@@ -18,11 +18,7 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings()
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args={"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {},
-    pool_pre_ping=True
-)
+engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {})
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
@@ -80,6 +76,9 @@ class ClientIn(BaseModel):
     password: str
     pharmacy_name: str
     days: int = 30
+
+class PasswordIn(BaseModel):
+    password: str
 
 def ensure_demo():
     s = SessionLocal()
@@ -162,12 +161,40 @@ def clients(acc: Account = Depends(current_user), s: Session = Depends(db)):
         for x in s.query(Account).order_by(Account.created_at.desc()).all()
     ]
 
-@app.post("/platform/disable/{username}")
-def disable(username: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
+@app.post("/platform/toggle-active/{username}")
+def toggle_active(username: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    if username == "admin":
+        raise HTTPException(400, "Admin account cannot be disabled")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+    obj.active = not obj.active
+    s.commit()
+    return {"ok": True, "username": username, "active": obj.active}
+
+@app.delete("/platform/client/{username}")
+def delete_client(username: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    if username == "admin":
+        raise HTTPException(400, "Admin account cannot be deleted")
+    obj = s.get(Account, username)
+    if obj:
+        s.delete(obj)
+        s.commit()
+    return {"ok": True}
+
+@app.post("/platform/change-password/{username}")
+def change_password(username: str, data: PasswordIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
     obj = s.get(Account, username)
-    if obj:
-        obj.active = False
-        s.commit()
+    if not obj:
+        raise HTTPException(404, "Account not found")
+    if not data.password or len(data.password) < 4:
+        raise HTTPException(400, "Password too short")
+    obj.password_hash = hpw(data.password)
+    s.commit()
     return {"ok": True}

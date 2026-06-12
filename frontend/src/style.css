@@ -8,3 +8,5 @@ table{border-collapse:collapse;width:100%;background:white;margin-top:12px}th,td
 .productBox{background:#eaf7ff;border:1px solid #9bd4ff;border-radius:8px;padding:12px;margin:12px 0}.success{color:green;font-weight:bold}
 
 .danger{border-color:#ffb3b3;background:#fff5f5}
+
+.dangerBtn{background:#b00020;color:white;border:0;border-radius:4px}.success{color:green;font-weight:bold}

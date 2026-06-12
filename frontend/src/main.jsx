@@ -65,7 +65,7 @@ function App(){
 
   return <div>
     <header>
-      <b>RFID Pharmacy Web SaaS V8</b>
+      <b>RFID Pharmacy Web SaaS V9</b>
       <span>{me?.pharmacy_name} | expire: {me?.expires_at?.slice(0,10)}</span>
       <button onClick={()=>setTab("association")}>Association RFID</button>
       <button onClick={()=>setTab("inventory")}>Inventaire réel</button>
@@ -338,31 +338,104 @@ function LocalData(){
   </section>
 }
 
+
 function Platform({auth}){
   const [clients,setClients]=useState([]);
   const [username,setUsername]=useState("");
   const [password,setPassword]=useState("");
   const [pharmacy,setPharmacy]=useState("");
   const [days,setDays]=useState(30);
+  const [msg,setMsg]=useState("");
+
   async function load(){ setClients((await axios.get(`${API}/platform/clients`,auth)).data); }
   useEffect(()=>{ load(); },[]);
+
   async function create(){
-    await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days)},auth);
-    setUsername(""); setPassword(""); setPharmacy(""); load();
+    try{
+      await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days)},auth);
+      setUsername(""); setPassword(""); setPharmacy(""); setDays(30);
+      setMsg("Client créé.");
+      load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur création client");
+    }
   }
-  async function disable(u){ await axios.post(`${API}/platform/disable/${u}`,{},auth); load(); }
+
+  async function toggleClient(u){
+    try{
+      await axios.post(`${API}/platform/toggle-active/${u}`,{},auth);
+      setMsg("Statut client modifié.");
+      load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur changement statut");
+    }
+  }
+
+  async function deleteClient(u){
+    if(!confirm(`Supprimer définitivement le client ${u} ?`)) return;
+    try{
+      await axios.delete(`${API}/platform/client/${u}`,auth);
+      setMsg("Client supprimé.");
+      load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur suppression client");
+    }
+  }
+
+  async function changePassword(u){
+    const p=prompt(`Nouveau mot de passe pour ${u}:`);
+    if(!p) return;
+    try{
+      await axios.post(`${API}/platform/change-password/${u}`,{password:p},auth);
+      setMsg(`Mot de passe changé pour ${u}.`);
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur changement mot de passe");
+    }
+  }
+
   return <section>
     <h2>Gestion clients SaaS</h2>
+
     <div className="card">
+      <h3>Créer un client pharmacie</h3>
       <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
       <input placeholder="password" value={password} onChange={e=>setPassword(e.target.value)}/>
       <input placeholder="nom pharmacie" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/>
       <input placeholder="jours" value={days} onChange={e=>setDays(e.target.value)}/>
       <button onClick={create}>Créer client</button>
     </div>
-    <table><thead><tr><th>Client</th><th>Pharmacie</th><th>Statut</th><th>Expire</th><th>Action</th></tr></thead><tbody>
-      {clients.map(c=><tr key={c.username}><td>{c.username}</td><td>{c.pharmacy_name}</td><td>{c.subscription_status}</td><td>{c.expires_at.slice(0,10)}</td><td><button onClick={()=>disable(c.username)}>Désactiver</button></td></tr>)}
-    </tbody></table>
+
+    <p className={msg.includes("Erreur") ? "err" : "success"}>{msg}</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Pharmacie</th>
+          <th>Abonnement</th>
+          <th>Compte</th>
+          <th>Expire</th>
+          <th>Mot de passe</th>
+          <th>Activer/Désactiver</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {clients.map(c=>{
+          const isAdmin=c.username==="admin";
+          return <tr key={c.username}>
+            <td>{c.username}</td>
+            <td>{c.pharmacy_name}</td>
+            <td>{c.subscription_status}</td>
+            <td>{c.active ? "active" : "inactive"}</td>
+            <td>{c.expires_at.slice(0,10)}</td>
+            <td><button onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
+            <td>{isAdmin ? "" : <button onClick={()=>toggleClient(c.username)}>{c.active ? "Désactiver" : "Activer"}</button>}</td>
+            <td>{isAdmin ? "" : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
+          </tr>
+        })}
+      </tbody>
+    </table>
   </section>
 }
 
