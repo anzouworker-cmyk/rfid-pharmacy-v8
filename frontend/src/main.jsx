@@ -65,7 +65,7 @@ function App(){
 
   return <div>
     <header>
-      <b>RFID Pharmacy Web SaaS V9</b>
+      <b>RFID Pharmacy Web SaaS V10</b>
       <span>{me?.pharmacy_name} | expire: {me?.expires_at?.slice(0,10)}</span>
       <button onClick={()=>setTab("association")}>Association RFID</button>
       <button onClick={()=>setTab("inventory")}>Inventaire réel</button>
@@ -339,6 +339,7 @@ function LocalData(){
 }
 
 
+
 function Platform({auth}){
   const [clients,setClients]=useState([]);
   const [username,setUsername]=useState("");
@@ -347,7 +348,13 @@ function Platform({auth}){
   const [days,setDays]=useState(30);
   const [msg,setMsg]=useState("");
 
-  async function load(){ setClients((await axios.get(`${API}/platform/clients`,auth)).data); }
+  async function load(){
+    try{
+      setClients((await axios.get(`${API}/platform/clients`,auth)).data);
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur chargement clients");
+    }
+  }
   useEffect(()=>{ load(); },[]);
 
   async function create(){
@@ -361,10 +368,10 @@ function Platform({auth}){
     }
   }
 
-  async function toggleClient(u){
+  async function setClientActive(u, active){
     try{
-      await axios.post(`${API}/platform/toggle-active/${u}`,{},auth);
-      setMsg("Statut client modifié.");
+      await axios.post(`${API}/platform/set-active/${encodeURIComponent(u)}?active=${active}`,{},auth);
+      setMsg(active ? "Client activé." : "Client désactivé.");
       load();
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur changement statut");
@@ -374,7 +381,7 @@ function Platform({auth}){
   async function deleteClient(u){
     if(!confirm(`Supprimer définitivement le client ${u} ?`)) return;
     try{
-      await axios.delete(`${API}/platform/client/${u}`,auth);
+      await axios.delete(`${API}/platform/delete-client/${encodeURIComponent(u)}`,auth);
       setMsg("Client supprimé.");
       load();
     }catch(e){
@@ -386,10 +393,22 @@ function Platform({auth}){
     const p=prompt(`Nouveau mot de passe pour ${u}:`);
     if(!p) return;
     try{
-      await axios.post(`${API}/platform/change-password/${u}`,{password:p},auth);
+      await axios.post(`${API}/platform/change-password/${encodeURIComponent(u)}`,{password:p},auth);
       setMsg(`Mot de passe changé pour ${u}.`);
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur changement mot de passe");
+    }
+  }
+
+  async function changeExpiry(u, currentDate){
+    const d=prompt(`Nouvelle date expiration pour ${u} (YYYY-MM-DD):`, currentDate?.slice(0,10) || "");
+    if(!d) return;
+    try{
+      await axios.post(`${API}/platform/update-expiry/${encodeURIComponent(u)}`,{expires_at:d},auth);
+      setMsg(`Date expiration changée pour ${u}.`);
+      load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur changement date expiration");
     }
   }
 
@@ -405,7 +424,7 @@ function Platform({auth}){
       <button onClick={create}>Créer client</button>
     </div>
 
-    <p className={msg.includes("Erreur") ? "err" : "success"}>{msg}</p>
+    <p className={msg.includes("Erreur") || msg.includes("not") ? "err" : "success"}>{msg}</p>
 
     <table>
       <thead>
@@ -416,21 +435,26 @@ function Platform({auth}){
           <th>Compte</th>
           <th>Expire</th>
           <th>Mot de passe</th>
-          <th>Activer/Désactiver</th>
+          <th>Statut</th>
           <th>Delete</th>
         </tr>
       </thead>
       <tbody>
         {clients.map(c=>{
           const isAdmin=c.username==="admin";
+          const expDate=c.expires_at?.slice(0,10);
           return <tr key={c.username}>
             <td>{c.username}</td>
             <td>{c.pharmacy_name}</td>
             <td>{c.subscription_status}</td>
             <td>{c.active ? "active" : "inactive"}</td>
-            <td>{c.expires_at.slice(0,10)}</td>
+            <td>
+              {expDate}
+              <br/>
+              <button onClick={()=>changeExpiry(c.username, expDate)}>Changer date</button>
+            </td>
             <td><button onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
-            <td>{isAdmin ? "" : <button onClick={()=>toggleClient(c.username)}>{c.active ? "Désactiver" : "Activer"}</button>}</td>
+            <td>{isAdmin ? "" : <button onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "Désactiver" : "Activer"}</button>}</td>
             <td>{isAdmin ? "" : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
           </tr>
         })}

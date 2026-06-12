@@ -1,5 +1,5 @@
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import hashlib
 from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, Header
@@ -79,6 +79,9 @@ class ClientIn(BaseModel):
 
 class PasswordIn(BaseModel):
     password: str
+
+class ExpiryIn(BaseModel):
+    expires_at: str
 
 def ensure_demo():
     s = SessionLocal()
@@ -198,3 +201,47 @@ def change_password(username: str, data: PasswordIn, acc: Account = Depends(curr
     obj.password_hash = hpw(data.password)
     s.commit()
     return {"ok": True}
+
+
+@app.post("/platform/set-active/{username}")
+def set_active(username: str, active: bool, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    if username == "admin":
+        raise HTTPException(400, "Admin account cannot be disabled")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+    obj.active = active
+    s.commit()
+    return {"ok": True, "username": username, "active": obj.active}
+
+@app.post("/platform/update-expiry/{username}")
+def update_expiry(username: str, data: ExpiryIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+    try:
+        d = datetime.strptime(data.expires_at, "%Y-%m-%d")
+    except Exception:
+        raise HTTPException(400, "Invalid date format. Use YYYY-MM-DD")
+    obj.expires_at = d
+    obj.subscription_status = "active" if obj.expires_at >= datetime.utcnow() else "expired"
+    s.commit()
+    return {"ok": True, "username": username, "expires_at": obj.expires_at.isoformat(), "subscription_status": obj.subscription_status}
+
+@app.delete("/platform/delete-client/{username}")
+def delete_client_v10(username: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    if username == "admin":
+        raise HTTPException(400, "Admin account cannot be deleted")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+    s.delete(obj)
+    s.commit()
+    return {"ok": True}
+
