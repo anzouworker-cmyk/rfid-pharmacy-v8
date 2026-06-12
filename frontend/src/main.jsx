@@ -51,6 +51,7 @@ function useLocalStore(){
   return {products:productsState,setProducts,associations:associationsState,setAssociations};
 }
 
+
 function App(){
   const [token,setToken]=useState(localStorage.token||"");
   const [me,setMe]=useState(null);
@@ -63,22 +64,47 @@ function App(){
 
   if(!token) return <Login setToken={setToken}/>;
 
-  return <div>
-    <header>
-      <b>RFID Pharmacy Web SaaS V12</b>
-      <span>{me?.pharmacy_name} | expire: {me?.expires_at?.slice(0,10)}</span>
-      <button onClick={()=>setTab("association")}>Association RFID</button>
-      <button onClick={()=>setTab("inventory")}>Inventaire réel</button>
-      <button onClick={()=>setTab("data")}>Données locales</button>
-      {me?.role==="platform_admin" && <button onClick={()=>setTab("platform")}>Clients</button>}
-      <button onClick={logout}>Fermer session</button>
-    </header>
-    <main>
-      {tab==="association" && <Association/>}
-      {tab==="inventory" && <Inventory/>}
-      {tab==="data" && <LocalData/>}
-      {tab==="platform" && <Platform auth={auth}/>}
-    </main>
+  const menu=[
+    {id:"association",label:"Association RFID",icon:"📡"},
+    {id:"inventory",label:"Inventaire réel",icon:"📦"},
+    {id:"data",label:"Données locales",icon:"💾"},
+  ];
+  if(me?.role==="platform_admin") menu.push({id:"platform",label:"Clients SaaS",icon:"👥"});
+
+  return <div className="appShell">
+    <aside className="sidebar">
+      <div className="brand">
+        <div className="brandIcon">RF</div>
+        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">SaaS V13</div></div>
+      </div>
+      <nav className="navMenu">
+        {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
+          <span>{m.icon}</span><span>{m.label}</span>
+        </button>)}
+      </nav>
+      <div className="sidebarFooter">
+        <div className="pharmacyBadge"><small>Pharmacie</small><b>{me?.pharmacy_name}</b></div>
+        <button className="logoutBtn" onClick={logout}>Déconnexion</button>
+      </div>
+    </aside>
+    <section className="mainArea">
+      <header className="topbar">
+        <div>
+          <h1>{tab==="association"?"Association RFID":tab==="inventory"?"Inventaire RFID réel":tab==="data"?"Données locales":"Gestion clients SaaS"}</h1>
+          <p>Gestion RFID pharmacie sans stockage métier dans le cloud.</p>
+        </div>
+        <div className="accountCard">
+          <span>{me?.username}</span>
+          <b>{me?.expires_at ? `Expire: ${me.expires_at.slice(0,10)}` : "Admin plateforme"}</b>
+        </div>
+      </header>
+      <main className="content">
+        {tab==="association" && <Association/>}
+        {tab==="inventory" && <Inventory/>}
+        {tab==="data" && <LocalData/>}
+        {tab==="platform" && <Platform auth={auth}/>}
+      </main>
+    </section>
   </div>
 }
 
@@ -182,6 +208,11 @@ function Association(){
   return <section>
     <h2>Association RFID locale</h2>
     <p className="notice">Produits et associations restent dans ce navigateur. Rien n'est envoyé au serveur.</p>
+    <div className="statsGrid">
+      <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
+      <div className="statCard"><span>Associations</span><b>{associations.length}</b><small>tags RFID liés</small></div>
+      <div className="statCard"><span>Mode</span><b>Local</b><small>aucune donnée cloud</small></div>
+    </div>
     <div className="card">
       <h3>Importer CSV pharmacie</h3>
       <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
