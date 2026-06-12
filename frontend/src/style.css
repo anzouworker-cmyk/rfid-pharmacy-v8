@@ -29,3 +29,10 @@ table{border-collapse:separate;border-spacing:0;width:100%;background:white;marg
 table button{padding:8px 10px;font-size:13px}
 @media(max-width:1100px){.proStats{grid-template-columns:repeat(2,1fr)}.heroCard{display:block}.heroActions{margin-top:16px}}
 @media(max-width:700px){.proStats{grid-template-columns:1fr}}
+
+.marketingHero{background:linear-gradient(135deg,#0f172a,#1e40af 55%,#0d9488)}
+.marketingGrid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:16px;margin:16px 0 24px}
+.marketingCard{background:white;border:1px solid var(--border);border-radius:20px;padding:20px;box-shadow:0 8px 24px rgba(15,23,42,.05);position:relative;overflow:hidden}
+.marketingCard:before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:#2563eb}.marketingCard.promo:before{background:#f59e0b}.marketingCard.conseil:before{background:#10b981}.marketingCard.annonce:before{background:#8b5cf6}.marketingCard.info:before{background:#2563eb}
+.cardType{text-transform:uppercase;color:#64748b;font-size:12px;font-weight:900;letter-spacing:.08em}.ctaLink{display:inline-block;margin-top:10px;background:#2563eb;color:white;text-decoration:none;padding:10px 12px;border-radius:10px;font-weight:800}.textArea{width:100%;min-height:100px;border:1px solid var(--border);border-radius:12px;padding:12px;font-family:inherit;margin:4px}
+@media(max-width:1100px){.marketingGrid{grid-template-columns:1fr 1fr}}@media(max-width:700px){.marketingGrid{grid-template-columns:1fr}}

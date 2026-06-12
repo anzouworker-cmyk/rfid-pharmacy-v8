@@ -70,13 +70,16 @@ function App(){
     {id:"inventory",label:"Inventaire réel",icon:"📦"},
     {id:"data",label:"Données locales",icon:"💾"},
   ];
-  if(me?.role==="platform_admin") menu.push({id:"platform",label:"Clients SaaS",icon:"👥"});
+  if(me?.role==="platform_admin"){
+    menu.push({id:"platform",label:"Clients SaaS",icon:"👥"});
+    menu.push({id:"dashboardAdmin",label:"Dashboard Admin",icon:"📣"});
+  }
 
   return <div className="appShell">
     <aside className="sidebar">
       <div className="brand">
         <div className="brandIcon">RF</div>
-        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V14 PRO</div></div>
+        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V15</div></div>
       </div>
       <nav className="navMenu">
         {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
@@ -91,7 +94,7 @@ function App(){
     <section className="mainArea">
       <header className="topbar">
         <div>
-          <h1>{tab==="dashboard"?"Dashboard":tab==="association"?"Association RFID":tab==="inventory"?"Inventaire RFID réel":tab==="data"?"Données locales":"Gestion clients SaaS"}</h1>
+          <h1>{tab==="dashboard"?"Dashboard":tab==="association"?"Association RFID":tab==="inventory"?"Inventaire RFID réel":tab==="data"?"Données locales":tab==="dashboardAdmin"?"Gestion Dashboard":"Gestion clients SaaS"}</h1>
           <p>Gestion RFID pharmacie sans stockage métier dans le cloud.</p>
         </div>
         <div className="accountCard">
@@ -105,63 +108,71 @@ function App(){
         {tab==="inventory" && <Inventory/>}
         {tab==="data" && <LocalData/>}
         {tab==="platform" && <Platform auth={auth}/>}
+        {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>}
       </main>
     </section>
   </div>
 }
 
 
+
 function Dashboard(){
   const {products,associations}=useLocalStore();
+  const [content,setContent]=useState([]);
+  const token=localStorage.token||"";
+  const auth={headers:{Authorization:`Bearer ${token}`}};
+
+  useEffect(()=>{
+    axios.get(`${API}/dashboard/content`,auth).then(r=>setContent(r.data)).catch(()=>setContent([]));
+  },[]);
+
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
   const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
 
+  const defaultContent=[
+    {id:"default1",content_type:"conseil",title:"Conseil professionnel",message:"Sauvegardez votre projet JSON à la fin de chaque journée pour éviter toute perte locale.",cta_label:"",cta_url:""},
+    {id:"default2",content_type:"promo",title:"Optimisez votre inventaire RFID",message:"Un taux de couverture RFID élevé réduit les écarts d’inventaire et accélère les audits magasin.",cta_label:"",cta_url:""}
+  ];
+  const cards=content.length ? content : defaultContent;
+
   return <section>
-    <div className="heroCard">
+    <div className="heroCard marketingHero">
       <div>
-        <span className="pill">SaaS sans stockage métier cloud</span>
-        <h2>Gestion RFID professionnelle pour pharmacies</h2>
+        <span className="pill">Solution SaaS RFID pour pharmacies</span>
+        <h2>Pilotez votre inventaire avec rapidité, précision et contrôle</h2>
         <p>Accès par abonnement, données produits/EPC conservées localement par la pharmacie, exports et sauvegardes projet.</p>
       </div>
       <div className="heroActions">
-        <span className="statusBadge successBadge">Abonnement actif</span>
-        <span className="statusBadge infoBadge">Données locales</span>
+        <span className="statusBadge successBadge">Service actif</span>
+        <span className="statusBadge infoBadge">Données métier locales</span>
       </div>
     </div>
 
     <div className="statsGrid proStats">
       <div className="statCard"><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small></div>
       <div className="statCard"><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés aux produits</small></div>
-      <div className="statCard"><span>Produits avec RFID</span><b>{productsWithRfid}</b><small>couverture actuelle</small></div>
-      <div className="statCard"><span>Couverture</span><b>{coverage}%</b><small>{productsWithoutRfid} sans RFID</small></div>
+      <div className="statCard"><span>Couverture RFID</span><b>{coverage}%</b><small>{productsWithoutRfid} produits sans RFID</small></div>
+      <div className="statCard"><span>Mode données</span><b>Local</b><small>pas de stockage métier cloud</small></div>
+    </div>
+
+    <h2>Messages, conseils et annonces</h2>
+    <div className="marketingGrid">
+      {cards.map(c=><div key={c.id} className={`marketingCard ${c.content_type||"info"}`}>
+        <div className="cardType">{c.content_type||"info"}</div>
+        <h3>{c.title}</h3>
+        <p>{c.message}</p>
+        {c.cta_label && c.cta_url && <a className="ctaLink" href={c.cta_url} target="_blank">{c.cta_label}</a>}
+      </div>)}
     </div>
 
     <div className="grid">
-      <div className="card">
-        <h3>Flux recommandé</h3>
-        <ol className="steps">
-          <li>Importer le CSV pharmacie.</li>
-          <li>Scanner code-barres produit.</li>
-          <li>Scanner EPC RFID.</li>
-          <li>Sauvegarder projet JSON.</li>
-          <li>Importer EPC détectés et comparer l’inventaire.</li>
-        </ol>
-      </div>
-      <div className="card">
-        <h3>Avantages SaaS</h3>
-        <ul className="steps">
-          <li>Contrôle des abonnements en ligne.</li>
-          <li>Aucune donnée métier stockée sur ton serveur.</li>
-          <li>Mises à jour instantanées pour les pharmacies.</li>
-          <li>Interface web moderne sans installation.</li>
-        </ul>
-      </div>
+      <div className="card"><h3>Plan d’action recommandé</h3><ol className="steps"><li>Importer le CSV pharmacie.</li><li>Associer les produits prioritaires avec leurs EPC RFID.</li><li>Faire une sauvegarde projet JSON.</li><li>Importer les EPC détectés et analyser les manquants.</li></ol></div>
+      <div className="card"><h3>Indicateurs pertinents</h3><ul className="steps"><li>Couverture RFID actuelle : {coverage}%.</li><li>Produits sans RFID : {productsWithoutRfid}.</li><li>Associations disponibles : {associations.length}.</li><li>Catalogue local : {products.length} produits.</li></ul></div>
     </div>
   </section>
 }
-
 
 function Login({setToken}){
   const [u,setU]=useState("demo"), [p,setP]=useState("demo123"), [err,setErr]=useState("");
@@ -569,6 +580,58 @@ function Platform({auth}){
     </table>
   </section>
 }
+
+
+function DashboardAdmin({auth}){
+  const [items,setItems]=useState([]);
+  const [clients,setClients]=useState([]);
+  const [scope,setScope]=useState("global");
+  const [target,setTarget]=useState("");
+  const [title,setTitle]=useState("");
+  const [message,setMessage]=useState("");
+  const [type,setType]=useState("conseil");
+  const [ctaLabel,setCtaLabel]=useState("");
+  const [ctaUrl,setCtaUrl]=useState("");
+  const [msg,setMsg]=useState("");
+
+  async function load(){
+    try{
+      setItems((await axios.get(`${API}/platform/dashboard-content`,auth)).data);
+      setClients((await axios.get(`${API}/platform/clients`,auth)).data.filter(c=>c.role!=="platform_admin"));
+    }catch(e){ setMsg(e.response?.data?.detail || "Erreur chargement dashboard admin"); }
+  }
+  useEffect(()=>{load()},[]);
+
+  async function create(){
+    try{
+      await axios.post(`${API}/platform/dashboard-content`,{scope,target_username:scope==="pharmacy"?target:null,title,message,content_type:type,cta_label:ctaLabel,cta_url:ctaUrl,active:true},auth);
+      setTitle(""); setMessage(""); setCtaLabel(""); setCtaUrl(""); setMsg("Contenu dashboard créé."); load();
+    }catch(e){ setMsg(e.response?.data?.detail || "Erreur création contenu"); }
+  }
+  async function toggle(id){ await axios.post(`${API}/platform/dashboard-content-toggle/${id}`,{},auth); load(); }
+  async function del(id){ if(!confirm("Supprimer ce contenu dashboard ?")) return; await axios.post(`${API}/platform/dashboard-content-delete/${id}`,{},auth); load(); }
+
+  return <section>
+    <h2>Gestion du Dashboard marketing</h2>
+    <p className="notice">Créer des annonces globales pour toutes les pharmacies ou des messages ciblés pour une pharmacie spécifique.</p>
+    <div className="card">
+      <h3>Nouveau contenu</h3>
+      <div className="row">
+        <select value={scope} onChange={e=>setScope(e.target.value)}><option value="global">Toutes les pharmacies</option><option value="pharmacy">Pharmacie spécifique</option></select>
+        {scope==="pharmacy" && <select value={target} onChange={e=>setTarget(e.target.value)}><option value="">Choisir pharmacie</option>{clients.map(c=><option key={c.username} value={c.username}>{c.pharmacy_name} ({c.username})</option>)}</select>}
+        <select value={type} onChange={e=>setType(e.target.value)}><option value="conseil">Conseil</option><option value="promo">Publicité</option><option value="annonce">Annonce</option><option value="info">Info</option></select>
+      </div>
+      <input placeholder="Titre" value={title} onChange={e=>setTitle(e.target.value)} style={{width:"100%"}}/>
+      <textarea className="textArea" placeholder="Message" value={message} onChange={e=>setMessage(e.target.value)} />
+      <div className="row"><input placeholder="Bouton CTA" value={ctaLabel} onChange={e=>setCtaLabel(e.target.value)}/><input placeholder="URL CTA https://..." value={ctaUrl} onChange={e=>setCtaUrl(e.target.value)}/><button onClick={create}>Publier</button></div>
+    </div>
+    <p className={msg.includes("Erreur")?"err":"success"}>{msg}</p>
+    <table><thead><tr><th>Type</th><th>Portée</th><th>Pharmacie</th><th>Titre</th><th>Message</th><th>Statut</th><th>Actions</th></tr></thead><tbody>
+      {items.map(i=><tr key={i.id}><td>{i.content_type}</td><td>{i.scope==="global"?"Toutes":"Ciblée"}</td><td>{i.target_username||"-"}</td><td>{i.title}</td><td>{i.message}</td><td>{i.active?"active":"inactive"}</td><td><button onClick={()=>toggle(i.id)}>{i.active?"Désactiver":"Activer"}</button><button className="dangerBtn" onClick={()=>del(i.id)}>Delete</button></td></tr>)}
+    </tbody></table>
+  </section>
+}
+
 
 function Table({rows,cols}){
   return <table><thead><tr>{cols.map(c=><th key={c}>{c}</th>)}</tr></thead><tbody>

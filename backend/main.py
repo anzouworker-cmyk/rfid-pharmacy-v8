@@ -36,6 +36,20 @@ class Account(Base):
     active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+
+class DashboardContent(Base):
+    __tablename__ = "dashboard_content"
+    id = Column(String, primary_key=True)
+    scope = Column(String, default="global")
+    target_username = Column(String, nullable=True)
+    title = Column(String, nullable=False)
+    message = Column(String, nullable=False)
+    cta_label = Column(String, default="")
+    cta_url = Column(String, default="")
+    content_type = Column(String, default="info")
+    active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 Base.metadata.create_all(engine)
 
 def db():
@@ -83,6 +97,17 @@ class PasswordIn(BaseModel):
 
 class ExpiryIn(BaseModel):
     expires_at: str
+
+
+class DashboardContentIn(BaseModel):
+    scope: str = "global"
+    target_username: Optional[str] = None
+    title: str
+    message: str
+    cta_label: str = ""
+    cta_url: str = ""
+    content_type: str = "info"
+    active: bool = True
 
 def ensure_demo():
     s = SessionLocal()
@@ -292,3 +317,85 @@ def client_update_expiry(username: str, data: ExpiryIn, acc: Account = Depends(c
     obj.subscription_status = "active" if new_date >= datetime.utcnow() else "expired"
     s.commit()
     return {"ok": True, "username": username, "expires_at": obj.expires_at.isoformat(), "subscription_status": obj.subscription_status}
+
+
+@app.get("/dashboard/content")
+def dashboard_content(acc: Account = Depends(current_user), s: Session = Depends(db)):
+    rows = s.query(DashboardContent).filter(DashboardContent.active == True).order_by(DashboardContent.created_at.desc()).all()
+    result = []
+    for x in rows:
+        if x.scope == "global" or x.target_username == acc.username:
+            result.append({
+                "id": x.id,
+                "scope": x.scope,
+                "target_username": x.target_username,
+                "title": x.title,
+                "message": x.message,
+                "cta_label": x.cta_label,
+                "cta_url": x.cta_url,
+                "content_type": x.content_type,
+                "active": x.active,
+                "created_at": x.created_at.isoformat()
+            })
+    return result
+
+@app.get("/platform/dashboard-content")
+def platform_dashboard_content(acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    return [{
+        "id": x.id,
+        "scope": x.scope,
+        "target_username": x.target_username,
+        "title": x.title,
+        "message": x.message,
+        "cta_label": x.cta_label,
+        "cta_url": x.cta_url,
+        "content_type": x.content_type,
+        "active": x.active,
+        "created_at": x.created_at.isoformat()
+    } for x in s.query(DashboardContent).order_by(DashboardContent.created_at.desc()).all()]
+
+@app.post("/platform/dashboard-content")
+def create_dashboard_content(data: DashboardContentIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    if data.scope not in ("global", "pharmacy"):
+        raise HTTPException(400, "scope must be global or pharmacy")
+    if data.scope == "pharmacy" and not data.target_username:
+        raise HTTPException(400, "target_username required")
+    obj = DashboardContent(
+        id="dash_" + str(int(datetime.utcnow().timestamp() * 1000)),
+        scope=data.scope,
+        target_username=data.target_username,
+        title=data.title,
+        message=data.message,
+        cta_label=data.cta_label,
+        cta_url=data.cta_url,
+        content_type=data.content_type,
+        active=data.active
+    )
+    s.add(obj)
+    s.commit()
+    return {"ok": True, "id": obj.id}
+
+@app.post("/platform/dashboard-content-toggle/{content_id}")
+def toggle_dashboard_content(content_id: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    obj = s.get(DashboardContent, content_id)
+    if not obj:
+        raise HTTPException(404, "Content not found")
+    obj.active = not obj.active
+    s.commit()
+    return {"ok": True, "active": obj.active}
+
+@app.post("/platform/dashboard-content-delete/{content_id}")
+def delete_dashboard_content(content_id: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    obj = s.get(DashboardContent, content_id)
+    if obj:
+        s.delete(obj)
+        s.commit()
+    return {"ok": True}
