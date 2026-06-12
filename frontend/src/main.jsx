@@ -65,7 +65,7 @@ function App(){
 
   return <div>
     <header>
-      <b>RFID Pharmacy Web SaaS V11</b>
+      <b>RFID Pharmacy Web SaaS V12</b>
       <span>{me?.pharmacy_name} | expire: {me?.expires_at?.slice(0,10)}</span>
       <button onClick={()=>setTab("association")}>Association RFID</button>
       <button onClick={()=>setTab("inventory")}>Inventaire réel</button>
@@ -172,6 +172,13 @@ function Association(){
 
   const assocCols=["PID","Produit","Code barre 1","Code barre 2","EPC","Date"];
 
+  function deleteAssociation(epc){
+    if(!confirm(`Supprimer l'association EPC ${epc} ?`)) return;
+    const updated = associations.filter(a => norm(a.EPC) !== norm(epc));
+    setAssociations(updated);
+    setMsg(`Association supprimée: ${epc}`);
+  }
+
   return <section>
     <h2>Association RFID locale</h2>
     <p className="notice">Produits et associations restent dans ce navigateur. Rien n'est envoyé au serveur.</p>
@@ -210,7 +217,20 @@ function Association(){
       }});
     }}/>
     <button onClick={()=>{ if(confirm("Vider les associations locales ?")) setAssociations([]); }}>Vider associations</button>
-    <Table rows={associations} cols={assocCols}/>
+    <table>
+      <thead>
+        <tr>
+          {assocCols.map(c=><th key={c}>{c}</th>)}
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {associations.map((a,i)=><tr key={i}>
+          {assocCols.map(c=><td key={c}>{String(a[c]??"")}</td>)}
+          <td><button className="dangerBtn" onClick={()=>deleteAssociation(a.EPC)}>Delete</button></td>
+        </tr>)}
+      </tbody>
+    </table>
   </section>
 }
 
