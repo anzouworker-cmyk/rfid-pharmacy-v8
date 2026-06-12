@@ -80,7 +80,7 @@ function App(){
     <aside className="sidebar">
       <div className="brand">
         <div className="brandIcon">RF</div>
-        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V16 AI</div></div>
+        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V17</div></div>
       </div>
       <nav className="navMenu">
         {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
@@ -218,61 +218,58 @@ function AIAssistant(){
 }
 
 
+
+function MiniSpark({type="up"}){
+  const points = type==="down" ? "0,18 20,11 40,14 60,9 80,13 100,10 120,16" : "0,16 20,12 40,13 60,8 80,10 100,6 120,9";
+  return <svg className="spark" viewBox="0 0 120 24"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/></svg>
+}
+
+function CoverageChart({coverage}){
+  const c=Math.max(15, Math.min(95, coverage || 0));
+  return <div className="coverageChart">
+    <div className="chartHeader"><b>Performance de couverture RFID</b><span>Objectif 85%</span></div>
+    <div className="chartArea">
+      <div className="gridLine gl1">100%</div><div className="gridLine gl2">75%</div><div className="gridLine gl3">50%</div><div className="gridLine gl4">25%</div>
+      <svg viewBox="0 0 700 260" preserveAspectRatio="none">
+        <defs><linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.25"/><stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.02"/></linearGradient></defs>
+        <path d={`M0 210 C90 182,160 170,230 160 C310 145,380 132,455 126 C530 120,610 ${220-c*1.4},700 ${220-c*1.55}`} fill="none" stroke="#0891b2" strokeWidth="5" strokeLinecap="round"/>
+        <path d={`M0 210 C90 182,160 170,230 160 C310 145,380 132,455 126 C530 120,610 ${220-c*1.4},700 ${220-c*1.55} L700 260 L0 260 Z`} fill="url(#areaGrad)"/>
+        <line x1="0" y1="65" x2="700" y2="65" stroke="#2563eb" strokeDasharray="8 8" strokeWidth="2"/>
+        <circle cx="585" cy={220-c*1.4} r="8" fill="white" stroke="#0891b2" strokeWidth="5"/>
+      </svg>
+      <div className="chartTooltip" style={{left:"68%",top:"42%"}}>Couverture RFID: <b>{coverage}%</b></div>
+    </div>
+  </div>
+}
+
 function Dashboard(){
   const {products,associations}=useLocalStore();
   const [content,setContent]=useState([]);
   const token=localStorage.token||"";
   const auth={headers:{Authorization:`Bearer ${token}`}};
-
-  useEffect(()=>{
-    axios.get(`${API}/dashboard/content`,auth).then(r=>setContent(r.data)).catch(()=>setContent([]));
-  },[]);
-
+  useEffect(()=>{ axios.get(`${API}/dashboard/content`,auth).then(r=>setContent(r.data)).catch(()=>setContent([])); },[]);
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
   const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
-
-  const defaultContent=[
-    {id:"default1",content_type:"conseil",title:"Conseil professionnel",message:"Sauvegardez votre projet JSON à la fin de chaque journée pour éviter toute perte locale.",cta_label:"",cta_url:""},
-    {id:"default2",content_type:"promo",title:"Optimisez votre inventaire RFID",message:"Un taux de couverture RFID élevé réduit les écarts d’inventaire et accélère les audits magasin.",cta_label:"",cta_url:""}
-  ];
-  const cards=content.length ? content : defaultContent;
-
-  return <section>
-    <div className="heroCard marketingHero">
-      <div>
-        <span className="pill">Solution SaaS RFID pour pharmacies</span>
-        <h2>Pilotez votre inventaire avec rapidité, précision et contrôle</h2>
-        <p>Accès par abonnement, données produits/EPC conservées localement par la pharmacie, exports et sauvegardes projet.</p>
-      </div>
-      <div className="heroActions">
-        <span className="statusBadge successBadge">Service actif</span>
-        <span className="statusBadge infoBadge">Données métier locales</span>
-      </div>
+  const gap = products.length ? Math.max(0, Math.round((productsWithoutRfid/products.length)*1000)/10) : 0;
+  const ads=content.filter(c=>["promo","publicite","annonce"].includes((c.content_type||"").toLowerCase()));
+  const ad=ads[0] || {title:"Offre Premium RFID",message:"Passez à la vitesse supérieure avec notre solution RFID avancée.",cta_label:"Découvrir l'offre Premium",cta_url:"",content_type:"promo"};
+  const insights=content.filter(c=>["conseil","info"].includes((c.content_type||"").toLowerCase())).slice(0,2);
+  return <section className="proDashboard">
+    <div className="welcomeRow"><div><h2>Bonjour 👋</h2><p>Voici un aperçu complet des performances RFID de votre pharmacie.</p></div><div className="dashActions"><button>30 derniers jours</button><button className="primaryBtn">Exporter le rapport</button></div></div>
+    <div className="kpiRow">
+      <div className="kpiCard"><div className="kpiIcon blue">📦</div><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small><em className="trend up">↗ +4,2%</em><MiniSpark/></div>
+      <div className="kpiCard"><div className="kpiIcon green">🔗</div><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés aux produits</small><em className="trend up">↗ +10,5%</em><MiniSpark/></div>
+      <div className="kpiCard"><div className="kpiIcon teal">📡</div><span>Couverture RFID</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small><em className="trend up">↗ +8,1%</em><MiniSpark/></div>
+      <div className="kpiCard"><div className="kpiIcon red">🏷️</div><span>Produits sans RFID</span><b>{productsWithoutRfid}</b><small>à couvrir</small><em className="trend down">↘ -3,6%</em><MiniSpark type="down"/></div>
+      <div className="kpiCard"><div className="kpiIcon green">📊</div><span>Écart d’inventaire</span><b>{gap}%</b><small>écart estimé</small><em className="trend up">↘ -12%</em><MiniSpark/></div>
     </div>
-
-    <div className="statsGrid proStats">
-      <div className="statCard"><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small></div>
-      <div className="statCard"><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés aux produits</small></div>
-      <div className="statCard"><span>Couverture RFID</span><b>{coverage}%</b><small>{productsWithoutRfid} produits sans RFID</small></div>
-      <div className="statCard"><span>Mode données</span><b>Local</b><small>pas de stockage métier cloud</small></div>
-    </div>
-
-    <h2>Messages, conseils et annonces</h2>
-    <div className="marketingGrid">
-      {cards.map(c=><div key={c.id} className={`marketingCard ${c.content_type||"info"}`}>
-        <div className="cardType">{c.content_type||"info"}</div>
-        <h3>{c.title}</h3>
-        <p>{c.message}</p>
-        {c.cta_label && c.cta_url && <a className="ctaLink" href={c.cta_url} target="_blank">{c.cta_label}</a>}
-      </div>)}
-    </div>
-
-    <div className="grid">
-      <div className="card"><h3>Plan d’action recommandé</h3><ol className="steps"><li>Importer le CSV pharmacie.</li><li>Associer les produits prioritaires avec leurs EPC RFID.</li><li>Faire une sauvegarde projet JSON.</li><li>Importer les EPC détectés et analyser les manquants.</li></ol></div>
-      <div className="card"><h3>Indicateurs pertinents</h3><ul className="steps"><li>Couverture RFID actuelle : {coverage}%.</li><li>Produits sans RFID : {productsWithoutRfid}.</li><li>Associations disponibles : {associations.length}.</li><li>Catalogue local : {products.length} produits.</li></ul></div>
-    </div>
+    <div className="dashGrid"><div className="leftDash"><CoverageChart coverage={coverage}/><div className="campaignCard"><div className="sectionTitle"><b>Campagnes récentes</b><a>Voir toutes les campagnes →</a></div><table className="miniTable"><thead><tr><th>Campagne</th><th>Objectif</th><th>Statut</th><th>Couverture</th><th>Période</th></tr></thead><tbody><tr><td>Scan Hebdo – Rayons A & B</td><td>Vérification hebdomadaire</td><td><span className="badge blue">En cours</span></td><td>78%</td><td>12–19 mai</td></tr><tr><td>Inventaire Mensuel</td><td>Inventaire complet</td><td><span className="badge teal">Planifiée</span></td><td>-</td><td>1–31 mai</td></tr><tr><td>Produits périmés – Q2</td><td>Contrôle DLC</td><td><span className="badge green">Terminée</span></td><td>95%</td><td>1 avr.–30 avr.</td></tr></tbody></table></div></div>
+      <aside className="rightDash"><div className="adCard"><span className="adPill">OFFRE EXCLUSIVE</span><h3>{ad.title}</h3><p>{ad.message}</p><div className="adBenefits"><div><span>⏱️</span><b>Traçabilité fiable</b><small>Suivi en temps réel</small></div><div><span>🛡️</span><b>Réduction des pertes</b><small>Moins de ruptures</small></div><div><span>📍</span><b>Données exploitables</b><small>Décisions éclairées</small></div></div><div className="productMock"><div className="box3d">PharmaRFID</div><div className="tag3d">RFID</div></div>{ad.cta_label ? <a className="adButton" href={ad.cta_url || "#"} target="_blank">{ad.cta_label} →</a> : <button className="adButton">Découvrir l’offre Premium →</button>}<div className="adFooter">Sécurisé · Fiable · Évolutif</div></div>
+      <div className="insightsCard"><h3>Insights & Opportunités IA</h3><div className="insightItem good"><span>💡</span><div><b>Couverture en progression</b><small>Votre couverture RFID est actuellement à {coverage}%.</small></div><em>Positif</em></div><div className="insightItem warn"><span>⚠️</span><div><b>Produits sans RFID</b><small>{productsWithoutRfid} produits restent à associer.</small></div><em>Attention</em></div><div className="insightItem action"><span>📈</span><div><b>Potentiel d’optimisation</b><small>Priorisez les catégories à fort impact.</small></div><em>Action</em></div>{insights.map(x=><div key={x.id} className="insightItem action"><span>📣</span><div><b>{x.title}</b><small>{x.message}</small></div><em>{x.content_type}</em></div>)}</div>
+      <div className="recommendCard"><h3>Recommandations IA</h3><div className="recItem"><span>📦</span><div><b>Associer les produits prioritaires</b><small>{Math.min(productsWithoutRfid,236)} produits sans EPC associé.</small></div><button>Agir</button></div><div className="recItem"><span>📡</span><div><b>Lancer un scan ciblé</b><small>Rayons à couverture inférieure à 60%.</small></div><button>Agir</button></div><div className="recItem"><span>📄</span><div><b>Exporter le rapport d’écarts</b><small>Analyse détaillée d’inventaire.</small></div><button>Agir</button></div></div></aside></div>
+    <div className="bottomGrid"><div className="smallPanel"><h3>Inventaire en temps réel</h3><div className="donut"><span>{associations.length}</span></div><p>Associés: {productsWithRfid} · Non associés: {productsWithoutRfid}</p></div><div className="smallPanel"><h3>Alertes et anomalies</h3><ul className="alertList"><li>⚠️ EPC détectés sans produit associé</li><li>🔁 Doublons EPC possibles</li><li>📉 Écart d’inventaire à surveiller</li></ul></div><div className="smallPanel"><h3>Rapports et exports</h3><ul className="reportList"><li>📄 Rapport d’inventaire</li><li>📄 Rapport d’écarts</li><li>📄 Performance RFID</li></ul></div></div>
   </section>
 }
 
