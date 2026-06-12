@@ -242,12 +242,6 @@ function CoverageChart({coverage}){
   </div>
 }
 
-
-function MiniSpark({type="up"}){
-  const points = type==="down" ? "0,18 20,11 40,14 60,9 80,13 100,10 120,16" : "0,16 20,12 40,13 60,8 80,10 100,6 120,9";
-  return <svg className="spark" viewBox="0 0 120 24"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/></svg>
-}
-
 function Dashboard(){
   const {products,associations}=useLocalStore();
   const [content,setContent]=useState([]);
