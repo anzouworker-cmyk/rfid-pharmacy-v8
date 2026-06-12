@@ -7,3 +7,25 @@
 .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 8px 24px rgba(15,23,42,.04)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.notice{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:12px 14px;border-radius:14px}.productBox{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:18px;padding:16px;margin:14px 0}.statsGrid{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:14px;margin:16px 0}.statCard{background:white;border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 8px 24px rgba(15,23,42,.04)}.statCard span{color:var(--muted);font-weight:700}.statCard b{display:block;font-size:28px;margin:8px 0}.statCard small{color:var(--muted)}
 table{border-collapse:separate;border-spacing:0;width:100%;background:white;margin-top:14px;border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 8px 24px rgba(15,23,42,.04)}th,td{border-bottom:1px solid var(--border);padding:12px;text-align:left;font-size:14px}th{background:#f8fafc;color:#334155;font-size:13px;text-transform:uppercase;letter-spacing:.03em}tr:last-child td{border-bottom:0}.ok{background:#ecfdf5}.bad{background:#fef2f2}.neutral{background:#f8fafc}.err{color:#dc2626;font-weight:700}.success{color:#059669;font-weight:700}.summary{display:flex;gap:10px;margin:15px 0;flex-wrap:wrap}.okBox,.badBox,.neutralBox{padding:12px 16px;border-radius:14px;font-weight:800}.okBox{background:#d1fae5;color:#065f46}.badBox{background:#fee2e2;color:#991b1b}.neutralBox{background:#e2e8f0;color:#334155}.danger{border-color:#fecaca;background:#fff5f5}.dangerBtn{background:#dc2626;color:white;border:0;border-radius:10px}
 @media(max-width:900px){.appShell{display:block}.sidebar{width:100%;height:auto;position:relative}.topbar{height:auto;display:block}.accountCard{text-align:left;margin-top:12px}.grid,.statsGrid{grid-template-columns:1fr}}
+
+
+/* V14 PRO additions */
+.heroCard{
+  background:linear-gradient(135deg,#1e40af,#2563eb 55%,#10b981);
+  color:white;border-radius:24px;padding:28px;display:flex;justify-content:space-between;gap:20px;align-items:center;
+  box-shadow:0 18px 45px rgba(37,99,235,.25);margin-bottom:20px
+}
+.heroCard h2{font-size:30px;margin:12px 0 8px}
+.heroCard p{color:#dbeafe;max-width:680px}
+.heroActions{display:grid;gap:10px;min-width:180px}
+.pill{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800}
+.statusBadge{display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;border-radius:999px;font-weight:800;font-size:13px}
+.successBadge{background:#d1fae5;color:#065f46}.infoBadge{background:#dbeafe;color:#1e40af}.warningBadge{background:#fef3c7;color:#92400e}
+.proStats{grid-template-columns:repeat(4,minmax(160px,1fr))}
+.steps{color:#334155;line-height:1.9;margin:0;padding-left:22px}
+.loginSub{text-align:center;margin-top:-8px;color:#64748b}
+.navItem span:first-child{font-size:18px}
+.card h3{color:#0f172a}
+table button{padding:8px 10px;font-size:13px}
+@media(max-width:1100px){.proStats{grid-template-columns:repeat(2,1fr)}.heroCard{display:block}.heroActions{margin-top:16px}}
+@media(max-width:700px){.proStats{grid-template-columns:1fr}}

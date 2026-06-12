@@ -55,7 +55,7 @@ function useLocalStore(){
 function App(){
   const [token,setToken]=useState(localStorage.token||"");
   const [me,setMe]=useState(null);
-  const [tab,setTab]=useState("association");
+  const [tab,setTab]=useState("dashboard");
   const auth={headers:{Authorization:`Bearer ${token}`}};
 
   useEffect(()=>{ if(token) axios.get(`${API}/me`,auth).then(r=>setMe(r.data)).catch(()=>logout()) },[token]);
@@ -65,6 +65,7 @@ function App(){
   if(!token) return <Login setToken={setToken}/>;
 
   const menu=[
+    {id:"dashboard",label:"Dashboard",icon:"📊"},
     {id:"association",label:"Association RFID",icon:"📡"},
     {id:"inventory",label:"Inventaire réel",icon:"📦"},
     {id:"data",label:"Données locales",icon:"💾"},
@@ -75,7 +76,7 @@ function App(){
     <aside className="sidebar">
       <div className="brand">
         <div className="brandIcon">RF</div>
-        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">SaaS V13</div></div>
+        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V14 PRO</div></div>
       </div>
       <nav className="navMenu">
         {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
@@ -90,7 +91,7 @@ function App(){
     <section className="mainArea">
       <header className="topbar">
         <div>
-          <h1>{tab==="association"?"Association RFID":tab==="inventory"?"Inventaire RFID réel":tab==="data"?"Données locales":"Gestion clients SaaS"}</h1>
+          <h1>{tab==="dashboard"?"Dashboard":tab==="association"?"Association RFID":tab==="inventory"?"Inventaire RFID réel":tab==="data"?"Données locales":"Gestion clients SaaS"}</h1>
           <p>Gestion RFID pharmacie sans stockage métier dans le cloud.</p>
         </div>
         <div className="accountCard">
@@ -99,6 +100,7 @@ function App(){
         </div>
       </header>
       <main className="content">
+        {tab==="dashboard" && <Dashboard/>}
         {tab==="association" && <Association/>}
         {tab==="inventory" && <Inventory/>}
         {tab==="data" && <LocalData/>}
@@ -107,6 +109,59 @@ function App(){
     </section>
   </div>
 }
+
+
+function Dashboard(){
+  const {products,associations}=useLocalStore();
+  const associatedPids=new Set(associations.map(a=>String(a.PID)));
+  const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
+  const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
+  const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
+
+  return <section>
+    <div className="heroCard">
+      <div>
+        <span className="pill">SaaS sans stockage métier cloud</span>
+        <h2>Gestion RFID professionnelle pour pharmacies</h2>
+        <p>Accès par abonnement, données produits/EPC conservées localement par la pharmacie, exports et sauvegardes projet.</p>
+      </div>
+      <div className="heroActions">
+        <span className="statusBadge successBadge">Abonnement actif</span>
+        <span className="statusBadge infoBadge">Données locales</span>
+      </div>
+    </div>
+
+    <div className="statsGrid proStats">
+      <div className="statCard"><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small></div>
+      <div className="statCard"><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés aux produits</small></div>
+      <div className="statCard"><span>Produits avec RFID</span><b>{productsWithRfid}</b><small>couverture actuelle</small></div>
+      <div className="statCard"><span>Couverture</span><b>{coverage}%</b><small>{productsWithoutRfid} sans RFID</small></div>
+    </div>
+
+    <div className="grid">
+      <div className="card">
+        <h3>Flux recommandé</h3>
+        <ol className="steps">
+          <li>Importer le CSV pharmacie.</li>
+          <li>Scanner code-barres produit.</li>
+          <li>Scanner EPC RFID.</li>
+          <li>Sauvegarder projet JSON.</li>
+          <li>Importer EPC détectés et comparer l’inventaire.</li>
+        </ol>
+      </div>
+      <div className="card">
+        <h3>Avantages SaaS</h3>
+        <ul className="steps">
+          <li>Contrôle des abonnements en ligne.</li>
+          <li>Aucune donnée métier stockée sur ton serveur.</li>
+          <li>Mises à jour instantanées pour les pharmacies.</li>
+          <li>Interface web moderne sans installation.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+}
+
 
 function Login({setToken}){
   const [u,setU]=useState("demo"), [p,setP]=useState("demo123"), [err,setErr]=useState("");
@@ -117,7 +172,7 @@ function Login({setToken}){
     catch(e){ setErr(e.response?.status===402 ? "Abonnement expiré" : "Connexion échouée"); }
   }
   return <div className="login"><form onSubmit={login}>
-    <h2>Connexion SaaS</h2>
+    <h2>RFID Pharmacy SaaS</h2><p className="loginSub">Plateforme professionnelle de gestion RFID pour pharmacies</p>
     <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
     <input value={p} onChange={e=>setP(e.target.value)} placeholder="Mot de passe" type="password"/>
     <button>Connexion</button>
