@@ -80,7 +80,7 @@ function App(){
     <aside className="sidebar">
       <div className="brand">
         <div className="brandIcon">RF</div>
-        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V17</div></div>
+        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V18</div></div>
       </div>
       <nav className="navMenu">
         {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
@@ -242,34 +242,115 @@ function CoverageChart({coverage}){
   </div>
 }
 
+
+function MiniSpark({type="up"}){
+  const points = type==="down" ? "0,18 20,11 40,14 60,9 80,13 100,10 120,16" : "0,16 20,12 40,13 60,8 80,10 100,6 120,9";
+  return <svg className="spark" viewBox="0 0 120 24"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/></svg>
+}
+
 function Dashboard(){
   const {products,associations}=useLocalStore();
   const [content,setContent]=useState([]);
   const token=localStorage.token||"";
   const auth={headers:{Authorization:`Bearer ${token}`}};
-  useEffect(()=>{ axios.get(`${API}/dashboard/content`,auth).then(r=>setContent(r.data)).catch(()=>setContent([])); },[]);
+
+  useEffect(()=>{
+    axios.get(`${API}/dashboard/content`,auth).then(r=>setContent(r.data)).catch(()=>setContent([]));
+  },[]);
+
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
   const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
   const gap = products.length ? Math.max(0, Math.round((productsWithoutRfid/products.length)*1000)/10) : 0;
-  const ads=content.filter(c=>["promo","publicite","annonce"].includes((c.content_type||"").toLowerCase()));
-  const ad=ads[0] || {title:"Offre Premium RFID",message:"Passez à la vitesse supérieure avec notre solution RFID avancée.",cta_label:"Découvrir l'offre Premium",cta_url:"",content_type:"promo"};
-  const insights=content.filter(c=>["conseil","info"].includes((c.content_type||"").toLowerCase())).slice(0,2);
-  return <section className="proDashboard">
-    <div className="welcomeRow"><div><h2>Bonjour 👋</h2><p>Voici un aperçu complet des performances RFID de votre pharmacie.</p></div><div className="dashActions"><button>30 derniers jours</button><button className="primaryBtn">Exporter le rapport</button></div></div>
+
+  const ads=content.filter(c=>["promo","publicite","publicité","annonce"].includes((c.content_type||"").toLowerCase()));
+  const mainAd=ads[0] || {title:"Offre Premium RFID",message:"Passez à la vitesse supérieure avec notre solution RFID avancée.",cta_label:"Découvrir l'offre Premium",cta_url:""};
+  const ad2=ads[1] || {title:"Formation inventaire RFID",message:"Accompagnez votre équipe pour améliorer la couverture RFID et réduire les écarts.",cta_label:"Demander une démo",cta_url:""};
+  const ad3=ads[2] || {title:"Support Premium",message:"Bénéficiez d’un accompagnement prioritaire pour vos scans, imports et rapports.",cta_label:"Activer le support",cta_url:""};
+
+  return <section className="proDashboard clientDashboard">
+    <div className="welcomeRow">
+      <div>
+        <h2>Bonjour 👋</h2>
+        <p>Voici un aperçu rapide de vos données RFID et des offres disponibles pour votre pharmacie.</p>
+      </div>
+      <div className="dashActions">
+        <button>30 derniers jours</button>
+        <button className="primaryBtn">Exporter le rapport</button>
+      </div>
+    </div>
+
     <div className="kpiRow">
       <div className="kpiCard"><div className="kpiIcon blue">📦</div><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small><em className="trend up">↗ +4,2%</em><MiniSpark/></div>
       <div className="kpiCard"><div className="kpiIcon green">🔗</div><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés aux produits</small><em className="trend up">↗ +10,5%</em><MiniSpark/></div>
       <div className="kpiCard"><div className="kpiIcon teal">📡</div><span>Couverture RFID</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small><em className="trend up">↗ +8,1%</em><MiniSpark/></div>
       <div className="kpiCard"><div className="kpiIcon red">🏷️</div><span>Produits sans RFID</span><b>{productsWithoutRfid}</b><small>à couvrir</small><em className="trend down">↘ -3,6%</em><MiniSpark type="down"/></div>
-      <div className="kpiCard"><div className="kpiIcon green">📊</div><span>Écart d’inventaire</span><b>{gap}%</b><small>écart estimé</small><em className="trend up">↘ -12%</em><MiniSpark/></div>
+      <div className="kpiCard"><div className="kpiIcon green">📊</div><span>Écart estimé</span><b>{gap}%</b><small>à surveiller</small><em className="trend up">↘ -12%</em><MiniSpark/></div>
     </div>
-    <div className="dashGrid"><div className="leftDash"><CoverageChart coverage={coverage}/><div className="campaignCard"><div className="sectionTitle"><b>Campagnes récentes</b><a>Voir toutes les campagnes →</a></div><table className="miniTable"><thead><tr><th>Campagne</th><th>Objectif</th><th>Statut</th><th>Couverture</th><th>Période</th></tr></thead><tbody><tr><td>Scan Hebdo – Rayons A & B</td><td>Vérification hebdomadaire</td><td><span className="badge blue">En cours</span></td><td>78%</td><td>12–19 mai</td></tr><tr><td>Inventaire Mensuel</td><td>Inventaire complet</td><td><span className="badge teal">Planifiée</span></td><td>-</td><td>1–31 mai</td></tr><tr><td>Produits périmés – Q2</td><td>Contrôle DLC</td><td><span className="badge green">Terminée</span></td><td>95%</td><td>1 avr.–30 avr.</td></tr></tbody></table></div></div>
-      <aside className="rightDash"><div className="adCard"><span className="adPill">OFFRE EXCLUSIVE</span><h3>{ad.title}</h3><p>{ad.message}</p><div className="adBenefits"><div><span>⏱️</span><b>Traçabilité fiable</b><small>Suivi en temps réel</small></div><div><span>🛡️</span><b>Réduction des pertes</b><small>Moins de ruptures</small></div><div><span>📍</span><b>Données exploitables</b><small>Décisions éclairées</small></div></div><div className="productMock"><div className="box3d">PharmaRFID</div><div className="tag3d">RFID</div></div>{ad.cta_label ? <a className="adButton" href={ad.cta_url || "#"} target="_blank">{ad.cta_label} →</a> : <button className="adButton">Découvrir l’offre Premium →</button>}<div className="adFooter">Sécurisé · Fiable · Évolutif</div></div>
-      <div className="insightsCard"><h3>Insights & Opportunités IA</h3><div className="insightItem good"><span>💡</span><div><b>Couverture en progression</b><small>Votre couverture RFID est actuellement à {coverage}%.</small></div><em>Positif</em></div><div className="insightItem warn"><span>⚠️</span><div><b>Produits sans RFID</b><small>{productsWithoutRfid} produits restent à associer.</small></div><em>Attention</em></div><div className="insightItem action"><span>📈</span><div><b>Potentiel d’optimisation</b><small>Priorisez les catégories à fort impact.</small></div><em>Action</em></div>{insights.map(x=><div key={x.id} className="insightItem action"><span>📣</span><div><b>{x.title}</b><small>{x.message}</small></div><em>{x.content_type}</em></div>)}</div>
-      <div className="recommendCard"><h3>Recommandations IA</h3><div className="recItem"><span>📦</span><div><b>Associer les produits prioritaires</b><small>{Math.min(productsWithoutRfid,236)} produits sans EPC associé.</small></div><button>Agir</button></div><div className="recItem"><span>📡</span><div><b>Lancer un scan ciblé</b><small>Rayons à couverture inférieure à 60%.</small></div><button>Agir</button></div><div className="recItem"><span>📄</span><div><b>Exporter le rapport d’écarts</b><small>Analyse détaillée d’inventaire.</small></div><button>Agir</button></div></div></aside></div>
-    <div className="bottomGrid"><div className="smallPanel"><h3>Inventaire en temps réel</h3><div className="donut"><span>{associations.length}</span></div><p>Associés: {productsWithRfid} · Non associés: {productsWithoutRfid}</p></div><div className="smallPanel"><h3>Alertes et anomalies</h3><ul className="alertList"><li>⚠️ EPC détectés sans produit associé</li><li>🔁 Doublons EPC possibles</li><li>📉 Écart d’inventaire à surveiller</li></ul></div><div className="smallPanel"><h3>Rapports et exports</h3><ul className="reportList"><li>📄 Rapport d’inventaire</li><li>📄 Rapport d’écarts</li><li>📄 Performance RFID</li></ul></div></div>
+
+    <div className="clientDashGrid">
+      <div className="adMainPanel">
+        <div className="adMainText">
+          <span className="adPill">OFFRE EXCLUSIVE</span>
+          <h2>{mainAd.title}</h2>
+          <p>{mainAd.message}</p>
+          <div className="adFeatureGrid">
+            <div><span>⏱️</span><b>Traçabilité fiable</b><small>Suivi clair de vos produits</small></div>
+            <div><span>🛡️</span><b>Réduction des pertes</b><small>Moins d’écarts et de ruptures</small></div>
+            <div><span>📊</span><b>Données exploitables</b><small>Décisions rapides et concrètes</small></div>
+          </div>
+          {mainAd.cta_label ? <a className="adButton" href={mainAd.cta_url || "#"} target="_blank">{mainAd.cta_label} →</a> : <button className="adButton">Découvrir l’offre Premium →</button>}
+        </div>
+        <div className="adVisual">
+          <div className="box3d bigBox">PharmaRFID</div>
+          <div className="tag3d bigTag">RFID</div>
+        </div>
+      </div>
+
+      <div className="sideAdStack">
+        <div className="miniAdCard tealAd">
+          <span>🎓 Service</span>
+          <h3>{ad2.title}</h3>
+          <p>{ad2.message}</p>
+          {ad2.cta_label && <a href={ad2.cta_url || "#"} target="_blank">En savoir plus →</a>}
+        </div>
+        <div className="miniAdCard blueAd">
+          <span>⭐ Premium</span>
+          <h3>{ad3.title}</h3>
+          <p>{ad3.message}</p>
+          {ad3.cta_label && <a href={ad3.cta_url || "#"} target="_blank">Découvrir →</a>}
+        </div>
+      </div>
+    </div>
+
+    <div className="bottomGrid betterBottom">
+      <div className="smallPanel realtimePanel">
+        <h3>Inventaire en temps réel</h3>
+        <div className="donut"><span>{associations.length}</span></div>
+        <p>Associés: {productsWithRfid} · Non associés: {productsWithoutRfid}</p>
+        <button>Voir le détail</button>
+      </div>
+
+      <div className="smallPanel alertsPanel">
+        <h3>Alertes et anomalies</h3>
+        <ul className="alertList">
+          <li><span>⚠️</span><div><b>EPC sans produit associé</b><small>À vérifier après chaque scan.</small></div></li>
+          <li><span>🔁</span><div><b>Doublons EPC possibles</b><small>Contrôler les associations récentes.</small></div></li>
+          <li><span>📉</span><div><b>Écart d’inventaire</b><small>Exporter un rapport pour analyse.</small></div></li>
+        </ul>
+      </div>
+
+      <div className="smallPanel reportsPanel">
+        <div className="sectionTitle"><b>Rapports et exports</b><a>Voir tout →</a></div>
+        <div className="reportCards">
+          <div className="reportCard"><span>📄</span><div><b>Rapport d’inventaire</b><small>Produits présents et manquants</small></div><button>Exporter</button></div>
+          <div className="reportCard"><span>📊</span><div><b>Rapport d’écarts</b><small>Analyse des anomalies RFID</small></div><button>Exporter</button></div>
+          <div className="reportCard"><span>🤖</span><div><b>Analyse IA RFID</b><small>Score, risques et recommandations</small></div><button>Générer</button></div>
+          <div className="reportCard"><span>💾</span><div><b>Sauvegarde projet</b><small>Produits + associations locales</small></div><button>Backup</button></div>
+        </div>
+      </div>
+    </div>
   </section>
 }
 
