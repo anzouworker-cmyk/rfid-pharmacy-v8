@@ -67,8 +67,9 @@ def current_user(authorization: Optional[str] = Header(None), s: Session = Depen
     acc = s.get(Account, username)
     if not acc or not acc.active:
         raise HTTPException(401, "Inactive account")
-    if acc.subscription_status != "active" or acc.expires_at < datetime.utcnow():
-        raise HTTPException(402, "Subscription expired")
+    if acc.role != "platform_admin":
+        if acc.subscription_status != "active" or acc.expires_at < datetime.utcnow():
+            raise HTTPException(402, "Subscription expired")
     return acc
 
 class ClientIn(BaseModel):
@@ -111,15 +112,16 @@ def login(form: OAuth2PasswordRequestForm = Depends(), s: Session = Depends(db))
     acc = s.get(Account, form.username)
     if not acc or not verify(form.password, acc.password_hash) or not acc.active:
         raise HTTPException(401, "Bad credentials")
-    if acc.subscription_status != "active" or acc.expires_at < datetime.utcnow():
-        raise HTTPException(402, "Subscription expired")
+    if acc.role != "platform_admin":
+        if acc.subscription_status != "active" or acc.expires_at < datetime.utcnow():
+            raise HTTPException(402, "Subscription expired")
     return {
         "access_token": token({"sub": acc.username}),
         "token_type": "bearer",
         "username": acc.username,
         "pharmacy_name": acc.pharmacy_name,
         "role": acc.role,
-        "expires_at": acc.expires_at.isoformat()
+        "expires_at": None if acc.role == "platform_admin" else acc.expires_at.isoformat()
     }
 
 @app.get("/me")
@@ -129,7 +131,7 @@ def me(acc: Account = Depends(current_user)):
         "pharmacy_name": acc.pharmacy_name,
         "role": acc.role,
         "subscription_status": acc.subscription_status,
-        "expires_at": acc.expires_at.isoformat()
+        "expires_at": None if acc.role == "platform_admin" else acc.expires_at.isoformat()
     }
 
 @app.post("/platform/create-client")
@@ -157,8 +159,8 @@ def clients(acc: Account = Depends(current_user), s: Session = Depends(db)):
             "username": x.username,
             "pharmacy_name": x.pharmacy_name,
             "role": x.role,
-            "subscription_status": x.subscription_status,
-            "expires_at": x.expires_at.isoformat(),
+            "subscription_status": "admin" if x.role == "platform_admin" else x.subscription_status,
+            "expires_at": None if x.role == "platform_admin" else x.expires_at.isoformat(),
             "active": x.active
         }
         for x in s.query(Account).order_by(Account.created_at.desc()).all()
@@ -245,3 +247,48 @@ def delete_client_v10(username: str, acc: Account = Depends(current_user), s: Se
     s.commit()
     return {"ok": True}
 
+
+
+@app.post("/platform/client-set-active/{username}")
+def client_set_active(username: str, active: bool, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    if username == "admin":
+        raise HTTPException(400, "Admin account cannot be disabled")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+    obj.active = active
+    s.commit()
+    return {"ok": True, "username": username, "active": obj.active}
+
+@app.post("/platform/client-delete/{username}")
+def client_delete(username: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    if username == "admin":
+        raise HTTPException(400, "Admin account cannot be deleted")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+    s.delete(obj)
+    s.commit()
+    return {"ok": True, "deleted": username}
+
+@app.post("/platform/client-update-expiry/{username}")
+def client_update_expiry(username: str, data: ExpiryIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    if username == "admin":
+        raise HTTPException(400, "Admin account does not have expiration date")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+    try:
+        new_date = datetime.strptime(data.expires_at, "%Y-%m-%d")
+    except Exception:
+        raise HTTPException(400, "Invalid date format. Use YYYY-MM-DD")
+    obj.expires_at = new_date
+    obj.subscription_status = "active" if new_date >= datetime.utcnow() else "expired"
+    s.commit()
+    return {"ok": True, "username": username, "expires_at": obj.expires_at.isoformat(), "subscription_status": obj.subscription_status}

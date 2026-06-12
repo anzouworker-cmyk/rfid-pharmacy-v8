@@ -65,7 +65,7 @@ function App(){
 
   return <div>
     <header>
-      <b>RFID Pharmacy Web SaaS V10</b>
+      <b>RFID Pharmacy Web SaaS V11</b>
       <span>{me?.pharmacy_name} | expire: {me?.expires_at?.slice(0,10)}</span>
       <button onClick={()=>setTab("association")}>Association RFID</button>
       <button onClick={()=>setTab("inventory")}>Inventaire réel</button>
@@ -340,6 +340,7 @@ function LocalData(){
 
 
 
+
 function Platform({auth}){
   const [clients,setClients]=useState([]);
   const [username,setUsername]=useState("");
@@ -350,7 +351,8 @@ function Platform({auth}){
 
   async function load(){
     try{
-      setClients((await axios.get(`${API}/platform/clients`,auth)).data);
+      const r = await axios.get(`${API}/platform/clients`,auth);
+      setClients(r.data);
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur chargement clients");
     }
@@ -362,7 +364,7 @@ function Platform({auth}){
       await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days)},auth);
       setUsername(""); setPassword(""); setPharmacy(""); setDays(30);
       setMsg("Client créé.");
-      load();
+      await load();
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur création client");
     }
@@ -370,9 +372,9 @@ function Platform({auth}){
 
   async function setClientActive(u, active){
     try{
-      await axios.post(`${API}/platform/set-active/${encodeURIComponent(u)}?active=${active}`,{},auth);
+      await axios.post(`${API}/platform/client-set-active/${encodeURIComponent(u)}?active=${active}`,{},auth);
       setMsg(active ? "Client activé." : "Client désactivé.");
-      load();
+      await load();
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur changement statut");
     }
@@ -381,9 +383,9 @@ function Platform({auth}){
   async function deleteClient(u){
     if(!confirm(`Supprimer définitivement le client ${u} ?`)) return;
     try{
-      await axios.delete(`${API}/platform/delete-client/${encodeURIComponent(u)}`,auth);
+      await axios.post(`${API}/platform/client-delete/${encodeURIComponent(u)}`,{},auth);
       setMsg("Client supprimé.");
-      load();
+      await load();
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur suppression client");
     }
@@ -401,12 +403,12 @@ function Platform({auth}){
   }
 
   async function changeExpiry(u, currentDate){
-    const d=prompt(`Nouvelle date expiration pour ${u} (YYYY-MM-DD):`, currentDate?.slice(0,10) || "");
+    const d=prompt(`Nouvelle date expiration pour ${u} (YYYY-MM-DD):`, currentDate || "");
     if(!d) return;
     try{
-      await axios.post(`${API}/platform/update-expiry/${encodeURIComponent(u)}`,{expires_at:d},auth);
+      await axios.post(`${API}/platform/client-update-expiry/${encodeURIComponent(u)}`,{expires_at:d},auth);
       setMsg(`Date expiration changée pour ${u}.`);
-      load();
+      await load();
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur changement date expiration");
     }
@@ -441,17 +443,16 @@ function Platform({auth}){
       </thead>
       <tbody>
         {clients.map(c=>{
-          const isAdmin=c.username==="admin";
-          const expDate=c.expires_at?.slice(0,10);
+          const isAdmin=c.username==="admin" || c.role==="platform_admin";
+          const expDate=c.expires_at ? c.expires_at.slice(0,10) : "";
           return <tr key={c.username}>
             <td>{c.username}</td>
             <td>{c.pharmacy_name}</td>
             <td>{c.subscription_status}</td>
             <td>{c.active ? "active" : "inactive"}</td>
             <td>
-              {expDate}
-              <br/>
-              <button onClick={()=>changeExpiry(c.username, expDate)}>Changer date</button>
+              {isAdmin ? "N/A" : expDate}
+              {!isAdmin && <><br/><button onClick={()=>changeExpiry(c.username, expDate)}>Changer date</button></>}
             </td>
             <td><button onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
             <td>{isAdmin ? "" : <button onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "Désactiver" : "Activer"}</button>}</td>
