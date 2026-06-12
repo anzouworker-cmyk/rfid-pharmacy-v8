@@ -1,12 +1,15 @@
 
 from datetime import datetime, timedelta, date
 import hashlib
+import os
+import json
 from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from pydantic import BaseModel
+from openai import OpenAI
 from sqlalchemy import create_engine, Column, String, DateTime, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from pydantic_settings import BaseSettings
@@ -399,3 +402,75 @@ def delete_dashboard_content(content_id: str, acc: Account = Depends(current_use
         s.delete(obj)
         s.commit()
     return {"ok": True}
+
+
+class AIAnalyzeIn(BaseModel):
+    products_count: int = 0
+    associations_count: int = 0
+    products_with_rfid: int = 0
+    products_without_rfid: int = 0
+    coverage: int = 0
+    detected_epc_count: int = 0
+    present_count: int = 0
+    missing_count: int = 0
+    no_association_count: int = 0
+    question: str = ""
+
+@app.post("/ai/analyze")
+def ai_analyze(data: AIAnalyzeIn, acc: Account = Depends(current_user)):
+    fallback = {
+        "score": max(0, min(100, int(data.coverage))),
+        "niveau": "Analyse locale",
+        "resume": f"Couverture RFID {data.coverage}%. {data.products_without_rfid} produits restent sans RFID.",
+        "recommandations": [
+            "Associer les produits à forte rotation en priorité.",
+            "Sauvegarder le projet JSON après chaque session.",
+            "Importer les EPC détectés avant chaque analyse d’inventaire.",
+            "Viser progressivement 95% de couverture RFID."
+        ],
+        "alertes": [
+            "Les produits sans RFID ne seront pas détectés automatiquement.",
+            "Les données locales doivent être sauvegardées régulièrement."
+        ],
+        "prochaine_action": "Continuer l’association RFID des produits sans tag."
+    }
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        return {"mode": "local-fallback", "analysis": fallback}
+
+    prompt = f"""
+Tu es un assistant professionnel pour une application SaaS RFID destinée aux pharmacies.
+Réponds uniquement en JSON valide.
+Données:
+produits={data.products_count}
+associations={data.associations_count}
+produits_avec_rfid={data.products_with_rfid}
+produits_sans_rfid={data.products_without_rfid}
+couverture={data.coverage}%
+epc_detectes={data.detected_epc_count}
+presents={data.present_count}
+manquants={data.missing_count}
+sans_association={data.no_association_count}
+question={data.question or "Analyse automatiquement la situation RFID."}
+Format JSON:
+score, niveau, resume, recommandations, alertes, prochaine_action
+"""
+    try:
+        client = OpenAI(api_key=api_key)
+        resp = client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            messages=[
+                {"role": "system", "content": "Tu réponds uniquement en JSON valide, sans markdown."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.2
+        )
+        text = resp.choices[0].message.content or "{}"
+        try:
+            parsed = json.loads(text)
+        except Exception:
+            parsed = fallback
+            parsed["resume"] = text
+        return {"mode": "openai", "analysis": parsed}
+    except Exception as e:
+        return {"mode": "fallback-error", "error": str(e), "analysis": fallback}

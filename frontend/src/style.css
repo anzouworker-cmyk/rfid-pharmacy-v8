@@ -36,3 +36,12 @@ table button{padding:8px 10px;font-size:13px}
 .marketingCard:before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:#2563eb}.marketingCard.promo:before{background:#f59e0b}.marketingCard.conseil:before{background:#10b981}.marketingCard.annonce:before{background:#8b5cf6}.marketingCard.info:before{background:#2563eb}
 .cardType{text-transform:uppercase;color:#64748b;font-size:12px;font-weight:900;letter-spacing:.08em}.ctaLink{display:inline-block;margin-top:10px;background:#2563eb;color:white;text-decoration:none;padding:10px 12px;border-radius:10px;font-weight:800}.textArea{width:100%;min-height:100px;border:1px solid var(--border);border-radius:12px;padding:12px;font-family:inherit;margin:4px}
 @media(max-width:1100px){.marketingGrid{grid-template-columns:1fr 1fr}}@media(max-width:700px){.marketingGrid{grid-template-columns:1fr}}
+
+.aiHero{background:linear-gradient(135deg,#111827,#4f46e5 55%,#06b6d4)}
+.quickGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.aiResult{display:grid;grid-template-columns:220px 1fr;gap:18px;margin-top:18px}
+.aiScore{background:linear-gradient(135deg,#4f46e5,#06b6d4);color:white;border-radius:24px;padding:24px;text-align:center;box-shadow:0 18px 45px rgba(79,70,229,.25)}
+.aiScore span{display:block;font-weight:800;color:#dbeafe}.aiScore b{display:block;font-size:54px;margin:12px 0}.aiScore small{color:#e0f2fe}
+.aiPanel{background:white;border:1px solid var(--border);border-radius:24px;padding:24px;box-shadow:0 8px 24px rgba(15,23,42,.05)}
+.aiPanel h3{margin-top:16px}.aiPanel h3:first-child{margin-top:0}
+@media(max-width:900px){.aiResult{grid-template-columns:1fr}.quickGrid{grid-template-columns:1fr}}

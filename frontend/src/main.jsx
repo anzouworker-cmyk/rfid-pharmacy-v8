@@ -66,6 +66,7 @@ function App(){
 
   const menu=[
     {id:"dashboard",label:"Dashboard",icon:"📊"},
+    {id:"ai",label:"Assistant IA",icon:"🤖"},
     {id:"association",label:"Association RFID",icon:"📡"},
     {id:"inventory",label:"Inventaire réel",icon:"📦"},
     {id:"data",label:"Données locales",icon:"💾"},
@@ -79,7 +80,7 @@ function App(){
     <aside className="sidebar">
       <div className="brand">
         <div className="brandIcon">RF</div>
-        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V15</div></div>
+        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V16 AI</div></div>
       </div>
       <nav className="navMenu">
         {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
@@ -94,7 +95,7 @@ function App(){
     <section className="mainArea">
       <header className="topbar">
         <div>
-          <h1>{tab==="dashboard"?"Dashboard":tab==="association"?"Association RFID":tab==="inventory"?"Inventaire RFID réel":tab==="data"?"Données locales":tab==="dashboardAdmin"?"Gestion Dashboard":"Gestion clients SaaS"}</h1>
+          <h1>{tab==="dashboard"?"Dashboard":tab==="ai"?"Assistant IA RFID":tab==="association"?"Association RFID":tab==="inventory"?"Inventaire RFID réel":tab==="data"?"Données locales":tab==="dashboardAdmin"?"Gestion Dashboard":"Gestion clients SaaS"}</h1>
           <p>Gestion RFID pharmacie sans stockage métier dans le cloud.</p>
         </div>
         <div className="accountCard">
@@ -104,6 +105,7 @@ function App(){
       </header>
       <main className="content">
         {tab==="dashboard" && <Dashboard/>}
+        {tab==="ai" && <AIAssistant/>}
         {tab==="association" && <Association/>}
         {tab==="inventory" && <Inventory/>}
         {tab==="data" && <LocalData/>}
@@ -114,6 +116,106 @@ function App(){
   </div>
 }
 
+
+
+
+function AIAssistant(){
+  const {products,associations}=useLocalStore();
+  const [epcs,setEpcs]=useState([]);
+  const [question,setQuestion]=useState("");
+  const [result,setResult]=useState(null);
+  const [loading,setLoading]=useState(false);
+  const token=localStorage.token||"";
+  const auth={headers:{Authorization:`Bearer ${token}`}};
+
+  function importEpcs(file){
+    Papa.parse(file,{header:false,skipEmptyLines:true,complete:(res)=>{
+      const rows=res.data.map(r=>norm(r[0])).filter(e=>e && e!=="EPC" && e.length>=3);
+      setEpcs([...new Set(rows)]);
+    }});
+  }
+
+  function computeStats(){
+    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
+    const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
+    const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
+    const detected=new Set(epcs.map(norm));
+    let present=0, missing=0, noAssoc=0;
+    products.forEach(p=>{
+      const productAssoc=associations.filter(a=>String(a.PID)===String(p.PID));
+      const epcList=productAssoc.map(a=>norm(a.EPC)).filter(Boolean);
+      if(epcList.length===0) noAssoc++;
+      else if(epcList.some(e=>detected.has(e))) present++;
+      else missing++;
+    });
+    return {products_count:products.length,associations_count:associations.length,products_with_rfid:productsWithRfid,products_without_rfid:productsWithoutRfid,coverage,detected_epc_count:epcs.length,present_count:present,missing_count:missing,no_association_count:noAssoc};
+  }
+
+  async function analyze(customQuestion=""){
+    setLoading(true); setResult(null);
+    try{
+      const r=await axios.post(`${API}/ai/analyze`,{...computeStats(),question:customQuestion||question},auth);
+      setResult(r.data);
+    }catch(e){
+      setResult({mode:"frontend-error",analysis:{score:0,niveau:"Erreur",resume:e.response?.data?.detail||"Erreur IA",recommandations:[],alertes:[],prochaine_action:"Vérifier backend / OPENAI_API_KEY"}});
+    }
+    setLoading(false);
+  }
+
+  const stats=computeStats();
+  const analysis=result?.analysis;
+
+  return <section>
+    <div className="heroCard aiHero">
+      <div>
+        <span className="pill">Assistant IA Premium</span>
+        <h2>Analyse intelligente de votre couverture RFID</h2>
+        <p>L’IA transforme vos données locales en recommandations simples pour améliorer l’inventaire et réduire les manquants.</p>
+      </div>
+      <div className="heroActions">
+        <span className="statusBadge successBadge">Score actuel: {stats.coverage}/100</span>
+        <span className="statusBadge infoBadge">{products.length} produits</span>
+      </div>
+    </div>
+
+    <div className="statsGrid proStats">
+      <div className="statCard"><span>Couverture RFID</span><b>{stats.coverage}%</b><small>{stats.products_without_rfid} sans RFID</small></div>
+      <div className="statCard"><span>Associations</span><b>{stats.associations_count}</b><small>tags liés</small></div>
+      <div className="statCard"><span>Présents détectés</span><b>{stats.present_count}</b><small>selon EPC importés</small></div>
+      <div className="statCard"><span>Manquants</span><b>{stats.missing_count}</b><small>associés non détectés</small></div>
+    </div>
+
+    <div className="grid">
+      <div className="card">
+        <h3>Analyse IA</h3>
+        <input type="file" accept=".csv,.txt" onChange={e=>importEpcs(e.target.files[0])}/>
+        <p>{epcs.length} EPC détectés chargés.</p>
+        <textarea className="textArea" placeholder="Question: Comment améliorer ma couverture RFID ?" value={question} onChange={e=>setQuestion(e.target.value)} />
+        <button onClick={()=>analyze()} disabled={loading}>{loading?"Analyse en cours...":"Analyser avec IA"}</button>
+      </div>
+      <div className="card">
+        <h3>Questions rapides</h3>
+        <div className="quickGrid">
+          <button onClick={()=>analyze("Analyse ma couverture RFID et donne les priorités.")}>Analyser couverture</button>
+          <button onClick={()=>analyze("Quels sont les risques dans mon inventaire RFID ?")}>Identifier risques</button>
+          <button onClick={()=>analyze("Donne un plan d'action pour atteindre 95% de couverture RFID.")}>Plan 95%</button>
+          <button onClick={()=>analyze("Explique les anomalies manquants et sans association.")}>Anomalies</button>
+        </div>
+      </div>
+    </div>
+
+    {analysis && <div className="aiResult">
+      <div className="aiScore"><span>Score IA</span><b>{analysis.score ?? stats.coverage}</b><small>{analysis.niveau || result?.mode}</small></div>
+      <div className="aiPanel">
+        <h3>Résumé</h3><p>{analysis.resume || analysis.summary}</p>
+        {(analysis.recommandations || analysis.recommendations || []).length>0 && <><h3>Recommandations</h3><ul className="steps">{(analysis.recommandations || analysis.recommendations).map((x,i)=><li key={i}>{x}</li>)}</ul></>}
+        {(analysis.alertes || analysis.risks || []).length>0 && <><h3>Alertes / Risques</h3><ul className="steps">{(analysis.alertes || analysis.risks).map((x,i)=><li key={i}>{x}</li>)}</ul></>}
+        {analysis.prochaine_action && <><h3>Prochaine action</h3><p><b>{analysis.prochaine_action}</b></p></>}
+      </div>
+    </div>}
+  </section>
+}
 
 
 function Dashboard(){
