@@ -52,6 +52,7 @@ function useLocalStore(){
 }
 
 
+
 function App(){
   const [token,setToken]=useState(localStorage.token||"");
   const [me,setMe]=useState(null);
@@ -65,45 +66,86 @@ function App(){
   if(!token) return <Login setToken={setToken}/>;
 
   const menu=[
-    {id:"dashboard",label:"Dashboard",icon:"📊"},
-    {id:"ai",label:"Assistant IA",icon:"🤖"},
-    {id:"association",label:"Association RFID",icon:"📡"},
-    {id:"inventory",label:"Inventaire réel",icon:"📦"},
-    {id:"data",label:"Données locales",icon:"💾"},
+    {id:"dashboard",label:"Vue d'ensemble",icon:"⌂"},
+    {id:"association",label:"Associations RFID",icon:"🔗"},
+    {id:"inventory",label:"Inventaire",icon:"▥"},
+    {id:"ai",label:"Assistant IA",icon:"✣",badge:"Nouveau"},
+    {id:"data",label:"Rapports",icon:"▧"},
   ];
   if(me?.role==="platform_admin"){
     menu.push({id:"platform",label:"Clients SaaS",icon:"👥"});
-    menu.push({id:"dashboardAdmin",label:"Dashboard Admin",icon:"📣"});
+    menu.push({id:"dashboardAdmin",label:"Publicités",icon:"📣"});
   }
+  menu.push({id:"settings",label:"Paramètres",icon:"⚙"});
 
-  return <div className="appShell">
-    <aside className="sidebar">
-      <div className="brand">
-        <div className="brandIcon">RF</div>
-        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V19</div></div>
+  const pageTitle = tab==="dashboard"?"Bonjour, "+(me?.username || "Utilisateur")+" 👋":
+    tab==="association"?"Associations RFID":
+    tab==="inventory"?"Inventaire":
+    tab==="ai"?"Assistant IA RFID":
+    tab==="data"?"Rapports et sauvegarde":
+    tab==="dashboardAdmin"?"Gestion publicités":
+    tab==="platform"?"Gestion clients SaaS":"Paramètres";
+
+  return <div className="appShell pharmaShell">
+    <aside className="sidebar pharmaSidebar">
+      <div className="brand pharmaBrand">
+        <div className="pharmaLogo"><span></span></div>
+        <div>
+          <div className="brandTitle">PHARMA<span>INVENTAIRE</span></div>
+          <div className="brandSub">Solution SaaS RFID</div>
+        </div>
       </div>
-      <nav className="navMenu">
+
+      <nav className="navMenu pharmaNav">
         {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
-          <span>{m.icon}</span><span>{m.label}</span>
+          <span className="navIcon">{m.icon}</span>
+          <span className="navLabel">{m.label}</span>
+          {m.badge && <em>{m.badge}</em>}
         </button>)}
       </nav>
-      <div className="sidebarFooter">
-        <div className="pharmacyBadge"><small>Pharmacie</small><b>{me?.pharmacy_name}</b></div>
-        <button className="logoutBtn" onClick={logout}>Déconnexion</button>
+
+      <div className="sidebarFooter pharmaProfile">
+        <div className="pharmacyBox">
+          <div className="miniIcon">▣</div>
+          <div>
+            <b>{me?.pharmacy_name || "Pharmacie Centrale"}</b>
+            <small>Compte Business</small>
+          </div>
+          <span>⌄</span>
+        </div>
+        <div className="userBox">
+          <div className="avatar">{(me?.username || "PC").slice(0,2).toUpperCase()}</div>
+          <div>
+            <b>{me?.username || "Utilisateur"}</b>
+            <small>{me?.role==="platform_admin"?"Administrateur":"Utilisateur"}</small>
+          </div>
+          <button onClick={logout}>⋮</button>
+        </div>
       </div>
     </aside>
-    <section className="mainArea">
-      <header className="topbar">
-        <div>
-          <h1>{tab==="dashboard"?"Dashboard":tab==="ai"?"Assistant IA RFID":tab==="association"?"Association RFID":tab==="inventory"?"Inventaire RFID réel":tab==="data"?"Données locales":tab==="dashboardAdmin"?"Gestion Dashboard":"Gestion clients SaaS"}</h1>
-          <p>Gestion RFID pharmacie sans stockage métier dans le cloud.</p>
+
+    <section className="mainArea pharmaMain">
+      <header className="topbar pharmaTopbar">
+        <div className="topWelcome">
+          <h1>{pageTitle}</h1>
+          <p>Voici un aperçu complet des performances de votre pharmacie.</p>
         </div>
-        <div className="accountCard">
-          <span>{me?.username}</span>
-          <b>{me?.expires_at ? `Expire: ${me.expires_at.slice(0,10)}` : "Admin plateforme"}</b>
+
+        <div className="topActions">
+          <button className="dateBtn">📅 12 mai – 11 juin 2024⌄</button>
+          <button className="iconBtn">🔔<sup>3</sup></button>
+          <button className="iconBtn">?</button>
+          <div className="topAccount">
+            <div>
+              <b>{me?.pharmacy_name || "Pharmacie Centrale"}</b>
+              <small>{me?.role==="platform_admin"?"Admin plateforme":"Compte Business"}</small>
+            </div>
+            <div className="roundAvatar">{(me?.pharmacy_name || "PC").split(" ").map(x=>x[0]).slice(0,2).join("").toUpperCase()}</div>
+          </div>
         </div>
       </header>
-      <main className="content">
+
+      <main className="content pharmaContent">
         {tab==="dashboard" && <Dashboard/>}
         {tab==="ai" && <AIAssistant/>}
         {tab==="association" && <Association/>}
@@ -111,295 +153,10 @@ function App(){
         {tab==="data" && <LocalData/>}
         {tab==="platform" && <Platform auth={auth}/>}
         {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>}
+        {tab==="settings" && <section><h2>Paramètres</h2><p className="notice">Paramètres généraux de l’application.</p></section>}
       </main>
     </section>
   </div>
-}
-
-
-
-
-function AIAssistant(){
-  const {products,associations}=useLocalStore();
-  const [epcs,setEpcs]=useState([]);
-  const [question,setQuestion]=useState("");
-  const [result,setResult]=useState(null);
-  const [loading,setLoading]=useState(false);
-  const token=localStorage.token||"";
-  const auth={headers:{Authorization:`Bearer ${token}`}};
-
-  function importEpcs(file){
-    Papa.parse(file,{header:false,skipEmptyLines:true,complete:(res)=>{
-      const rows=res.data.map(r=>norm(r[0])).filter(e=>e && e!=="EPC" && e.length>=3);
-      setEpcs([...new Set(rows)]);
-    }});
-  }
-
-  function computeStats(){
-    const associatedPids=new Set(associations.map(a=>String(a.PID)));
-    const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
-    const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
-    const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
-    const detected=new Set(epcs.map(norm));
-    let present=0, missing=0, noAssoc=0;
-    products.forEach(p=>{
-      const productAssoc=associations.filter(a=>String(a.PID)===String(p.PID));
-      const epcList=productAssoc.map(a=>norm(a.EPC)).filter(Boolean);
-      if(epcList.length===0) noAssoc++;
-      else if(epcList.some(e=>detected.has(e))) present++;
-      else missing++;
-    });
-    return {products_count:products.length,associations_count:associations.length,products_with_rfid:productsWithRfid,products_without_rfid:productsWithoutRfid,coverage,detected_epc_count:epcs.length,present_count:present,missing_count:missing,no_association_count:noAssoc};
-  }
-
-  async function analyze(customQuestion=""){
-    setLoading(true); setResult(null);
-    try{
-      const r=await axios.post(`${API}/ai/analyze`,{...computeStats(),question:customQuestion||question},auth);
-      setResult(r.data);
-    }catch(e){
-      setResult({mode:"frontend-error",analysis:{score:0,niveau:"Erreur",resume:e.response?.data?.detail||"Erreur IA",recommandations:[],alertes:[],prochaine_action:"Vérifier backend / OPENAI_API_KEY"}});
-    }
-    setLoading(false);
-  }
-
-  const stats=computeStats();
-  const analysis=result?.analysis;
-
-  return <section>
-    <div className="heroCard aiHero">
-      <div>
-        <span className="pill">Assistant IA Premium</span>
-        <h2>Analyse intelligente de votre couverture RFID</h2>
-        <p>L’IA transforme vos données locales en recommandations simples pour améliorer l’inventaire et réduire les manquants.</p>
-      </div>
-      <div className="heroActions">
-        <span className="statusBadge successBadge">Score actuel: {stats.coverage}/100</span>
-        <span className="statusBadge infoBadge">{products.length} produits</span>
-      </div>
-    </div>
-
-    <div className="statsGrid proStats">
-      <div className="statCard"><span>Couverture RFID</span><b>{stats.coverage}%</b><small>{stats.products_without_rfid} sans RFID</small></div>
-      <div className="statCard"><span>Associations</span><b>{stats.associations_count}</b><small>tags liés</small></div>
-      <div className="statCard"><span>Présents détectés</span><b>{stats.present_count}</b><small>selon EPC importés</small></div>
-      <div className="statCard"><span>Manquants</span><b>{stats.missing_count}</b><small>associés non détectés</small></div>
-    </div>
-
-    <div className="grid">
-      <div className="card">
-        <h3>Analyse IA</h3>
-        <input type="file" accept=".csv,.txt" onChange={e=>importEpcs(e.target.files[0])}/>
-        <p>{epcs.length} EPC détectés chargés.</p>
-        <textarea className="textArea" placeholder="Question: Comment améliorer ma couverture RFID ?" value={question} onChange={e=>setQuestion(e.target.value)} />
-        <button onClick={()=>analyze()} disabled={loading}>{loading?"Analyse en cours...":"Analyser avec IA"}</button>
-      </div>
-      <div className="card">
-        <h3>Questions rapides</h3>
-        <div className="quickGrid">
-          <button onClick={()=>analyze("Analyse ma couverture RFID et donne les priorités.")}>Analyser couverture</button>
-          <button onClick={()=>analyze("Quels sont les risques dans mon inventaire RFID ?")}>Identifier risques</button>
-          <button onClick={()=>analyze("Donne un plan d'action pour atteindre 95% de couverture RFID.")}>Plan 95%</button>
-          <button onClick={()=>analyze("Explique les anomalies manquants et sans association.")}>Anomalies</button>
-        </div>
-      </div>
-    </div>
-
-    {analysis && <div className="aiResult">
-      <div className="aiScore"><span>Score IA</span><b>{analysis.score ?? stats.coverage}</b><small>{analysis.niveau || result?.mode}</small></div>
-      <div className="aiPanel">
-        <h3>Résumé</h3><p>{analysis.resume || analysis.summary}</p>
-        {(analysis.recommandations || analysis.recommendations || []).length>0 && <><h3>Recommandations</h3><ul className="steps">{(analysis.recommandations || analysis.recommendations).map((x,i)=><li key={i}>{x}</li>)}</ul></>}
-        {(analysis.alertes || analysis.risks || []).length>0 && <><h3>Alertes / Risques</h3><ul className="steps">{(analysis.alertes || analysis.risks).map((x,i)=><li key={i}>{x}</li>)}</ul></>}
-        {analysis.prochaine_action && <><h3>Prochaine action</h3><p><b>{analysis.prochaine_action}</b></p></>}
-      </div>
-    </div>}
-  </section>
-}
-
-
-
-
-function CoverageChart({coverage}){
-  const c=Math.max(15, Math.min(95, coverage || 0));
-  return <div className="coverageChart">
-    <div className="chartHeader"><b>Performance de couverture RFID</b><span>Objectif 85%</span></div>
-    <div className="chartArea">
-      <div className="gridLine gl1">100%</div><div className="gridLine gl2">75%</div><div className="gridLine gl3">50%</div><div className="gridLine gl4">25%</div>
-      <svg viewBox="0 0 700 260" preserveAspectRatio="none">
-        <defs><linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.25"/><stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.02"/></linearGradient></defs>
-        <path d={`M0 210 C90 182,160 170,230 160 C310 145,380 132,455 126 C530 120,610 ${220-c*1.4},700 ${220-c*1.55}`} fill="none" stroke="#0891b2" strokeWidth="5" strokeLinecap="round"/>
-        <path d={`M0 210 C90 182,160 170,230 160 C310 145,380 132,455 126 C530 120,610 ${220-c*1.4},700 ${220-c*1.55} L700 260 L0 260 Z`} fill="url(#areaGrad)"/>
-        <line x1="0" y1="65" x2="700" y2="65" stroke="#2563eb" strokeDasharray="8 8" strokeWidth="2"/>
-        <circle cx="585" cy={220-c*1.4} r="8" fill="white" stroke="#0891b2" strokeWidth="5"/>
-      </svg>
-      <div className="chartTooltip" style={{left:"68%",top:"42%"}}>Couverture RFID: <b>{coverage}%</b></div>
-    </div>
-  </div>
-}
-
-
-
-
-function MiniSpark({type="up"}){
-  const points = type==="down" ? "0,18 20,11 40,14 60,9 80,13 100,10 120,16" : "0,16 20,12 40,13 60,8 80,10 100,6 120,9";
-  return <svg className="spark" viewBox="0 0 120 24"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/></svg>;
-}
-
-function Dashboard(){
-  const {products,associations}=useLocalStore();
-  const [content,setContent]=useState([]);
-  const token=localStorage.token||"";
-  const auth={headers:{Authorization:`Bearer ${token}`}};
-
-  useEffect(()=>{
-    axios.get(`${API}/dashboard/content`,auth).then(r=>setContent(r.data)).catch(()=>setContent([]));
-  },[]);
-
-  const associatedPids=new Set(associations.map(a=>String(a.PID)));
-  const epcCounts = {};
-  associations.forEach(a=>{ const e=norm(a.EPC); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
-  const duplicateEpcs = Object.values(epcCounts).filter(x=>x>1).length;
-
-  const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
-  const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
-  const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
-  const gap = products.length ? Math.max(0, Math.round((productsWithoutRfid/products.length)*1000)/10) : 0;
-
-  const typeOf = c => (c.content_type||"").toLowerCase();
-  const ads = content.filter(c=>["promo","publicite","publicité","annonce"].includes(typeOf(c)));
-  const titles = content.filter(c=>["titre","title","section"].includes(typeOf(c)));
-  const mainAd=ads[0] || {title:"Offre Premium RFID",message:"Passez à la vitesse supérieure avec notre solution RFID avancée.",cta_label:"Découvrir l'offre Premium",cta_url:"",image_url:""};
-  const serviceAd=ads[1] || {title:"Formation inventaire RFID",message:"Accompagnez votre équipe pour améliorer la couverture RFID et réduire les écarts.",cta_label:"Demander une démo",cta_url:"",image_url:""};
-  const premiumAd=ads[2] || {title:"Support Premium",message:"Bénéficiez d’un accompagnement prioritaire pour vos scans, imports et rapports.",cta_label:"Activer le support",cta_url:"",image_url:""};
-
-  const sectionTitle = (key, fallback) => {
-    const item = titles.find(t => (t.title||"").toLowerCase().includes(key.toLowerCase()));
-    return item?.message || fallback;
-  };
-
-  const anomalies=[];
-  if(duplicateEpcs>0) anomalies.push({icon:"🔁",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,desc:"Un même EPC semble utilisé plusieurs fois."});
-  if(products.length>0 && productsWithoutRfid>0) anomalies.push({icon:"🏷️",title:`${productsWithoutRfid} produits sans RFID`,desc:"Ces produits ne seront pas détectés automatiquement."});
-  if(coverage>0 && coverage<60) anomalies.push({icon:"📉",title:"Couverture RFID faible",desc:"La couverture est inférieure à 60%."});
-  if(associations.length===0 && products.length>0) anomalies.push({icon:"⚠️",title:"Aucune association RFID",desc:"Importez/associez les tags EPC aux produits."});
-
-  function exportInventoryReport(){
-    const rows = products.map(p=>{
-      const linked = associations.filter(a=>String(a.PID)===String(p.PID)).map(a=>a.EPC).join(", ");
-      return {...p, "EPC associés": linked, "Statut RFID": linked ? "Associé" : "Sans RFID"};
-    });
-    const cols = ["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associés","Statut RFID"];
-    exportCSV("rapport_inventaire_rfid.csv", rows, cols);
-  }
-
-  function exportGapReport(){
-    const rows = products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p, "Anomalie":"Produit sans RFID"}));
-    const cols = ["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Anomalie"];
-    exportCSV("rapport_ecarts_rfid.csv", rows, cols);
-  }
-
-  function exportAiReport(){
-    const rows=[{
-      "Produits locaux":products.length,
-      "Associations RFID":associations.length,
-      "Couverture RFID":coverage+"%",
-      "Produits sans RFID":productsWithoutRfid,
-      "Doublons EPC":duplicateEpcs,
-      "Recommandation":"Associer les produits sans RFID et sauvegarder le projet JSON."
-    }];
-    exportCSV("analyse_ia_rfid.csv", rows, Object.keys(rows[0]));
-  }
-
-  function backupProject(){
-    const backup={app:"RFID Pharmacy SaaS",version:"V19",backup_date:new Date().toISOString(),products,associations};
-    downloadJSON(`pharmacie_backup_${new Date().toISOString().slice(0,10)}.json`, backup);
-  }
-
-  return <section className="proDashboard clientDashboard">
-    <div className="welcomeRow">
-      <div>
-        <h2>Bonjour 👋</h2>
-        <p>{sectionTitle("bienvenue","Voici un aperçu rapide de vos données RFID et des offres disponibles pour votre pharmacie.")}</p>
-      </div>
-      <div className="dashActions">
-        <button>30 derniers jours</button>
-        <button className="primaryBtn" onClick={exportInventoryReport}>Exporter le rapport</button>
-      </div>
-    </div>
-
-    <div className="kpiRow">
-      <div className="kpiCard"><div className="kpiIcon blue">📦</div><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small><em className="trend up">↗ +4,2%</em><MiniSpark/></div>
-      <div className="kpiCard"><div className="kpiIcon green">🔗</div><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés aux produits</small><em className="trend up">↗ +10,5%</em><MiniSpark/></div>
-      <div className="kpiCard"><div className="kpiIcon teal">📡</div><span>Couverture RFID</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small><em className="trend up">↗ +8,1%</em><MiniSpark/></div>
-      <div className="kpiCard"><div className="kpiIcon red">🏷️</div><span>Produits sans RFID</span><b>{productsWithoutRfid}</b><small>à couvrir</small><em className="trend down">↘ -3,6%</em><MiniSpark type="down"/></div>
-      <div className="kpiCard"><div className="kpiIcon green">📊</div><span>Écart estimé</span><b>{gap}%</b><small>à surveiller</small><em className="trend up">↘ -12%</em><MiniSpark/></div>
-    </div>
-
-    <div className="clientDashGrid">
-      <div className="adMainPanel">
-        <div className="adMainText">
-          <span className="adPill">OFFRE EXCLUSIVE</span>
-          <h2>{mainAd.title}</h2>
-          <p>{mainAd.message}</p>
-          <div className="adFeatureGrid">
-            <div><span>⏱️</span><b>Traçabilité fiable</b><small>Suivi clair de vos produits</small></div>
-            <div><span>🛡️</span><b>Réduction des pertes</b><small>Moins d’écarts et de ruptures</small></div>
-            <div><span>📊</span><b>Données exploitables</b><small>Décisions rapides et concrètes</small></div>
-          </div>
-          {mainAd.cta_label ? <a className="adButton" href={mainAd.cta_url || "#"} target="_blank">{mainAd.cta_label} →</a> : <button className="adButton">Découvrir l’offre Premium →</button>}
-        </div>
-        <div className="adVisual">
-          {mainAd.image_url ? <img className="adImage" src={mainAd.image_url} alt="Publicité"/> : <>
-            <div className="box3d bigBox">PharmaRFID</div>
-            <div className="tag3d bigTag">RFID</div>
-          </>}
-        </div>
-      </div>
-
-      <div className="sideAdStack">
-        <div className="miniAdCard tealAd">
-          {serviceAd.image_url && <img className="miniAdImage" src={serviceAd.image_url} alt="Service"/>}
-          <span>🎓 Service</span>
-          <h3>{serviceAd.title}</h3>
-          <p>{serviceAd.message}</p>
-          {serviceAd.cta_label && <a href={serviceAd.cta_url || "#"} target="_blank">{serviceAd.cta_label} →</a>}
-        </div>
-        <div className="miniAdCard blueAd">
-          {premiumAd.image_url && <img className="miniAdImage" src={premiumAd.image_url} alt="Premium"/>}
-          <span>⭐ Premium</span>
-          <h3>{premiumAd.title}</h3>
-          <p>{premiumAd.message}</p>
-          {premiumAd.cta_label && <a href={premiumAd.cta_url || "#"} target="_blank">{premiumAd.cta_label} →</a>}
-        </div>
-      </div>
-    </div>
-
-    <div className="bottomGrid betterBottom">
-      <div className="smallPanel realtimePanel">
-        <h3>{sectionTitle("inventaire","Inventaire en temps réel")}</h3>
-        <div className="donut"><span>{associations.length}</span></div>
-        <p>Associés: {productsWithRfid} · Non associés: {productsWithoutRfid}</p>
-      </div>
-
-      <div className="smallPanel alertsPanel">
-        <h3>{sectionTitle("alertes","Alertes et anomalies")}</h3>
-        {anomalies.length===0 ? <div className="noAnomaly">✅ Pas d’anomalies détectées</div> : <ul className="alertList">
-          {anomalies.map((a,i)=><li key={i}><span>{a.icon}</span><div><b>{a.title}</b><small>{a.desc}</small></div></li>)}
-        </ul>}
-      </div>
-
-      <div className="smallPanel reportsPanel">
-        <div className="sectionTitle"><b>{sectionTitle("rapports","Rapports et exports")}</b></div>
-        <div className="reportCards">
-          <div className="reportCard"><span>📄</span><div><b>Rapport d’inventaire</b><small>Produits présents et manquants</small></div><button onClick={exportInventoryReport}>Exporter</button></div>
-          <div className="reportCard"><span>📊</span><div><b>Rapport d’écarts</b><small>Produits sans RFID et anomalies</small></div><button onClick={exportGapReport}>Exporter</button></div>
-          <div className="reportCard"><span>🤖</span><div><b>Analyse IA RFID</b><small>Score, risques et recommandations</small></div><button onClick={exportAiReport}>Générer</button></div>
-          <div className="reportCard"><span>💾</span><div><b>Sauvegarde projet</b><small>Produits + associations locales</small></div><button onClick={backupProject}>Backup</button></div>
-        </div>
-      </div>
-    </div>
-  </section>;
 }
 
 function Login({setToken}){
@@ -411,7 +168,7 @@ function Login({setToken}){
     catch(e){ setErr(e.response?.status===402 ? "Abonnement expiré" : "Connexion échouée"); }
   }
   return <div className="login"><form onSubmit={login}>
-    <h2>RFID Pharmacy SaaS</h2><p className="loginSub">Plateforme professionnelle de gestion RFID pour pharmacies</p>
+    <h2>PHARMAINVENTAIRE SaaS</h2><p className="loginSub">Solution SaaS RFID pour pharmacies</p>
     <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
     <input value={p} onChange={e=>setP(e.target.value)} placeholder="Mot de passe" type="password"/>
     <button>Connexion</button>
@@ -616,7 +373,7 @@ function LocalData(){
 
   function saveProject(){
     const backup={
-      app:"RFID Pharmacy Web SaaS NoData",
+      app:"PHARMAINVENTAIRE Web SaaS NoData",
       version:"V8",
       backup_date:new Date().toISOString(),
       products,

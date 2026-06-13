@@ -72,3 +72,131 @@ table button{padding:8px 10px;font-size:13px}
 .miniAdImage{width:100%;height:120px;object-fit:cover;border-radius:16px;margin-bottom:14px}
 .reportCard button{cursor:pointer}
 .reportCard button:hover{background:#eff6ff}
+
+
+/* V20 PHARMAINVENTAIRE header + sidebar */
+.pharmaShell{background:#f8fbff}
+.pharmaSidebar{
+  width:282px;
+  background:
+    radial-gradient(circle at 15% 15%,rgba(20,184,166,.26),transparent 22%),
+    linear-gradient(180deg,#062b59 0%,#003a63 42%,#002b4f 100%);
+  padding:28px 18px 20px;
+  border-right:1px solid rgba(255,255,255,.12);
+}
+.pharmaBrand{margin-bottom:28px;padding:0 8px}
+.pharmaLogo{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(145deg,#fff,#dffafe);
+  display:grid;place-items:center;position:relative;
+  box-shadow:0 8px 20px rgba(0,0,0,.18)
+}
+.pharmaLogo:before{
+  content:"";width:24px;height:24px;border-radius:50%;
+  border:7px solid #0f8ea8;border-top-color:transparent;
+  display:block;transform:rotate(-35deg)
+}
+.pharmaLogo span{
+  position:absolute;width:8px;height:22px;background:#10b981;border-radius:8px;bottom:8px
+}
+.pharmaBrand .brandTitle{font-size:21px;font-weight:900;letter-spacing:-.5px;color:#fff}
+.pharmaBrand .brandTitle span{color:#20d6c3}
+.pharmaBrand .brandSub{font-size:12px;color:#d8f3ff;margin-top:4px}
+
+.pharmaNav{gap:9px}
+.pharmaNav .navItem{
+  min-height:52px;
+  border-radius:10px;
+  color:#eaf7ff;
+  padding:0 14px;
+  gap:14px;
+  font-size:15px;
+  font-weight:700;
+}
+.pharmaNav .navItem.active{
+  background:linear-gradient(135deg,#1684ff,#0b63e5);
+  box-shadow:0 12px 28px rgba(22,132,255,.32);
+}
+.pharmaNav .navItem:hover{background:rgba(255,255,255,.11)}
+.navIcon{
+  width:24px;height:24px;
+  display:grid;place-items:center;
+  font-size:17px;color:#fff
+}
+.navLabel{flex:1;text-align:left}
+.pharmaNav em{
+  font-style:normal;font-size:11px;
+  background:#2563eb;color:white;border-radius:999px;
+  padding:4px 8px;font-weight:800
+}
+
+.pharmaProfile{
+  gap:12px;
+  background:rgba(0,84,135,.18);
+  border-radius:14px;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.06)
+}
+.pharmacyBox,.userBox{
+  display:grid;grid-template-columns:36px 1fr auto;
+  align-items:center;gap:10px;
+  color:white;
+}
+.pharmacyBox b,.userBox b{font-size:13px}
+.pharmacyBox small,.userBox small{display:block;color:#d8f3ff;font-size:12px}
+.miniIcon,.avatar{
+  width:36px;height:36px;border-radius:50%;
+  display:grid;place-items:center;background:#075985;color:white;font-weight:900
+}
+.avatar{background:#0b82b7}
+.userBox button{background:transparent;color:white;box-shadow:none;padding:4px}
+
+.pharmaMain{background:#f8fbff}
+.pharmaTopbar{
+  height:116px;
+  padding:24px 32px;
+  border-bottom:1px solid #e5edf7;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(10px);
+}
+.topWelcome h1{
+  margin:0 0 6px;
+  font-size:26px;
+  line-height:1.1;
+  color:#071b49;
+  font-weight:900
+}
+.topWelcome p{font-size:15px;color:#506381;margin:0}
+.topActions{display:flex;align-items:center;gap:14px}
+.dateBtn{
+  background:white;border:1px solid #dbe5f2;
+  color:#071b49;border-radius:9px;
+  box-shadow:none;min-width:225px
+}
+.iconBtn{
+  background:white;color:#0b315f;border:0;
+  width:40px;height:40px;border-radius:50%;
+  box-shadow:none;position:relative;padding:0
+}
+.iconBtn sup{
+  position:absolute;top:2px;right:3px;background:#0b63e5;color:white;
+  width:17px;height:17px;border-radius:50%;font-size:10px;display:grid;place-items:center
+}
+.topAccount{
+  border-left:1px solid #dbe5f2;
+  padding-left:18px;
+  display:flex;align-items:center;gap:12px;color:#071b49
+}
+.topAccount b{font-size:14px;display:block}
+.topAccount small{font-size:12px;color:#506381}
+.roundAvatar{
+  width:44px;height:44px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#003a63;color:white;font-weight:900
+}
+.pharmaContent{padding:28px 32px}
+@media(max-width:1000px){
+  .pharmaTopbar{height:auto;display:block}
+  .topActions{margin-top:16px;flex-wrap:wrap}
+  .pharmaSidebar{width:100%;height:auto}
+}
