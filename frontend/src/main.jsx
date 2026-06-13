@@ -159,23 +159,55 @@ function App(){
   </div>
 }
 
+
 function Login({setToken}){
-  const [u,setU]=useState("demo"), [p,setP]=useState("demo123"), [err,setErr]=useState("");
+  const [u,setU]=useState("demo");
+  const [p,setP]=useState("demo123");
+  const [err,setErr]=useState("");
+  const [loading,setLoading]=useState(false);
+
   async function login(e){
     e.preventDefault();
-    const form=new URLSearchParams(); form.append("username",u); form.append("password",p);
-    try{ const r=await axios.post(`${API}/auth/login`,form); localStorage.token=r.data.access_token; setToken(r.data.access_token); }
-    catch(e){ setErr(e.response?.status===402 ? "Abonnement expiré" : "Connexion échouée"); }
+    setErr("");
+    setLoading(true);
+    const form=new URLSearchParams();
+    form.append("username",u);
+    form.append("password",p);
+    try{
+      const r=await axios.post(`${API}/auth/login`,form);
+      localStorage.token=r.data.access_token;
+      setToken(r.data.access_token);
+    }catch(e){
+      setErr(e.response?.status===402 ? "Abonnement expiré" : "Connexion échouée. Vérifier utilisateur/mot de passe.");
+    }
+    setLoading(false);
   }
-  return <div className="login"><form onSubmit={login}>
-    <h2>PHARMAINVENTAIRE SaaS</h2><p className="loginSub">Solution SaaS RFID pour pharmacies</p>
-    <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
-    <input value={p} onChange={e=>setP(e.target.value)} placeholder="Mot de passe" type="password"/>
-    <button>Connexion</button>
-    <p className="err">{err}</p>
-    <small>Démo: demo / demo123</small>
-  </form></div>
+
+  return <div className="login pharmaLogin">
+    <form onSubmit={login} className="loginCard">
+      <div className="loginLogoWrap">
+        <div className="pharmaLogo loginLogo"><span></span></div>
+      </div>
+      <h2>PHARMAINVENTAIRE</h2>
+      <p className="loginSub">Solution SaaS RFID pour pharmacies</p>
+
+      <label>Utilisateur</label>
+      <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
+
+      <label>Mot de passe</label>
+      <input value={p} onChange={e=>setP(e.target.value)} placeholder="Mot de passe" type="password"/>
+
+      <button type="submit" className="primaryLoginBtn" disabled={loading}>{loading ? "Connexion..." : "Connexion"}</button>
+
+      {err && <p className="err">{err}</p>}
+
+      <div className="loginHelp">
+        <small>Compte démo : demo / demo123</small>
+      </div>
+    </form>
+  </div>
 }
+
 
 function findProduct(products,value){
   const v=String(value||"").trim();

@@ -200,3 +200,54 @@ table button{padding:8px 10px;font-size:13px}
   .topActions{margin-top:16px;flex-wrap:wrap}
   .pharmaSidebar{width:100%;height:auto}
 }
+
+
+/* V20.1 Login fixed */
+.pharmaLogin{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(32,214,195,.18),transparent 24%),
+    radial-gradient(circle at 80% 10%,rgba(37,99,235,.16),transparent 20%),
+    linear-gradient(135deg,#eef9ff,#f8fbff);
+}
+.loginCard{
+  width:390px;
+  background:white;
+  border:1px solid #e5edf7;
+  border-radius:26px;
+  padding:34px;
+  box-shadow:0 30px 80px rgba(7,27,73,.14);
+  display:grid;
+  gap:10px;
+}
+.loginLogoWrap{display:grid;place-items:center;margin-bottom:8px}
+.loginLogo{width:58px;height:58px}
+.loginCard h2{
+  text-align:center;
+  color:#071b49;
+  font-size:28px;
+  margin:4px 0 0;
+  font-weight:900;
+  letter-spacing:-.8px;
+}
+.loginSub{text-align:center;color:#506381;margin:0 0 18px}
+.loginCard label{font-weight:800;color:#071b49;font-size:14px;margin-top:4px}
+.loginCard input{
+  width:100%;
+  padding:13px 14px;
+  border:1px solid #dbe5f2;
+  border-radius:12px;
+  outline:none;
+}
+.loginCard input:focus{border-color:#1684ff;box-shadow:0 0 0 4px rgba(22,132,255,.12)}
+.primaryLoginBtn{
+  background:linear-gradient(135deg,#1684ff,#0b63e5);
+  color:white;
+  border-radius:12px;
+  padding:13px;
+  margin-top:10px;
+}
+.primaryLoginBtn:disabled{opacity:.7;cursor:not-allowed}
+.loginHelp{text-align:center;color:#64748b;margin-top:8px}
