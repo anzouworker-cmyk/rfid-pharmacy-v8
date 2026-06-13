@@ -325,3 +325,7 @@ table button{padding:8px 10px;font-size:13px}
 .exportGrid .reportCard{min-height:92px}
 .exportGrid input[type=file]{max-width:180px;font-size:12px}
 @media(max-width:900px){.exportGrid{grid-template-columns:1fr}}
+
+
+/* V22.1 Dashboard fixed */
+.noAnomaly{background:#ecfdf5;border:1px solid #bbf7d0;color:#166534;border-radius:16px;padding:18px;font-weight:900;text-align:center}
