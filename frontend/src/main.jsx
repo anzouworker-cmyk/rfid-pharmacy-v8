@@ -53,6 +53,7 @@ function useLocalStore(){
 
 
 
+
 function App(){
   const [token,setToken]=useState(localStorage.token||"");
   const [me,setMe]=useState(null);
@@ -65,20 +66,23 @@ function App(){
 
   if(!token) return <Login setToken={setToken}/>;
 
+  const displayName = me?.username || "Utilisateur";
+  const accountName = me?.pharmacy_name || displayName;
+  const roleName = me?.role==="platform_admin" ? "Administrateur" : "Utilisateur";
+
   const menu=[
     {id:"dashboard",label:"Vue d'ensemble",icon:"⌂"},
     {id:"association",label:"Associations RFID",icon:"🔗"},
     {id:"inventory",label:"Inventaire",icon:"▥"},
-    {id:"ai",label:"Assistant IA",icon:"✣",badge:"Nouveau"},
-    {id:"data",label:"Rapports",icon:"▧"},
+    {id:"ai",label:"Assistant IA",icon:"✣"},
+    {id:"data",label:"Reports & Exports",icon:"▧"},
   ];
   if(me?.role==="platform_admin"){
     menu.push({id:"platform",label:"Clients SaaS",icon:"👥"});
     menu.push({id:"dashboardAdmin",label:"Publicités",icon:"📣"});
   }
-  menu.push({id:"settings",label:"Paramètres",icon:"⚙"});
 
-  const pageTitle = tab==="dashboard"?"Bonjour, "+(me?.username || "Utilisateur")+" 👋":
+  const pageTitle = tab==="dashboard" ? `Bonjour, ${displayName} 👋` :
     tab==="association"?"Associations RFID":
     tab==="inventory"?"Inventaire":
     tab==="ai"?"Assistant IA RFID":
@@ -88,11 +92,10 @@ function App(){
 
   return <div className="appShell pharmaShell">
     <aside className="sidebar pharmaSidebar">
-      <div className="brand pharmaBrand">
-        <div className="pharmaLogo"><span></span></div>
+      <div className="brand pharmaBrand noLogoBrand">
         <div>
-          <div className="brandTitle">Pharma<span>Inventaire</span></div>
-          <div className="brandSub">Solution SaaS RFID</div>
+          <div className="brandTitle cleanBrand">PharmaInventory</div>
+          <div className="brandSub">Smart Inventory Solution</div>
         </div>
       </div>
 
@@ -100,27 +103,18 @@ function App(){
         {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
           <span className="navIcon">{m.icon}</span>
           <span className="navLabel">{m.label}</span>
-          {m.badge && <em>{m.badge}</em>}
         </button>)}
       </nav>
 
-      <div className="sidebarFooter pharmaProfile">
-        <div className="pharmacyBox">
-          <div className="miniIcon">▣</div>
+      <div className="sidebarFooter pharmaProfile cleanProfile">
+        <div className="userBox cleanUserBox">
+          <div className="avatar">{displayName.slice(0,2).toUpperCase()}</div>
           <div>
-            <b>{me?.pharmacy_name || "Pharmacie Centrale"}</b>
-            <small>Compte Business</small>
+            <b>{displayName}</b>
+            <small>{roleName}</small>
           </div>
-          <span>⌄</span>
         </div>
-        <div className="userBox">
-          <div className="avatar">{(me?.username || "PC").slice(0,2).toUpperCase()}</div>
-          <div>
-            <b>{me?.username || "Utilisateur"}</b>
-            <small>{me?.role==="platform_admin"?"Administrateur":"Utilisateur"}</small>
-          </div>
-          <button onClick={logout}>⋮</button>
-        </div>
+        <button className="logoutBtn fullLogout" onClick={logout}>🚪 Déconnexion</button>
       </div>
     </aside>
 
@@ -132,15 +126,13 @@ function App(){
         </div>
 
         <div className="topActions">
-          <button className="dateBtn">📅 12 mai – 11 juin 2024⌄</button>
-          <button className="iconBtn">🔔<sup>3</sup></button>
-          <button className="iconBtn">?</button>
-          <div className="topAccount">
+          <button className="dateBtn">📅 30 derniers jours</button>
+          <div className="topAccount cleanTopAccount">
             <div>
-              <b>{me?.pharmacy_name || "Pharmacie Centrale"}</b>
-              <small>{me?.role==="platform_admin"?"Admin plateforme":"Compte Business"}</small>
+              <b>{accountName}</b>
+              <small>{roleName}</small>
             </div>
-            <div className="roundAvatar">{(me?.pharmacy_name || "PC").split(" ").map(x=>x[0]).slice(0,2).join("").toUpperCase()}</div>
+            <div className="roundAvatar">{displayName.slice(0,1).toUpperCase()}</div>
           </div>
         </div>
       </header>
@@ -153,73 +145,11 @@ function App(){
         {tab==="data" && <LocalData/>}
         {tab==="platform" && <Platform auth={auth}/>}
         {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>}
-        {tab==="settings" && <section><h2>Paramètres</h2><p className="notice">Paramètres généraux de l’application.</p></section>}
+        
       </main>
     </section>
   </div>
 }
-
-
-
-function Dashboard(){
-  const {products,associations}=useLocalStore();
-  const associatedPids=new Set(associations.map(a=>String(a.PID)));
-  const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
-  const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
-  const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
-
-  return <section className="proDashboard clientDashboard">
-    <div className="welcomeRow">
-      <div>
-        <h2>Bienvenue sur PharmaInventaire 👋</h2>
-        <p>Vue d’ensemble de votre inventaire RFID, vos associations et vos rapports.</p>
-      </div>
-      <div className="dashActions">
-        <button>30 derniers jours</button>
-        <button className="primaryBtn" onClick={()=>exportCSV("rapport_inventaire_rfid.csv",products,Object.keys(products[0]||{}))}>Exporter le rapport</button>
-      </div>
-    </div>
-
-    <div className="kpiRow">
-      <div className="kpiCard"><div className="kpiIcon blue">📦</div><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small></div>
-      <div className="kpiCard"><div className="kpiIcon green">🔗</div><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés aux produits</small></div>
-      <div className="kpiCard"><div className="kpiIcon teal">📡</div><span>Couverture RFID</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small></div>
-      <div className="kpiCard"><div className="kpiIcon red">🏷️</div><span>Produits sans RFID</span><b>{productsWithoutRfid}</b><small>à couvrir</small></div>
-    </div>
-
-    <div className="clientDashGrid">
-      <div className="adMainPanel">
-        <div className="adMainText">
-          <span className="adPill">OFFRE EXCLUSIVE</span>
-          <h2>Offre Premium RFID</h2>
-          <p>Passez à la vitesse supérieure avec une solution RFID professionnelle pour pharmacie.</p>
-          <div className="adFeatureGrid">
-            <div><span>⏱️</span><b>Traçabilité fiable</b><small>Suivi clair de vos produits</small></div>
-            <div><span>🛡️</span><b>Réduction des pertes</b><small>Moins d’écarts et de ruptures</small></div>
-            <div><span>📊</span><b>Données exploitables</b><small>Décisions rapides</small></div>
-          </div>
-          <button className="adButton">Découvrir l’offre Premium →</button>
-        </div>
-        <div className="adVisual">
-          <div className="box3d bigBox">PharmaInventaire</div>
-          <div className="tag3d bigTag">RFID</div>
-        </div>
-      </div>
-
-      <div className="sideAdStack">
-        <div className="miniAdCard tealAd"><span>🎓 Service</span><h3>Formation inventaire RFID</h3><p>Accompagnez votre équipe pour améliorer la couverture RFID.</p></div>
-        <div className="miniAdCard blueAd"><span>⭐ Premium</span><h3>Support Premium</h3><p>Bénéficiez d’un accompagnement prioritaire.</p></div>
-      </div>
-    </div>
-
-    <div className="bottomGrid betterBottom">
-      <div className="smallPanel realtimePanel"><h3>Inventaire en temps réel</h3><div className="donut"><span>{associations.length}</span></div><p>Associés: {productsWithRfid} · Non associés: {productsWithoutRfid}</p></div>
-      <div className="smallPanel alertsPanel"><h3>Alertes et anomalies</h3>{productsWithoutRfid>0 ? <ul className="alertList"><li><span>🏷️</span><div><b>{productsWithoutRfid} produits sans RFID</b><small>À associer progressivement.</small></div></li></ul> : <div className="noAnomaly">✅ Pas d’anomalies détectées</div>}</div>
-      <div className="smallPanel reportsPanel"><div className="sectionTitle"><b>Rapports et exports</b></div><div className="reportCards"><div className="reportCard"><span>📄</span><div><b>Rapport d’inventaire</b><small>Produits et associations</small></div><button onClick={()=>exportCSV("rapport_inventaire_rfid.csv",products,Object.keys(products[0]||{}))}>Exporter</button></div><div className="reportCard"><span>💾</span><div><b>Sauvegarde projet</b><small>Backup local JSON</small></div><button onClick={()=>downloadJSON("backup_pharmainventaire.json",{products,associations})}>Backup</button></div></div></div>
-    </div>
-  </section>
-}
-
 
 function Login({setToken}){
   const [u,setU]=useState("demo");
@@ -249,8 +179,8 @@ function Login({setToken}){
       <div className="loginLogoWrap">
         <div className="pharmaLogo loginLogo"><span></span></div>
       </div>
-      <h2>PharmaInventaire</h2>
-      <p className="loginSub">Solution SaaS RFID pour pharmacies</p>
+      <h2>PharmaInventory</h2>
+      <p className="loginSub">Smart Inventory Solution pour pharmacies</p>
 
       <label>Utilisateur</label>
       <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
@@ -278,6 +208,32 @@ function findProduct(products,value){
     String(p["Code barre 2"]||"").trim()===v
   );
 }
+
+
+function AIAssistant(){
+  const {products,associations}=useLocalStore();
+  const associatedPids=new Set(associations.map(a=>String(a.PID)));
+  const coverage = products.length ? Math.round((associatedPids.size / products.length) * 100) : 0;
+  return <section>
+    <div className="heroCard aiHero">
+      <div>
+        <span className="pill">Assistant IA</span>
+        <h2>Analyse RFID intelligente</h2>
+        <p>Analyse locale rapide de votre couverture RFID et recommandations.</p>
+      </div>
+    </div>
+    <div className="statsGrid">
+      <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
+      <div className="statCard"><span>Associations</span><b>{associations.length}</b><small>EPC liés</small></div>
+      <div className="statCard"><span>Couverture</span><b>{coverage}%</b><small>score RFID</small></div>
+    </div>
+    <div className="card">
+      <h3>Recommandation</h3>
+      <p>Associez d’abord les produits à forte rotation et sauvegardez le projet JSON après chaque session.</p>
+    </div>
+  </section>
+}
+
 
 function Association(){
   const {products,setProducts,associations,setAssociations}=useLocalStore();
@@ -460,24 +416,21 @@ function Inventory(){
 }
 
 
+
 function LocalData(){
   const {products,setProducts,associations,setAssociations}=useLocalStore();
   const [msg,setMsg]=useState("");
 
   function saveProject(){
     const backup={
-      app:"PharmaInventaire Web SaaS NoData",
-      version:"V8",
+      app:"PharmaInventory",
+      version:"V22",
       backup_date:new Date().toISOString(),
       products,
       associations,
-      settings:{
-        storage:"local-browser",
-        cloud_business_data:false
-      }
+      settings:{storage:"local-browser",cloud_business_data:false}
     };
-    const d=new Date().toISOString().slice(0,10);
-    downloadJSON(`pharmacie_backup_${d}.json`, backup);
+    downloadJSON(`pharmainventory_backup_${new Date().toISOString().slice(0,10)}.json`, backup);
     setMsg("Sauvegarde projet JSON créée.");
   }
 
@@ -497,31 +450,74 @@ function LocalData(){
     }
   }
 
+  function exportProducts(){
+    exportCSV("produits_locaux.csv",products,Object.keys(products[0]||{}));
+  }
+
+  function exportAssociations(){
+    exportCSV("associations_rfid.csv",associations,Object.keys(associations[0]||{}));
+  }
+
+  function exportProductsWithoutRfid(){
+    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Sans RFID"}));
+    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"];
+    exportCSV("produits_sans_rfid.csv",rows,cols);
+  }
+
+  function exportCoverageReport(){
+    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
+    const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
+    const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
+    const rows=[{
+      "Produits locaux":products.length,
+      "Produits avec RFID":productsWithRfid,
+      "Produits sans RFID":productsWithoutRfid,
+      "Associations RFID":associations.length,
+      "Couverture RFID":coverage+"%",
+      "Date rapport":new Date().toISOString()
+    }];
+    exportCSV("rapport_couverture_rfid.csv",rows,Object.keys(rows[0]));
+  }
+
+  function exportDuplicateEpcReport(){
+    const counts={};
+    associations.forEach(a=>{const e=norm(a.EPC); if(e) counts[e]=(counts[e]||0)+1;});
+    const rows=associations.filter(a=>counts[norm(a.EPC)]>1).map(a=>({...a,"Anomalie":"Doublon EPC"}));
+    const cols=["PID","Produit","Code barre 1","Code barre 2","EPC","Date","Anomalie"];
+    exportCSV("rapport_doublons_epc.csv",rows,cols);
+  }
+
+  function exportFullAudit(){
+    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    const rows=products.map(p=>{
+      const linked=associations.filter(a=>String(a.PID)===String(p.PID)).map(a=>a.EPC).join(", ");
+      return {...p,"EPC associés":linked,"Statut RFID":linked?"Associé":"Sans RFID"};
+    });
+    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associés","Statut RFID"];
+    exportCSV("audit_complet_pharmainventory.csv",rows,cols);
+  }
+
   return <section>
-    <h2>Données locales & sauvegarde projet</h2>
-    <p className="notice">Ces données sont dans localStorage du navigateur, pas dans le cloud. Utilise la sauvegarde JSON pour changer de PC ou faire une copie de sécurité.</p>
+    <h2>Reports & Exports</h2>
+    <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
 
-    <div className="summary">
-      <span className="neutralBox">Produits: {products.length}</span>
-      <span className="neutralBox">Associations RFID: {associations.length}</span>
+    <div className="statsGrid">
+      <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
+      <div className="statCard"><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés</small></div>
+      <div className="statCard"><span>Sauvegarde</span><b>JSON</b><small>restauration complète</small></div>
     </div>
 
-    <div className="card">
-      <h3>Sauvegarde complète</h3>
-      <button onClick={saveProject}>Sauvegarder projet JSON</button>
-      <p>Contient produits + associations RFID + paramètres locaux.</p>
-    </div>
-
-    <div className="card">
-      <h3>Restauration complète</h3>
-      <input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/>
-      <p>Charge un fichier pharmacie_backup_YYYY-MM-DD.json.</p>
-    </div>
-
-    <div className="card">
-      <h3>Exports CSV séparés</h3>
-      <button onClick={()=>exportCSV("produits_locaux.csv",products,Object.keys(products[0]||{}))}>Exporter produits locaux</button>
-      <button onClick={()=>exportCSV("associations_locales.csv",associations,Object.keys(associations[0]||{}))}>Exporter associations locales</button>
+    <div className="reportCards exportGrid">
+      <div className="reportCard"><span>📦</span><div><b>Produits locaux</b><small>Catalogue importé complet</small></div><button onClick={exportProducts}>Exporter</button></div>
+      <div className="reportCard"><span>🔗</span><div><b>Associations RFID</b><small>PID, produits et EPC liés</small></div><button onClick={exportAssociations}>Exporter</button></div>
+      <div className="reportCard"><span>🏷️</span><div><b>Produits sans RFID</b><small>Articles à associer</small></div><button onClick={exportProductsWithoutRfid}>Exporter</button></div>
+      <div className="reportCard"><span>📊</span><div><b>Couverture RFID</b><small>KPI de couverture</small></div><button onClick={exportCoverageReport}>Exporter</button></div>
+      <div className="reportCard"><span>🔁</span><div><b>Doublons EPC</b><small>Anomalies EPC répétées</small></div><button onClick={exportDuplicateEpcReport}>Exporter</button></div>
+      <div className="reportCard"><span>✅</span><div><b>Audit complet</b><small>Produits + statut RFID</small></div><button onClick={exportFullAudit}>Exporter</button></div>
+      <div className="reportCard"><span>💾</span><div><b>Sauvegarder projet</b><small>Backup JSON complet</small></div><button onClick={saveProject}>Backup</button></div>
+      <div className="reportCard"><span>📥</span><div><b>Restaurer projet</b><small>Importer un backup JSON</small></div><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></div>
     </div>
 
     <div className="card danger">
@@ -532,8 +528,6 @@ function LocalData(){
     <p className="success">{msg}</p>
   </section>
 }
-
-
 
 
 function Platform({auth}){
