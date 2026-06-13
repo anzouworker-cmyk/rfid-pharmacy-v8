@@ -13,6 +13,7 @@ from openai import OpenAI
 from sqlalchemy import create_engine, Column, String, DateTime, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from pydantic_settings import BaseSettings
+from sqlalchemy import text
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./license_saas.db"
@@ -55,6 +56,13 @@ class DashboardContent(Base):
     active = Column(Boolean, default=True)
     ai_premium = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+with engine.begin() as conn:
+    conn.execute(text("""
+        ALTER TABLE accounts
+        ADD COLUMN IF NOT EXISTS ai_premium BOOLEAN DEFAULT FALSE
+    """))
 
 Base.metadata.create_all(engine)
 
