@@ -91,7 +91,7 @@ function App(){
       <div className="brand pharmaBrand">
         <div className="pharmaLogo"><span></span></div>
         <div>
-          <div className="brandTitle">PHARMA<span>INVENTAIRE</span></div>
+          <div className="brandTitle">Pharma<span>Inventaire</span></div>
           <div className="brandSub">Solution SaaS RFID</div>
         </div>
       </div>
@@ -160,6 +160,67 @@ function App(){
 }
 
 
+
+function Dashboard(){
+  const {products,associations}=useLocalStore();
+  const associatedPids=new Set(associations.map(a=>String(a.PID)));
+  const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
+  const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
+  const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
+
+  return <section className="proDashboard clientDashboard">
+    <div className="welcomeRow">
+      <div>
+        <h2>Bienvenue sur PharmaInventaire 👋</h2>
+        <p>Vue d’ensemble de votre inventaire RFID, vos associations et vos rapports.</p>
+      </div>
+      <div className="dashActions">
+        <button>30 derniers jours</button>
+        <button className="primaryBtn" onClick={()=>exportCSV("rapport_inventaire_rfid.csv",products,Object.keys(products[0]||{}))}>Exporter le rapport</button>
+      </div>
+    </div>
+
+    <div className="kpiRow">
+      <div className="kpiCard"><div className="kpiIcon blue">📦</div><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small></div>
+      <div className="kpiCard"><div className="kpiIcon green">🔗</div><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés aux produits</small></div>
+      <div className="kpiCard"><div className="kpiIcon teal">📡</div><span>Couverture RFID</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small></div>
+      <div className="kpiCard"><div className="kpiIcon red">🏷️</div><span>Produits sans RFID</span><b>{productsWithoutRfid}</b><small>à couvrir</small></div>
+    </div>
+
+    <div className="clientDashGrid">
+      <div className="adMainPanel">
+        <div className="adMainText">
+          <span className="adPill">OFFRE EXCLUSIVE</span>
+          <h2>Offre Premium RFID</h2>
+          <p>Passez à la vitesse supérieure avec une solution RFID professionnelle pour pharmacie.</p>
+          <div className="adFeatureGrid">
+            <div><span>⏱️</span><b>Traçabilité fiable</b><small>Suivi clair de vos produits</small></div>
+            <div><span>🛡️</span><b>Réduction des pertes</b><small>Moins d’écarts et de ruptures</small></div>
+            <div><span>📊</span><b>Données exploitables</b><small>Décisions rapides</small></div>
+          </div>
+          <button className="adButton">Découvrir l’offre Premium →</button>
+        </div>
+        <div className="adVisual">
+          <div className="box3d bigBox">PharmaInventaire</div>
+          <div className="tag3d bigTag">RFID</div>
+        </div>
+      </div>
+
+      <div className="sideAdStack">
+        <div className="miniAdCard tealAd"><span>🎓 Service</span><h3>Formation inventaire RFID</h3><p>Accompagnez votre équipe pour améliorer la couverture RFID.</p></div>
+        <div className="miniAdCard blueAd"><span>⭐ Premium</span><h3>Support Premium</h3><p>Bénéficiez d’un accompagnement prioritaire.</p></div>
+      </div>
+    </div>
+
+    <div className="bottomGrid betterBottom">
+      <div className="smallPanel realtimePanel"><h3>Inventaire en temps réel</h3><div className="donut"><span>{associations.length}</span></div><p>Associés: {productsWithRfid} · Non associés: {productsWithoutRfid}</p></div>
+      <div className="smallPanel alertsPanel"><h3>Alertes et anomalies</h3>{productsWithoutRfid>0 ? <ul className="alertList"><li><span>🏷️</span><div><b>{productsWithoutRfid} produits sans RFID</b><small>À associer progressivement.</small></div></li></ul> : <div className="noAnomaly">✅ Pas d’anomalies détectées</div>}</div>
+      <div className="smallPanel reportsPanel"><div className="sectionTitle"><b>Rapports et exports</b></div><div className="reportCards"><div className="reportCard"><span>📄</span><div><b>Rapport d’inventaire</b><small>Produits et associations</small></div><button onClick={()=>exportCSV("rapport_inventaire_rfid.csv",products,Object.keys(products[0]||{}))}>Exporter</button></div><div className="reportCard"><span>💾</span><div><b>Sauvegarde projet</b><small>Backup local JSON</small></div><button onClick={()=>downloadJSON("backup_pharmainventaire.json",{products,associations})}>Backup</button></div></div></div>
+    </div>
+  </section>
+}
+
+
 function Login({setToken}){
   const [u,setU]=useState("demo");
   const [p,setP]=useState("demo123");
@@ -188,7 +249,7 @@ function Login({setToken}){
       <div className="loginLogoWrap">
         <div className="pharmaLogo loginLogo"><span></span></div>
       </div>
-      <h2>PHARMAINVENTAIRE</h2>
+      <h2>PharmaInventaire</h2>
       <p className="loginSub">Solution SaaS RFID pour pharmacies</p>
 
       <label>Utilisateur</label>
@@ -405,7 +466,7 @@ function LocalData(){
 
   function saveProject(){
     const backup={
-      app:"PHARMAINVENTAIRE Web SaaS NoData",
+      app:"PharmaInventaire Web SaaS NoData",
       version:"V8",
       backup_date:new Date().toISOString(),
       products,

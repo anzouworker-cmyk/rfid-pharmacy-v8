@@ -251,3 +251,27 @@ table button{padding:8px 10px;font-size:13px}
 }
 .primaryLoginBtn:disabled{opacity:.7;cursor:not-allowed}
 .loginHelp{text-align:center;color:#64748b;margin-top:8px}
+
+
+/* V20.2 brand typography fix */
+.pharmaBrand .brandTitle,
+.loginCard h2{
+  font-family: Inter, Segoe UI, Arial, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  text-transform: none;
+}
+.pharmaBrand .brandTitle{
+  font-size: 23px;
+  color:#ffffff;
+}
+.pharmaBrand .brandTitle span{
+  color:#22d3c5;
+}
+.loginCard h2{
+  font-size: 31px;
+  color:#071b49;
+}
+.loginCard h2::first-letter{
+  color:#0f8ea8;
+}
