@@ -80,7 +80,7 @@ function App(){
     <aside className="sidebar">
       <div className="brand">
         <div className="brandIcon">RF</div>
-        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V18</div></div>
+        <div><div className="brandTitle">RFID Pharmacy</div><div className="brandSub">RFID Pharmacy SaaS V19</div></div>
       </div>
       <nav className="navMenu">
         {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
@@ -219,10 +219,6 @@ function AIAssistant(){
 
 
 
-function MiniSpark({type="up"}){
-  const points = type==="down" ? "0,18 20,11 40,14 60,9 80,13 100,10 120,16" : "0,16 20,12 40,13 60,8 80,10 100,6 120,9";
-  return <svg className="spark" viewBox="0 0 120 24"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/></svg>
-}
 
 function CoverageChart({coverage}){
   const c=Math.max(15, Math.min(95, coverage || 0));
@@ -242,6 +238,14 @@ function CoverageChart({coverage}){
   </div>
 }
 
+
+
+
+function MiniSpark({type="up"}){
+  const points = type==="down" ? "0,18 20,11 40,14 60,9 80,13 100,10 120,16" : "0,16 20,12 40,13 60,8 80,10 100,6 120,9";
+  return <svg className="spark" viewBox="0 0 120 24"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2"/></svg>;
+}
+
 function Dashboard(){
   const {products,associations}=useLocalStore();
   const [content,setContent]=useState([]);
@@ -253,25 +257,74 @@ function Dashboard(){
   },[]);
 
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
+  const epcCounts = {};
+  associations.forEach(a=>{ const e=norm(a.EPC); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
+  const duplicateEpcs = Object.values(epcCounts).filter(x=>x>1).length;
+
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
   const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
   const gap = products.length ? Math.max(0, Math.round((productsWithoutRfid/products.length)*1000)/10) : 0;
 
-  const ads=content.filter(c=>["promo","publicite","publicité","annonce"].includes((c.content_type||"").toLowerCase()));
-  const mainAd=ads[0] || {title:"Offre Premium RFID",message:"Passez à la vitesse supérieure avec notre solution RFID avancée.",cta_label:"Découvrir l'offre Premium",cta_url:""};
-  const ad2=ads[1] || {title:"Formation inventaire RFID",message:"Accompagnez votre équipe pour améliorer la couverture RFID et réduire les écarts.",cta_label:"Demander une démo",cta_url:""};
-  const ad3=ads[2] || {title:"Support Premium",message:"Bénéficiez d’un accompagnement prioritaire pour vos scans, imports et rapports.",cta_label:"Activer le support",cta_url:""};
+  const typeOf = c => (c.content_type||"").toLowerCase();
+  const ads = content.filter(c=>["promo","publicite","publicité","annonce"].includes(typeOf(c)));
+  const titles = content.filter(c=>["titre","title","section"].includes(typeOf(c)));
+  const mainAd=ads[0] || {title:"Offre Premium RFID",message:"Passez à la vitesse supérieure avec notre solution RFID avancée.",cta_label:"Découvrir l'offre Premium",cta_url:"",image_url:""};
+  const serviceAd=ads[1] || {title:"Formation inventaire RFID",message:"Accompagnez votre équipe pour améliorer la couverture RFID et réduire les écarts.",cta_label:"Demander une démo",cta_url:"",image_url:""};
+  const premiumAd=ads[2] || {title:"Support Premium",message:"Bénéficiez d’un accompagnement prioritaire pour vos scans, imports et rapports.",cta_label:"Activer le support",cta_url:"",image_url:""};
+
+  const sectionTitle = (key, fallback) => {
+    const item = titles.find(t => (t.title||"").toLowerCase().includes(key.toLowerCase()));
+    return item?.message || fallback;
+  };
+
+  const anomalies=[];
+  if(duplicateEpcs>0) anomalies.push({icon:"🔁",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,desc:"Un même EPC semble utilisé plusieurs fois."});
+  if(products.length>0 && productsWithoutRfid>0) anomalies.push({icon:"🏷️",title:`${productsWithoutRfid} produits sans RFID`,desc:"Ces produits ne seront pas détectés automatiquement."});
+  if(coverage>0 && coverage<60) anomalies.push({icon:"📉",title:"Couverture RFID faible",desc:"La couverture est inférieure à 60%."});
+  if(associations.length===0 && products.length>0) anomalies.push({icon:"⚠️",title:"Aucune association RFID",desc:"Importez/associez les tags EPC aux produits."});
+
+  function exportInventoryReport(){
+    const rows = products.map(p=>{
+      const linked = associations.filter(a=>String(a.PID)===String(p.PID)).map(a=>a.EPC).join(", ");
+      return {...p, "EPC associés": linked, "Statut RFID": linked ? "Associé" : "Sans RFID"};
+    });
+    const cols = ["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associés","Statut RFID"];
+    exportCSV("rapport_inventaire_rfid.csv", rows, cols);
+  }
+
+  function exportGapReport(){
+    const rows = products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p, "Anomalie":"Produit sans RFID"}));
+    const cols = ["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Anomalie"];
+    exportCSV("rapport_ecarts_rfid.csv", rows, cols);
+  }
+
+  function exportAiReport(){
+    const rows=[{
+      "Produits locaux":products.length,
+      "Associations RFID":associations.length,
+      "Couverture RFID":coverage+"%",
+      "Produits sans RFID":productsWithoutRfid,
+      "Doublons EPC":duplicateEpcs,
+      "Recommandation":"Associer les produits sans RFID et sauvegarder le projet JSON."
+    }];
+    exportCSV("analyse_ia_rfid.csv", rows, Object.keys(rows[0]));
+  }
+
+  function backupProject(){
+    const backup={app:"RFID Pharmacy SaaS",version:"V19",backup_date:new Date().toISOString(),products,associations};
+    downloadJSON(`pharmacie_backup_${new Date().toISOString().slice(0,10)}.json`, backup);
+  }
 
   return <section className="proDashboard clientDashboard">
     <div className="welcomeRow">
       <div>
         <h2>Bonjour 👋</h2>
-        <p>Voici un aperçu rapide de vos données RFID et des offres disponibles pour votre pharmacie.</p>
+        <p>{sectionTitle("bienvenue","Voici un aperçu rapide de vos données RFID et des offres disponibles pour votre pharmacie.")}</p>
       </div>
       <div className="dashActions">
         <button>30 derniers jours</button>
-        <button className="primaryBtn">Exporter le rapport</button>
+        <button className="primaryBtn" onClick={exportInventoryReport}>Exporter le rapport</button>
       </div>
     </div>
 
@@ -297,55 +350,56 @@ function Dashboard(){
           {mainAd.cta_label ? <a className="adButton" href={mainAd.cta_url || "#"} target="_blank">{mainAd.cta_label} →</a> : <button className="adButton">Découvrir l’offre Premium →</button>}
         </div>
         <div className="adVisual">
-          <div className="box3d bigBox">PharmaRFID</div>
-          <div className="tag3d bigTag">RFID</div>
+          {mainAd.image_url ? <img className="adImage" src={mainAd.image_url} alt="Publicité"/> : <>
+            <div className="box3d bigBox">PharmaRFID</div>
+            <div className="tag3d bigTag">RFID</div>
+          </>}
         </div>
       </div>
 
       <div className="sideAdStack">
         <div className="miniAdCard tealAd">
+          {serviceAd.image_url && <img className="miniAdImage" src={serviceAd.image_url} alt="Service"/>}
           <span>🎓 Service</span>
-          <h3>{ad2.title}</h3>
-          <p>{ad2.message}</p>
-          {ad2.cta_label && <a href={ad2.cta_url || "#"} target="_blank">En savoir plus →</a>}
+          <h3>{serviceAd.title}</h3>
+          <p>{serviceAd.message}</p>
+          {serviceAd.cta_label && <a href={serviceAd.cta_url || "#"} target="_blank">{serviceAd.cta_label} →</a>}
         </div>
         <div className="miniAdCard blueAd">
+          {premiumAd.image_url && <img className="miniAdImage" src={premiumAd.image_url} alt="Premium"/>}
           <span>⭐ Premium</span>
-          <h3>{ad3.title}</h3>
-          <p>{ad3.message}</p>
-          {ad3.cta_label && <a href={ad3.cta_url || "#"} target="_blank">Découvrir →</a>}
+          <h3>{premiumAd.title}</h3>
+          <p>{premiumAd.message}</p>
+          {premiumAd.cta_label && <a href={premiumAd.cta_url || "#"} target="_blank">{premiumAd.cta_label} →</a>}
         </div>
       </div>
     </div>
 
     <div className="bottomGrid betterBottom">
       <div className="smallPanel realtimePanel">
-        <h3>Inventaire en temps réel</h3>
+        <h3>{sectionTitle("inventaire","Inventaire en temps réel")}</h3>
         <div className="donut"><span>{associations.length}</span></div>
         <p>Associés: {productsWithRfid} · Non associés: {productsWithoutRfid}</p>
-        <button>Voir le détail</button>
       </div>
 
       <div className="smallPanel alertsPanel">
-        <h3>Alertes et anomalies</h3>
-        <ul className="alertList">
-          <li><span>⚠️</span><div><b>EPC sans produit associé</b><small>À vérifier après chaque scan.</small></div></li>
-          <li><span>🔁</span><div><b>Doublons EPC possibles</b><small>Contrôler les associations récentes.</small></div></li>
-          <li><span>📉</span><div><b>Écart d’inventaire</b><small>Exporter un rapport pour analyse.</small></div></li>
-        </ul>
+        <h3>{sectionTitle("alertes","Alertes et anomalies")}</h3>
+        {anomalies.length===0 ? <div className="noAnomaly">✅ Pas d’anomalies détectées</div> : <ul className="alertList">
+          {anomalies.map((a,i)=><li key={i}><span>{a.icon}</span><div><b>{a.title}</b><small>{a.desc}</small></div></li>)}
+        </ul>}
       </div>
 
       <div className="smallPanel reportsPanel">
-        <div className="sectionTitle"><b>Rapports et exports</b><a>Voir tout →</a></div>
+        <div className="sectionTitle"><b>{sectionTitle("rapports","Rapports et exports")}</b></div>
         <div className="reportCards">
-          <div className="reportCard"><span>📄</span><div><b>Rapport d’inventaire</b><small>Produits présents et manquants</small></div><button>Exporter</button></div>
-          <div className="reportCard"><span>📊</span><div><b>Rapport d’écarts</b><small>Analyse des anomalies RFID</small></div><button>Exporter</button></div>
-          <div className="reportCard"><span>🤖</span><div><b>Analyse IA RFID</b><small>Score, risques et recommandations</small></div><button>Générer</button></div>
-          <div className="reportCard"><span>💾</span><div><b>Sauvegarde projet</b><small>Produits + associations locales</small></div><button>Backup</button></div>
+          <div className="reportCard"><span>📄</span><div><b>Rapport d’inventaire</b><small>Produits présents et manquants</small></div><button onClick={exportInventoryReport}>Exporter</button></div>
+          <div className="reportCard"><span>📊</span><div><b>Rapport d’écarts</b><small>Produits sans RFID et anomalies</small></div><button onClick={exportGapReport}>Exporter</button></div>
+          <div className="reportCard"><span>🤖</span><div><b>Analyse IA RFID</b><small>Score, risques et recommandations</small></div><button onClick={exportAiReport}>Générer</button></div>
+          <div className="reportCard"><span>💾</span><div><b>Sauvegarde projet</b><small>Produits + associations locales</small></div><button onClick={backupProject}>Backup</button></div>
         </div>
       </div>
     </div>
-  </section>
+  </section>;
 }
 
 function Login({setToken}){
@@ -766,6 +820,7 @@ function DashboardAdmin({auth}){
   const [type,setType]=useState("conseil");
   const [ctaLabel,setCtaLabel]=useState("");
   const [ctaUrl,setCtaUrl]=useState("");
+  const [imageUrl,setImageUrl]=useState("");
   const [msg,setMsg]=useState("");
 
   async function load(){
@@ -778,8 +833,8 @@ function DashboardAdmin({auth}){
 
   async function create(){
     try{
-      await axios.post(`${API}/platform/dashboard-content`,{scope,target_username:scope==="pharmacy"?target:null,title,message,content_type:type,cta_label:ctaLabel,cta_url:ctaUrl,active:true},auth);
-      setTitle(""); setMessage(""); setCtaLabel(""); setCtaUrl(""); setMsg("Contenu dashboard créé."); load();
+      await axios.post(`${API}/platform/dashboard-content`,{scope,target_username:scope==="pharmacy"?target:null,title,message,content_type:type,cta_label:ctaLabel,cta_url:ctaUrl,image_url:imageUrl,active:true},auth);
+      setTitle(""); setMessage(""); setCtaLabel(""); setCtaUrl(""); setImageUrl(""); setMsg("Contenu dashboard créé."); load();
     }catch(e){ setMsg(e.response?.data?.detail || "Erreur création contenu"); }
   }
   async function toggle(id){ await axios.post(`${API}/platform/dashboard-content-toggle/${id}`,{},auth); load(); }
@@ -797,7 +852,7 @@ function DashboardAdmin({auth}){
       </div>
       <input placeholder="Titre" value={title} onChange={e=>setTitle(e.target.value)} style={{width:"100%"}}/>
       <textarea className="textArea" placeholder="Message" value={message} onChange={e=>setMessage(e.target.value)} />
-      <div className="row"><input placeholder="Bouton CTA" value={ctaLabel} onChange={e=>setCtaLabel(e.target.value)}/><input placeholder="URL CTA https://..." value={ctaUrl} onChange={e=>setCtaUrl(e.target.value)}/><button onClick={create}>Publier</button></div>
+      <div className="row"><input placeholder="Bouton CTA" value={ctaLabel} onChange={e=>setCtaLabel(e.target.value)}/><input placeholder="URL CTA https://..." value={ctaUrl} onChange={e=>setCtaUrl(e.target.value)}/><input placeholder="URL image publicité https://..." value={imageUrl} onChange={e=>setImageUrl(e.target.value)}/><button onClick={create}>Publier</button></div>
     </div>
     <p className={msg.includes("Erreur")?"err":"success"}>{msg}</p>
     <table><thead><tr><th>Type</th><th>Portée</th><th>Pharmacie</th><th>Titre</th><th>Message</th><th>Statut</th><th>Actions</th></tr></thead><tbody>

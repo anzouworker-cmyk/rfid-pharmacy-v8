@@ -50,6 +50,7 @@ class DashboardContent(Base):
     cta_label = Column(String, default="")
     cta_url = Column(String, default="")
     content_type = Column(String, default="info")
+    image_url = Column(String, default="")
     active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -110,6 +111,7 @@ class DashboardContentIn(BaseModel):
     cta_label: str = ""
     cta_url: str = ""
     content_type: str = "info"
+    image_url: str = ""
     active: bool = True
 
 def ensure_demo():
@@ -337,6 +339,7 @@ def dashboard_content(acc: Account = Depends(current_user), s: Session = Depends
                 "cta_label": x.cta_label,
                 "cta_url": x.cta_url,
                 "content_type": x.content_type,
+                "image_url": getattr(x, "image_url", ""),
                 "active": x.active,
                 "created_at": x.created_at.isoformat()
             })
@@ -376,6 +379,7 @@ def create_dashboard_content(data: DashboardContentIn, acc: Account = Depends(cu
         cta_label=data.cta_label,
         cta_url=data.cta_url,
         content_type=data.content_type,
+        image_url=data.image_url,
         active=data.active
     )
     s.add(obj)
