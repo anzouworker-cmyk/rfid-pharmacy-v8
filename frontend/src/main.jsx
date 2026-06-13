@@ -126,7 +126,7 @@ function App(){
         </div>
 
         <div className="topActions">
-          <button className="dateBtn">📅 30 derniers jours</button>
+          {me?.role !== "platform_admin" && me?.expires_at && <button className="dateBtn">📅 Expire: {me.expires_at.slice(0,10)}</button>}
           <div className="topAccount cleanTopAccount">
             <div>
               <b>{accountName}</b>
@@ -210,27 +210,105 @@ function findProduct(products,value){
 }
 
 
+
 function AIAssistant(){
   const {products,associations}=useLocalStore();
+  const [question,setQuestion]=useState("");
+  const [answer,setAnswer]=useState(null);
+  const [loading,setLoading]=useState(false);
+  const token=localStorage.token||"";
+  const auth={headers:{Authorization:`Bearer ${token}`}};
+
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
-  const coverage = products.length ? Math.round((associatedPids.size / products.length) * 100) : 0;
-  return <section>
-    <div className="heroCard aiHero">
+  const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
+  const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
+  const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
+
+  async function analyze(q){
+    setLoading(true);
+    setAnswer(null);
+    const payload={
+      products_count:products.length,
+      associations_count:associations.length,
+      products_with_rfid:productsWithRfid,
+      products_without_rfid:productsWithoutRfid,
+      coverage,
+      detected_epc_count:0,
+      present_count:0,
+      missing_count:0,
+      no_association_count:productsWithoutRfid,
+      question:q || question || "Analyse ma situation RFID et donne les prochaines actions."
+    };
+    try{
+      const r=await axios.post(`${API}/ai/analyze`,payload,auth);
+      setAnswer(r.data.analysis || r.data);
+    }catch(e){
+      setAnswer({
+        score:coverage,
+        niveau:"Analyse locale",
+        resume:"L’assistant IA cloud n’est pas encore disponible ou le compte n’a pas l’option Premium AI.",
+        recommandations:[
+          "Vérifier que l’option Premium AI est activée pour ce client.",
+          "Vérifier OPENAI_API_KEY sur Render.",
+          "Continuer à associer les produits sans RFID."
+        ],
+        alertes: productsWithoutRfid>0 ? [`${productsWithoutRfid} produits sans RFID.`] : [],
+        prochaine_action:"Activer Premium AI depuis la gestion clients si nécessaire."
+      });
+    }
+    setLoading(false);
+  }
+
+  return <section className="aiPagePro">
+    <div className="aiHeroPro">
       <div>
-        <span className="pill">Assistant IA</span>
-        <h2>Analyse RFID intelligente</h2>
-        <p>Analyse locale rapide de votre couverture RFID et recommandations.</p>
+        <span className="pill">Premium AI Assistant</span>
+        <h2>Assistant intelligent pour inventaire RFID</h2>
+        <p>Analyse vos produits, associations RFID et couverture pour recommander les prochaines actions.</p>
+      </div>
+      <div className="aiScoreCircle">
+        <b>{coverage}</b>
+        <span>/100</span>
       </div>
     </div>
-    <div className="statsGrid">
+
+    <div className="statsGrid proStats">
       <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
       <div className="statCard"><span>Associations</span><b>{associations.length}</b><small>EPC liés</small></div>
-      <div className="statCard"><span>Couverture</span><b>{coverage}%</b><small>score RFID</small></div>
+      <div className="statCard"><span>Couverture</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small></div>
+      <div className="statCard"><span>Sans RFID</span><b>{productsWithoutRfid}</b><small>à associer</small></div>
     </div>
-    <div className="card">
-      <h3>Recommandation</h3>
-      <p>Associez d’abord les produits à forte rotation et sauvegardez le projet JSON après chaque session.</p>
+
+    <div className="grid">
+      <div className="card aiPromptCard">
+        <h3>Poser une question</h3>
+        <textarea className="textArea" value={question} onChange={e=>setQuestion(e.target.value)} placeholder="Ex: Comment atteindre 95% de couverture RFID ?"/>
+        <button className="primaryBtn" onClick={()=>analyze()} disabled={loading}>{loading ? "Analyse..." : "Analyser"}</button>
+      </div>
+      <div className="card">
+        <h3>Questions rapides</h3>
+        <div className="quickGrid">
+          <button onClick={()=>analyze("Donne-moi les priorités pour améliorer la couverture RFID.")}>Priorités</button>
+          <button onClick={()=>analyze("Quels sont les risques actuels de mon inventaire RFID ?")}>Risques</button>
+          <button onClick={()=>analyze("Donne un plan d’action pour atteindre 95% de couverture RFID.")}>Plan 95%</button>
+          <button onClick={()=>analyze("Que dois-je faire cette semaine ?")}>Cette semaine</button>
+        </div>
+      </div>
     </div>
+
+    {answer && <div className="aiAnswerPanel">
+      <h3>Résultat de l’analyse</h3>
+      <p>{answer.resume || answer.summary || "Analyse terminée."}</p>
+      {(answer.recommandations || answer.recommendations || []).length>0 && <>
+        <h4>Recommandations</h4>
+        <ul>{(answer.recommandations || answer.recommendations).map((x,i)=><li key={i}>{x}</li>)}</ul>
+      </>}
+      {(answer.alertes || answer.risks || []).length>0 && <>
+        <h4>Alertes</h4>
+        <ul>{(answer.alertes || answer.risks).map((x,i)=><li key={i}>{x}</li>)}</ul>
+      </>}
+      {answer.prochaine_action && <p><b>Prochaine action :</b> {answer.prochaine_action}</p>}
+    </div>}
   </section>
 }
 
@@ -536,6 +614,7 @@ function Platform({auth}){
   const [password,setPassword]=useState("");
   const [pharmacy,setPharmacy]=useState("");
   const [days,setDays]=useState(30);
+  const [aiPremium,setAiPremium]=useState(false);
   const [msg,setMsg]=useState("");
 
   async function load(){
@@ -550,8 +629,8 @@ function Platform({auth}){
 
   async function create(){
     try{
-      await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days)},auth);
-      setUsername(""); setPassword(""); setPharmacy(""); setDays(30);
+      await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days),ai_premium:aiPremium},auth);
+      setUsername(""); setPassword(""); setPharmacy(""); setDays(30); setAiPremium(false);
       setMsg("Client créé.");
       await load();
     }catch(e){
@@ -603,7 +682,18 @@ function Platform({auth}){
     }
   }
 
-  return <section>
+  
+  async function toggleAiPremium(u, enabled){
+    try{
+      await axios.post(`${API}/platform/client-ai-premium/${encodeURIComponent(u)}?enabled=${enabled}`,{},auth);
+      setMsg(enabled ? "Premium AI activé." : "Premium AI désactivé.");
+      load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur Premium AI");
+    }
+  }
+
+return <section>
     <h2>Gestion clients SaaS</h2>
 
     <div className="card">
@@ -612,6 +702,7 @@ function Platform({auth}){
       <input placeholder="password" value={password} onChange={e=>setPassword(e.target.value)}/>
       <input placeholder="nom pharmacie" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/>
       <input placeholder="jours" value={days} onChange={e=>setDays(e.target.value)}/>
+      <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
       <button onClick={create}>Créer client</button>
     </div>
 
@@ -626,6 +717,7 @@ function Platform({auth}){
           <th>Compte</th>
           <th>Expire</th>
           <th>Mot de passe</th>
+          <th>Premium AI</th>
           <th>Statut</th>
           <th>Delete</th>
         </tr>
@@ -644,6 +736,7 @@ function Platform({auth}){
               {!isAdmin && <><br/><button onClick={()=>changeExpiry(c.username, expDate)}>Changer date</button></>}
             </td>
             <td><button onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
+            <td>{isAdmin ? "Oui" : <button onClick={()=>toggleAiPremium(c.username,!c.ai_premium)}>{c.ai_premium ? "AI activé" : "AI désactivé"}</button>}</td>
             <td>{isAdmin ? "" : <button onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "Désactiver" : "Activer"}</button>}</td>
             <td>{isAdmin ? "" : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
           </tr>

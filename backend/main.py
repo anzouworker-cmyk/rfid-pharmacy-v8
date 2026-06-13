@@ -37,6 +37,7 @@ class Account(Base):
     subscription_status = Column(String, default="active")
     expires_at = Column(DateTime, nullable=False)
     active = Column(Boolean, default=True)
+    ai_premium = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -52,6 +53,7 @@ class DashboardContent(Base):
     content_type = Column(String, default="info")
     image_url = Column(String, default="")
     active = Column(Boolean, default=True)
+    ai_premium = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 Base.metadata.create_all(engine)
@@ -95,6 +97,7 @@ class ClientIn(BaseModel):
     password: str
     pharmacy_name: str
     days: int = 30
+    ai_premium: bool = False
 
 class PasswordIn(BaseModel):
     password: str
@@ -128,8 +131,9 @@ def ensure_demo():
         s.add(Account(
             username="admin",
             password_hash=hpw("admin123"),
-            pharmacy_name="Plateforme",
+            pharmacy_name="admin",
             role="platform_admin",
+            ai_premium=True,
             subscription_status="active",
             expires_at=datetime.utcnow() + timedelta(days=3650)
         ))
@@ -151,6 +155,7 @@ def login(form: OAuth2PasswordRequestForm = Depends(), s: Session = Depends(db))
         "username": acc.username,
         "pharmacy_name": acc.pharmacy_name,
         "role": acc.role,
+        "ai_premium": getattr(acc, "ai_premium", False),
         "expires_at": None if acc.role == "platform_admin" else acc.expires_at.isoformat()
     }
 
@@ -161,6 +166,7 @@ def me(acc: Account = Depends(current_user)):
         "pharmacy_name": acc.pharmacy_name,
         "role": acc.role,
         "subscription_status": acc.subscription_status,
+        "ai_premium": getattr(acc, "ai_premium", False),
         "expires_at": None if acc.role == "platform_admin" else acc.expires_at.isoformat()
     }
 
@@ -174,6 +180,7 @@ def create_client(data: ClientIn, acc: Account = Depends(current_user), s: Sessi
         username=data.username,
         password_hash=hpw(data.password),
         pharmacy_name=data.pharmacy_name,
+        ai_premium=data.ai_premium,
         subscription_status="active",
         expires_at=datetime.utcnow() + timedelta(days=data.days)
     ))
@@ -191,7 +198,8 @@ def clients(acc: Account = Depends(current_user), s: Session = Depends(db)):
             "role": x.role,
             "subscription_status": "admin" if x.role == "platform_admin" else x.subscription_status,
             "expires_at": None if x.role == "platform_admin" else x.expires_at.isoformat(),
-            "active": x.active
+            "active": x.active,
+            "ai_premium": getattr(x, "ai_premium", False)
         }
         for x in s.query(Account).order_by(Account.created_at.desc()).all()
     ]
@@ -478,3 +486,15 @@ score, niveau, resume, recommandations, alertes, prochaine_action
         return {"mode": "openai", "analysis": parsed}
     except Exception as e:
         return {"mode": "fallback-error", "error": str(e), "analysis": fallback}
+
+
+@app.post("/platform/client-ai-premium/{username}")
+def client_ai_premium(username: str, enabled: bool, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+    obj.ai_premium = enabled
+    s.commit()
+    return {"ok": True, "username": username, "ai_premium": obj.ai_premium}
