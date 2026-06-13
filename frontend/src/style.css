@@ -358,3 +358,24 @@ table button{padding:8px 10px;font-size:13px}
 .checkLine{display:flex;align-items:center;gap:8px;font-weight:800;color:#0f172a;margin:8px}
 .checkLine input{min-height:auto;width:auto}
 @media(max-width:900px){.aiHeroPro{display:block}.aiScoreCircle{margin-top:16px}}
+
+
+/* V24 UI clean */
+.topActions .dateBtn,
+.topActions .primaryBtn,
+.dashActions,
+.dashboardToolbar,
+.roundAvatar{
+  display:none!important;
+}
+.cleanTopAccount,
+.topAccount{
+  border-left:0!important;
+  padding-left:0!important;
+}
+.pharmaTopbar{
+  height:92px!important;
+}
+.pharmaContent > section > h2:first-child{
+  display:none!important;
+}

@@ -126,13 +126,13 @@ function App(){
         </div>
 
         <div className="topActions">
-          {me?.role !== "platform_admin" && me?.expires_at && <button className="dateBtn">📅 Expire: {me.expires_at.slice(0,10)}</button>}
+          
           <div className="topAccount cleanTopAccount">
             <div>
               <b>{accountName}</b>
               <small>{roleName}</small>
             </div>
-            <div className="roundAvatar">{displayName.slice(0,1).toUpperCase()}</div>
+            
           </div>
         </div>
       </header>
@@ -384,7 +384,7 @@ function Association(){
   }
 
   return <section>
-    <h2>Association RFID locale</h2>
+    
     <p className="notice">Produits et associations restent dans ce navigateur. Rien n'est envoyé au serveur.</p>
     <div className="statsGrid">
       <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
@@ -578,13 +578,13 @@ function LocalData(){
   }
 
   return <section>
-    <h2>Reports & Exports</h2>
+    
     <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
 
     <div className="statsGrid">
       <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
       <div className="statCard"><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés</small></div>
-      <div className="statCard"><span>Sauvegarde</span><b>JSON</b><small>restauration complète</small></div>
+      
     </div>
 
     <div className="reportCards exportGrid">
@@ -694,7 +694,7 @@ function Platform({auth}){
   }
 
 return <section>
-    <h2>Gestion clients SaaS</h2>
+    
 
     <div className="card">
       <h3>Créer un client pharmacie</h3>
@@ -768,13 +768,7 @@ function Dashboard(){
   }
 
   return <section className="proDashboard clientDashboard">
-    <div className="welcomeRow dashboardToolbar">
-      <div></div>
-      <div className="dashActions">
-        <button>30 derniers jours</button>
-        <button className="primaryBtn" onClick={exportInventoryReport}>Exporter le rapport</button>
-      </div>
-    </div>
+    
 
     <div className="kpiRow">
       <div className="kpiCard"><div className="kpiIcon blue">📦</div><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small></div>
