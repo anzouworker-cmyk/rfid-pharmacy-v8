@@ -54,10 +54,12 @@ function useLocalStore(){
 
 
 
+
 function App(){
   const [token,setToken]=useState(localStorage.token||"");
   const [me,setMe]=useState(null);
-  const [tab,setTab]=useState("dashboard");
+  const [tab,setTab]=useState("operations");
+  const [search,setSearch]=useState("");
   const auth={headers:{Authorization:`Bearer ${token}`}};
 
   useEffect(()=>{ if(token) axios.get(`${API}/me`,auth).then(r=>setMe(r.data)).catch(()=>logout()) },[token]);
@@ -71,10 +73,11 @@ function App(){
   const roleName = me?.role==="platform_admin" ? "Administrateur" : "Utilisateur";
 
   const menu=[
-    {id:"dashboard",label:"Vue d'ensemble",icon:"⌂"},
-    {id:"association",label:"Associations RFID",icon:"🔗"},
-    {id:"inventory",label:"Inventaire",icon:"▥"},
-    {id:"ai",label:"Assistant IA",icon:"✣"},
+    {id:"operations",label:"Operations",icon:"⌂"},
+    {id:"dashboard",label:"Dashboard",icon:"📊"},
+    {id:"association",label:"RFID Associations",icon:"🔗"},
+    {id:"inventory",label:"Inventory",icon:"▥"},
+    {id:"ai",label:"AI Assistant",icon:"✣"},
     {id:"data",label:"Reports & Exports",icon:"▧"},
   ];
   if(me?.role==="platform_admin"){
@@ -82,62 +85,45 @@ function App(){
     menu.push({id:"dashboardAdmin",label:"Publicités",icon:"📣"});
   }
 
-  const pageTitle = tab==="dashboard" ? `Bonjour, ${displayName} 👋` :
-    tab==="association"?"Associations RFID":
-    tab==="inventory"?"Inventaire":
-    tab==="ai"?"Assistant IA RFID":
-    tab==="data"?"Rapports et sauvegarde":
-    tab==="dashboardAdmin"?"Gestion publicités":
-    tab==="platform"?"Gestion clients SaaS":"Paramètres";
-
-  return <div className="appShell pharmaShell">
-    <aside className="sidebar pharmaSidebar">
-      <div className="brand pharmaBrand noLogoBrand">
-        <div>
-          <div className="brandTitle cleanBrand">PharmaInventory</div>
-          <div className="brandSub">Smart Inventory Solution</div>
-        </div>
+  return <div className="appShell whiteShell">
+    <aside className="sidebar whiteSidebar">
+      <div className="whiteBrand">
+        <div className="cubeLogo">◆</div>
+        <div className="brandText">PharmaInventory</div>
       </div>
 
-      <nav className="navMenu pharmaNav">
-        {menu.map(m=><button key={m.id} className={tab===m.id ? "navItem active" : "navItem"} onClick={()=>setTab(m.id)}>
-          <span className="navIcon">{m.icon}</span>
-          <span className="navLabel">{m.label}</span>
+      <nav className="whiteNav">
+        {menu.map(m=><button key={m.id} className={tab===m.id ? "whiteNavItem active" : "whiteNavItem"} onClick={()=>setTab(m.id)}>
+          <span>{m.icon}</span>
+          <b>{m.label}</b>
         </button>)}
       </nav>
 
-      <div className="sidebarFooter pharmaProfile cleanProfile">
-        <div className="userBox cleanUserBox">
-          <div className="avatar">{displayName.slice(0,2).toUpperCase()}</div>
-          <div>
-            <b>{displayName}</b>
-            <small>{roleName}</small>
-          </div>
-        </div>
-        <button className="logoutBtn fullLogout" onClick={logout}>🚪 Déconnexion</button>
+      <div className="whiteSideBottom">
+        <button className="helpBtn">ⓘ Help & Support</button>
+        <button className="whiteLogout" onClick={logout}>↪ Log out</button>
       </div>
     </aside>
 
-    <section className="mainArea pharmaMain">
-      <header className="topbar pharmaTopbar">
-        <div className="topWelcome">
-          <h1>{pageTitle}</h1>
-          <p>Voici un aperçu complet des performances de votre pharmacie.</p>
+    <section className="whiteMain">
+      <header className="whiteTopbar">
+        <button className="hamburger">☰</button>
+        <div className="searchBox">
+          <span>⌕</span>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search anything..." />
+          <em>⌘ K</em>
         </div>
-
-        <div className="topActions">
-          
-          <div className="topAccount cleanTopAccount">
-            <div>
-              <b>{accountName}</b>
-              <small>{roleName}</small>
-            </div>
-            
+        <div className="whiteAccount">
+          <div>
+            <b>{accountName}</b>
+            <small>{roleName}</small>
           </div>
+          <span>{displayName.slice(0,1).toUpperCase()}</span>
         </div>
       </header>
 
-      <main className="content pharmaContent">
+      <main className="whiteContent">
+        {tab==="operations" && <Operations setTab={setTab}/>}
         {tab==="dashboard" && <Dashboard/>}
         {tab==="ai" && <AIAssistant/>}
         {tab==="association" && <Association/>}
@@ -145,11 +131,45 @@ function App(){
         {tab==="data" && <LocalData/>}
         {tab==="platform" && <Platform auth={auth}/>}
         {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>}
-        
       </main>
+      <footer className="whiteFooter">© 2026 PharmaInventory. All rights reserved.</footer>
     </section>
   </div>
 }
+
+
+function Operations({setTab}){
+  const operations=[
+    {title:"RFID Associations",icon:"🔗",tab:"association",accent:"white"},
+    {title:"Inventory Scan",icon:"▥",tab:"inventory",accent:"blue"},
+    {title:"Reports & Exports",icon:"▧",tab:"data",accent:"white"},
+    {title:"AI Assistant",icon:"✣",tab:"ai",accent:"green"},
+    {title:"Dashboard",icon:"📊",tab:"dashboard",accent:"white"},
+    {title:"Client Management",icon:"👥",tab:"platform",accent:"white"},
+  ];
+
+  return <section className="operationsPage">
+    <h1>Operations</h1>
+    <p>Choose an operation to get started. Each action is designed to help you manage your pharmacy inventory efficiently.</p>
+
+    <div className="operationGrid">
+      {operations.map(op=><button key={op.title} className={`operationCard ${op.accent}`} onClick={()=>setTab(op.tab)}>
+        <div className="opIcon">{op.icon}</div>
+        <h3>{op.title}</h3>
+      </button>)}
+    </div>
+
+    <div className="helpPanel">
+      <div className="helpIcon">i</div>
+      <div>
+        <b>Need help?</b>
+        <p>Check your documentation or contact support for assistance.</p>
+      </div>
+      <button>Visit Help Center ↗</button>
+    </div>
+  </section>
+}
+
 
 function Login({setToken}){
   const [u,setU]=useState("demo");

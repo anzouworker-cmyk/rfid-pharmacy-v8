@@ -379,3 +379,50 @@ table button{padding:8px 10px;font-size:13px}
 .pharmaContent > section > h2:first-child{
   display:none!important;
 }
+
+
+/* V25 White UI + Operations */
+.whiteShell{background:#fff!important;color:#0f172a}
+.whiteSidebar{width:340px!important;background:#fff!important;color:#243047!important;border-right:1px solid #e5eaf3;padding:34px 22px!important;box-shadow:none!important}
+.whiteBrand{display:flex;align-items:center;gap:14px;margin:10px 10px 48px}
+.cubeLogo{width:42px;height:42px;display:grid;place-items:center;color:#2563eb;font-size:35px}
+.brandText{font-size:22px;font-weight:800;letter-spacing:-.4px;color:#172033}
+.whiteNav{display:grid;gap:12px}
+.whiteNavItem{width:100%;min-height:64px;border:0;border-radius:12px;background:#fff;color:#526078;display:flex;align-items:center;gap:18px;padding:0 26px;font-size:18px;box-shadow:none;justify-content:flex-start}
+.whiteNavItem span{width:28px;font-size:24px}
+.whiteNavItem b{font-weight:700}
+.whiteNavItem.active{background:#eef4ff!important;color:#2563eb!important}
+.whiteNavItem:hover{background:#f5f8ff;transform:none;box-shadow:none}
+.whiteSideBottom{margin-top:auto;border-top:1px solid #e5eaf3;padding-top:26px;display:grid;gap:12px}
+.helpBtn,.whiteLogout{background:#fff!important;color:#526078!important;justify-content:flex-start!important;text-align:left;font-size:17px;box-shadow:none!important}
+.whiteMain{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff}
+.whiteTopbar{height:120px;border-bottom:1px solid #e5eaf3;display:flex;align-items:center;gap:28px;padding:0 48px}
+.hamburger{background:#fff!important;color:#172033!important;font-size:30px;box-shadow:none!important}
+.searchBox{margin-left:auto;width:470px;height:58px;border-radius:12px;background:#f6f8fc;border:1px solid #edf1f8;display:flex;align-items:center;gap:12px;padding:0 18px}
+.searchBox span{font-size:30px;color:#526078}
+.searchBox input{flex:1;border:0!important;outline:0;background:transparent!important;margin:0!important;font-size:17px;min-height:auto!important}
+.searchBox em{font-style:normal;border:1px solid #d8e0ec;border-radius:8px;padding:6px 10px;color:#64748b}
+.whiteAccount{display:flex;align-items:center;gap:16px;color:#243047}
+.whiteAccount div{text-align:right}
+.whiteAccount b{display:block;font-size:17px}
+.whiteAccount small{color:#64748b}
+.whiteAccount span{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#2563eb;color:white;font-weight:900}
+.whiteContent{padding:64px 52px;flex:1}
+.operationsPage h1{font-size:52px;line-height:1.05;margin:0 0 18px;letter-spacing:-1.4px;color:#0b1023}
+.operationsPage>p{max-width:720px;font-size:18px;line-height:1.7;color:#526078;margin-bottom:62px}
+.operationGrid{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:18px;margin-bottom:90px}
+.operationCard{height:320px;border:1px solid #d9e0eb;border-radius:14px;background:#fff;color:#0b1023;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;box-shadow:0 18px 35px rgba(15,23,42,.08)}
+.operationCard:hover{transform:translateY(-3px);box-shadow:0 24px 45px rgba(15,23,42,.13)}
+.operationCard.blue{background:linear-gradient(135deg,#4f8cff,#275eea);color:white;border-color:#2860ef}
+.operationCard.green{background:linear-gradient(135deg,#68d8b7,#21b47b);color:white;border-color:#21b47b}
+.opIcon{width:96px;height:96px;border-radius:18px;display:grid;place-items:center;font-size:46px;background:#f1f5ff}
+.operationCard.blue .opIcon,.operationCard.green .opIcon{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32)}
+.operationCard h3{font-size:20px;margin:0}
+.helpPanel{border:1px solid #d7e3f7;border-radius:14px;min-height:126px;display:grid;grid-template-columns:58px 1fr auto;gap:20px;align-items:center;padding:0 38px;color:#526078}
+.helpIcon{width:48px;height:48px;border-radius:50%;border:4px solid #2563eb;display:grid;place-items:center;color:#2563eb;font-weight:900;font-size:22px}
+.helpPanel b{font-size:19px;color:#172033}
+.helpPanel p{margin:6px 0 0}
+.helpPanel button{background:#fff!important;border:1px solid #d9e0eb;color:#243047!important;padding:16px 26px;box-shadow:none!important}
+.whiteFooter{border-top:1px solid #e5eaf3;text-align:center;padding:28px;color:#94a3b8}
+@media(max-width:1400px){.operationGrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.whiteShell{display:block!important}.whiteSidebar{width:100%!important;height:auto!important;position:relative!important}.whiteTopbar{height:auto;display:block;padding:22px}.searchBox{width:100%;margin:18px 0}.operationGrid{grid-template-columns:1fr}.helpPanel{grid-template-columns:1fr;text-align:center;padding:24px}.helpIcon{margin:auto}}
