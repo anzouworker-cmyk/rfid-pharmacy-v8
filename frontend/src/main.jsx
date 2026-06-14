@@ -78,7 +78,6 @@ function App(){
     {id:"association",label:"RFID Associations",icon:"🔗"},
     {id:"inventory",label:"Inventory",icon:"▥"},
     {id:"ai",label:"AI Assistant",icon:"✣"},
-    {id:"data",label:"Reports & Exports",icon:"▧"},
   ];
   if(me?.role==="platform_admin"){
     menu.push({id:"platform",label:"Clients SaaS",icon:"👥"});
@@ -108,11 +107,6 @@ function App(){
     <section className="whiteMain">
       <header className="whiteTopbar">
         <button className="hamburger">☰</button>
-        <div className="searchBox">
-          <span>⌕</span>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search anything..." />
-          <em>⌘ K</em>
-        </div>
         <div className="whiteAccount">
           <div>
             <b>{accountName}</b>
@@ -128,7 +122,6 @@ function App(){
         {tab==="ai" && <AIAssistant/>}
         {tab==="association" && <Association/>}
         {tab==="inventory" && <Inventory/>}
-        {tab==="data" && <LocalData/>}
         {tab==="platform" && <Platform auth={auth}/>}
         {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>}
       </main>
@@ -138,34 +131,69 @@ function App(){
 }
 
 
+
 function Operations({setTab}){
+  const {products,associations,setProducts,setAssociations}=useLocalStore();
+
+  function exportProducts(){ exportCSV("produits_locaux.csv",products,Object.keys(products[0]||{})); }
+  function exportAssociations(){ exportCSV("associations_rfid.csv",associations,Object.keys(associations[0]||{})); }
+  function exportProductsWithoutRfid(){
+    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Sans RFID"}));
+    exportCSV("produits_sans_rfid.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]);
+  }
+  function exportCoverageReport(){
+    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
+    const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
+    const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
+    const rows=[{"Produits locaux":products.length,"Produits avec RFID":productsWithRfid,"Produits sans RFID":productsWithoutRfid,"Associations RFID":associations.length,"Couverture RFID":coverage+"%","Date rapport":new Date().toISOString()}];
+    exportCSV("rapport_couverture_rfid.csv",rows,Object.keys(rows[0]));
+  }
+  function backupProject(){
+    downloadJSON(`pharmainventory_backup_${new Date().toISOString().slice(0,10)}.json`,{products,associations,backup_date:new Date().toISOString()});
+  }
+  async function restoreProject(file){
+    if(!file) return;
+    try{
+      const data=await readJSONFile(file);
+      if(Array.isArray(data.products)) setProducts(data.products);
+      if(Array.isArray(data.associations)) setAssociations(data.associations);
+    }catch(e){ alert("Fichier JSON invalide"); }
+  }
+
   const operations=[
-    {title:"RFID Associations",icon:"🔗",tab:"association",accent:"white"},
-    {title:"Inventory Scan",icon:"▥",tab:"inventory",accent:"blue"},
-    {title:"Reports & Exports",icon:"▧",tab:"data",accent:"white"},
-    {title:"AI Assistant",icon:"✣",tab:"ai",accent:"green"},
-    {title:"Dashboard",icon:"📊",tab:"dashboard",accent:"white"},
-    {title:"Client Management",icon:"👥",tab:"platform",accent:"white"},
+    {title:"Importer CSV pharmacie",desc:"Importer le catalogue produits de la pharmacie.",icon:"📥",tab:"association",accent:"white"},
+    {title:"Scanner code-barres produit",desc:"Lire le code-barres et retrouver le produit.",icon:"🏷️",tab:"association",accent:"blue"},
+    {title:"Scanner EPC RFID",desc:"Scanner le tag EPC et lier au produit.",icon:"📡",tab:"association",accent:"green"},
+    {title:"Associations locales",desc:"Voir les produits associés aux tags RFID.",icon:"🔗",tab:"association",accent:"white"},
+    {title:"Importer EPC détectés",desc:"Importer les EPC détectés pendant l’inventaire.",icon:"▥",tab:"inventory",accent:"white"},
+    {title:"Exports & sauvegardes",desc:"Exporter tableaux, rapports RFID et backups locaux.",icon:"▧",tab:"operations",accent:"white"},
   ];
 
   return <section className="operationsPage">
     <h1>Operations</h1>
-    <p>Choose an operation to get started. Each action is designed to help you manage your pharmacy inventory efficiently.</p>
+    <p>Choisissez une opération pour gérer le flux RFID de la pharmacie : import catalogue, scan code-barres, scan EPC, inventaire et exports.</p>
 
-    <div className="operationGrid">
+    <div className="operationGrid workflowGrid">
       {operations.map(op=><button key={op.title} className={`operationCard ${op.accent}`} onClick={()=>setTab(op.tab)}>
         <div className="opIcon">{op.icon}</div>
         <h3>{op.title}</h3>
+        <p>{op.desc}</p>
       </button>)}
     </div>
 
-    <div className="helpPanel">
-      <div className="helpIcon">i</div>
-      <div>
-        <b>Need help?</b>
-        <p>Check your documentation or contact support for assistance.</p>
+    <div className="exportsPanel">
+      <h2>Exports & sauvegardes locales</h2>
+      <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
+      <div className="reportCards exportGrid">
+        <div className="reportCard"><span>📦</span><div><b>Produits locaux</b><small>Catalogue importé complet</small></div><button onClick={exportProducts}>Exporter</button></div>
+        <div className="reportCard"><span>🔗</span><div><b>Associations RFID</b><small>PID, produits et EPC liés</small></div><button onClick={exportAssociations}>Exporter</button></div>
+        <div className="reportCard"><span>🏷️</span><div><b>Produits sans RFID</b><small>Articles à associer</small></div><button onClick={exportProductsWithoutRfid}>Exporter</button></div>
+        <div className="reportCard"><span>📊</span><div><b>Couverture RFID</b><small>KPI de couverture</small></div><button onClick={exportCoverageReport}>Exporter</button></div>
+        <div className="reportCard"><span>💾</span><div><b>Sauvegarde projet</b><small>Backup JSON complet</small></div><button onClick={backupProject}>Backup</button></div>
+        <div className="reportCard"><span>📥</span><div><b>Restaurer projet</b><small>Importer un backup JSON</small></div><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></div>
       </div>
-      <button>Visit Help Center ↗</button>
     </div>
   </section>
 }
@@ -405,6 +433,7 @@ function Association(){
 
   return <section>
     
+    <h2>Association RFID locale</h2>
     <p className="notice">Produits et associations restent dans ce navigateur. Rien n'est envoyé au serveur.</p>
     <div className="statsGrid">
       <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
@@ -493,6 +522,7 @@ function Inventory(){
   const noAssoc=results.filter(r=>r.Statut==="Sans association").length;
 
   return <section>
+    <h2>Inventaire RFID réel</h2>
     <h2>Inventaire RFID réel</h2>
     <p className="notice">Importer un CSV/TXT avec une seule colonne EPC détectés. La comparaison se fait localement.</p>
     <div className="card">
