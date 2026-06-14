@@ -132,8 +132,66 @@ function App(){
 
 
 
-function Operations({setTab}){
+
+function Operations(){
   const {products,associations,setProducts,setAssociations}=useLocalStore();
+  const [scanModal,setScanModal]=useState(null);
+  const [barcode,setBarcode]=useState("");
+  const [epc,setEpc]=useState("");
+  const [selectedProduct,setSelectedProduct]=useState(null);
+  const [msg,setMsg]=useState("");
+
+  function importProducts(file){
+    if(!file) return;
+    Papa.parse(file,{header:true,skipEmptyLines:true,complete:(res)=>{
+      const rows=res.data.map((r,i)=>({
+        PID:r.PID||r.pid||String(i+1),
+        Produit:r.Produit||r.produit||r.name||r.Nom||"",
+        Catégorie:r["Catégorie"]||r.categorie||r.category||"",
+        Zone:r.Zone||r.zone||"",
+        Stock:r.Stock||r.stock||"",
+        "Code barre 1":r["Code barre 1"]||r.barcode||r.codebarre||r.UPC||"",
+        "Code barre 2":r["Code barre 2"]||""
+      }));
+      setProducts(rows);
+      setMsg(`${rows.length} produits importés.`);
+    }});
+  }
+
+  function openBarcode(){ setScanModal("barcode"); setBarcode(""); setSelectedProduct(null); setMsg(""); }
+  function openEpc(){ setScanModal("epc"); setEpc(""); setMsg(""); }
+
+  function findByBarcode(){
+    const code=norm(barcode);
+    const p=products.find(x=>norm(x["Code barre 1"])===code || norm(x["Code barre 2"])===code || norm(x.PID)===code);
+    setSelectedProduct(p||null);
+    setMsg(p ? `Produit trouvé: ${p.Produit}` : "Aucun produit trouvé.");
+  }
+
+  function associateEpc(){
+    if(!selectedProduct){ setMsg("Scannez d'abord un code-barres produit."); return; }
+    if(!epc.trim()){ setMsg("Saisir EPC RFID."); return; }
+    const item={
+      PID:selectedProduct.PID,
+      Produit:selectedProduct.Produit,
+      "Code barre 1":selectedProduct["Code barre 1"],
+      "Code barre 2":selectedProduct["Code barre 2"],
+      EPC:norm(epc),
+      Date:new Date().toISOString()
+    };
+    setAssociations([...associations,item]);
+    setMsg(`EPC associé à ${selectedProduct.Produit}.`);
+    setEpc("");
+  }
+
+  function importDetectedEpc(file){
+    if(!file) return;
+    Papa.parse(file,{header:false,skipEmptyLines:true,complete:(res)=>{
+      const rows=res.data.map(r=>norm(r[0])).filter(Boolean);
+      downloadJSON(`epc_detectes_${new Date().toISOString().slice(0,10)}.json`,{epcs:[...new Set(rows)],date:new Date().toISOString()});
+      setMsg(`${rows.length} EPC détectés importés. Fichier JSON généré.`);
+    }});
+  }
 
   function exportProducts(){ exportCSV("produits_locaux.csv",products,Object.keys(products[0]||{})); }
   function exportAssociations(){ exportCSV("associations_rfid.csv",associations,Object.keys(associations[0]||{})); }
@@ -159,78 +217,91 @@ function Operations({setTab}){
       const data=await readJSONFile(file);
       if(Array.isArray(data.products)) setProducts(data.products);
       if(Array.isArray(data.associations)) setAssociations(data.associations);
+      setMsg("Projet restauré.");
     }catch(e){ alert("Fichier JSON invalide"); }
   }
 
-  const operations=[
-    {title:"Importer CSV pharmacie",desc:"Importer le catalogue produits de la pharmacie.",icon:"📥",tab:"association",accent:"white"},
-    {title:"Scanner code-barres produit",desc:"Lire le code-barres et retrouver le produit.",icon:"🏷️",tab:"association",accent:"blue"},
-    {title:"Scanner EPC RFID",desc:"Scanner le tag EPC et lier au produit.",icon:"📡",tab:"association",accent:"green"},
-    {title:"Associations locales",desc:"Voir les produits associés aux tags RFID.",icon:"🔗",tab:"association",accent:"white"},
-    {title:"Importer EPC détectés",desc:"Importer les EPC détectés pendant l’inventaire.",icon:"▥",tab:"inventory",accent:"white"},
-    {title:"Exports & sauvegardes",desc:"Exporter tableaux, rapports RFID et backups locaux.",icon:"▧",tab:"operations",accent:"white"},
-  ];
-
   return <section className="operationsPage">
     <h1>Operations</h1>
-    <p>Choisissez une opération pour gérer le flux RFID de la pharmacie : import catalogue, scan code-barres, scan EPC, inventaire et exports.</p>
+    <p>Exécutez les opérations RFID directement ici : import, scan code-barres, scan EPC, associations, EPC détectés et exports.</p>
 
     <div className="operationGrid workflowGrid">
-      {operations.map(op=><button key={op.title} className={`operationCard ${op.accent}`} onClick={()=>setTab(op.tab)}>
-        <div className="opIcon">{op.icon}</div>
-        <h3>{op.title}</h3>
-        <p>{op.desc}</p>
-      </button>)}
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon">📥</div>
+        <h3>Importer CSV pharmacie</h3>
+        <p>Importer le catalogue produits.</p>
+        <span>Choisir CSV</span>
+        <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
+      </label>
+
+      <button className="operationCard blue" onClick={openBarcode}>
+        <div className="opIcon">🏷️</div>
+        <h3>Scanner code-barres produit</h3>
+        <p>Ouvrir une fenêtre pour saisir le code-barres.</p>
+      </button>
+
+      <button className="operationCard green" onClick={openEpc}>
+        <div className="opIcon">📡</div>
+        <h3>Scanner EPC RFID</h3>
+        <p>Ouvrir une fenêtre pour saisir le tag EPC.</p>
+      </button>
+
+      <div className="operationCard white">
+        <div className="opIcon">🔗</div>
+        <h3>Associations locales</h3>
+        <p>{associations.length} associations RFID locales.</p>
+      </div>
+
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon">▥</div>
+        <h3>Importer EPC détectés</h3>
+        <p>Importer un CSV/TXT EPC détectés.</p>
+        <span>Choisir fichier</span>
+        <input type="file" accept=".csv,.txt" onChange={e=>importDetectedEpc(e.target.files[0])}/>
+      </label>
+
+      <button className="operationCard white" onClick={backupProject}>
+        <div className="opIcon">💾</div>
+        <h3>Sauvegarder projet</h3>
+        <p>Backup JSON produits + associations.</p>
+      </button>
     </div>
 
     <div className="exportsPanel">
       <h2>Exports & sauvegardes locales</h2>
       <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
       <div className="exportOperationGrid">
-        <button className="exportOperationCard" onClick={exportProducts}>
-          <div className="opIcon">📦</div>
-          <h3>Produits locaux</h3>
-          <p>Exporter le catalogue importé complet.</p>
-          <span>Exporter</span>
-        </button>
-
-        <button className="exportOperationCard" onClick={exportAssociations}>
-          <div className="opIcon">🔗</div>
-          <h3>Associations RFID</h3>
-          <p>Exporter les produits liés aux EPC RFID.</p>
-          <span>Exporter</span>
-        </button>
-
-        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}>
-          <div className="opIcon">🏷️</div>
-          <h3>Produits sans RFID</h3>
-          <p>Exporter les articles à associer.</p>
-          <span>Exporter</span>
-        </button>
-
-        <button className="exportOperationCard blue" onClick={exportCoverageReport}>
-          <div className="opIcon">📊</div>
-          <h3>Couverture RFID</h3>
-          <p>Exporter les KPI de couverture.</p>
-          <span>Exporter</span>
-        </button>
-
-        <button className="exportOperationCard green" onClick={backupProject}>
-          <div className="opIcon">💾</div>
-          <h3>Sauvegarde projet</h3>
-          <p>Créer un backup JSON complet.</p>
-          <span>Backup</span>
-        </button>
-
-        <label className="exportOperationCard fileCard">
-          <div className="opIcon">📥</div>
-          <h3>Restaurer projet</h3>
-          <p>Importer un backup JSON local.</p>
-          <span>Choisir fichier</span>
-          <input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/>
-        </label>
+        <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon">📦</div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportAssociations}><div className="opIcon">🔗</div><h3>Associations RFID</h3><p>Exporter les produits liés aux EPC RFID.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}><div className="opIcon">🏷️</div><h3>Produits sans RFID</h3><p>Exporter les articles à associer.</p><span>Exporter</span></button>
+        <button className="exportOperationCard blue" onClick={exportCoverageReport}><div className="opIcon">📊</div><h3>Couverture RFID</h3><p>Exporter les KPI de couverture.</p><span>Exporter</span></button>
+        <button className="exportOperationCard green" onClick={backupProject}><div className="opIcon">💾</div><h3>Sauvegarde projet</h3><p>Créer un backup JSON complet.</p><span>Backup</span></button>
+        <label className="exportOperationCard fileCard"><div className="opIcon">📥</div><h3>Restaurer projet</h3><p>Importer un backup JSON local.</p><span>Choisir fichier</span><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></label>
       </div>
     </div>
+
+    {msg && <p className="success opMessage">{msg}</p>}
+
+    {scanModal && <div className="modalOverlay">
+      <div className="scanModal">
+        <button className="modalClose" onClick={()=>setScanModal(null)}>×</button>
+        {scanModal==="barcode" && <>
+          <h2>Scanner code-barres produit</h2>
+          <p>Saisissez ou scannez le code-barres du produit.</p>
+          <input autoFocus value={barcode} onChange={e=>setBarcode(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")findByBarcode()}} placeholder="Code-barres ou PID"/>
+          <button className="primaryBtn" onClick={findByBarcode}>Rechercher produit</button>
+          {selectedProduct && <div className="foundProduct"><b>{selectedProduct.Produit}</b><small>PID: {selectedProduct.PID}</small></div>}
+        </>}
+
+        {scanModal==="epc" && <>
+          <h2>Scanner EPC RFID</h2>
+          <p>Saisissez ou scannez l’EPC RFID à associer au produit sélectionné.</p>
+          {selectedProduct ? <div className="foundProduct"><b>{selectedProduct.Produit}</b><small>PID: {selectedProduct.PID}</small></div> : <p className="err">Aucun produit sélectionné. Scannez d’abord le code-barres.</p>}
+          <input autoFocus value={epc} onChange={e=>setEpc(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")associateEpc()}} placeholder="EPC RFID"/>
+          <button className="primaryBtn" onClick={associateEpc}>Associer EPC</button>
+        </>}
+      </div>
+    </div>}
   </section>
 }
 

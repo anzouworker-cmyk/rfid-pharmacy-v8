@@ -522,3 +522,87 @@ table button{padding:8px 10px;font-size:13px}
 @media(max-width:900px){
   .exportOperationGrid{grid-template-columns:1fr}
 }
+
+
+/* V28 inline operations */
+.fileCardOp{
+  position:relative;
+  cursor:pointer;
+}
+.fileCardOp input{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+}
+.fileCardOp span{
+  margin-top:8px;
+  border:1px solid #d9e0eb;
+  border-radius:10px;
+  padding:10px 16px;
+  font-weight:800;
+  color:#075985;
+  background:#fff;
+}
+.opMessage{
+  margin-top:18px;
+  font-weight:900;
+}
+.modalOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.42);
+  display:grid;
+  place-items:center;
+  z-index:9999;
+}
+.scanModal{
+  width:min(520px,92vw);
+  background:white;
+  border-radius:22px;
+  padding:28px;
+  box-shadow:0 30px 80px rgba(15,23,42,.28);
+  position:relative;
+  display:grid;
+  gap:12px;
+}
+.scanModal h2{
+  margin:0;
+  font-size:28px;
+}
+.scanModal input{
+  width:100%;
+  padding:14px 16px;
+  border:1px solid #d9e0eb;
+  border-radius:12px;
+}
+.modalClose{
+  position:absolute;
+  right:16px;
+  top:14px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#f1f5f9!important;
+  color:#0f172a!important;
+  box-shadow:none!important;
+  padding:0;
+  font-size:22px;
+}
+.foundProduct{
+  background:#ecfdf5;
+  border:1px solid #bbf7d0;
+  border-radius:14px;
+  padding:14px;
+  display:grid;
+  gap:4px;
+}
+.foundProduct small{
+  color:#166534;
+}
+
+/* simplify Association and Inventory pages visually */
+.pharmaContent section > .grid,
+.whiteContent section > .grid{
+  /* keep dashboards/grids elsewhere; operations has operationGrid class */
+}
