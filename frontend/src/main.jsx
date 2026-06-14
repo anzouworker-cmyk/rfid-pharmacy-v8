@@ -186,13 +186,49 @@ function Operations({setTab}){
     <div className="exportsPanel">
       <h2>Exports & sauvegardes locales</h2>
       <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
-      <div className="reportCards exportGrid">
-        <div className="reportCard"><span>📦</span><div><b>Produits locaux</b><small>Catalogue importé complet</small></div><button onClick={exportProducts}>Exporter</button></div>
-        <div className="reportCard"><span>🔗</span><div><b>Associations RFID</b><small>PID, produits et EPC liés</small></div><button onClick={exportAssociations}>Exporter</button></div>
-        <div className="reportCard"><span>🏷️</span><div><b>Produits sans RFID</b><small>Articles à associer</small></div><button onClick={exportProductsWithoutRfid}>Exporter</button></div>
-        <div className="reportCard"><span>📊</span><div><b>Couverture RFID</b><small>KPI de couverture</small></div><button onClick={exportCoverageReport}>Exporter</button></div>
-        <div className="reportCard"><span>💾</span><div><b>Sauvegarde projet</b><small>Backup JSON complet</small></div><button onClick={backupProject}>Backup</button></div>
-        <div className="reportCard"><span>📥</span><div><b>Restaurer projet</b><small>Importer un backup JSON</small></div><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></div>
+      <div className="exportOperationGrid">
+        <button className="exportOperationCard" onClick={exportProducts}>
+          <div className="opIcon">📦</div>
+          <h3>Produits locaux</h3>
+          <p>Exporter le catalogue importé complet.</p>
+          <span>Exporter</span>
+        </button>
+
+        <button className="exportOperationCard" onClick={exportAssociations}>
+          <div className="opIcon">🔗</div>
+          <h3>Associations RFID</h3>
+          <p>Exporter les produits liés aux EPC RFID.</p>
+          <span>Exporter</span>
+        </button>
+
+        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}>
+          <div className="opIcon">🏷️</div>
+          <h3>Produits sans RFID</h3>
+          <p>Exporter les articles à associer.</p>
+          <span>Exporter</span>
+        </button>
+
+        <button className="exportOperationCard blue" onClick={exportCoverageReport}>
+          <div className="opIcon">📊</div>
+          <h3>Couverture RFID</h3>
+          <p>Exporter les KPI de couverture.</p>
+          <span>Exporter</span>
+        </button>
+
+        <button className="exportOperationCard green" onClick={backupProject}>
+          <div className="opIcon">💾</div>
+          <h3>Sauvegarde projet</h3>
+          <p>Créer un backup JSON complet.</p>
+          <span>Backup</span>
+        </button>
+
+        <label className="exportOperationCard fileCard">
+          <div className="opIcon">📥</div>
+          <h3>Restaurer projet</h3>
+          <p>Importer un backup JSON local.</p>
+          <span>Choisir fichier</span>
+          <input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/>
+        </label>
       </div>
     </div>
   </section>
