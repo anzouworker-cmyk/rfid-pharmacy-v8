@@ -124,8 +124,7 @@ function App(){
 
     <section className="whiteMain">
       <header className="whiteTopbar">
-        <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button><h1 className="topPageTitle">{pageTitle}</h1>
-        {(() => { const pageTitles={operations:"Operations",dashboard:"Dashboard",association:"Associations RFID",inventory:"Inventaire RFID réel",ai:"Assistant IA",platform:"Clients SaaS",dashboardAdmin:"Publicités"}; return <h1 className="topPageTitle">{pageTitles[tab]||""}</h1>; })()}
+        <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button><h1 className="topPageTitle">{pageTitle}</h1>{(() => { const pageTitles={operations:"Operations",dashboard:"Dashboard",association:"Associations RFID",inventory:"Inventaire RFID réel",ai:"Assistant IA",platform:"Clients SaaS",dashboardAdmin:"Publicités"}; return <h1 className="topPageTitle">{pageTitles[tab]||""}</h1>; })()}
         <div className="whiteAccount">
           <div>
             <b>{accountName}</b>
@@ -262,9 +261,12 @@ function Operations(){
 
   return <section className="operationsPage">
     <h1>Operations</h1>
-    <p className="notice">Exécutez les opérations RFID directement ici : import, scan, associations, EPC détectés, exports et sauvegardes.</p>
+    <p>Exécutez les opérations RFID directement ici : import, scan, associations, EPC détectés, exports et sauvegardes.</p>
 
-    <div className="operationGrid workflowGrid">
+    <div className="operationsActionPanel">
+      <h2>Actions RFID</h2>
+      <p className="notice">Lancez les opérations principales : import catalogue, import associations, scan code-barres, scan EPC et nettoyage des associations.</p>
+      <div className="operationGrid workflowGrid">
       <label className="operationCard white fileCardOp">
         <div className="opIcon">📥</div><h3>Importer CSV pharmacie</h3><p>Importer le catalogue produits.</p><span>Choisir CSV</span>
         <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
@@ -292,8 +294,10 @@ function Operations(){
         <div className="opIcon">🗑️</div><h3>Vider toutes associations</h3><p>Supprimer toutes les associations RFID locales.</p>
       </button>
     </div>
+    </div>
 
     <div className="exportsPanel">
+      <h2>Exports & sauvegardes locales</h2>
       <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
       <div className="exportOperationGrid">
         <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon">📦</div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>

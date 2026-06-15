@@ -843,3 +843,48 @@ table button{padding:8px 10px;font-size:13px}
 }
 
 .whiteContent section h1:first-child{display:none!important;}
+
+
+/* V30.4 - final duplicate title fix */
+.whiteTopbar .topPageTitle + .topPageTitle{
+  display:none!important;
+}
+.whiteContent > section > h1:first-child,
+.whiteContent > section > h2:first-child,
+.pharmaContent > section > h1:first-child,
+.pharmaContent > section > h2:first-child{
+  display:none!important;
+}
+.topPageTitle{
+  margin:0!important;
+  font-size:38px!important;
+  line-height:1!important;
+  letter-spacing:-1px!important;
+  font-weight:900!important;
+  color:#0b1023!important;
+}
+
+
+/* V30.5 - Operations cards panel */
+.operationsActionPanel{
+  margin-top:28px;
+  margin-bottom:42px;
+  background:white;
+  border:1px solid #e5eaf3;
+  border-radius:18px;
+  padding:26px;
+  box-shadow:0 12px 28px rgba(15,23,42,.05);
+}
+.operationsActionPanel h2{
+  margin:0 0 12px;
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:-.5px;
+  color:#0b1023;
+}
+.operationsActionPanel .notice{
+  margin-bottom:22px;
+}
+.operationsActionPanel .operationGrid{
+  margin-bottom:0!important;
+}
