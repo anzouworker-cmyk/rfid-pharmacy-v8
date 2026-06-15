@@ -81,8 +81,8 @@ function App(){
   const pageTitle =
     tab==="operations" ? "Operations" :
     tab==="dashboard" ? "Dashboard" :
-    tab==="association" ? "Associations RFID" :
-    tab==="inventory" ? "Inventaire RFID réel" :
+    tab==="association" ? "Associations Tags" :
+    tab==="inventory" ? "Inventaire Resultat" :
     tab==="ai" ? "Assistant IA" :
     tab==="platform" ? "Clients SaaS" :
     tab==="dashboardAdmin" ? "Publicités" : "Smart Inventory";
@@ -91,8 +91,8 @@ function App(){
   const menu=[
     {id:"operations",label:"Operations",icon:"⌂"},
     {id:"dashboard",label:"Dashboard",icon:"📊"},
-    {id:"association",label:"Associations RFID",icon:"🔗"},
-    {id:"inventory",label:"Inventaire RFID",icon:"▥"},
+    {id:"association",label:"Associations Tags",icon:"🔗"},
+    {id:"inventory",label:"Inventaire Resultat",icon:"▥"},
     {id:"ai",label:"Assistant IA",icon:"✣"},
   ];
   if(me?.role==="platform_admin"){
@@ -106,7 +106,7 @@ function App(){
         <div className="piLogo"><span>PI</span></div>
         <div className="brandWords">
           <div className="brandText">Smart Inventory</div>
-          <small>RFID & Inventory Management Platform</small>
+          <small>Inventory Management Platform</small>
         </div>
       </div>
 
@@ -261,10 +261,9 @@ function Operations(){
 
   return <section className="operationsPage">
     <h1>Operations</h1>
-    <p>Exécutez les opérations RFID directement ici : import, scan, associations, EPC détectés, exports et sauvegardes.</p>
 
     <div className="operationsActionPanel">
-      <h2>Actions RFID</h2>
+      <h2>Actions</h2>
       <p className="notice">Lancez les opérations principales : import catalogue, import associations, scan code-barres, scan EPC et nettoyage des associations.</p>
       <div className="operationGrid workflowGrid">
       <label className="operationCard white fileCardOp">
@@ -282,7 +281,7 @@ function Operations(){
       </button>
 
       <button className="operationCard green" onClick={openEpc}>
-        <div className="opIcon">📡</div><h3>Scanner EPC RFID</h3><p>Ouvrir une fenêtre pour saisir le tag EPC.</p>
+        <div className="opIcon">📡</div><h3>Scanner EPC Tags</h3><p>Ouvrir une fenêtre pour saisir le tag EPC.</p>
       </button>
 
       <label className="operationCard white fileCardOp">
@@ -297,7 +296,6 @@ function Operations(){
     </div>
 
     <div className="exportsPanel">
-      <h2>Exports & sauvegardes locales</h2>
       <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
       <div className="exportOperationGrid">
         <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon">📦</div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
@@ -323,8 +321,8 @@ function Operations(){
         </>}
 
         {scanModal==="epc" && <>
-          <h2>Scanner EPC RFID</h2>
-          <p>Saisissez ou scannez l’EPC RFID à associer au produit sélectionné.</p>
+          <h2>Scanner EPC Tags</h2>
+          <p>Saisissez ou scannez l’EPC Tag à associer au produit sélectionné.</p>
           {selectedProduct ? <div className="foundProduct"><b>{selectedProduct.Produit}</b><small>PID: {selectedProduct.PID}</small></div> : <p className="err">Aucun produit sélectionné. Scannez d’abord le code-barres.</p>}
           <input autoFocus value={epc} onChange={e=>setEpc(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")associateEpc()}} placeholder="EPC RFID"/>
           <button className="primaryBtn" onClick={associateEpc}>Associer EPC</button>
@@ -364,7 +362,7 @@ function Login({setToken}){
         <div className="pharmaLogo loginLogo"><span></span></div>
       </div>
       <h2>Smart Inventory</h2>
-      <p className="loginSub">RFID & Inventory Management Platform pour pharmacies</p>
+      <p className="loginSub">Smart Inventory Management Platform</p>
 
       <label>Utilisateur</label>
       <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
