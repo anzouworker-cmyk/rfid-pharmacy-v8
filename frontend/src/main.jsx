@@ -59,7 +59,7 @@ function useLocalStore(){
 function App(){
   const [token,setToken]=useState(localStorage.token||"");
   const [me,setMe]=useState(null);
-  const [tab,setTab]=useState("operations");
+  const [tab,setTab]=useState("dashboard");
   const [sidebarCollapsed,setSidebarCollapsed]=useState(localStorage.sidebarCollapsed==="1");
   const auth={headers:{Authorization:`Bearer ${token}`}};
 
@@ -89,8 +89,8 @@ function App(){
 
 
   const menu=[
-    {id:"operations",label:"Operations",icon:"⌂"},
     {id:"dashboard",label:"Dashboard",icon:"📊"},
+    {id:"operations",label:"Operations",icon:"⌂"},
     {id:"association",label:"Associations RFID",icon:"🔗"},
     {id:"inventory",label:"Inventaire RFID",icon:"▥"},
     {id:"ai",label:"Assistant IA",icon:"✣"},
@@ -135,7 +135,7 @@ function App(){
 
       <main className="whiteContent">
         {tab==="operations" && <Operations/>}
-        {tab==="dashboard" && <Dashboard/>}
+        {tab==="dashboard" && <Dashboard setTab={setTab}/>}
         {tab==="ai" && <AIAssistant/>}
         {tab==="association" && <Association/>}
         {tab==="inventory" && <Inventory/>}
@@ -818,7 +818,7 @@ return <section>
 
 
 
-function Dashboard(){
+function Dashboard({setTab}){
   const {products,associations}=useLocalStore();
   const [dashboardAd,setDashboardAd]=useState(null);
 
@@ -870,9 +870,9 @@ function Dashboard(){
 
     <div className="dashKpiGrid">
       <div className="dashKpiCard"><div className="dashKpiIcon blue">📦</div><div><span>Produits catalogués</span><b>{products.length}</b><small>Total dans le catalogue</small></div></div>
-      <div className="dashKpiCard"><div className="dashKpiIcon green">🏷️</div><div><span>Produits tagués</span><b>{productsWithRfid}</b><small>Produits avec RFID</small></div></div>
-      <div className="dashKpiCard"><div className="dashKpiIcon blue">◎</div><div><span>Couverture RFID</span><b className="greenText">{coverage}%</b><small>Pourcentage global</small></div></div>
-      <div className="dashKpiCard"><div className="dashKpiIcon orange">⚠️</div><div><span>Produits sans tag</span><b>{productsWithoutRfid}</b><small>Nécessitent un tag</small></div></div>
+      <div className="dashKpiCard clickableKpi" onClick={()=>setTab("association")}><div className="dashKpiIcon green">🏷️</div><div><span>Produits tagués</span><b>{productsWithRfid}</b><small>Produits avec RFID</small></div></div>
+      <div className="dashKpiCard clickableKpi" onClick={()=>setTab("dashboard")}><div className="dashKpiIcon blue">◎</div><div><span>Couverture RFID</span><b className="greenText">{coverage}%</b><small>Pourcentage global</small></div></div>
+      <div className="dashKpiCard clickableKpi" onClick={()=>setTab("inventory")}><div className="dashKpiIcon orange">⚠️</div><div><span>Produits sans tag</span><b>{productsWithoutRfid}</b><small>Nécessitent un tag</small></div></div>
     </div>
 
     <div className="dashboardMainGrid">
@@ -886,8 +886,7 @@ function Dashboard(){
             <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture RFID progresse." : "Votre couverture RFID doit être améliorée."}</h3>
             <p>Vous avez atteint {coverage}% de couverture RFID.</p>
             <p>Continuez à associer vos produits pour une traçabilité optimale.</p>
-            <button onClick={()=>alert("Utilisez Operations → Scanner code-barres produit puis Scanner EPC RFID.")}>🔗 Associer maintenant</button>
-            <a>En savoir plus sur la couverture RFID ›</a>
+            <button onClick={()=>setTab("operations")}>🔗 Associer maintenant</button>
           </div>
         </div>
       </div>

@@ -1057,3 +1057,17 @@ table button{padding:8px 10px;font-size:13px}
 @media(max-width:1100px){
   .adAdminGrid{grid-template-columns:1fr}
 }
+
+
+/* V32.2 navigation/dashboard flow */
+.clickableKpi{
+  cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.clickableKpi:hover{
+  transform:translateY(-3px);
+  box-shadow:0 20px 45px rgba(15,23,42,.12);
+}
+.coverageText button{
+  cursor:pointer;
+}
