@@ -606,3 +606,48 @@ table button{padding:8px 10px;font-size:13px}
 .whiteContent section > .grid{
   /* keep dashboards/grids elsewhere; operations has operationGrid class */
 }
+
+
+/* V29 final workflow, branding, collapsible sidebar */
+.piLogo{
+  width:46px;height:46px;border-radius:14px;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  display:grid;place-items:center;color:white;font-weight:900;
+  box-shadow:0 12px 24px rgba(37,99,235,.25);
+}
+.piLogo span{font-size:15px;letter-spacing:-.5px}
+.brandWords small{display:block;color:#64748b;margin-top:2px;font-weight:700}
+.sidebarIsCollapsed .whiteSidebar{width:92px!important;padding:34px 14px!important}
+.sidebarIsCollapsed .brandWords,
+.sidebarIsCollapsed .whiteNavItem b,
+.sidebarIsCollapsed .whiteLogout b{display:none!important}
+.sidebarIsCollapsed .whiteBrand{justify-content:center;margin-left:0;margin-right:0}
+.sidebarIsCollapsed .whiteNavItem{justify-content:center;padding:0}
+.sidebarIsCollapsed .whiteNavItem span{width:auto}
+.whiteSidebar,.whiteMain{transition:all .22s ease}
+.hamburger{cursor:pointer}
+.dangerOp{
+  background:linear-gradient(135deg,#ef4444,#b91c1c)!important;
+  color:white!important;
+  border-color:#b91c1c!important;
+}
+.dangerOp p{color:rgba(255,255,255,.88)!important}
+.dangerOp .opIcon{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32)}
+.fileCardOp{position:relative;cursor:pointer}
+.fileCardOp input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.fileCardOp span{
+  margin-top:8px;border:1px solid #d9e0eb;border-radius:10px;
+  padding:10px 16px;font-weight:800;color:#075985;background:#fff
+}
+.opMessage{margin-top:18px;font-weight:900}
+.modalOverlay{position:fixed;inset:0;background:rgba(15,23,42,.42);display:grid;place-items:center;z-index:9999}
+.scanModal{width:min(520px,92vw);background:white;border-radius:22px;padding:28px;box-shadow:0 30px 80px rgba(15,23,42,.28);position:relative;display:grid;gap:12px}
+.scanModal h2{margin:0;font-size:28px}
+.scanModal input{width:100%;padding:14px 16px;border:1px solid #d9e0eb;border-radius:12px}
+.modalClose{position:absolute;right:16px;top:14px;width:36px;height:36px;border-radius:50%;background:#f1f5f9!important;color:#0f172a!important;box-shadow:none!important;padding:0;font-size:22px}
+.foundProduct{background:#ecfdf5;border:1px solid #bbf7d0;border-radius:14px;padding:14px;display:grid;gap:4px}
+.foundProduct small{color:#166534}
+
+/* Reduce duplicate page titles: topbar title remains, repeated h2 visually softened */
+.whiteContent section > h2:first-child + h2,
+.pharmaContent section > h2:first-child + h2{display:none!important}
