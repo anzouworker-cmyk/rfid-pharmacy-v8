@@ -85,7 +85,7 @@ function App(){
     tab==="inventory" ? "Inventaire RFID réel" :
     tab==="ai" ? "Assistant IA" :
     tab==="platform" ? "Clients SaaS" :
-    tab==="dashboardAdmin" ? "Publicités" : "PharmaInventory";
+    tab==="dashboardAdmin" ? "Publicités" : "Smart Inventory";
 
 
   const menu=[
@@ -105,8 +105,8 @@ function App(){
       <div className="whiteBrand">
         <div className="piLogo"><span>PI</span></div>
         <div className="brandWords">
-          <div className="brandText">PharmaInventory</div>
-          <small>Smart Inventory Solution</small>
+          <div className="brandText">Smart Inventory</div>
+          <small>RFID & Inventory Management Platform</small>
         </div>
       </div>
 
@@ -143,7 +143,7 @@ function App(){
         {tab==="platform" && <Platform auth={auth}/>}
         {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>}
       </main>
-      <footer className="whiteFooter">© 2026 PharmaInventory. All rights reserved.</footer>
+      <footer className="whiteFooter">© 2026 Smart Inventory. All rights reserved.</footer>
     </section>
   </div>
 }
@@ -360,8 +360,8 @@ function Login({setToken}){
       <div className="loginLogoWrap">
         <div className="pharmaLogo loginLogo"><span></span></div>
       </div>
-      <h2>PharmaInventory</h2>
-      <p className="loginSub">Smart Inventory Solution pour pharmacies</p>
+      <h2>Smart Inventory</h2>
+      <p className="loginSub">RFID & Inventory Management Platform pour pharmacies</p>
 
       <label>Utilisateur</label>
       <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
@@ -558,7 +558,7 @@ function LocalData(){
 
   function saveProject(){
     const backup={
-      app:"PharmaInventory",
+      app:"Smart Inventory",
       version:"V22",
       backup_date:new Date().toISOString(),
       products,
@@ -848,7 +848,7 @@ function Dashboard(){
           <button className="adButton">Découvrir l’offre Premium →</button>
         </div>
         <div className="adVisual">
-          <div className="box3d bigBox">PharmaInventory</div>
+          <div className="box3d bigBox">Smart Inventory</div>
           <div className="tag3d bigTag">RFID</div>
         </div>
       </div>

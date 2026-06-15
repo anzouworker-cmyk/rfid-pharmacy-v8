@@ -841,3 +841,5 @@ table button{padding:8px 10px;font-size:13px}
   .tableToolbar{display:block}
   .tableToolbar span{display:block;margin-top:10px}
 }
+
+.whiteContent section h1:first-child{display:none!important;}
