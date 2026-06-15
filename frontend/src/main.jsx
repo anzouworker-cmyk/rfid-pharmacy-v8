@@ -115,6 +115,7 @@ function App(){
     <section className="whiteMain">
       <header className="whiteTopbar">
         <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button>
+        {(() => { const pageTitles={operations:"Operations",dashboard:"Dashboard",association:"Associations RFID",inventory:"Inventaire RFID réel",ai:"Assistant IA",platform:"Clients SaaS",dashboardAdmin:"Publicités"}; return <h1 className="topPageTitle">{pageTitles[tab]||""}</h1>; })()}
         <div className="whiteAccount">
           <div>
             <b>{accountName}</b>

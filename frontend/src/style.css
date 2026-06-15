@@ -664,3 +664,14 @@ table button{padding:8px 10px;font-size:13px}
 .scanModal{width:min(520px,92vw);background:white;border-radius:22px;padding:28px;box-shadow:0 30px 80px rgba(15,23,42,.28);position:relative;display:grid;gap:12px}
 .modalClose{position:absolute;right:16px;top:14px;width:36px;height:36px;border-radius:50%;background:#f1f5f9!important;color:#0f172a!important;box-shadow:none!important;padding:0;font-size:22px}
 .foundProduct{background:#ecfdf5;border:1px solid #bbf7d0;border-radius:14px;padding:14px;display:grid;gap:4px}
+
+.topPageTitle{font-size:32px;font-weight:900;margin:0 0 0 16px;color:#0f172a}
+.whiteTopbar{display:flex;align-items:center}
+.whiteContent section>h1:first-child{display:none}
+.operationCard,.exportOperationCard{display:flex;flex-direction:column}
+.operationCard h3,.exportOperationCard h3{min-height:64px;display:flex;align-items:center;justify-content:center;text-align:center}
+.operationCard p,.exportOperationCard p{min-height:56px}
+.operationCard span:last-child,.exportOperationCard span:last-child{margin-top:auto}
+
+/* V30 notes */
+.association-page .ops-section,.inventory-page .import-section{display:none!important}
