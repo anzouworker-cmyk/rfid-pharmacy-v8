@@ -81,8 +81,8 @@ function App(){
   const pageTitle =
     tab==="operations" ? "Operations" :
     tab==="dashboard" ? "Dashboard" :
-    tab==="association" ? "Associations Tags" :
-    tab==="inventory" ? "Inventaire Resultat" :
+    tab==="association" ? "Associations RFID" :
+    tab==="inventory" ? "Inventaire RFID réel" :
     tab==="ai" ? "Assistant IA" :
     tab==="platform" ? "Clients SaaS" :
     tab==="dashboardAdmin" ? "Publicités" : "Smart Inventory";
@@ -91,8 +91,8 @@ function App(){
   const menu=[
     {id:"operations",label:"Operations",icon:"⌂"},
     {id:"dashboard",label:"Dashboard",icon:"📊"},
-    {id:"association",label:"Associations Tags",icon:"🔗"},
-    {id:"inventory",label:"Inventaire Resultat",icon:"▥"},
+    {id:"association",label:"Associations RFID",icon:"🔗"},
+    {id:"inventory",label:"Inventaire RFID",icon:"▥"},
     {id:"ai",label:"Assistant IA",icon:"✣"},
   ];
   if(me?.role==="platform_admin"){
@@ -106,7 +106,7 @@ function App(){
         <div className="piLogo"><span>PI</span></div>
         <div className="brandWords">
           <div className="brandText">Smart Inventory</div>
-          <small>Inventory Management Platform</small>
+          <small>RFID & Inventory Management Platform</small>
         </div>
       </div>
 
@@ -124,7 +124,7 @@ function App(){
 
     <section className="whiteMain">
       <header className="whiteTopbar">
-        <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button><h1 className="topPageTitle">{pageTitle}</h1>{(() => { const pageTitles={operations:"Operations",dashboard:"Dashboard",association:"Associations Tags",inventory:"Inventaire RFID réel",ai:"Assistant IA",platform:"Clients SaaS",dashboardAdmin:"Publicités"}; return <h1 className="topPageTitle">{pageTitles[tab]||""}</h1>; })()}
+        <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button><h1 className="topPageTitle">{pageTitle}</h1>{(() => { const pageTitles={operations:"Operations",dashboard:"Dashboard",association:"Associations RFID",inventory:"Inventaire RFID réel",ai:"Assistant IA",platform:"Clients SaaS",dashboardAdmin:"Publicités"}; return <h1 className="topPageTitle">{pageTitles[tab]||""}</h1>; })()}
         <div className="whiteAccount">
           <div>
             <b>{accountName}</b>
@@ -185,7 +185,7 @@ function Operations(){
         Date:r.Date||new Date().toISOString()
       })).filter(x=>x.EPC);
       setAssociations([...associations,...rows]);
-      setMsg(`${rows.length} associations Tags importées.`);
+      setMsg(`${rows.length} associations RFID importées.`);
     }});
   }
 
@@ -243,8 +243,8 @@ function Operations(){
     const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
     const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
     const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
-    const rows=[{"Produits locaux":products.length,"Produits avec Tags":productsWithRfid,"Produits sans Tags":productsWithoutRfid,"Associations Tags":associations.length,"Couverture Tags":coverage+"%","Date rapport":new Date().toISOString()}];
-    exportCSV("rapport_couverture_tags.csv",rows,Object.keys(rows[0]));
+    const rows=[{"Produits locaux":products.length,"Produits avec RFID":productsWithRfid,"Produits sans RFID":productsWithoutRfid,"Associations RFID":associations.length,"Couverture RFID":coverage+"%","Date rapport":new Date().toISOString()}];
+    exportCSV("rapport_couverture_rfid.csv",rows,Object.keys(rows[0]));
   }
   function backupProject(){
     downloadJSON(`pharmainventory_backup_${new Date().toISOString().slice(0,10)}.json`,{products,associations,backup_date:new Date().toISOString()});
@@ -261,9 +261,10 @@ function Operations(){
 
   return <section className="operationsPage">
     <h1>Operations</h1>
+    <p>Exécutez les opérations RFID directement ici : import, scan, associations, EPC détectés, exports et sauvegardes.</p>
 
     <div className="operationsActionPanel">
-      <h2>Actions</h2>
+      <h2>Actions RFID</h2>
       <p className="notice">Lancez les opérations principales : import catalogue, import associations, scan code-barres, scan EPC et nettoyage des associations.</p>
       <div className="operationGrid workflowGrid">
       <label className="operationCard white fileCardOp">
@@ -281,7 +282,7 @@ function Operations(){
       </button>
 
       <button className="operationCard green" onClick={openEpc}>
-        <div className="opIcon">📡</div><h3>Scanner EPC Tags</h3><p>Ouvrir une fenêtre pour saisir le tag EPC.</p>
+        <div className="opIcon">📡</div><h3>Scanner EPC RFID</h3><p>Ouvrir une fenêtre pour saisir le tag EPC.</p>
       </button>
 
       <label className="operationCard white fileCardOp">
@@ -296,6 +297,7 @@ function Operations(){
     </div>
 
     <div className="exportsPanel">
+      <h2>Exports & sauvegardes locales</h2>
       <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
       <div className="exportOperationGrid">
         <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon">📦</div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
@@ -321,8 +323,8 @@ function Operations(){
         </>}
 
         {scanModal==="epc" && <>
-          <h2>Scanner EPC Tags</h2>
-          <p>Saisissez ou scannez l’EPC Tag à associer au produit sélectionné.</p>
+          <h2>Scanner EPC RFID</h2>
+          <p>Saisissez ou scannez l’EPC RFID à associer au produit sélectionné.</p>
           {selectedProduct ? <div className="foundProduct"><b>{selectedProduct.Produit}</b><small>PID: {selectedProduct.PID}</small></div> : <p className="err">Aucun produit sélectionné. Scannez d’abord le code-barres.</p>}
           <input autoFocus value={epc} onChange={e=>setEpc(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")associateEpc()}} placeholder="EPC RFID"/>
           <button className="primaryBtn" onClick={associateEpc}>Associer EPC</button>
@@ -362,7 +364,7 @@ function Login({setToken}){
         <div className="pharmaLogo loginLogo"><span></span></div>
       </div>
       <h2>Smart Inventory</h2>
-      <p className="loginSub">Smart Inventory Management Platform</p>
+      <p className="loginSub">RFID & Inventory Management Platform pour pharmacies</p>
 
       <label>Utilisateur</label>
       <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
@@ -641,7 +643,7 @@ function LocalData(){
 
     <div className="statsGrid">
       <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
-      <div className="statCard"><span>Associations Tags</span><b>{associations.length}</b><small>EPC liés</small></div>
+      <div className="statCard"><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés</small></div>
       
     </div>
 
@@ -806,84 +808,97 @@ return <section>
 
 
 
+
 function Dashboard(){
   const {products,associations}=useLocalStore();
+
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
   const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
 
-  function exportInventoryReport(){
-    const rows=products.map(p=>{
-      const linked=associations.filter(a=>String(a.PID)===String(p.PID)).map(a=>a.EPC).join(", ");
-      return {...p,"EPC associés":linked,"Statut RFID":linked?"Associé":"Sans RFID"};
-    });
-    exportCSV("rapport_inventaire_rfid.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associés","Statut RFID"]);
+  const epcCounts={};
+  associations.forEach(a=>{ const e=norm(a.EPC); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
+  const duplicateEpcs=Object.values(epcCounts).filter(x=>x>1).length;
+
+  function exportDashboardReport(){
+    const rows=[{
+      "Produits catalogués":products.length,
+      "Produits tagués":productsWithRfid,
+      "Produits sans tag":productsWithoutRfid,
+      "Associations RFID":associations.length,
+      "Couverture RFID":coverage+"%",
+      "Doublons EPC":duplicateEpcs,
+      "Date rapport":new Date().toISOString()
+    }];
+    exportCSV("rapport_dashboard_rfid.csv",rows,Object.keys(rows[0]));
   }
 
-  function backupProject(){
-    downloadJSON("backup_pharmainventory.json",{products,associations,backup_date:new Date().toISOString()});
+  function exportProductsWithoutRfid(){
+    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Sans tag"}));
+    exportCSV("produits_sans_tag.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]);
   }
 
-  return <section className="proDashboard clientDashboard">
-    
+  const alerts=[];
+  if(productsWithoutRfid>0) alerts.push({type:"warning",title:`${productsWithoutRfid} produits sans tag RFID`,text:"Priorisez les produits à forte rotation."});
+  if(duplicateEpcs>0) alerts.push({type:"danger",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,text:"Vérifier les associations RFID en double."});
+  if(coverage>=80) alerts.push({type:"success",title:"Couverture RFID élevée",text:"Votre catalogue est bien avancé."});
+  if(alerts.length===0) alerts.push({type:"success",title:"Aucune alerte prioritaire",text:"Les données RFID sont stables."});
 
-    <div className="kpiRow">
-      <div className="kpiCard"><div className="kpiIcon blue">📦</div><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small></div>
-      <div className="kpiCard"><div className="kpiIcon green">🔗</div><span>Associations Tags</span><b>{associations.length}</b><small>EPC liés aux produits</small></div>
-      <div className="kpiCard"><div className="kpiIcon teal">📡</div><span>Couverture Tags</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small></div>
-      <div className="kpiCard"><div className="kpiIcon red">🏷️</div><span>Produits sans Tags</span><b>{productsWithoutRfid}</b><small>à couvrir</small></div>
+  return <section className="proDashboardV31">
+    <p className="pageIntro">Vue d’ensemble de la couverture RFID et de l’activité de votre pharmacie.</p>
+
+    <div className="dashKpiGrid">
+      <div className="dashKpiCard"><div className="dashKpiIcon blue">📦</div><div><span>Produits catalogués</span><b>{products.length}</b><small>Total dans le catalogue</small></div></div>
+      <div className="dashKpiCard"><div className="dashKpiIcon green">🏷️</div><div><span>Produits tagués</span><b>{productsWithRfid}</b><small>Produits avec RFID</small></div></div>
+      <div className="dashKpiCard"><div className="dashKpiIcon blue">◎</div><div><span>Couverture RFID</span><b className="greenText">{coverage}%</b><small>Pourcentage global</small></div></div>
+      <div className="dashKpiCard"><div className="dashKpiIcon orange">⚠️</div><div><span>Produits sans tag</span><b>{productsWithoutRfid}</b><small>Nécessitent un tag</small></div></div>
     </div>
 
-    <div className="clientDashGrid">
-      <div className="adMainPanel">
-        <div className="adMainText">
-          <span className="adPill">OFFRE EXCLUSIVE</span>
-          <h2>Offre Premium</h2>
-          <p>Passez à la vitesse supérieure avec une solution Tags professionnelle pour pharmacie.</p>
-          <div className="adFeatureGrid">
-            <div><span>⏱️</span><b>Traçabilité fiable</b><small>Suivi clair de vos produits</small></div>
-            <div><span>🛡️</span><b>Réduction des pertes</b><small>Moins d’écarts et de ruptures</small></div>
-            <div><span>📊</span><b>Données exploitables</b><small>Décisions rapides</small></div>
+    <div className="dashboardMainGrid">
+      <div className="coveragePanelV31">
+        <div className="panelTitle"><h3>Couverture RFID</h3><span>ⓘ</span></div>
+        <div className="coverageContent">
+          <div className="coverageDonut" style={{"--p": `${coverage}%`}}>
+            <div><b>{coverage}%</b><small>Couverture globale</small><em>🛡️</em></div>
           </div>
-          <button className="adButton">Découvrir l’offre Premium →</button>
-        </div>
-        <div className="adVisual">
-          <div className="box3d bigBox">Smart Inventory</div>
-          <div className="tag3d bigTag">Tags</div>
+          <div className="coverageText">
+            <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture RFID progresse." : "Votre couverture RFID doit être améliorée."}</h3>
+            <p>Vous avez atteint {coverage}% de couverture RFID.</p>
+            <p>Continuez à associer vos produits pour une traçabilité optimale.</p>
+            <button onClick={()=>alert("Utilisez Operations → Scanner code-barres produit puis Scanner EPC RFID.")}>🔗 Associer maintenant</button>
+            <a>En savoir plus sur la couverture RFID ›</a>
+          </div>
         </div>
       </div>
 
-      <div className="sideAdStack">
-        <div className="miniAdCard tealAd"><span>🎓 Service</span><h3>Formation inventaire RFID</h3><p>Améliorez la couverture RFID avec votre équipe.</p></div>
-        <div className="miniAdCard blueAd"><span>⭐ Premium</span><h3>Support Premium</h3><p>Accompagnement prioritaire pour vos inventaires.</p></div>
+      <div className="adPlaceholderV31">
+        <div><h3>Espace publicité</h3><p>Zone configurable pour offres premium, fournisseurs RFID ou services d’accompagnement.</p></div>
       </div>
     </div>
 
-    <div className="bottomGrid betterBottom">
-      <div className="smallPanel realtimePanel">
-        <h3>Inventaire en temps réel</h3>
-        <div className="donut"><span>{associations.length}</span></div>
-        <p>Associés: {productsWithRfid} · Non associés: {productsWithoutRfid}</p>
+    <div className="dashboardBottomGrid">
+      <div className="reportsPanelV31">
+        <div className="panelTitle"><h3>Rapports et exports</h3></div>
+        <div className="miniReportGrid">
+          <button onClick={exportDashboardReport}><span>📄</span><b>Couverture RFID</b><small>CSV</small><em>↓</em></button>
+          <button onClick={exportProductsWithoutRfid}><span>📄</span><b>Produits sans tag</b><small>CSV</small><em>↓</em></button>
+          <button onClick={exportDashboardReport}><span>📄</span><b>Écarts d’inventaire</b><small>CSV</small><em>↓</em></button>
+          <button onClick={()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{}))}><span>📄</span><b>Historique scans</b><small>CSV</small><em>↓</em></button>
+        </div>
+        <a className="panelLink">Voir tous les rapports ›</a>
       </div>
 
-      <div className="smallPanel alertsPanel">
-        <h3>Alertes et anomalies</h3>
-        {productsWithoutRfid>0 ? 
-          <ul className="alertList"><li><span>🏷️</span><div><b>{productsWithoutRfid} produits sans RFID</b><small>À associer progressivement.</small></div></li></ul> :
-          <div className="noAnomaly">✅ Pas d’anomalies détectées</div>}
-      </div>
-
-      <div className="smallPanel reportsPanel">
-        <div className="sectionTitle"><b>Reports & Exports</b></div>
-        <div className="reportCards">
-          <div className="reportCard"><span>📄</span><div><b>Rapport d’inventaire</b><small>Produits et associations</small></div><button onClick={exportInventoryReport}>Exporter</button></div>
-          <div className="reportCard"><span>💾</span><div><b>Sauvegarde projet</b><small>Backup local JSON</small></div><button onClick={backupProject}>Backup</button></div>
+      <div className="alertsPanelV31">
+        <div className="panelTitle"><h3>Alertes prioritaires</h3></div>
+        <div className="alertListV31">
+          {alerts.map((a,i)=><div className={`alertItemV31 ${a.type}`} key={i}><span>{a.type==="success"?"✅":a.type==="danger"?"⛔":"🔔"}</span><div><b>{a.title}</b><small>{a.text}</small></div></div>)}
         </div>
       </div>
     </div>
   </section>
 }
+
 
 
 function DashboardAdmin({auth}){

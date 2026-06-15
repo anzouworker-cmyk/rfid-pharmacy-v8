@@ -888,3 +888,27 @@ table button{padding:8px 10px;font-size:13px}
 .operationsActionPanel .operationGrid{
   margin-bottom:0!important;
 }
+
+
+/* V31 professional RFID dashboard */
+.proDashboardV31{max-width:1500px;margin:0 auto}
+.pageIntro{font-size:18px;color:#526078;margin:0 0 28px}
+.dashKpiGrid{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:24px;margin-bottom:28px}
+.dashKpiCard{background:white;border:1px solid #e5eaf3;border-radius:16px;padding:26px 24px;display:grid;grid-template-columns:72px 1fr;gap:18px;align-items:center;box-shadow:0 14px 35px rgba(15,23,42,.08)}
+.dashKpiIcon{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-size:32px}
+.dashKpiIcon.blue{background:#eaf4ff;color:#1d4ed8}.dashKpiIcon.green{background:#eafaf1;color:#059669}.dashKpiIcon.orange{background:#fff0e2;color:#f97316}
+.dashKpiCard span{display:block;font-weight:900;color:#334155}.dashKpiCard b{display:block;font-size:34px;line-height:1.1;margin:8px 0;letter-spacing:-1px;color:#0b1023}.dashKpiCard small{color:#64748b}.greenText{color:#059669!important}
+.dashboardMainGrid{display:grid;grid-template-columns:1.15fr .8fr;gap:24px;margin-bottom:24px}
+.coveragePanelV31,.adPlaceholderV31,.reportsPanelV31,.alertsPanelV31{background:white;border:1px solid #e5eaf3;border-radius:16px;padding:24px;box-shadow:0 14px 35px rgba(15,23,42,.08)}
+.panelTitle{display:flex;align-items:center;gap:10px;margin-bottom:22px}.panelTitle h3{margin:0;font-size:22px;font-weight:900;color:#0b1023}
+.coverageContent{display:grid;grid-template-columns:340px 1fr;align-items:center;gap:42px}
+.coverageDonut{width:300px;height:300px;border-radius:50%;background:conic-gradient(#22c55e var(--p),#eef0f4 0);display:grid;place-items:center;margin:auto}
+.coverageDonut>div{width:190px;height:190px;border-radius:50%;background:white;display:grid;place-items:center;text-align:center}
+.coverageDonut b{font-size:48px;color:#059669;line-height:1}.coverageDonut small{font-weight:900;color:#0b1023}.coverageDonut em{font-style:normal;font-size:30px}
+.coverageText h3{font-size:22px;color:#0b1023}.coverageText p{color:#526078;line-height:1.7}.coverageText button{background:#075985!important;color:white!important;border-radius:8px;padding:15px 30px;margin:12px 0 18px}.coverageText a{display:block;color:#075985;font-weight:900}
+.adPlaceholderV31{min-height:420px;display:grid;place-items:center;background:linear-gradient(135deg,#f8fafc,#eef8ff)}.adPlaceholderV31 div{border:2px dashed #cbd5e1;border-radius:16px;padding:44px;text-align:center;color:#64748b}
+.dashboardBottomGrid{display:grid;grid-template-columns:1fr .95fr;gap:24px}
+.miniReportGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.miniReportGrid button{min-height:150px;background:white!important;border:1px solid #e5eaf3;color:#0b1023!important;border-radius:12px;display:grid;place-items:center;gap:6px;box-shadow:none!important}.miniReportGrid span{font-size:34px;color:#059669}.miniReportGrid b{font-size:14px;text-align:center}.miniReportGrid small{color:#64748b}.miniReportGrid em{font-style:normal;color:#64748b}.panelLink{display:inline-block;margin-top:22px;color:#075985;font-weight:900}
+.alertListV31{display:grid;gap:12px}.alertItemV31{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:center;padding:14px;border-radius:12px;border:1px solid #e5eaf3;background:#f8fafc}.alertItemV31 span{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:white}.alertItemV31 b{display:block;color:#0b1023}.alertItemV31 small{color:#64748b}.alertItemV31.warning{border-color:#fed7aa;background:#fff7ed}.alertItemV31.danger{border-color:#fecaca;background:#fef2f2}.alertItemV31.success{border-color:#bbf7d0;background:#f0fdf4}
+@media(max-width:1300px){.dashKpiGrid{grid-template-columns:repeat(2,1fr)}.dashboardMainGrid,.dashboardBottomGrid{grid-template-columns:1fr}}
+@media(max-width:800px){.dashKpiGrid,.miniReportGrid{grid-template-columns:1fr}.coverageContent{grid-template-columns:1fr}.coverageDonut{width:240px;height:240px}.coverageDonut>div{width:155px;height:155px}}
