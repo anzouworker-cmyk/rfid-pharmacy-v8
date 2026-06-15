@@ -675,3 +675,169 @@ table button{padding:8px 10px;font-size:13px}
 
 /* V30 notes */
 .association-page .ops-section,.inventory-page .import-section{display:none!important}
+
+
+/* V30.1 - Perfect card alignment in Operations */
+.operationGrid.workflowGrid{
+  align-items:stretch;
+}
+
+.operationCard,
+.exportOperationCard{
+  position:relative!important;
+  min-height:330px!important;
+  height:330px!important;
+  padding:28px 22px!important;
+  display:grid!important;
+  grid-template-rows:92px 70px 70px 52px!important;
+  align-items:center!important;
+  justify-items:center!important;
+  gap:0!important;
+  text-align:center!important;
+  overflow:visible!important;
+}
+
+.operationCard .opIcon,
+.exportOperationCard .opIcon{
+  grid-row:1!important;
+  width:92px!important;
+  height:92px!important;
+  border-radius:22px!important;
+  display:grid!important;
+  place-items:center!important;
+  margin:0 auto!important;
+  font-size:42px!important;
+  line-height:1!important;
+  transform:none!important;
+}
+
+.operationCard h3,
+.exportOperationCard h3{
+  grid-row:2!important;
+  align-self:center!important;
+  min-height:58px!important;
+  margin:0!important;
+  padding:0 4px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  line-height:1.18!important;
+  font-size:20px!important;
+  font-weight:900!important;
+  max-width:100%!important;
+}
+
+.operationCard p,
+.exportOperationCard p{
+  grid-row:3!important;
+  align-self:start!important;
+  min-height:54px!important;
+  margin:0!important;
+  padding:0 4px!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  text-align:center!important;
+  line-height:1.45!important;
+  font-size:15px!important;
+}
+
+.operationCard span,
+.exportOperationCard span:last-child{
+  grid-row:4!important;
+  align-self:end!important;
+  min-width:140px!important;
+  height:44px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin:0 auto!important;
+  border-radius:12px!important;
+  font-weight:900!important;
+}
+
+.fileCardOp input,
+.fileCard input{
+  position:absolute!important;
+  inset:0!important;
+  opacity:0!important;
+  cursor:pointer!important;
+}
+
+/* keep colored cards readable */
+.operationCard.blue h3,
+.operationCard.green h3,
+.operationCard.dangerOp h3,
+.exportOperationCard.blue h3,
+.exportOperationCard.green h3{
+  color:white!important;
+}
+
+.operationCard.blue p,
+.operationCard.green p,
+.operationCard.dangerOp p,
+.exportOperationCard.blue p,
+.exportOperationCard.green p{
+  color:rgba(255,255,255,.9)!important;
+}
+
+@media(max-width:900px){
+  .operationCard,
+  .exportOperationCard{
+    height:auto!important;
+    min-height:300px!important;
+  }
+}
+
+
+/* V30.2 clean table-only pages */
+.tableOnlyPage{
+  max-width:1600px;
+  margin:0 auto;
+}
+.tableOnlyPage .notice{
+  margin-bottom:20px;
+}
+.tableToolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin:0 0 18px;
+}
+.tableToolbar input{
+  max-width:420px;
+  width:100%;
+  min-height:44px;
+  border:1px solid #d9e0eb;
+  border-radius:12px;
+  padding:0 14px;
+  background:#fff;
+}
+.tableToolbar span{
+  color:#64748b;
+  font-weight:800;
+}
+.topPageTitle{
+  margin:0;
+  font-size:38px;
+  line-height:1;
+  letter-spacing:-1px;
+  font-weight:900;
+  color:#0b1023;
+}
+.whiteTopbar{
+  gap:22px!important;
+}
+.whiteContent > section > h1:first-child{
+  display:none!important;
+}
+.whiteContent > section > h2:first-child{
+  display:none!important;
+}
+@media(max-width:900px){
+  .topPageTitle{font-size:28px;margin-top:14px}
+  .tableToolbar{display:block}
+  .tableToolbar span{display:block;margin-top:10px}
+}

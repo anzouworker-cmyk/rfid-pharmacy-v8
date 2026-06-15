@@ -78,6 +78,16 @@ function App(){
   const accountName = me?.pharmacy_name || displayName;
   const roleName = me?.role==="platform_admin" ? "Administrateur" : "Utilisateur";
 
+  const pageTitle =
+    tab==="operations" ? "Operations" :
+    tab==="dashboard" ? "Dashboard" :
+    tab==="association" ? "Associations RFID" :
+    tab==="inventory" ? "Inventaire RFID réel" :
+    tab==="ai" ? "Assistant IA" :
+    tab==="platform" ? "Clients SaaS" :
+    tab==="dashboardAdmin" ? "Publicités" : "PharmaInventory";
+
+
   const menu=[
     {id:"operations",label:"Operations",icon:"⌂"},
     {id:"dashboard",label:"Dashboard",icon:"📊"},
@@ -114,7 +124,7 @@ function App(){
 
     <section className="whiteMain">
       <header className="whiteTopbar">
-        <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button>
+        <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button><h1 className="topPageTitle">{pageTitle}</h1>
         {(() => { const pageTitles={operations:"Operations",dashboard:"Dashboard",association:"Associations RFID",inventory:"Inventaire RFID réel",ai:"Assistant IA",platform:"Clients SaaS",dashboardAdmin:"Publicités"}; return <h1 className="topPageTitle">{pageTitles[tab]||""}</h1>; })()}
         <div className="whiteAccount">
           <div>
@@ -484,185 +494,59 @@ function AIAssistant(){
 }
 
 
+
 function Association(){
-  const {products,setProducts,associations,setAssociations}=useLocalStore();
-  const [barcode,setBarcode]=useState("");
-  const [epc,setEpc]=useState("");
-  const [selected,setSelected]=useState(null);
-  const [msg,setMsg]=useState("");
-  const barcodeRef=useRef(null);
-  const epcRef=useRef(null);
+  const {associations}=useLocalStore();
+  const [q,setQ]=useState("");
 
-  function importProducts(file){
-    Papa.parse(file,{header:true,delimiter:";",skipEmptyLines:true,complete:(res)=>{
-      const rows=res.data.map(r=>({
-        PID:r["PID"]||"",
-        Produit:r["Produit"]||"",
-        Catégorie:r["Catégorie"]||"",
-        TVA:r["TVA"]||"",
-        PPV:r["PPV"]||"",
-        PPH:r["PPH"]||"",
-        Zone:r["Zone"]||"",
-        Stock:r["Stock"]||"",
-        "Date de péremption":r["Date de péremption"]||"",
-        "Stock min":r["Stock min"]||"",
-        "Stock max":r["Stock max"]||"",
-        "Code barre 1":r["Code barre 1"]||"",
-        "Code barre 2":r["Code barre 2"]||""
-      })).filter(r=>r.PID && r.Produit);
-      setProducts(rows);
-      setMsg(`${rows.length} produits importés localement`);
-    }});
-  }
+  const rows = associations.filter(a=>{
+    const s = `${a.PID||""} ${a.Produit||""} ${a.EPC||""} ${a["Code barre 1"]||""} ${a["Code barre 2"]||""}`.toLowerCase();
+    return s.includes(q.toLowerCase());
+  });
 
-  function lookup(){
-    const p=findProduct(products,barcode);
-    if(!p){
-      setSelected(null);
-      setMsg("Produit introuvable. Vérifier le code-barres/PID ou importer le CSV pharmacie.");
-      return;
-    }
-    setSelected(p);
-    setMsg(`Produit trouvé: ${p.Produit} | PID ${p.PID}`);
-    setTimeout(()=>epcRef.current?.focus(),50);
-  }
+  return <section className="tableOnlyPage">
+    <p className="notice">Tableau de consultation des associations Produit ↔ EPC RFID enregistrées localement.</p>
 
-  function assignNow(epcValue){
-    const e=norm(epcValue||epc);
-    if(!selected) return setMsg("Scanner/rechercher un produit d'abord.");
-    if(!e) return setMsg("Scanner EPC RFID.");
-    const existing=associations.find(a=>norm(a.EPC)===e);
-    if(existing && existing.PID!==selected.PID){
-      return setMsg(`Erreur: cet EPC est déjà associé au PID ${existing.PID}`);
-    }
-    const newAssoc=[
-      ...associations.filter(a=>norm(a.EPC)!==e),
-      {PID:selected.PID,Produit:selected.Produit,"Code barre 1":selected["Code barre 1"],"Code barre 2":selected["Code barre 2"],EPC:e,Date:new Date().toISOString()}
-    ];
-    setAssociations(newAssoc);
-    setMsg(`✓ Association réussie: ${selected.Produit} ↔ ${e}`);
-    setBarcode(""); setEpc(""); setSelected(null);
-    setTimeout(()=>barcodeRef.current?.focus(),80);
-  }
-
-  const assocCols=["PID","Produit","Code barre 1","Code barre 2","EPC","Date"];
-
-  function deleteAssociation(epc){
-    if(!confirm(`Supprimer l'association EPC ${epc} ?`)) return;
-    const updated = associations.filter(a => norm(a.EPC) !== norm(epc));
-    setAssociations(updated);
-    setMsg(`Association supprimée: ${epc}`);
-  }
-
-  return <section>
-    
-    <h2>Association RFID locale</h2>
-    <p className="notice">Produits et associations restent dans ce navigateur. Rien n'est envoyé au serveur.</p>
-    <div className="statsGrid">
-      <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
-      <div className="statCard"><span>Associations</span><b>{associations.length}</b><small>tags RFID liés</small></div>
-      <div className="statCard"><span>Mode</span><b>Local</b><small>aucune donnée cloud</small></div>
+    <div className="tableToolbar">
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans les associations..."/>
+      <span>{rows.length} association(s)</span>
     </div>
-    <div className="card">
-      <h3>Importer CSV pharmacie</h3>
-      <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
-      <p>{products.length} produits chargés localement</p>
-    </div>
-    <div className="card">
-      <h3>1. Scanner code-barres produit</h3>
-      <input ref={barcodeRef} autoFocus value={barcode} onChange={e=>setBarcode(e.target.value)}
-        onKeyDown={e=>{ if(e.key==="Enter"){ e.preventDefault(); lookup(); }}}
-        placeholder="Scanner code-barres ou PID puis ENTER"/>
-      <button onClick={lookup}>Rechercher produit</button>
-    </div>
-    {selected && <div className="productBox">
-      <h3>Produit trouvé</h3>
-      <p><b>{selected.Produit}</b></p>
-      <p>PID: {selected.PID} | Zone: {selected.Zone||"-"} | Stock: {selected.Stock||"-"}</p>
-    </div>}
-    <div className="card">
-      <h3>2. Scanner EPC RFID</h3>
-      <input ref={epcRef} value={epc} onChange={e=>setEpc(e.target.value)}
-        onKeyDown={e=>{ if(e.key==="Enter"){ e.preventDefault(); assignNow(e.target.value); }}}
-        placeholder="Scanner EPC RFID puis ENTER"/>
-      <button onClick={()=>assignNow()}>Associer</button>
-    </div>
-    <p className={msg.startsWith("✓")?"success":""}>{msg}</p>
-    <h3>Associations locales</h3>
-    <button onClick={()=>exportCSV("associations_rfid.csv",associations,assocCols)}>Exporter associations CSV</button>
-    <input type="file" accept=".csv" onChange={e=>{
-      Papa.parse(e.target.files[0],{header:true,delimiter:";",skipEmptyLines:true,complete:(res)=>{
-        const rows=res.data.filter(r=>r.PID&&r.EPC);
-        setAssociations(rows);
-        setMsg(`${rows.length} associations importées`);
-      }});
-    }}/>
-    <button onClick={()=>{ if(confirm("Vider les associations locales ?")) setAssociations([]); }}>Vider associations</button>
-    <table>
-      <thead>
-        <tr>
-          {assocCols.map(c=><th key={c}>{c}</th>)}
-          <th>Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        {associations.map((a,i)=><tr key={i}>
-          {assocCols.map(c=><td key={c}>{String(a[c]??"")}</td>)}
-          <td><button className="dangerBtn" onClick={()=>deleteAssociation(a.EPC)}>Delete</button></td>
-        </tr>)}
-      </tbody>
-    </table>
+
+    <Table rows={rows} cols={["PID","Produit","Code barre 1","Code barre 2","EPC","Date"]}/>
   </section>
 }
 
+
+
+
 function Inventory(){
   const {products,associations}=useLocalStore();
-  const [epcs,setEpcs]=useState([]);
-  const [search,setSearch]=useState("");
+  const [q,setQ]=useState("");
 
-  function importEpcs(file){
-    Papa.parse(file,{header:false,skipEmptyLines:true,complete:(res)=>{
-      const rows=res.data.map(r=>norm(r[0])).filter(e=>e && e!=="EPC" && e.length>=3);
-      setEpcs([...new Set(rows)]);
-    }});
-  }
+  const associatedPids = new Set(associations.map(a=>String(a.PID)));
+  const rows = products.map(p=>({
+    PID:p.PID,
+    Produit:p.Produit,
+    Catégorie:p["Catégorie"] || p.Catégorie || "",
+    Zone:p.Zone || "",
+    Stock:p.Stock || "",
+    "Code barre 1":p["Code barre 1"] || "",
+    "Code barre 2":p["Code barre 2"] || "",
+    "Statut RFID": associatedPids.has(String(p.PID)) ? "Associé" : "Sans RFID"
+  })).filter(r=>{
+    const s = Object.values(r).join(" ").toLowerCase();
+    return s.includes(q.toLowerCase());
+  });
 
-  const results=useMemo(()=>{
-    const detected=new Set(epcs.map(norm));
-    return products.map(p=>{
-      const productAssoc=associations.filter(a=>String(a.PID)===String(p.PID));
-      const epcList=productAssoc.map(a=>norm(a.EPC)).filter(Boolean);
-      let Statut="Sans association";
-      if(epcList.length>0) Statut=epcList.some(e=>detected.has(e)) ? "Présent" : "Manquant";
-      return {...p, Statut, "EPC associés":epcList.join(", ")};
-    });
-  },[products,associations,epcs]);
+  return <section className="tableOnlyPage">
+    <p className="notice">Tableau de consultation de l’inventaire RFID réel et du statut de couverture RFID.</p>
 
-  const filtered=results.filter(r=>!search || Object.values(r).join(" ").toLowerCase().includes(search.toLowerCase()));
-  const cols=["Statut","PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associés"];
-  const present=results.filter(r=>r.Statut==="Présent").length;
-  const missing=results.filter(r=>r.Statut==="Manquant").length;
-  const noAssoc=results.filter(r=>r.Statut==="Sans association").length;
-
-  return <section>
-    <h2>Inventaire RFID réel</h2>
-    <h2>Inventaire RFID réel</h2>
-    <p className="notice">Importer un CSV/TXT avec une seule colonne EPC détectés. La comparaison se fait localement.</p>
-    <div className="card">
-      <h3>Importer EPC détectés</h3>
-      <input type="file" accept=".csv,.txt" onChange={e=>importEpcs(e.target.files[0])}/>
-      <p>{epcs.length} EPC détectés chargés</p>
+    <div className="tableToolbar">
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans l’inventaire..."/>
+      <span>{rows.length} produit(s)</span>
     </div>
-    <div className="summary">
-      <span className="okBox">Présents: {present}</span>
-      <span className="badBox">Manquants: {missing}</span>
-      <span className="neutralBox">Sans association: {noAssoc}</span>
-    </div>
-    <div className="row">
-      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Recherche"/>
-      <button onClick={()=>exportCSV("inventaire_rfid_resultat.csv",filtered,cols)}>Exporter résultat CSV</button>
-    </div>
-    <Table rows={filtered} cols={cols}/>
+
+    <Table rows={rows} cols={["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]}/>
   </section>
 }
 
