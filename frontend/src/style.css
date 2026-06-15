@@ -912,3 +912,148 @@ table button{padding:8px 10px;font-size:13px}
 .alertListV31{display:grid;gap:12px}.alertItemV31{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:center;padding:14px;border-radius:12px;border:1px solid #e5eaf3;background:#f8fafc}.alertItemV31 span{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:white}.alertItemV31 b{display:block;color:#0b1023}.alertItemV31 small{color:#64748b}.alertItemV31.warning{border-color:#fed7aa;background:#fff7ed}.alertItemV31.danger{border-color:#fecaca;background:#fef2f2}.alertItemV31.success{border-color:#bbf7d0;background:#f0fdf4}
 @media(max-width:1300px){.dashKpiGrid{grid-template-columns:repeat(2,1fr)}.dashboardMainGrid,.dashboardBottomGrid{grid-template-columns:1fr}}
 @media(max-width:800px){.dashKpiGrid,.miniReportGrid{grid-template-columns:1fr}.coverageContent{grid-template-columns:1fr}.coverageDonut{width:240px;height:240px}.coverageDonut>div{width:155px;height:155px}}
+
+
+/* V32 single ad manager */
+.singleAdAdmin{
+  max-width:1500px;
+  margin:0 auto;
+}
+.adAdminGrid{
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:24px;
+  margin:22px 0;
+}
+.adEditorPanel,
+.adPreviewPanel,
+.adListPanel{
+  background:white;
+  border:1px solid #e5eaf3;
+  border-radius:18px;
+  padding:26px;
+  box-shadow:0 12px 28px rgba(15,23,42,.05);
+}
+.adEditorPanel h2,
+.adPreviewPanel h2,
+.adListPanel h2{
+  margin:0 0 10px;
+  font-size:26px;
+  font-weight:900;
+  color:#0b1023;
+}
+.mutedText{
+  color:#64748b;
+  margin-bottom:18px;
+}
+.adFormGrid{
+  display:grid;
+  gap:12px;
+  margin-bottom:18px;
+}
+.adFormGrid input,
+.adFormGrid select,
+.adFormGrid textarea{
+  width:100%;
+  border:1px solid #d9e0eb;
+  border-radius:12px;
+  padding:13px 14px;
+  background:#fff;
+}
+.adFormGrid textarea{
+  min-height:120px;
+}
+.dashboardAdPreview{
+  border:1px solid #e5eaf3;
+  border-radius:18px;
+  padding:22px;
+  background:linear-gradient(135deg,#f8fafc,#eef8ff);
+  min-height:420px;
+  display:grid;
+  align-content:center;
+  gap:12px;
+}
+.dashboardAdPreview img{
+  width:100%;
+  max-height:190px;
+  object-fit:cover;
+  border-radius:14px;
+}
+.adPreviewImage{
+  height:180px;
+  border:2px dashed #cbd5e1;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  color:#64748b;
+  font-weight:900;
+}
+.dashboardAdPreview span,
+.liveDashboardAd span{
+  display:inline-block;
+  font-size:12px;
+  font-weight:900;
+  color:#075985;
+  letter-spacing:.04em;
+}
+.dashboardAdPreview h3,
+.liveDashboardAd h3{
+  font-size:26px;
+  margin:0;
+  color:#0b1023;
+}
+.dashboardAdPreview p,
+.liveDashboardAd p{
+  color:#526078;
+  line-height:1.6;
+}
+.dashboardAdPreview button,
+.liveDashboardAd a{
+  display:inline-block;
+  background:#075985!important;
+  color:white!important;
+  border-radius:10px;
+  padding:13px 18px;
+  text-decoration:none;
+  font-weight:900;
+  width:max-content;
+}
+.adCardsList{
+  display:grid;
+  gap:12px;
+  margin-top:18px;
+}
+.adRowCard{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  border:1px solid #e5eaf3;
+  border-radius:14px;
+  padding:14px;
+}
+.adRowCard b{display:block}
+.adRowCard small{display:block;color:#64748b}
+.adRowCard button{
+  margin-left:6px;
+}
+.dangerSmall{
+  background:#fee2e2!important;
+  color:#991b1b!important;
+}
+.liveDashboardAd{
+  width:100%;
+  min-height:100%;
+  display:grid;
+  align-content:center;
+  gap:14px;
+}
+.liveDashboardAd img{
+  width:100%;
+  max-height:220px;
+  object-fit:cover;
+  border-radius:14px;
+}
+@media(max-width:1100px){
+  .adAdminGrid{grid-template-columns:1fr}
+}

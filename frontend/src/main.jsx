@@ -397,6 +397,14 @@ function findProduct(products,value){
 
 function AIAssistant(){
   const {products,associations}=useLocalStore();
+  const [dashboardAds,setDashboardAds]=useState([]);
+  useEffect(()=>{
+    const token=localStorage.token||"";
+    axios.get(`${API}/dashboard/content`,{headers:{Authorization:`Bearer ${token}`}}).then(r=>{
+      setDashboardAds(r.data.filter(x=>["publicite","publicité","promo","annonce","ad"].includes((x.content_type||"").toLowerCase())));
+    }).catch(()=>setDashboardAds([]));
+  },[]);
+  const dashboardAd = dashboardAds.find(x=>x.active!==false) || null;
   const [question,setQuestion]=useState("");
   const [answer,setAnswer]=useState(null);
   const [loading,setLoading]=useState(false);
@@ -873,7 +881,13 @@ function Dashboard(){
       </div>
 
       <div className="adPlaceholderV31">
-        <div><h3>Espace publicité</h3><p>Zone configurable pour offres premium, fournisseurs RFID ou services d’accompagnement.</p></div>
+        {dashboardAd ? <div className="liveDashboardAd">
+          {dashboardAd.image_url && <img src={dashboardAd.image_url} alt="Publicité"/>}
+          <span>ESPACE PUBLICITAIRE</span>
+          <h3>{dashboardAd.title}</h3>
+          <p>{dashboardAd.message}</p>
+          {dashboardAd.cta_label && <a href={dashboardAd.cta_url || "#"} target="_blank">{dashboardAd.cta_label} →</a>}
+        </div> : <div><h3>Espace publicité</h3><p>Zone configurable pour offres premium, fournisseurs RFID ou services d’accompagnement.</p></div>}
       </div>
     </div>
 
@@ -901,6 +915,7 @@ function Dashboard(){
 
 
 
+
 function DashboardAdmin({auth}){
   const [items,setItems]=useState([]);
   const [clients,setClients]=useState([]);
@@ -908,49 +923,155 @@ function DashboardAdmin({auth}){
   const [target,setTarget]=useState("");
   const [title,setTitle]=useState("");
   const [message,setMessage]=useState("");
-  const [type,setType]=useState("conseil");
   const [ctaLabel,setCtaLabel]=useState("");
   const [ctaUrl,setCtaUrl]=useState("");
   const [imageUrl,setImageUrl]=useState("");
+  const [active,setActive]=useState(true);
   const [msg,setMsg]=useState("");
 
-  async function load(){
-    try{
-      setItems((await axios.get(`${API}/platform/dashboard-content`,auth)).data);
-      setClients((await axios.get(`${API}/platform/clients`,auth)).data.filter(c=>c.role!=="platform_admin"));
-    }catch(e){ setMsg(e.response?.data?.detail || "Erreur chargement dashboard admin"); }
+  function load(){
+    axios.get(`${API}/platform/dashboard-content`,auth).then(r=>setItems(r.data)).catch(()=>setMsg("Erreur chargement publicités"));
+    axios.get(`${API}/platform/clients`,auth).then(r=>setClients(r.data.filter(x=>x.role!=="platform_admin"))).catch(()=>{});
   }
+
   useEffect(()=>{load()},[]);
 
-  async function create(){
-    try{
-      await axios.post(`${API}/platform/dashboard-content`,{scope,target_username:scope==="pharmacy"?target:null,title,message,content_type:type,cta_label:ctaLabel,cta_url:ctaUrl,image_url:imageUrl,active:true},auth);
-      setTitle(""); setMessage(""); setCtaLabel(""); setCtaUrl(""); setImageUrl(""); setMsg("Contenu dashboard créé."); load();
-    }catch(e){ setMsg(e.response?.data?.detail || "Erreur création contenu"); }
-  }
-  async function toggle(id){ await axios.post(`${API}/platform/dashboard-content-toggle/${id}`,{},auth); load(); }
-  async function del(id){ if(!confirm("Supprimer ce contenu dashboard ?")) return; await axios.post(`${API}/platform/dashboard-content-delete/${id}`,{},auth); load(); }
+  const ads = items.filter(x=>["publicite","publicité","promo","annonce","ad"].includes((x.content_type||"").toLowerCase()));
+  const currentAd = ads[0];
 
-  return <section>
-    <h2>Gestion du Dashboard marketing</h2>
-    <p className="notice">Créer des annonces globales pour toutes les pharmacies ou des messages ciblés pour une pharmacie spécifique.</p>
-    <div className="card">
-      <h3>Nouveau contenu</h3>
-      <div className="row">
-        <select value={scope} onChange={e=>setScope(e.target.value)}><option value="global">Toutes les pharmacies</option><option value="pharmacy">Pharmacie spécifique</option></select>
-        {scope==="pharmacy" && <select value={target} onChange={e=>setTarget(e.target.value)}><option value="">Choisir pharmacie</option>{clients.map(c=><option key={c.username} value={c.username}>{c.pharmacy_name} ({c.username})</option>)}</select>}
-        <select value={type} onChange={e=>setType(e.target.value)}><option value="conseil">Conseil</option><option value="promo">Publicité</option><option value="annonce">Annonce</option><option value="info">Info</option></select>
+  function editExisting(x){
+    setScope(x.scope || "global");
+    setTarget(x.target_username || "");
+    setTitle(x.title || "");
+    setMessage(x.message || "");
+    setCtaLabel(x.cta_label || "");
+    setCtaUrl(x.cta_url || "");
+    setImageUrl(x.image_url || "");
+    setActive(x.active !== false);
+    setMsg("Publicité chargée dans le formulaire.");
+  }
+
+  async function publish(){
+    setMsg("");
+    if(!title.trim() || !message.trim()){
+      setMsg("Titre et message obligatoires.");
+      return;
+    }
+    try{
+      // Single ad slot: deactivate existing ads before creating the new one.
+      for(const ad of ads.filter(x=>x.active)){
+        await axios.post(`${API}/platform/dashboard-content-toggle/${ad.id}`,{},auth);
+      }
+      await axios.post(`${API}/platform/dashboard-content`,{
+        scope,
+        target_username: scope==="pharmacy" ? target : null,
+        title,
+        message,
+        cta_label:ctaLabel,
+        cta_url:ctaUrl,
+        image_url:imageUrl,
+        content_type:"publicite",
+        active
+      },auth);
+      setTitle("");
+      setMessage("");
+      setCtaLabel("");
+      setCtaUrl("");
+      setImageUrl("");
+      setActive(true);
+      setMsg("Publicité dashboard publiée.");
+      load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur création publicité");
+    }
+  }
+
+  async function toggle(id){
+    try{
+      await axios.post(`${API}/platform/dashboard-content-toggle/${id}`,{},auth);
+      load();
+    }catch(e){setMsg("Erreur changement statut");}
+  }
+
+  async function del(id){
+    if(!confirm("Supprimer cette publicité ?")) return;
+    try{
+      await axios.post(`${API}/platform/dashboard-content-delete/${id}`,{},auth);
+      load();
+    }catch(e){setMsg("Erreur suppression");}
+  }
+
+  return <section className="singleAdAdmin">
+    <p className="notice">Gérez l’unique espace publicitaire affiché dans le dashboard client. Une seule publicité active est utilisée à la fois.</p>
+
+    <div className="adAdminGrid">
+      <div className="adEditorPanel">
+        <h2>Espace publicité dashboard</h2>
+        <p className="mutedText">Cette publicité apparaît dans le panneau droit du Dashboard RFID.</p>
+
+        <div className="adFormGrid">
+          <select value={scope} onChange={e=>setScope(e.target.value)}>
+            <option value="global">Toutes les pharmacies</option>
+            <option value="pharmacy">Pharmacie spécifique</option>
+          </select>
+
+          {scope==="pharmacy" && <select value={target} onChange={e=>setTarget(e.target.value)}>
+            <option value="">Choisir pharmacie</option>
+            {clients.map(c=><option key={c.username} value={c.username}>{c.pharmacy_name || c.username}</option>)}
+          </select>}
+
+          <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Titre publicité"/>
+          <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Message publicité"/>
+          <input value={ctaLabel} onChange={e=>setCtaLabel(e.target.value)} placeholder="Bouton CTA"/>
+          <input value={ctaUrl} onChange={e=>setCtaUrl(e.target.value)} placeholder="URL CTA https://..."/>
+          <input value={imageUrl} onChange={e=>setImageUrl(e.target.value)} placeholder="URL image publicité https://..."/>
+
+          <label className="checkLine"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/> Publicité active</label>
+        </div>
+
+        <button className="primaryBtn" onClick={publish}>Publier dans le dashboard</button>
+        {msg && <p className={msg.toLowerCase().includes("erreur") ? "err" : "success"}>{msg}</p>}
       </div>
-      <input placeholder="Titre" value={title} onChange={e=>setTitle(e.target.value)} style={{width:"100%"}}/>
-      <textarea className="textArea" placeholder="Message" value={message} onChange={e=>setMessage(e.target.value)} />
-      <div className="row"><input placeholder="Bouton CTA" value={ctaLabel} onChange={e=>setCtaLabel(e.target.value)}/><input placeholder="URL CTA https://..." value={ctaUrl} onChange={e=>setCtaUrl(e.target.value)}/><input placeholder="URL image publicité https://..." value={imageUrl} onChange={e=>setImageUrl(e.target.value)}/><button onClick={create}>Publier</button></div>
+
+      <div className="adPreviewPanel">
+        <h2>Aperçu</h2>
+        <div className="dashboardAdPreview">
+          {imageUrl ? <img src={imageUrl} alt="Aperçu publicité"/> : <div className="adPreviewImage">Image publicité</div>}
+          <span>ESPACE PUBLICITAIRE</span>
+          <h3>{title || "Produit Exclusif"}</h3>
+          <p>{message || "Profitez de l’offre disponible pour votre pharmacie."}</p>
+          <button>{ctaLabel || "Découvrir"}</button>
+        </div>
+      </div>
     </div>
-    <p className={msg.includes("Erreur")?"err":"success"}>{msg}</p>
-    <table><thead><tr><th>Type</th><th>Portée</th><th>Pharmacie</th><th>Titre</th><th>Message</th><th>Statut</th><th>Actions</th></tr></thead><tbody>
-      {items.map(i=><tr key={i.id}><td>{i.content_type}</td><td>{i.scope==="global"?"Toutes":"Ciblée"}</td><td>{i.target_username||"-"}</td><td>{i.title}</td><td>{i.message}</td><td>{i.active?"active":"inactive"}</td><td><button onClick={()=>toggle(i.id)}>{i.active?"Désactiver":"Activer"}</button><button className="dangerBtn" onClick={()=>del(i.id)}>Delete</button></td></tr>)}
-    </tbody></table>
+
+    <div className="adListPanel">
+      <h2>Publicités existantes</h2>
+      <Table rows={ads.map(x=>({
+        Type:x.content_type,
+        Portée:x.scope==="global"?"Toutes":x.target_username,
+        Titre:x.title,
+        Statut:x.active?"Active":"Inactive",
+        Actions:""
+      }))} cols={["Type","Portée","Titre","Statut"]}/>
+
+      <div className="adCardsList">
+        {ads.map(x=><div className="adRowCard" key={x.id}>
+          <div>
+            <b>{x.title}</b>
+            <small>{x.scope==="global" ? "Toutes les pharmacies" : x.target_username} · {x.active ? "Active" : "Inactive"}</small>
+          </div>
+          <div>
+            <button onClick={()=>editExisting(x)}>Modifier</button>
+            <button onClick={()=>toggle(x.id)}>{x.active ? "Désactiver" : "Activer"}</button>
+            <button className="dangerSmall" onClick={()=>del(x.id)}>Supprimer</button>
+          </div>
+        </div>)}
+      </div>
+    </div>
   </section>
 }
+
 
 
 function Table({rows,cols}){
