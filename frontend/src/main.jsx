@@ -124,7 +124,7 @@ function App(){
 
     <section className="whiteMain">
       <header className="whiteTopbar">
-        <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button><h1 className="topPageTitle">{pageTitle}</h1>{(() => { const pageTitles={operations:"Operations",dashboard:"Dashboard",association:"Associations RFID",inventory:"Inventaire RFID réel",ai:"Assistant IA",platform:"Clients SaaS",dashboardAdmin:"Publicités"}; return <h1 className="topPageTitle">{pageTitles[tab]||""}</h1>; })()}
+        <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button><h1 className="topPageTitle">{pageTitle}</h1>{(() => { const pageTitles={operations:"Operations",dashboard:"Dashboard",association:"Associations Tags",inventory:"Inventaire RFID réel",ai:"Assistant IA",platform:"Clients SaaS",dashboardAdmin:"Publicités"}; return <h1 className="topPageTitle">{pageTitles[tab]||""}</h1>; })()}
         <div className="whiteAccount">
           <div>
             <b>{accountName}</b>
@@ -185,7 +185,7 @@ function Operations(){
         Date:r.Date||new Date().toISOString()
       })).filter(x=>x.EPC);
       setAssociations([...associations,...rows]);
-      setMsg(`${rows.length} associations RFID importées.`);
+      setMsg(`${rows.length} associations Tags importées.`);
     }});
   }
 
@@ -243,8 +243,8 @@ function Operations(){
     const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
     const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
     const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
-    const rows=[{"Produits locaux":products.length,"Produits avec RFID":productsWithRfid,"Produits sans RFID":productsWithoutRfid,"Associations RFID":associations.length,"Couverture RFID":coverage+"%","Date rapport":new Date().toISOString()}];
-    exportCSV("rapport_couverture_rfid.csv",rows,Object.keys(rows[0]));
+    const rows=[{"Produits locaux":products.length,"Produits avec Tags":productsWithRfid,"Produits sans Tags":productsWithoutRfid,"Associations Tags":associations.length,"Couverture Tags":coverage+"%","Date rapport":new Date().toISOString()}];
+    exportCSV("rapport_couverture_tags.csv",rows,Object.keys(rows[0]));
   }
   function backupProject(){
     downloadJSON(`pharmainventory_backup_${new Date().toISOString().slice(0,10)}.json`,{products,associations,backup_date:new Date().toISOString()});
@@ -641,7 +641,7 @@ function LocalData(){
 
     <div className="statsGrid">
       <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
-      <div className="statCard"><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés</small></div>
+      <div className="statCard"><span>Associations Tags</span><b>{associations.length}</b><small>EPC liés</small></div>
       
     </div>
 
@@ -830,17 +830,17 @@ function Dashboard(){
 
     <div className="kpiRow">
       <div className="kpiCard"><div className="kpiIcon blue">📦</div><span>Produits locaux</span><b>{products.length}</b><small>catalogue importé</small></div>
-      <div className="kpiCard"><div className="kpiIcon green">🔗</div><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés aux produits</small></div>
-      <div className="kpiCard"><div className="kpiIcon teal">📡</div><span>Couverture RFID</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small></div>
-      <div className="kpiCard"><div className="kpiIcon red">🏷️</div><span>Produits sans RFID</span><b>{productsWithoutRfid}</b><small>à couvrir</small></div>
+      <div className="kpiCard"><div className="kpiIcon green">🔗</div><span>Associations Tags</span><b>{associations.length}</b><small>EPC liés aux produits</small></div>
+      <div className="kpiCard"><div className="kpiIcon teal">📡</div><span>Couverture Tags</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small></div>
+      <div className="kpiCard"><div className="kpiIcon red">🏷️</div><span>Produits sans Tags</span><b>{productsWithoutRfid}</b><small>à couvrir</small></div>
     </div>
 
     <div className="clientDashGrid">
       <div className="adMainPanel">
         <div className="adMainText">
           <span className="adPill">OFFRE EXCLUSIVE</span>
-          <h2>Offre Premium RFID</h2>
-          <p>Passez à la vitesse supérieure avec une solution RFID professionnelle pour pharmacie.</p>
+          <h2>Offre Premium</h2>
+          <p>Passez à la vitesse supérieure avec une solution Tags professionnelle pour pharmacie.</p>
           <div className="adFeatureGrid">
             <div><span>⏱️</span><b>Traçabilité fiable</b><small>Suivi clair de vos produits</small></div>
             <div><span>🛡️</span><b>Réduction des pertes</b><small>Moins d’écarts et de ruptures</small></div>
@@ -850,7 +850,7 @@ function Dashboard(){
         </div>
         <div className="adVisual">
           <div className="box3d bigBox">Smart Inventory</div>
-          <div className="tag3d bigTag">RFID</div>
+          <div className="tag3d bigTag">Tags</div>
         </div>
       </div>
 
