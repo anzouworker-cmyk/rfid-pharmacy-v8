@@ -137,6 +137,190 @@ function App(){
   </div>
 }
 
+
+function Operations(){
+  const {products,associations,setProducts,setAssociations}=useLocalStore();
+  const [scanModal,setScanModal]=useState(null);
+  const [barcode,setBarcode]=useState("");
+  const [epc,setEpc]=useState("");
+  const [selectedProduct,setSelectedProduct]=useState(null);
+  const [msg,setMsg]=useState("");
+
+  function importProducts(file){
+    if(!file) return;
+    Papa.parse(file,{header:true,skipEmptyLines:true,complete:(res)=>{
+      const rows=res.data.map((r,i)=>({
+        PID:r.PID||r.pid||String(i+1),
+        Produit:r.Produit||r.produit||r.name||r.Nom||"",
+        Catégorie:r["Catégorie"]||r.categorie||r.category||"",
+        Zone:r.Zone||r.zone||"",
+        Stock:r.Stock||r.stock||"",
+        "Code barre 1":r["Code barre 1"]||r.barcode||r.codebarre||r.UPC||"",
+        "Code barre 2":r["Code barre 2"]||""
+      }));
+      setProducts(rows);
+      setMsg(`${rows.length} produits importés.`);
+    }});
+  }
+
+  function importAssociations(file){
+    if(!file) return;
+    Papa.parse(file,{header:true,skipEmptyLines:true,complete:(res)=>{
+      const rows=res.data.map((r)=>({
+        PID:r.PID||r.pid||"",
+        Produit:r.Produit||r.produit||"",
+        "Code barre 1":r["Code barre 1"]||"",
+        "Code barre 2":r["Code barre 2"]||"",
+        EPC:norm(r.EPC||r.epc||r.Tag||""),
+        Date:r.Date||new Date().toISOString()
+      })).filter(x=>x.EPC);
+      setAssociations([...associations,...rows]);
+      setMsg(`${rows.length} associations RFID importées.`);
+    }});
+  }
+
+  function openBarcode(){ setScanModal("barcode"); setBarcode(""); setSelectedProduct(null); setMsg(""); }
+  function openEpc(){ setScanModal("epc"); setEpc(""); setMsg(""); }
+
+  function findByBarcode(){
+    const code=norm(barcode);
+    const p=products.find(x=>norm(x["Code barre 1"])===code || norm(x["Code barre 2"])===code || norm(x.PID)===code);
+    setSelectedProduct(p||null);
+    setMsg(p ? `Produit trouvé: ${p.Produit}` : "Aucun produit trouvé.");
+  }
+
+  function associateEpc(){
+    if(!selectedProduct){ setMsg("Scannez d'abord un code-barres produit."); return; }
+    if(!epc.trim()){ setMsg("Saisir EPC RFID."); return; }
+    const item={
+      PID:selectedProduct.PID,
+      Produit:selectedProduct.Produit,
+      "Code barre 1":selectedProduct["Code barre 1"],
+      "Code barre 2":selectedProduct["Code barre 2"],
+      EPC:norm(epc),
+      Date:new Date().toISOString()
+    };
+    setAssociations([...associations,item]);
+    setMsg(`EPC associé à ${selectedProduct.Produit}.`);
+    setEpc("");
+  }
+
+  function importDetectedEpc(file){
+    if(!file) return;
+    Papa.parse(file,{header:false,skipEmptyLines:true,complete:(res)=>{
+      const rows=res.data.map(r=>norm(r[0])).filter(Boolean);
+      downloadJSON(`epc_detectes_${new Date().toISOString().slice(0,10)}.json`,{epcs:[...new Set(rows)],date:new Date().toISOString()});
+      setMsg(`${rows.length} EPC détectés importés. Fichier JSON généré.`);
+    }});
+  }
+
+  function clearAssociations(){
+    if(confirm("Supprimer toutes les associations RFID locales ?")){
+      setAssociations([]);
+      setMsg("Toutes les associations RFID ont été supprimées.");
+    }
+  }
+
+  function exportProducts(){ exportCSV("produits_locaux.csv",products,Object.keys(products[0]||{})); }
+  function exportAssociations(){ exportCSV("associations_rfid.csv",associations,Object.keys(associations[0]||{})); }
+  function exportProductsWithoutRfid(){
+    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Sans RFID"}));
+    exportCSV("produits_sans_rfid.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]);
+  }
+  function exportCoverageReport(){
+    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
+    const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
+    const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
+    const rows=[{"Produits locaux":products.length,"Produits avec RFID":productsWithRfid,"Produits sans RFID":productsWithoutRfid,"Associations RFID":associations.length,"Couverture RFID":coverage+"%","Date rapport":new Date().toISOString()}];
+    exportCSV("rapport_couverture_rfid.csv",rows,Object.keys(rows[0]));
+  }
+  function backupProject(){
+    downloadJSON(`pharmainventory_backup_${new Date().toISOString().slice(0,10)}.json`,{products,associations,backup_date:new Date().toISOString()});
+  }
+  async function restoreProject(file){
+    if(!file) return;
+    try{
+      const data=await readJSONFile(file);
+      if(Array.isArray(data.products)) setProducts(data.products);
+      if(Array.isArray(data.associations)) setAssociations(data.associations);
+      setMsg("Projet restauré.");
+    }catch(e){ alert("Fichier JSON invalide"); }
+  }
+
+  return <section className="operationsPage">
+    <h1>Operations</h1>
+    <p>Exécutez les opérations RFID directement ici : import, scan, associations, EPC détectés, exports et sauvegardes.</p>
+
+    <div className="operationGrid workflowGrid">
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon">📥</div><h3>Importer CSV pharmacie</h3><p>Importer le catalogue produits.</p><span>Choisir CSV</span>
+        <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
+      </label>
+
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon">🔗</div><h3>Importer associations RFID</h3><p>Importer les associations Produit ↔ EPC.</p><span>Choisir CSV</span>
+        <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
+      </label>
+
+      <button className="operationCard blue" onClick={openBarcode}>
+        <div className="opIcon">🏷️</div><h3>Scanner code-barres produit</h3><p>Ouvrir une fenêtre pour saisir le code-barres.</p>
+      </button>
+
+      <button className="operationCard green" onClick={openEpc}>
+        <div className="opIcon">📡</div><h3>Scanner EPC RFID</h3><p>Ouvrir une fenêtre pour saisir le tag EPC.</p>
+      </button>
+
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon">▥</div><h3>Importer EPC détectés</h3><p>Importer un CSV/TXT EPC détectés.</p><span>Choisir fichier</span>
+        <input type="file" accept=".csv,.txt" onChange={e=>importDetectedEpc(e.target.files[0])}/>
+      </label>
+
+      <button className="operationCard dangerOp" onClick={clearAssociations}>
+        <div className="opIcon">🗑️</div><h3>Vider toutes associations</h3><p>Supprimer toutes les associations RFID locales.</p>
+      </button>
+    </div>
+
+    <div className="exportsPanel">
+      <h2>Exports & sauvegardes locales</h2>
+      <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
+      <div className="exportOperationGrid">
+        <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon">📦</div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportAssociations}><div className="opIcon">🔗</div><h3>Associations RFID</h3><p>Exporter les produits liés aux EPC RFID.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}><div className="opIcon">🏷️</div><h3>Produits sans RFID</h3><p>Exporter les articles à associer.</p><span>Exporter</span></button>
+        <button className="exportOperationCard blue" onClick={exportCoverageReport}><div className="opIcon">📊</div><h3>Couverture RFID</h3><p>Exporter les KPI de couverture.</p><span>Exporter</span></button>
+        <button className="exportOperationCard green" onClick={backupProject}><div className="opIcon">💾</div><h3>Sauvegarde projet</h3><p>Créer un backup JSON complet.</p><span>Backup</span></button>
+        <label className="exportOperationCard fileCard"><div className="opIcon">📥</div><h3>Restaurer projet</h3><p>Importer un backup JSON local.</p><span>Choisir fichier</span><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></label>
+      </div>
+    </div>
+
+    {msg && <p className="success opMessage">{msg}</p>}
+
+    {scanModal && <div className="modalOverlay">
+      <div className="scanModal">
+        <button className="modalClose" onClick={()=>setScanModal(null)}>×</button>
+        {scanModal==="barcode" && <>
+          <h2>Scanner code-barres produit</h2>
+          <p>Saisissez ou scannez le code-barres du produit.</p>
+          <input autoFocus value={barcode} onChange={e=>setBarcode(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")findByBarcode()}} placeholder="Code-barres ou PID"/>
+          <button className="primaryBtn" onClick={findByBarcode}>Rechercher produit</button>
+          {selectedProduct && <div className="foundProduct"><b>{selectedProduct.Produit}</b><small>PID: {selectedProduct.PID}</small></div>}
+        </>}
+
+        {scanModal==="epc" && <>
+          <h2>Scanner EPC RFID</h2>
+          <p>Saisissez ou scannez l’EPC RFID à associer au produit sélectionné.</p>
+          {selectedProduct ? <div className="foundProduct"><b>{selectedProduct.Produit}</b><small>PID: {selectedProduct.PID}</small></div> : <p className="err">Aucun produit sélectionné. Scannez d’abord le code-barres.</p>}
+          <input autoFocus value={epc} onChange={e=>setEpc(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")associateEpc()}} placeholder="EPC RFID"/>
+          <button className="primaryBtn" onClick={associateEpc}>Associer EPC</button>
+        </>}
+      </div>
+    </div>}
+  </section>
+}
+
+
 function Login({setToken}){
   const [u,setU]=useState("demo");
   const [p,setP]=useState("demo123");
