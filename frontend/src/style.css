@@ -1117,3 +1117,53 @@ table button{padding:8px 10px;font-size:13px}
 .simpleLiveAd a{
   display:none!important;
 }
+
+
+/* V32.4 dashboard ad full image */
+.adPlaceholderV31{
+  padding:0!important;
+  overflow:hidden!important;
+  min-height:420px!important;
+}
+.fullImageAd{
+  width:100%!important;
+  height:100%!important;
+  min-height:420px!important;
+  display:block!important;
+}
+.fullImageAd img{
+  width:100%!important;
+  height:100%!important;
+  min-height:420px!important;
+  object-fit:cover!important;
+  border-radius:16px!important;
+  display:block!important;
+}
+.fullImageAd p,
+.fullImageAd span,
+.fullImageAd h3,
+.fullImageAd a{
+  display:none!important;
+}
+.emptyAdSlot{
+  width:100%;
+  height:100%;
+  min-height:420px;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  background:linear-gradient(135deg,#f8fafc,#eef8ff);
+  color:#64748b;
+}
+.emptyAdSlot h3{
+  color:#0b1023;
+  margin:0 0 8px;
+}
+.emptyAdSlot p{
+  margin:0;
+  font-weight:800;
+}
+.simpleAdPreview img{
+  aspect-ratio:3/2;
+  object-fit:cover!important;
+}

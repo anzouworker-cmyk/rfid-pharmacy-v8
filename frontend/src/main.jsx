@@ -892,10 +892,9 @@ function Dashboard({setTab}){
       </div>
 
       <div className="adPlaceholderV31">
-        {dashboardAd ? <div className="liveDashboardAd simpleLiveAd">
-          {dashboardAd.image_url && <img src={dashboardAd.image_url} alt="Publicité"/>}
-          <p>{dashboardAd.message}</p>
-        </div> : <div><h3>Espace publicité</h3><p>Zone configurable pour image et message publicitaire.</p></div>}
+        {dashboardAd && dashboardAd.image_url ? <div className="liveDashboardAd fullImageAd">
+          <img src={dashboardAd.image_url} alt="Publicité"/>
+        </div> : <div className="emptyAdSlot"><h3>Espace publicité</h3><p>Image recommandée : 1200 × 800 px</p></div>}
       </div>
     </div>
 
@@ -1002,11 +1001,11 @@ function DashboardAdmin({auth}){
     <div className="adAdminGrid">
       <div className="adEditorPanel">
         <h2>Publicité Dashboard</h2>
-        <p className="mutedText">Cette publicité apparaît dans le panneau droit du Dashboard RFID.</p>
+        <p className="mutedText">Cette publicité apparaît dans le panneau droit du Dashboard RFID. Image recommandée : 1200 × 800 px, ratio 3:2, JPG/PNG/WEBP.</p>
 
         <div className="adFormGrid simpleAdForm">
           <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Message publicité"/>
-          <input value={imageUrl} onChange={e=>setImageUrl(e.target.value)} placeholder="URL image publicité https://..."/>
+          <input value={imageUrl} onChange={e=>setImageUrl(e.target.value)} placeholder="URL image publicité https://... — recommandé 1200x800 px"/>
           <label className="checkLine"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/> Publicité active</label>
         </div>
 
