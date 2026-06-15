@@ -817,8 +817,20 @@ return <section>
 
 
 
+
 function Dashboard(){
   const {products,associations}=useLocalStore();
+  const [dashboardAd,setDashboardAd]=useState(null);
+
+  useEffect(()=>{
+    const token=localStorage.token||"";
+    axios.get(`${API}/dashboard/content`,{headers:{Authorization:`Bearer ${token}`}})
+      .then(r=>{
+        const ads=(r.data||[]).filter(x=>["publicite","publicité","promo","annonce","ad"].includes((x.content_type||"").toLowerCase()));
+        setDashboardAd(ads.find(x=>x.active!==false) || null);
+      })
+      .catch(()=>setDashboardAd(null));
+  },[]);
 
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
@@ -912,7 +924,6 @@ function Dashboard(){
     </div>
   </section>
 }
-
 
 
 
