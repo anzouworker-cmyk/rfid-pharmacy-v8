@@ -892,13 +892,10 @@ function Dashboard({setTab}){
       </div>
 
       <div className="adPlaceholderV31">
-        {dashboardAd ? <div className="liveDashboardAd">
+        {dashboardAd ? <div className="liveDashboardAd simpleLiveAd">
           {dashboardAd.image_url && <img src={dashboardAd.image_url} alt="Publicité"/>}
-          <span>ESPACE PUBLICITAIRE</span>
-          <h3>{dashboardAd.title}</h3>
           <p>{dashboardAd.message}</p>
-          {dashboardAd.cta_label && <a href={dashboardAd.cta_url || "#"} target="_blank">{dashboardAd.cta_label} →</a>}
-        </div> : <div><h3>Espace publicité</h3><p>Zone configurable pour offres premium, fournisseurs RFID ou services d’accompagnement.</p></div>}
+        </div> : <div><h3>Espace publicité</h3><p>Zone configurable pour image et message publicitaire.</p></div>}
       </div>
     </div>
 
@@ -926,36 +923,26 @@ function Dashboard({setTab}){
 
 
 
+
 function DashboardAdmin({auth}){
   const [items,setItems]=useState([]);
-  const [clients,setClients]=useState([]);
-  const [scope,setScope]=useState("global");
-  const [target,setTarget]=useState("");
-  const [title,setTitle]=useState("");
   const [message,setMessage]=useState("");
-  const [ctaLabel,setCtaLabel]=useState("");
-  const [ctaUrl,setCtaUrl]=useState("");
   const [imageUrl,setImageUrl]=useState("");
   const [active,setActive]=useState(true);
   const [msg,setMsg]=useState("");
 
   function load(){
-    axios.get(`${API}/platform/dashboard-content`,auth).then(r=>setItems(r.data)).catch(()=>setMsg("Erreur chargement publicités"));
-    axios.get(`${API}/platform/clients`,auth).then(r=>setClients(r.data.filter(x=>x.role!=="platform_admin"))).catch(()=>{});
+    axios.get(`${API}/platform/dashboard-content`,auth)
+      .then(r=>setItems(r.data || []))
+      .catch(()=>setMsg("Erreur chargement publicité"));
   }
 
   useEffect(()=>{load()},[]);
 
   const ads = items.filter(x=>["publicite","publicité","promo","annonce","ad"].includes((x.content_type||"").toLowerCase()));
-  const currentAd = ads[0];
 
   function editExisting(x){
-    setScope(x.scope || "global");
-    setTarget(x.target_username || "");
-    setTitle(x.title || "");
     setMessage(x.message || "");
-    setCtaLabel(x.cta_label || "");
-    setCtaUrl(x.cta_url || "");
     setImageUrl(x.image_url || "");
     setActive(x.active !== false);
     setMsg("Publicité chargée dans le formulaire.");
@@ -963,30 +950,28 @@ function DashboardAdmin({auth}){
 
   async function publish(){
     setMsg("");
-    if(!title.trim() || !message.trim()){
-      setMsg("Titre et message obligatoires.");
+    if(!message.trim()){
+      setMsg("Message publicité obligatoire.");
       return;
     }
     try{
-      // Single ad slot: deactivate existing ads before creating the new one.
       for(const ad of ads.filter(x=>x.active)){
         await axios.post(`${API}/platform/dashboard-content-toggle/${ad.id}`,{},auth);
       }
+
       await axios.post(`${API}/platform/dashboard-content`,{
-        scope,
-        target_username: scope==="pharmacy" ? target : null,
-        title,
+        scope:"global",
+        target_username:null,
+        title:"Publicité Dashboard",
         message,
-        cta_label:ctaLabel,
-        cta_url:ctaUrl,
+        cta_label:"",
+        cta_url:"",
         image_url:imageUrl,
         content_type:"publicite",
         active
       },auth);
-      setTitle("");
+
       setMessage("");
-      setCtaLabel("");
-      setCtaUrl("");
       setImageUrl("");
       setActive(true);
       setMsg("Publicité dashboard publiée.");
@@ -1011,65 +996,40 @@ function DashboardAdmin({auth}){
     }catch(e){setMsg("Erreur suppression");}
   }
 
-  return <section className="singleAdAdmin">
-    <p className="notice">Gérez l’unique espace publicitaire affiché dans le dashboard client. Une seule publicité active est utilisée à la fois.</p>
+  return <section className="simpleAdAdmin">
+    <p className="notice">Gérez l’unique espace publicitaire affiché dans le dashboard client. Cette publicité contient seulement une image et un message.</p>
 
     <div className="adAdminGrid">
       <div className="adEditorPanel">
-        <h2>Espace publicité dashboard</h2>
+        <h2>Publicité Dashboard</h2>
         <p className="mutedText">Cette publicité apparaît dans le panneau droit du Dashboard RFID.</p>
 
-        <div className="adFormGrid">
-          <select value={scope} onChange={e=>setScope(e.target.value)}>
-            <option value="global">Toutes les pharmacies</option>
-            <option value="pharmacy">Pharmacie spécifique</option>
-          </select>
-
-          {scope==="pharmacy" && <select value={target} onChange={e=>setTarget(e.target.value)}>
-            <option value="">Choisir pharmacie</option>
-            {clients.map(c=><option key={c.username} value={c.username}>{c.pharmacy_name || c.username}</option>)}
-          </select>}
-
-          <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Titre publicité"/>
+        <div className="adFormGrid simpleAdForm">
           <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Message publicité"/>
-          <input value={ctaLabel} onChange={e=>setCtaLabel(e.target.value)} placeholder="Bouton CTA"/>
-          <input value={ctaUrl} onChange={e=>setCtaUrl(e.target.value)} placeholder="URL CTA https://..."/>
           <input value={imageUrl} onChange={e=>setImageUrl(e.target.value)} placeholder="URL image publicité https://..."/>
-
           <label className="checkLine"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/> Publicité active</label>
         </div>
 
-        <button className="primaryBtn" onClick={publish}>Publier dans le dashboard</button>
+        <button className="primaryBtn" onClick={publish}>Publier</button>
         {msg && <p className={msg.toLowerCase().includes("erreur") ? "err" : "success"}>{msg}</p>}
       </div>
 
       <div className="adPreviewPanel">
         <h2>Aperçu</h2>
-        <div className="dashboardAdPreview">
+        <div className="simpleAdPreview">
           {imageUrl ? <img src={imageUrl} alt="Aperçu publicité"/> : <div className="adPreviewImage">Image publicité</div>}
-          <span>ESPACE PUBLICITAIRE</span>
-          <h3>{title || "Produit Exclusif"}</h3>
-          <p>{message || "Profitez de l’offre disponible pour votre pharmacie."}</p>
-          <button>{ctaLabel || "Découvrir"}</button>
+          <p>{message || "Message publicité visible dans le dashboard."}</p>
         </div>
       </div>
     </div>
 
     <div className="adListPanel">
-      <h2>Publicités existantes</h2>
-      <Table rows={ads.map(x=>({
-        Type:x.content_type,
-        Portée:x.scope==="global"?"Toutes":x.target_username,
-        Titre:x.title,
-        Statut:x.active?"Active":"Inactive",
-        Actions:""
-      }))} cols={["Type","Portée","Titre","Statut"]}/>
-
+      <h2>Publicité existante</h2>
       <div className="adCardsList">
         {ads.map(x=><div className="adRowCard" key={x.id}>
           <div>
-            <b>{x.title}</b>
-            <small>{x.scope==="global" ? "Toutes les pharmacies" : x.target_username} · {x.active ? "Active" : "Inactive"}</small>
+            <b>{x.message || "Publicité Dashboard"}</b>
+            <small>{x.active ? "Active" : "Inactive"}</small>
           </div>
           <div>
             <button onClick={()=>editExisting(x)}>Modifier</button>
