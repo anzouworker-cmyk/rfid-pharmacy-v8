@@ -262,7 +262,7 @@ function Operations(){
 
   return <section className="operationsPage">
     <h1>Operations</h1>
-    <p>Exécutez les opérations RFID directement ici : import, scan, associations, EPC détectés, exports et sauvegardes.</p>
+    <p className="notice">Exécutez les opérations RFID directement ici : import, scan, associations, EPC détectés, exports et sauvegardes.</p>
 
     <div className="operationGrid workflowGrid">
       <label className="operationCard white fileCardOp">
