@@ -294,7 +294,6 @@ function Operations(){
     </div>
 
     <div className="exportsPanel">
-      <h2>Exports & sauvegardes locales</h2>
       <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales. Les données restent dans le navigateur de la pharmacie.</p>
       <div className="exportOperationGrid">
         <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon">📦</div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
