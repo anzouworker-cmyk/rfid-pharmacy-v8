@@ -145,6 +145,16 @@ with engine.begin() as conn:
     except Exception:
         pass
 
+
+with engine.begin() as conn:
+    try:
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS image_url VARCHAR DEFAULT ''"))
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS extra_config VARCHAR DEFAULT 'contain'"))
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS cta_label VARCHAR DEFAULT ''"))
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS cta_url VARCHAR DEFAULT ''"))
+    except Exception:
+        pass
+
 ensure_demo():
     s = SessionLocal()
     if not s.get(Account, "demo"):

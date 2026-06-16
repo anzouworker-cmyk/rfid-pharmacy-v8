@@ -1376,3 +1376,34 @@ table button{padding:8px 10px;font-size:13px}
   min-height:420px!important;
   height:auto!important;
 }
+
+
+/* V33.1 official Smart Inventory logo */
+.whiteBrand{
+  min-height:74px!important;
+  margin:8px 8px 34px!important;
+  display:flex!important;
+  align-items:center!important;
+}
+.sidebarLogoFull{
+  width:100%;
+  max-width:260px;
+  height:auto;
+  display:block;
+  object-fit:contain;
+}
+.sidebarLogoIcon{
+  width:56px;
+  height:56px;
+  object-fit:contain;
+  display:none;
+}
+.sidebarIsCollapsed .sidebarLogoFull{
+  display:none!important;
+}
+.sidebarIsCollapsed .sidebarLogoIcon{
+  display:block!important;
+}
+.sidebarIsCollapsed .whiteBrand{
+  justify-content:center!important;
+}

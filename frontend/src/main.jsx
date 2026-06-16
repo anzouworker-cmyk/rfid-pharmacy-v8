@@ -103,13 +103,9 @@ function App(){
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
       <div className="whiteBrand">
-        <div className="piLogo"><span>PI</span></div>
-        <div className="brandWords">
-          <div className="brandText">Smart Inventory</div>
-          <small>RFID & Inventory Management Platform</small>
-        </div>
+        <img className="sidebarLogoFull" src="/smart-inventory-logo.png" alt="Smart Inventory"/>
+        <img className="sidebarLogoIcon" src="/smart-inventory-icon.png" alt="Smart Inventory"/>
       </div>
-
       <nav className="whiteNav">
         {menu.map(m=><button key={m.id} title={m.label} className={tab===m.id ? "whiteNavItem active" : "whiteNavItem"} onClick={()=>setTab(m.id)}>
           <span>{m.icon}</span>
@@ -370,7 +366,7 @@ function Login({setToken}){
         <div className="pharmaLogo loginLogo"><span></span></div>
       </div>
       <h2>Smart Inventory</h2>
-      <p className="loginSub">RFID & Inventory Management Platform pour pharmacies</p>
+      <p className="loginSub">Inventory Management Platform pour pharmacies</p>
 
       <label>Utilisateur</label>
       <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
