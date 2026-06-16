@@ -947,7 +947,7 @@ function Dashboard({setTab}){
         <div className="panelTitle"><h3>Couverture RFID</h3><span>ⓘ</span></div>
         <div className="coverageContent">
           <div className="coverageDonut" style={{"--progress": `${coverage * 3.6}deg`}}>
-            <div><b>{coverage}%</b></div>
+            <div><b>{coverage}%</b><small>Couverture globale</small><em>🛡️</em></div>
           </div>
           <div className="coverageText">
             <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture RFID progresse." : "Votre couverture RFID doit être améliorée."}</h3>
@@ -959,8 +959,9 @@ function Dashboard({setTab}){
       </div>
 
       <div className="adPlaceholderV31">
-        {dashboardAd && dashboardAd.image_url ? <div className="liveDashboardAd fullImageAd">
+        {dashboardAd && dashboardAd.image_url ? <div className={`liveDashboardAd dynamicDashboardAd ${dashboardAd.extra_config==="cover" ? "cover" : "contain"}`}>
           <img src={dashboardAd.image_url} alt="Publicité"/>
+          {dashboardAd.cta_label && <a href={dashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{dashboardAd.cta_label}</a>}
         </div> : <div className="liveDashboardAd fullImageAd defaultAd dynamicDefaultAd"><img src={defaultAds[defaultAdIndex]} alt="Smart Inventory publicité dynamique"/></div>}
       </div>
     </div>
@@ -990,13 +991,17 @@ function Dashboard({setTab}){
 
 
 
+
 function DashboardAdmin({auth}){
   const [items,setItems]=useState([]);
   const [message,setMessage]=useState("");
   const [imageUrl,setImageUrl]=useState("");
   const [imageFile,setImageFile]=useState(null);
-  const [uploading,setUploading]=useState(false);
+  const [ctaLabel,setCtaLabel]=useState("");
+  const [ctaUrl,setCtaUrl]=useState("");
+  const [fitMode,setFitMode]=useState("contain");
   const [active,setActive]=useState(true);
+  const [uploading,setUploading]=useState(false);
   const [msg,setMsg]=useState("");
 
   function load(){
@@ -1012,11 +1017,13 @@ function DashboardAdmin({auth}){
   function editExisting(x){
     setMessage(x.message || "");
     setImageUrl(x.image_url || "");
+    setCtaLabel(x.cta_label || "");
+    setCtaUrl(x.cta_url || "");
+    setFitMode(x.extra_config || "contain");
     setActive(x.active !== false);
     setMsg("Publicité chargée dans le formulaire.");
   }
 
-  
   async function uploadSelectedImage(){
     if(!imageFile) return imageUrl;
     const fd=new FormData();
@@ -1035,14 +1042,15 @@ function DashboardAdmin({auth}){
     }
   }
 
-async function publish(){
+  async function publish(){
     setMsg("");
-    if(!message.trim()){
-      setMsg("Message publicité obligatoire.");
-      return;
-    }
     try{
       const finalImageUrl = await uploadSelectedImage();
+      if(!finalImageUrl){
+        setMsg("Image publicité obligatoire.");
+        return;
+      }
+
       for(const ad of ads.filter(x=>x.active)){
         await axios.post(`${API}/platform/dashboard-content-toggle/${ad.id}`,{},auth);
       }
@@ -1052,21 +1060,25 @@ async function publish(){
         target_username:null,
         title:"Publicité Dashboard",
         message,
-        cta_label:"",
-        cta_url:"",
+        cta_label:ctaLabel,
+        cta_url:ctaUrl,
         image_url:finalImageUrl,
         content_type:"publicite",
+        extra_config:fitMode,
         active
       },auth);
 
       setMessage("");
       setImageUrl("");
       setImageFile(null);
+      setCtaLabel("");
+      setCtaUrl("");
+      setFitMode("contain");
       setActive(true);
       setMsg("Publicité dashboard publiée.");
       load();
     }catch(e){
-      setMsg(e.response?.data?.detail || "Erreur création publicité");
+      setMsg(e.message || e.response?.data?.detail || "Erreur création publicité");
     }
   }
 
@@ -1085,22 +1097,33 @@ async function publish(){
     }catch(e){setMsg("Erreur suppression");}
   }
 
-  return <section className="simpleAdAdmin">
-    <p className="notice">Gérez l’unique espace publicitaire affiché dans le dashboard client. Cette publicité contient seulement une image et un message.</p>
+  const previewSrc = imageFile ? URL.createObjectURL(imageFile) : imageUrl;
+
+  return <section className="simpleAdAdmin dynamicAdAdmin">
+    <p className="notice">Gérez l’espace publicitaire du dashboard. L’image peut avoir une dimension dynamique; le bouton et son lien sont configurables.</p>
 
     <div className="adAdminGrid">
       <div className="adEditorPanel">
         <h2>Publicité Dashboard</h2>
-        <p className="mutedText">Cette publicité apparaît dans le panneau droit du Dashboard RFID. Image recommandée : 1200 × 800 px, ratio 3:2, JPG/PNG/WEBP.</p>
+        <p className="mutedText">Image recommandée : 1200 × 800 px, mais les dimensions sont acceptées dynamiquement. Utilisez PNG, JPG ou WEBP.</p>
 
         <div className="adFormGrid simpleAdForm">
-          <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Message publicité"/>
           <div className="uploadBox">
             <label>Image publicité</label>
             <input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setImageFile(e.target.files[0])}/>
-            <small>Dimension recommandée : 1200 × 800 px, ratio 3:2, PNG/JPG/WEBP.</small>
+            <small>Recommandé : 1200 × 800 px. Max 3 MB.</small>
           </div>
+
           <input value={imageUrl} onChange={e=>setImageUrl(e.target.value)} placeholder="Ou coller une URL image existante https://..."/>
+          <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Message interne optionnel"/>
+          <input value={ctaLabel} onChange={e=>setCtaLabel(e.target.value)} placeholder="Titre du bouton, ex: Découvrir l'offre Premium"/>
+          <input value={ctaUrl} onChange={e=>setCtaUrl(e.target.value)} placeholder="Lien du bouton https://..."/>
+
+          <select value={fitMode} onChange={e=>setFitMode(e.target.value)}>
+            <option value="contain">Image entière visible</option>
+            <option value="cover">Remplir tout l’espace</option>
+          </select>
+
           <label className="checkLine"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/> Publicité active</label>
         </div>
 
@@ -1110,9 +1133,9 @@ async function publish(){
 
       <div className="adPreviewPanel">
         <h2>Aperçu</h2>
-        <div className="simpleAdPreview">
-          {imageFile ? <div className="adPreviewImage">Image sélectionnée : {imageFile.name}</div> : imageUrl ? <img src={imageUrl} alt="Aperçu publicité"/> : <img src="/default-ads/ad1.png" alt="Image par défaut dynamique"/>}
-          <p>{message || "Message publicité visible dans le dashboard."}</p>
+        <div className={`dynamicAdPreview ${fitMode}`}>
+          {previewSrc ? <img src={previewSrc} alt="Aperçu publicité"/> : <div className="adPreviewImage">Image publicité</div>}
+          {ctaLabel && <a href={ctaUrl || "#"} target="_blank" rel="noreferrer">{ctaLabel}</a>}
         </div>
       </div>
     </div>
@@ -1122,8 +1145,8 @@ async function publish(){
       <div className="adCardsList">
         {ads.map(x=><div className="adRowCard" key={x.id}>
           <div>
-            <b>{x.message || "Publicité Dashboard"}</b>
-            <small>{x.active ? "Active" : "Inactive"}</small>
+            <b>{x.cta_label || x.message || "Publicité Dashboard"}</b>
+            <small>{x.active ? "Active" : "Inactive"} · {x.image_url ? "Image configurée" : "Sans image"}</small>
           </div>
           <div>
             <button onClick={()=>editExisting(x)}>Modifier</button>

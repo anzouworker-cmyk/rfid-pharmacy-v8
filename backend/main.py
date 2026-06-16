@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from openai import OpenAI
 from sqlalchemy import create_engine, Column, String, DateTime, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
+from sqlalchemy import text
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -70,6 +71,7 @@ class DashboardContent(Base):
     cta_url = Column(String, default="")
     content_type = Column(String, default="info")
     image_url = Column(String, default="")
+    extra_config = Column(String, default="contain")
     active = Column(Boolean, default=True)
     ai_premium = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -133,9 +135,17 @@ class DashboardContentIn(BaseModel):
     cta_url: str = ""
     content_type: str = "info"
     image_url: str = ""
+    extra_config: str = "contain"
     active: bool = True
 
-def ensure_demo():
+def 
+with engine.begin() as conn:
+    try:
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS extra_config VARCHAR DEFAULT 'contain'"))
+    except Exception:
+        pass
+
+ensure_demo():
     s = SessionLocal()
     if not s.get(Account, "demo"):
         s.add(Account(
@@ -406,6 +416,7 @@ def create_dashboard_content(data: DashboardContentIn, acc: Account = Depends(cu
         cta_url=data.cta_url,
         content_type=data.content_type,
         image_url=data.image_url,
+        extra_config=getattr(data, "extra_config", "contain"),
         active=data.active
     )
     s.add(obj)

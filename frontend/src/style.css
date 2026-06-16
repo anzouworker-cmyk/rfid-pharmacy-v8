@@ -1308,3 +1308,71 @@ table button{padding:8px 10px;font-size:13px}
   .statusSummaryGrid{grid-template-columns:1fr 1fr}
   .inventoryToolbar{grid-template-columns:1fr!important}
 }
+
+
+/* V33 dynamic ad image + configurable CTA */
+.dynamicAdPreview{
+  border:1px solid #e5eaf3;
+  border-radius:18px;
+  padding:16px;
+  background:#f8fafc;
+  min-height:420px;
+  display:grid;
+  grid-template-rows:1fr auto;
+  gap:14px;
+}
+.dynamicAdPreview img{
+  width:100%;
+  max-height:520px;
+  border-radius:14px;
+  background:white;
+}
+.dynamicAdPreview.contain img{
+  object-fit:contain;
+}
+.dynamicAdPreview.cover img{
+  height:420px;
+  object-fit:cover;
+}
+.dynamicAdPreview a,
+.dynamicDashboardAd a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  justify-self:center;
+  background:#075985!important;
+  color:white!important;
+  text-decoration:none!important;
+  border-radius:12px;
+  padding:14px 24px;
+  font-weight:900;
+  box-shadow:0 12px 24px rgba(7,89,133,.2);
+}
+.dynamicDashboardAd{
+  width:100%;
+  min-height:420px;
+  display:grid!important;
+  grid-template-rows:1fr auto;
+  gap:14px;
+  padding:14px;
+  background:#f8fafc;
+}
+.dynamicDashboardAd img{
+  width:100%;
+  max-height:520px;
+  border-radius:14px;
+  background:white;
+}
+.dynamicDashboardAd.contain img{
+  height:auto!important;
+  max-height:520px!important;
+  object-fit:contain!important;
+}
+.dynamicDashboardAd.cover img{
+  height:420px!important;
+  object-fit:cover!important;
+}
+.adPlaceholderV31{
+  min-height:420px!important;
+  height:auto!important;
+}
