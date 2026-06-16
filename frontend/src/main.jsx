@@ -947,7 +947,7 @@ function Dashboard({setTab}){
         <div className="panelTitle"><h3>Couverture RFID</h3><span>ⓘ</span></div>
         <div className="coverageContent">
           <div className="coverageDonut" style={{"--progress": `${coverage * 3.6}deg`}}>
-            <div><b>{coverage}%</b><small>Couverture globale</small><em>🛡️</em></div>
+            <div><b>{coverage}%</b></div>
           </div>
           <div className="coverageText">
             <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture RFID progresse." : "Votre couverture RFID doit être améliorée."}</h3>
