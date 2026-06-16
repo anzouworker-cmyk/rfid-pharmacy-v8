@@ -894,7 +894,7 @@ function Dashboard({setTab}){
       <div className="adPlaceholderV31">
         {dashboardAd && dashboardAd.image_url ? <div className="liveDashboardAd fullImageAd">
           <img src={dashboardAd.image_url} alt="Publicité"/>
-        </div> : <div className="emptyAdSlot"><h3>Espace publicité</h3><p>Image recommandée : 1200 × 800 px</p></div>}
+        </div> : <div className="liveDashboardAd fullImageAd defaultAd"><img src="/default-dashboard-ad.png" alt="Smart Inventory publicité par défaut"/></div>}
       </div>
     </div>
 
@@ -927,6 +927,8 @@ function DashboardAdmin({auth}){
   const [items,setItems]=useState([]);
   const [message,setMessage]=useState("");
   const [imageUrl,setImageUrl]=useState("");
+  const [imageFile,setImageFile]=useState(null);
+  const [uploading,setUploading]=useState(false);
   const [active,setActive]=useState(true);
   const [msg,setMsg]=useState("");
 
@@ -947,13 +949,33 @@ function DashboardAdmin({auth}){
     setMsg("Publicité chargée dans le formulaire.");
   }
 
-  async function publish(){
+  
+  async function uploadSelectedImage(){
+    if(!imageFile) return imageUrl;
+    const fd=new FormData();
+    fd.append("file",imageFile);
+    setUploading(true);
+    try{
+      const r=await axios.post(`${API}/platform/upload-ad-image`,fd,{
+        headers:{...auth.headers,"Content-Type":"multipart/form-data"}
+      });
+      setUploading(false);
+      setImageUrl(r.data.image_url);
+      return r.data.image_url;
+    }catch(e){
+      setUploading(false);
+      throw new Error(e.response?.data?.detail || "Erreur upload image");
+    }
+  }
+
+async function publish(){
     setMsg("");
     if(!message.trim()){
       setMsg("Message publicité obligatoire.");
       return;
     }
     try{
+      const finalImageUrl = await uploadSelectedImage();
       for(const ad of ads.filter(x=>x.active)){
         await axios.post(`${API}/platform/dashboard-content-toggle/${ad.id}`,{},auth);
       }
@@ -965,13 +987,14 @@ function DashboardAdmin({auth}){
         message,
         cta_label:"",
         cta_url:"",
-        image_url:imageUrl,
+        image_url:finalImageUrl,
         content_type:"publicite",
         active
       },auth);
 
       setMessage("");
       setImageUrl("");
+      setImageFile(null);
       setActive(true);
       setMsg("Publicité dashboard publiée.");
       load();
@@ -1005,18 +1028,23 @@ function DashboardAdmin({auth}){
 
         <div className="adFormGrid simpleAdForm">
           <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Message publicité"/>
-          <input value={imageUrl} onChange={e=>setImageUrl(e.target.value)} placeholder="URL image publicité https://... — recommandé 1200x800 px"/>
+          <div className="uploadBox">
+            <label>Image publicité</label>
+            <input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setImageFile(e.target.files[0])}/>
+            <small>Dimension recommandée : 1200 × 800 px, ratio 3:2, PNG/JPG/WEBP.</small>
+          </div>
+          <input value={imageUrl} onChange={e=>setImageUrl(e.target.value)} placeholder="Ou coller une URL image existante https://..."/>
           <label className="checkLine"><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/> Publicité active</label>
         </div>
 
-        <button className="primaryBtn" onClick={publish}>Publier</button>
+        <button className="primaryBtn" onClick={publish} disabled={uploading}>{uploading ? "Upload..." : "Publier"}</button>
         {msg && <p className={msg.toLowerCase().includes("erreur") ? "err" : "success"}>{msg}</p>}
       </div>
 
       <div className="adPreviewPanel">
         <h2>Aperçu</h2>
         <div className="simpleAdPreview">
-          {imageUrl ? <img src={imageUrl} alt="Aperçu publicité"/> : <div className="adPreviewImage">Image publicité</div>}
+          {imageFile ? <div className="adPreviewImage">Image sélectionnée : {imageFile.name}</div> : imageUrl ? <img src={imageUrl} alt="Aperçu publicité"/> : <img src="/default-dashboard-ad.png" alt="Image par défaut"/>}
           <p>{message || "Message publicité visible dans le dashboard."}</p>
         </div>
       </div>

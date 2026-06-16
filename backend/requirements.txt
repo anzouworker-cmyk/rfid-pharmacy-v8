@@ -6,3 +6,4 @@ python-jose[cryptography]
 pydantic-settings
 openai
 psycopg2-binary
+cloudinary

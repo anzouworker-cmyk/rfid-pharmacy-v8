@@ -1167,3 +1167,47 @@ table button{padding:8px 10px;font-size:13px}
   aspect-ratio:3/2;
   object-fit:cover!important;
 }
+
+
+/* V32.6 ad image upload */
+.uploadBox{
+  border:1px dashed #b9c8dc;
+  background:#f8fbff;
+  border-radius:14px;
+  padding:16px;
+  display:grid;
+  gap:10px;
+}
+.uploadBox label{
+  font-weight:900;
+  color:#0b1023;
+}
+.uploadBox input[type=file]{
+  border:0!important;
+  padding:0!important;
+  background:transparent!important;
+}
+.uploadBox small{
+  color:#64748b;
+  font-weight:700;
+}
+.primaryBtn:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+
+
+/* V32.7 default dashboard ad */
+.defaultAd img{
+  width:100%!important;
+  height:100%!important;
+  min-height:420px!important;
+  object-fit:cover!important;
+  border-radius:16px!important;
+}
+.simpleAdPreview img{
+  width:100%;
+  aspect-ratio:3/2;
+  object-fit:cover;
+  border-radius:14px;
+}

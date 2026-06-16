@@ -4,8 +4,9 @@ import hashlib
 import os
 import json
 from typing import Optional
-from fastapi import FastAPI, Depends, HTTPException, Header
+from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from pydantic import BaseModel
@@ -17,6 +18,10 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./license_saas.db"
     SECRET_KEY: str = "change_this_secret_key"
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
+    FRONTEND_ORIGINS: str = "https://rfid-pharmacy-v8-staging-cr53cfcaz-anzou-s-projects.vercel.app,https://rfid-pharmacy-v8-staging.vercel.app,http://localhost:5173,http://localhost:3000"
     class Config:
         env_file = ".env"
 
@@ -25,8 +30,21 @@ engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread":
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
+
+
 app = FastAPI(title="RFID Pharmacy Web SaaS Licence API")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+allowed_origins = [x.strip() for x in settings.FRONTEND_ORIGINS.split(",") if x.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
+)
 
 class Account(Base):
     __tablename__ = "accounts"
@@ -498,3 +516,50 @@ def client_ai_premium(username: str, enabled: bool, acc: Account = Depends(curre
     obj.ai_premium = enabled
     s.commit()
     return {"ok": True, "username": username, "ai_premium": obj.ai_premium}
+
+
+@app.post("/platform/upload-ad-image")
+async def upload_ad_image(file: UploadFile = File(...), acc: Account = Depends(current_user)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+
+    allowed = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp"}
+    if file.content_type not in allowed:
+        raise HTTPException(400, "Format image non supporté. Utilisez PNG, JPG ou WEBP.")
+
+    content = await file.read()
+    if len(content) > 3 * 1024 * 1024:
+        raise HTTPException(400, "Image trop lourde. Maximum 3 MB.")
+
+    # Cloudinary recommended for production
+    if settings.CLOUDINARY_CLOUD_NAME and settings.CLOUDINARY_API_KEY and settings.CLOUDINARY_API_SECRET:
+        try:
+            import cloudinary
+            import cloudinary.uploader
+            cloudinary.config(
+                cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+                api_key=settings.CLOUDINARY_API_KEY,
+                api_secret=settings.CLOUDINARY_API_SECRET,
+                secure=True
+            )
+            result = cloudinary.uploader.upload(
+                content,
+                folder="smart_inventory_ads",
+                resource_type="image",
+                transformation=[
+                    {"width": 1200, "height": 800, "crop": "fill", "quality": "auto", "fetch_format": "auto"}
+                ]
+            )
+            return {"image_url": result.get("secure_url")}
+        except Exception as e:
+            raise HTTPException(500, f"Erreur upload Cloudinary: {str(e)}")
+
+    # Fallback local storage for development/testing
+    ext = allowed[file.content_type]
+    filename = f"ad_{uuid.uuid4().hex}{ext}"
+    path = UPLOAD_DIR / filename
+    path.write_bytes(content)
+    base_url = os.getenv("BACKEND_PUBLIC_URL", "").rstrip("/")
+    if base_url:
+        return {"image_url": f"{base_url}/uploads/{filename}"}
+    return {"image_url": f"/uploads/{filename}"}
