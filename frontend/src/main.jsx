@@ -536,34 +536,93 @@ function Association(){
 
 
 
+
 function Inventory(){
   const {products,associations}=useLocalStore();
   const [q,setQ]=useState("");
+  const [statusFilter,setStatusFilter]=useState("all");
 
-  const associatedPids = new Set(associations.map(a=>String(a.PID)));
-  const rows = products.map(p=>({
-    PID:p.PID,
-    Produit:p.Produit,
-    Catégorie:p["Catégorie"] || p.Catégorie || "",
-    Zone:p.Zone || "",
-    Stock:p.Stock || "",
-    "Code barre 1":p["Code barre 1"] || "",
-    "Code barre 2":p["Code barre 2"] || "",
-    "Statut RFID": associatedPids.has(String(p.PID)) ? "Associé" : "Sans RFID"
-  })).filter(r=>{
-    const s = Object.values(r).join(" ").toLowerCase();
-    return s.includes(q.toLowerCase());
+  const associatedByPid = new Map();
+  associations.forEach(a=>{
+    const pid=String(a.PID||"");
+    if(pid) associatedByPid.set(pid,a);
   });
 
-  return <section className="tableOnlyPage">
+  // If an association has a detected/present flag in future imports, use it.
+  // Otherwise, any associated product is considered Présent.
+  function getStatus(p){
+    const a=associatedByPid.get(String(p.PID));
+    if(!a) return "Non associé";
+    const raw=String(a.Statut||a.status||a.Etat||a.etat||"").toLowerCase();
+    if(raw.includes("manquant") || raw.includes("missing") || raw.includes("absent")) return "Manquant";
+    return "Présent";
+  }
+
+  const rows = products.map(p=>{
+    const status=getStatus(p);
+    return {
+      PID:p.PID,
+      Produit:p.Produit,
+      Catégorie:p["Catégorie"] || p.Catégorie || "",
+      Zone:p.Zone || "",
+      Stock:p.Stock || "",
+      "Code barre 1":p["Code barre 1"] || "",
+      "Code barre 2":p["Code barre 2"] || "",
+      "Statut RFID": status,
+      _rowClass: status==="Présent" ? "rowPresent" : status==="Manquant" ? "rowMissing" : "rowUnassociated"
+    };
+  }).filter(r=>{
+    const s = Object.values(r).join(" ").toLowerCase();
+    const matchText = s.includes(q.toLowerCase());
+    const matchStatus = statusFilter==="all" || r["Statut RFID"]===statusFilter;
+    return matchText && matchStatus;
+  });
+
+  const total=products.length;
+  const presentCount=products.filter(p=>getStatus(p)==="Présent").length;
+  const missingCount=products.filter(p=>getStatus(p)==="Manquant").length;
+  const unassociatedCount=products.filter(p=>getStatus(p)==="Non associé").length;
+
+  return <section className="tableOnlyPage inventoryStatusPage">
     <p className="notice">Tableau de consultation de l’inventaire RFID réel et du statut de couverture RFID.</p>
 
-    <div className="tableToolbar">
+    <div className="statusSummaryGrid">
+      <div className="statusSummary present"><b>{presentCount}</b><span>Présents</span></div>
+      <div className="statusSummary missing"><b>{missingCount}</b><span>Manquants</span></div>
+      <div className="statusSummary unassociated"><b>{unassociatedCount}</b><span>Non associés</span></div>
+      <div className="statusSummary total"><b>{total}</b><span>Total</span></div>
+    </div>
+
+    <div className="tableToolbar inventoryToolbar">
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans l’inventaire..."/>
+      <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
+        <option value="all">Tous les statuts</option>
+        <option value="Présent">Présent</option>
+        <option value="Manquant">Manquant</option>
+        <option value="Non associé">Non associé</option>
+      </select>
       <span>{rows.length} produit(s)</span>
     </div>
 
-    <Table rows={rows} cols={["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]}/>
+    <div className="smartTableWrap">
+      <table className="smartTable statusTable">
+        <thead>
+          <tr>{["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"].map(c=><th key={c}>{c}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((r,i)=><tr key={i} className={r._rowClass}>
+            <td>{r.PID}</td>
+            <td>{r.Produit}</td>
+            <td>{r.Catégorie}</td>
+            <td>{r.Zone}</td>
+            <td>{r.Stock}</td>
+            <td>{r["Code barre 1"]}</td>
+            <td>{r["Code barre 2"]}</td>
+            <td><span className={`statusBadge ${r._rowClass}`}>{r["Statut RFID"]}</span></td>
+          </tr>)}
+        </tbody>
+      </table>
+    </div>
   </section>
 }
 
@@ -887,7 +946,7 @@ function Dashboard({setTab}){
       <div className="coveragePanelV31">
         <div className="panelTitle"><h3>Couverture RFID</h3><span>ⓘ</span></div>
         <div className="coverageContent">
-          <div className="coverageDonut" style={{"--p": `${coverage}%`}}>
+          <div className="coverageDonut" style={{"--progress": `${coverage * 3.6}deg`}}>
             <div><b>{coverage}%</b><small>Couverture globale</small><em>🛡️</em></div>
           </div>
           <div className="coverageText">
