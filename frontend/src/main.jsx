@@ -234,7 +234,13 @@ function Operations(){
   function exportProducts(){ exportCSV("produits_locaux.csv",products,Object.keys(products[0]||{})); }
   function exportAssociations(){ exportCSV("associations_rfid.csv",associations,Object.keys(associations[0]||{})); }
   function exportProductsWithoutRfid(){
-    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    
+  useEffect(()=>{
+    const timer=setInterval(()=>setDefaultAdIndex(i=>(i+1)%defaultAds.length),10000);
+    return ()=>clearInterval(timer);
+  },[]);
+
+  const associatedPids=new Set(associations.map(a=>String(a.PID)));
     const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Sans RFID"}));
     exportCSV("produits_sans_rfid.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]);
   }
@@ -821,6 +827,8 @@ return <section>
 function Dashboard({setTab}){
   const {products,associations}=useLocalStore();
   const [dashboardAd,setDashboardAd]=useState(null);
+  const [defaultAdIndex,setDefaultAdIndex]=useState(0);
+  const defaultAds=["/default-ads/ad1.png","/default-ads/ad2.png","/default-ads/ad3.png","/default-ads/ad4.png"];
 
   useEffect(()=>{
     const token=localStorage.token||"";
@@ -894,7 +902,7 @@ function Dashboard({setTab}){
       <div className="adPlaceholderV31">
         {dashboardAd && dashboardAd.image_url ? <div className="liveDashboardAd fullImageAd">
           <img src={dashboardAd.image_url} alt="Publicité"/>
-        </div> : <div className="liveDashboardAd fullImageAd defaultAd"><img src="/default-dashboard-ad.png" alt="Smart Inventory publicité par défaut"/></div>}
+        </div> : <div className="liveDashboardAd fullImageAd defaultAd dynamicDefaultAd"><img src={defaultAds[defaultAdIndex]} alt="Smart Inventory publicité dynamique"/></div>}
       </div>
     </div>
 
@@ -1044,7 +1052,7 @@ async function publish(){
       <div className="adPreviewPanel">
         <h2>Aperçu</h2>
         <div className="simpleAdPreview">
-          {imageFile ? <div className="adPreviewImage">Image sélectionnée : {imageFile.name}</div> : imageUrl ? <img src={imageUrl} alt="Aperçu publicité"/> : <img src="/default-dashboard-ad.png" alt="Image par défaut"/>}
+          {imageFile ? <div className="adPreviewImage">Image sélectionnée : {imageFile.name}</div> : imageUrl ? <img src={imageUrl} alt="Aperçu publicité"/> : <img src="/default-ads/ad1.png" alt="Image par défaut dynamique"/>}
           <p>{message || "Message publicité visible dans le dashboard."}</p>
         </div>
       </div>

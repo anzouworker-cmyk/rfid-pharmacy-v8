@@ -1211,3 +1211,21 @@ table button{padding:8px 10px;font-size:13px}
   object-fit:cover;
   border-radius:14px;
 }
+
+
+/* V32.8 dynamic default ads */
+.dynamicDefaultAd img{
+  animation: adFadeIn .45s ease;
+}
+@keyframes adFadeIn{
+  from{opacity:.72;transform:scale(1.01)}
+  to{opacity:1;transform:scale(1)}
+}
+.defaultAd img,
+.dynamicDefaultAd img{
+  width:100%!important;
+  height:100%!important;
+  min-height:420px!important;
+  object-fit:cover!important;
+  border-radius:16px!important;
+}
