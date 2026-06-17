@@ -4,6 +4,7 @@ import hashlib
 import os
 import json
 import uuid
+import mimetypes
 from typing import Optional
 from pathlib import Path
 from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File, Request
@@ -13,7 +14,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from pydantic import BaseModel
 from openai import OpenAI
-from sqlalchemy import create_engine, Column, String, DateTime, Boolean
+from sqlalchemy import create_engine, Column, String, DateTime, Boolean, Text
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from sqlalchemy import text, inspect
 from pydantic_settings import BaseSettings
@@ -48,7 +49,7 @@ app.add_middleware(
     allow_origins=allowed_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Accept"],
+    allow_headers=["*"],
 )
 
 class Account(Base):
@@ -74,7 +75,7 @@ class DashboardContent(Base):
     cta_label = Column(String, default="")
     cta_url = Column(String, default="")
     content_type = Column(String, default="info")
-    image_url = Column(String, default="")
+    image_url = Column(Text, default="")
     extra_config = Column(String, default="contain")
     active = Column(Boolean, default=True)
     ai_premium = Column(Boolean, default=False)
@@ -568,15 +569,35 @@ async def upload_ad_image(request: Request, file: UploadFile = File(...), acc: A
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
 
-    allowed = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp"}
-    if file.content_type not in allowed:
-        raise HTTPException(400, "Format image non supporté. Utilisez PNG, JPG ou WEBP.")
+    # Le navigateur peut parfois envoyer image/png, image/x-png ou même application/octet-stream.
+    # On valide donc le type MIME, l'extension ET la signature du fichier pour éviter les faux rejets.
+    allowed_mimes = {"image/png": ".png", "image/x-png": ".png", "image/jpeg": ".jpg", "image/jpg": ".jpg", "image/webp": ".webp"}
+    allowed_exts = {".png", ".jpg", ".jpeg", ".webp"}
 
     content = await file.read()
+    if not content:
+        raise HTTPException(400, "Image vide ou illisible.")
     if len(content) > 3 * 1024 * 1024:
         raise HTTPException(400, "Image trop lourde. Maximum 3 MB.")
 
-    # Cloudinary recommended for production
+    content_type = (file.content_type or "").split(";", 1)[0].strip().lower()
+    original_ext = Path(file.filename or "").suffix.lower()
+    ext = allowed_mimes.get(content_type)
+    if not ext and original_ext in allowed_exts:
+        ext = ".jpg" if original_ext == ".jpeg" else original_ext
+
+    # Validation par signature fichier.
+    if content.startswith(b"\x89PNG\r\n\x1a\n"):
+        ext = ".png"
+    elif content.startswith(b"\xff\xd8\xff"):
+        ext = ".jpg"
+    elif content.startswith(b"RIFF") and content[8:12] == b"WEBP":
+        ext = ".webp"
+
+    if ext not in {".png", ".jpg", ".webp"}:
+        raise HTTPException(400, "Format image non supporté. Utilisez PNG, JPG ou WEBP.")
+
+    cloudinary_error = ""
     if settings.CLOUDINARY_CLOUD_NAME and settings.CLOUDINARY_API_KEY and settings.CLOUDINARY_API_SECRET:
         try:
             import cloudinary
@@ -590,20 +611,27 @@ async def upload_ad_image(request: Request, file: UploadFile = File(...), acc: A
             result = cloudinary.uploader.upload(
                 content,
                 folder="smart_inventory_ads",
-                resource_type="image",
-                transformation=[
-                    {"width": 1200, "height": 800, "crop": "fill", "quality": "auto", "fetch_format": "auto"}
-                ]
+                resource_type="image"
             )
-            return {"image_url": result.get("secure_url")}
+            secure_url = result.get("secure_url")
+            if secure_url:
+                return {"image_url": secure_url}
+            cloudinary_error = "Cloudinary n'a pas retourné d'URL."
         except Exception as e:
-            raise HTTPException(500, f"Erreur upload Cloudinary: {str(e)}")
+            # Ne bloque pas la publication: on tente le stockage local ensuite.
+            cloudinary_error = str(e)
 
-    # Fallback local storage for development/testing
-    ext = allowed[file.content_type]
-    filename = f"ad_{uuid.uuid4().hex}{ext}"
-    path = UPLOAD_DIR / filename
-    path.write_bytes(content)
+    # Fallback local storage pour développement/testing ou si Cloudinary n'est pas configuré.
+    try:
+        filename = f"ad_{uuid.uuid4().hex}{ext}"
+        path = UPLOAD_DIR / filename
+        path.write_bytes(content)
+    except Exception as e:
+        detail = f"Erreur sauvegarde image locale: {str(e)}"
+        if cloudinary_error:
+            detail += f" | Cloudinary: {cloudinary_error}"
+        raise HTTPException(500, detail)
+
     # Retourner une URL absolue évite que le frontend cherche /uploads sur Vercel
     # au lieu du backend. Définir BACKEND_PUBLIC_URL en production reste préférable.
     base_url = os.getenv("BACKEND_PUBLIC_URL", "").rstrip("/")

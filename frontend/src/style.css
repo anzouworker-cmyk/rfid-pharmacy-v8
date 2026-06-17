@@ -1470,3 +1470,12 @@ table button{padding:8px 10px;font-size:13px}
   height:72px;
   object-fit:contain;
 }
+
+/* V33.4 ads upload robustness */
+.urlHint{
+  display:block;
+  margin:-8px 0 2px;
+  color:#b45309;
+  font-size:12px;
+  font-weight:700;
+}

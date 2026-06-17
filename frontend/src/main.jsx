@@ -40,6 +40,15 @@ function readJSONFile(file){
   });
 }
 
+function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function exportCSV(filename, rows, cols){
   const esc = v => `"${String(v ?? "").replaceAll('"','""')}"`;
   const csv = [cols.join(";"), ...rows.map(r => cols.map(c => esc(r[c])).join(";"))].join("\n");
@@ -1032,20 +1041,35 @@ function DashboardAdmin({auth}){
   }
 
   async function uploadSelectedImage(){
-    if(!imageFile) return imageUrl;
+    if(!imageFile) return String(imageUrl || "").trim();
+
     const fd=new FormData();
     fd.append("file",imageFile);
     setUploading(true);
     try{
+      // Ne pas forcer Content-Type ici: le navigateur ajoute le boundary multipart lui-même.
       const r=await axios.post(`${API}/platform/upload-ad-image`,fd,{
-        headers:{...auth.headers,"Content-Type":"multipart/form-data"}
+        headers:{...(auth.headers || {})}
       });
-      setUploading(false);
-      setImageUrl(r.data.image_url);
-      return r.data.image_url;
+      const uploadedUrl = r.data?.image_url || "";
+      if(!uploadedUrl) throw new Error("Réponse upload invalide");
+      setImageUrl(uploadedUrl);
+      return uploadedUrl;
     }catch(e){
+      // Fallback robuste: si Render/Cloudinary refuse l'upload, on stocke l'image directement en base
+      // sous forme Data URL. Cela évite le blocage “Erreur upload image”.
+      try{
+        const dataUrl = await fileToDataUrl(imageFile);
+        if(dataUrl){
+          setImageUrl(dataUrl);
+          return dataUrl;
+        }
+      }catch(readError){
+        // On affichera l'erreur originale plus bas.
+      }
+      throw new Error(e.response?.data?.detail || e.message || "Erreur upload image");
+    }finally{
       setUploading(false);
-      throw new Error(e.response?.data?.detail || "Erreur upload image");
     }
   }
 
@@ -1131,7 +1155,8 @@ function DashboardAdmin({auth}){
             <small>Recommandé : 1200 × 800 px. Max 3 MB.</small>
           </div>
 
-          <input value={imageUrl} onChange={e=>setImageUrl(e.target.value)} placeholder="Ou coller une URL image existante https://..."/>
+          <input value={imageUrl} onChange={e=>setImageUrl(e.target.value)} placeholder="Ou coller une URL image directe https://.../image.png"/>
+          {imageUrl && /^https?:\/\//i.test(imageUrl) && !/\.(png|jpe?g|webp)(\?|#|$)/i.test(imageUrl) && <small className="urlHint">Note : pour une URL externe, utilisez le lien direct de l’image, pas la page web.</small>}
           <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder="Message interne optionnel"/>
           <input value={ctaLabel} onChange={e=>setCtaLabel(e.target.value)} placeholder="Titre du bouton, ex: Découvrir l'offre Premium"/>
           <input value={ctaUrl} onChange={e=>setCtaUrl(e.target.value)} placeholder="Lien du bouton https://..."/>
