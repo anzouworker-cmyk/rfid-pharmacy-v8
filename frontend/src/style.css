@@ -1631,24 +1631,30 @@ table button{padding:8px 10px;font-size:13px}
   flex:none;
 }
 .sidebarCodeLogo{
-  max-width:232px;
-  justify-items:start;
+  max-width:282px;
+  justify-items:center;
+  margin:0 auto;
 }
 .sidebarCodeLogo .smartCodeLogoMain{
-  justify-content:flex-start;
-  font-size:25px;
-  letter-spacing:-.068em;
+  justify-content:center;
+  font-size:33px;
+  letter-spacing:-.062em;
+  line-height:.92;
 }
 .sidebarCodeLogo .smartCodeLogoSubRow{
-  justify-content:flex-start;
-  gap:8px;
+  justify-content:center;
+  gap:7px;
+  margin-top:4px;
 }
 .sidebarCodeLogo .smartCodeLogoSubRow small{
-  font-size:7.3px;
-  letter-spacing:.15em;
+  font-size:8.2px;
+  letter-spacing:.105em;
+  font-weight:900;
 }
 .sidebarCodeLogo .smartCodeLogoLine{
-  width:22px;
+  width:18px;
+  height:1.5px;
+  opacity:.72;
 }
 .loginCodeLogo{
   max-width:348px;
@@ -1666,12 +1672,12 @@ table button{padding:8px 10px;font-size:13px}
   width:26px;
 }
 .whiteBrand{
-  min-height:74px!important;
-  margin:8px 8px 28px!important;
-  padding:0!important;
+  min-height:92px!important;
+  margin:12px 0 28px!important;
+  padding:0 14px!important;
   display:flex!important;
   align-items:center!important;
-  justify-content:flex-start!important;
+  justify-content:center!important;
   gap:0!important;
 }
 .brandIcon,.brandTextWrap,.brandNameText,.brandSubText,.loginLogoWrap,.pharmaLogo{
@@ -1699,6 +1705,18 @@ table button{padding:8px 10px;font-size:13px}
   font-weight:950;
   letter-spacing:-1px;
   font-size:21px;
+}
+
+/* V33.13 sidebar logo fix: bigger, centered, readable, no overflow */
+.whiteSidebar .whiteBrand{overflow:hidden!important}
+.whiteSidebar .sidebarCodeLogo{transform:none!important}
+.whiteSidebar .sidebarCodeLogo .smartCodeLogoMain{max-width:100%}
+.whiteSidebar .sidebarCodeLogo .smartCodeLogoSubRow{max-width:100%}
+.whiteSidebar .sidebarCodeLogo .smartCodeLogoSubRow small{overflow:visible}
+@media(max-width:380px){
+  .sidebarCodeLogo .smartCodeLogoMain{font-size:29px}
+  .sidebarCodeLogo .smartCodeLogoSubRow small{font-size:7.5px;letter-spacing:.08em}
+  .sidebarCodeLogo .smartCodeLogoLine{width:14px}
 }
 @media(max-width:520px){
   .loginCard{width:min(390px,calc(100vw - 28px));padding:28px 24px}
