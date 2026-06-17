@@ -13,6 +13,17 @@ function mediaUrl(url){
   if(u.startsWith("/")) return API.replace(/\/$/, "") + u;
   return u;
 }
+
+function apiErrorMessage(e, action="requête API"){
+  const status = e?.response?.status;
+  const detail = e?.response?.data?.detail || e?.response?.data?.message || e?.message || "";
+  if(!e?.response){
+    return `Erreur ${action}: API inaccessible ou CORS bloqué. Vérifiez VITE_API_URL et FRONTEND_ORIGINS dans Render.`;
+  }
+  if(status===401) return `Erreur ${action}: session expirée. Déconnectez-vous puis reconnectez-vous.`;
+  if(status===403) return `Erreur ${action}: accès refusé. Connectez-vous avec admin/admin123.`;
+  return `Erreur ${action}${status ? ` (${status})` : ""}${detail ? `: ${detail}` : ""}`;
+}
 const LS_PRODUCTS="rfid_v7_products";
 const LS_ASSOC="rfid_v7_associations";
 
@@ -1034,7 +1045,7 @@ function DashboardAdmin({auth}){
   function load(){
     axios.get(`${API}/platform/dashboard-content`,auth)
       .then(r=>setItems(r.data || []))
-      .catch(()=>setMsg("Erreur chargement publicité"));
+      .catch(e=>setMsg(apiErrorMessage(e, "chargement publicité")));
   }
 
   useEffect(()=>{load()},[]);
@@ -1078,7 +1089,7 @@ function DashboardAdmin({auth}){
       }catch(readError){
         // On affichera l'erreur originale plus bas.
       }
-      throw new Error(e.response?.data?.detail || e.message || "Erreur upload image");
+      throw new Error(apiErrorMessage(e, "upload image"));
     }finally{
       setUploading(false);
     }
@@ -1090,6 +1101,10 @@ function DashboardAdmin({auth}){
       const finalImageUrl = await uploadSelectedImage();
       if(!finalImageUrl){
         setMsg("Image publicité obligatoire.");
+        return;
+      }
+      if(/^https?:\/\//i.test(finalImageUrl) && !/\.(png|jpe?g|webp)(\?|#|$)/i.test(finalImageUrl) && !/cloudinary\.com\/.+\/image\/upload\//i.test(finalImageUrl)){
+        setMsg("URL image non directe. Utilisez Choose File ou collez un lien qui finit par .png, .jpg, .jpeg ou .webp.");
         return;
       }
 
@@ -1120,7 +1135,7 @@ function DashboardAdmin({auth}){
       setMsg("Publicité dashboard publiée.");
       load();
     }catch(e){
-      setMsg(e.message || e.response?.data?.detail || "Erreur création publicité");
+      setMsg(e.message || apiErrorMessage(e, "création publicité"));
     }
   }
 
@@ -1143,6 +1158,7 @@ function DashboardAdmin({auth}){
 
   return <section className="simpleAdAdmin dynamicAdAdmin">
     <p className="notice">Gérez l’espace publicitaire du dashboard. L’image peut avoir une dimension dynamique; le bouton et son lien sont configurables.</p>
+    <p className="mutedText">Pour une image externe, il faut une URL directe d'image. Une page Pixabay/Unsplash ne fonctionne pas comme image directe.</p>
 
     <div className="adAdminGrid">
       <div className="adEditorPanel">

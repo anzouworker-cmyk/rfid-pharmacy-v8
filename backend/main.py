@@ -25,7 +25,14 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
     CLOUDINARY_API_SECRET: str = ""
-    FRONTEND_ORIGINS: str = "https://rfid-pharmacy-v8-staging-cr53cfcaz-anzou-s-projects.vercel.app,https://rfid-pharmacy-v8-staging.vercel.app,http://localhost:5173,http://localhost:3000"
+    # CORS strict:
+    # - NE PAS utiliser "*" en production.
+    # - Mettre ici uniquement les origines frontend autorisées, séparées par des virgules.
+    # - Une origine = protocole + domaine, sans chemin et sans slash final.
+    #   Exemple: https://mon-site.vercel.app
+    FRONTEND_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
+    # Optionnel. Laisser vide pour désactiver les regex et accepter seulement FRONTEND_ORIGINS.
+    CORS_ORIGIN_REGEX: str = ""
     DEMO_USERNAME: str = "demo"
     DEMO_PASSWORD: str = "demo123"
     ADMIN_USERNAME: str = "admin"
@@ -47,15 +54,26 @@ UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "uploads"))
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
-allowed_origins = [x.strip() for x in settings.FRONTEND_ORIGINS.split(",") if x.strip()]
+allowed_origins = [x.strip().rstrip("/") for x in settings.FRONTEND_ORIGINS.split(",") if x.strip()]
+# En production, on préfère une liste exacte d'origines.
+# CORS_ORIGIN_REGEX reste disponible seulement si vous voulez volontairement accepter un motif.
+allow_origin_regex = settings.CORS_ORIGIN_REGEX.strip() or None
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
+    allow_origin_regex=allow_origin_regex,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=86400,
 )
+
+@app.options("/{full_path:path}")
+def cors_preflight_fallback(full_path: str):
+    # Fallback inoffensif si un proxy envoie directement un OPTIONS à l'app.
+    return {"ok": True}
 
 class Account(Base):
     __tablename__ = "accounts"
@@ -229,7 +247,22 @@ ensure_demo()
 
 @app.get("/health")
 def health():
-    return {"ok": True, "service": "Smart Inventory API"}
+    db_status = {"ok": True, "tables": [], "dashboard_columns": []}
+    try:
+        inspector = inspect(engine)
+        db_status["tables"] = inspector.get_table_names()
+        if "dashboard_content" in db_status["tables"]:
+            db_status["dashboard_columns"] = [c["name"] for c in inspector.get_columns("dashboard_content")]
+    except Exception as e:
+        db_status = {"ok": False, "error": str(e)}
+    return {
+        "ok": True,
+        "service": "Smart Inventory API",
+        "version": "V33.8_ADS_DIAGNOSTIC_FIX",
+        "cors_origins": allowed_origins,
+        "cors_origin_regex": allow_origin_regex or "",
+        "db": db_status,
+    }
 
 @app.post("/auth/login")
 async def login(request: Request, s: Session = Depends(db)):
@@ -443,46 +476,78 @@ def client_update_expiry(username: str, data: ExpiryIn, acc: Account = Depends(c
     return {"ok": True, "username": username, "expires_at": obj.expires_at.isoformat(), "subscription_status": obj.subscription_status}
 
 
+
+
+def _dashboard_content_rows(s: Session, include_inactive: bool = False, username: Optional[str] = None):
+    """Lecture robuste du contenu dashboard.
+
+    Anciennes bases Render/Postgres peuvent avoir une table dashboard_content créée
+    avant l'ajout de image_url / extra_config / cta_label. Une requête ORM peut alors
+    tomber en 500. Cette fonction lit les colonnes existantes avec SELECT * et remplit
+    les champs manquants avec des valeurs par défaut.
+    """
+    try:
+        ensure_schema()
+    except Exception:
+        pass
+
+    try:
+        inspector = inspect(engine)
+        if "dashboard_content" not in inspector.get_table_names():
+            return []
+    except Exception:
+        return []
+
+    where = []
+    params = {}
+    if not include_inactive:
+        where.append("active = :active")
+        params["active"] = True
+    if username:
+        where.append("(scope = :global_scope OR target_username = :username)")
+        params["global_scope"] = "global"
+        params["username"] = username
+    sql = "SELECT * FROM dashboard_content"
+    if where:
+        sql += " WHERE " + " AND ".join(where)
+    sql += " ORDER BY created_at DESC"
+
+    try:
+        rows = s.execute(text(sql), params).mappings().all()
+    except Exception:
+        # Dernier filet de sécurité: ne pas casser l'écran admin à cause d'une ancienne table.
+        return []
+
+    result = []
+    for r in rows:
+        created_at = r.get("created_at")
+        if hasattr(created_at, "isoformat"):
+            created_at = created_at.isoformat()
+        result.append({
+            "id": r.get("id", ""),
+            "scope": r.get("scope", "global") or "global",
+            "target_username": r.get("target_username", None),
+            "title": r.get("title", ""),
+            "message": r.get("message", ""),
+            "cta_label": r.get("cta_label", "") or "",
+            "cta_url": r.get("cta_url", "") or "",
+            "content_type": r.get("content_type", "info") or "info",
+            "image_url": r.get("image_url", "") or "",
+            "extra_config": r.get("extra_config", "contain") or "contain",
+            "active": bool(r.get("active", True)),
+            "created_at": created_at or "",
+        })
+    return result
+
 @app.get("/dashboard/content")
 def dashboard_content(acc: Account = Depends(current_user), s: Session = Depends(db)):
-    rows = s.query(DashboardContent).filter(DashboardContent.active == True).order_by(DashboardContent.created_at.desc()).all()
-    result = []
-    for x in rows:
-        if x.scope == "global" or x.target_username == acc.username:
-            result.append({
-                "id": x.id,
-                "scope": x.scope,
-                "target_username": x.target_username,
-                "title": x.title,
-                "message": x.message,
-                "cta_label": x.cta_label,
-                "cta_url": x.cta_url,
-                "content_type": x.content_type,
-                "image_url": getattr(x, "image_url", ""),
-                "extra_config": getattr(x, "extra_config", "contain") or "contain",
-                "active": x.active,
-                "created_at": x.created_at.isoformat()
-            })
-    return result
+    return _dashboard_content_rows(s, include_inactive=False, username=acc.username)
 
 @app.get("/platform/dashboard-content")
 def platform_dashboard_content(acc: Account = Depends(current_user), s: Session = Depends(db)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
-    return [{
-        "id": x.id,
-        "scope": x.scope,
-        "target_username": x.target_username,
-        "title": x.title,
-        "message": x.message,
-        "cta_label": x.cta_label,
-        "cta_url": x.cta_url,
-        "content_type": x.content_type,
-        "image_url": x.image_url,
-        "extra_config": x.extra_config or "contain",
-        "active": x.active,
-        "created_at": x.created_at.isoformat()
-    } for x in s.query(DashboardContent).order_by(DashboardContent.created_at.desc()).all()]
+    return _dashboard_content_rows(s, include_inactive=True)
 
 @app.post("/platform/dashboard-content")
 def create_dashboard_content(data: DashboardContentIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
@@ -492,42 +557,64 @@ def create_dashboard_content(data: DashboardContentIn, acc: Account = Depends(cu
         raise HTTPException(400, "scope must be global or pharmacy")
     if data.scope == "pharmacy" and not data.target_username:
         raise HTTPException(400, "target_username required")
+
+    try:
+        ensure_schema()
+    except Exception:
+        pass
+
     obj = DashboardContent(
-        id="dash_" + str(int(datetime.utcnow().timestamp() * 1000)),
+        id="dash_" + uuid.uuid4().hex,
         scope=data.scope,
         target_username=data.target_username,
-        title=data.title,
-        message=data.message,
-        cta_label=data.cta_label,
-        cta_url=data.cta_url,
-        content_type=data.content_type,
-        image_url=data.image_url,
-        extra_config=getattr(data, "extra_config", "contain"),
+        title=data.title or "Publicité Dashboard",
+        message=data.message or "",
+        cta_label=data.cta_label or "",
+        cta_url=data.cta_url or "",
+        content_type=data.content_type or "publicite",
+        image_url=data.image_url or "",
+        extra_config=(getattr(data, "extra_config", "contain") or "contain"),
         active=data.active
     )
-    s.add(obj)
-    s.commit()
+    try:
+        s.add(obj)
+        s.commit()
+    except Exception as e:
+        s.rollback()
+        raise HTTPException(500, f"Erreur sauvegarde publicité: {str(e)}")
     return {"ok": True, "id": obj.id}
 
 @app.post("/platform/dashboard-content-toggle/{content_id}")
 def toggle_dashboard_content(content_id: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
-    obj = s.get(DashboardContent, content_id)
-    if not obj:
-        raise HTTPException(404, "Content not found")
-    obj.active = not obj.active
-    s.commit()
-    return {"ok": True, "active": obj.active}
+    try:
+        res = s.execute(
+            text("UPDATE dashboard_content SET active = CASE WHEN active THEN false ELSE true END WHERE id = :id"),
+            {"id": content_id},
+        )
+        if res.rowcount == 0:
+            raise HTTPException(404, "Content not found")
+        s.commit()
+        rows = _dashboard_content_rows(s, include_inactive=True)
+        active = next((x["active"] for x in rows if x["id"] == content_id), None)
+        return {"ok": True, "active": active}
+    except HTTPException:
+        raise
+    except Exception as e:
+        s.rollback()
+        raise HTTPException(500, f"Erreur changement statut publicité: {str(e)}")
 
 @app.post("/platform/dashboard-content-delete/{content_id}")
 def delete_dashboard_content(content_id: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
-    obj = s.get(DashboardContent, content_id)
-    if obj:
-        s.delete(obj)
+    try:
+        s.execute(text("DELETE FROM dashboard_content WHERE id = :id"), {"id": content_id})
         s.commit()
+    except Exception as e:
+        s.rollback()
+        raise HTTPException(500, f"Erreur suppression publicité: {str(e)}")
     return {"ok": True}
 
 
