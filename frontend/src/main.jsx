@@ -371,11 +371,21 @@ function Login({setToken}){
     form.append("username",u);
     form.append("password",p);
     try{
-      const r=await axios.post(`${API}/auth/login`,form);
+      const r=await axios.post(`${API}/auth/login`,form,{
+        headers:{"Content-Type":"application/x-www-form-urlencoded"}
+      });
       localStorage.token=r.data.access_token;
       setToken(r.data.access_token);
     }catch(e){
-      setErr(e.response?.status===402 ? "Abonnement expiré" : "Connexion échouée. Vérifier utilisateur/mot de passe.");
+      if(!e.response){
+        setErr(`API backend inaccessible. Vérifiez VITE_API_URL: ${API}`);
+      }else if(e.response.status===402){
+        setErr("Abonnement expiré");
+      }else if(e.response.status===401){
+        setErr("Connexion échouée. Essayez demo/demo123 ou admin/admin123 après redéploiement du backend.");
+      }else{
+        setErr(e.response?.data?.detail || "Erreur serveur pendant la connexion.");
+      }
     }
     setLoading(false);
   }
@@ -399,7 +409,8 @@ function Login({setToken}){
       {err && <p className="err">{err}</p>}
 
       <div className="loginHelp">
-        <small>Compte démo : demo / demo123</small>
+        <small>Compte démo : demo / demo123</small><br/>
+        <small>Compte admin : admin / admin123</small>
       </div>
     </form>
   </div>

@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str = ""
     CLOUDINARY_API_SECRET: str = ""
     FRONTEND_ORIGINS: str = "https://rfid-pharmacy-v8-staging-cr53cfcaz-anzou-s-projects.vercel.app,https://rfid-pharmacy-v8-staging.vercel.app,http://localhost:5173,http://localhost:3000"
+    DEMO_USERNAME: str = "demo"
+    DEMO_PASSWORD: str = "demo123"
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "admin123"
+    RESET_BOOTSTRAP_ACCOUNTS: bool = True
     class Config:
         env_file = ".env"
 
@@ -174,26 +179,47 @@ def ensure_schema():
 
 
 def ensure_demo():
+    """Crée ou répare les comptes de démarrage.
+
+    Sur Render/Postgres, la base peut déjà contenir un ancien compte demo
+    désactivé ou avec un ancien mot de passe. Dans ce cas, le frontend affiche
+    "Connexion échouée" même si demo/demo123 est indiqué à l'écran.
+    RESET_BOOTSTRAP_ACCOUNTS=True remet les comptes demo/admin dans un état
+    utilisable à chaque redémarrage.
+    """
     s = SessionLocal()
     try:
-        if not s.get(Account, "demo"):
-            s.add(Account(
-                username="demo",
-                password_hash=hpw("demo123"),
-                pharmacy_name="Pharmacie Démo",
-                subscription_status="active",
-                expires_at=datetime.utcnow() + timedelta(days=365)
-            ))
-        if not s.get(Account, "admin"):
-            s.add(Account(
-                username="admin",
-                password_hash=hpw("admin123"),
-                pharmacy_name="admin",
-                role="platform_admin",
-                ai_premium=True,
-                subscription_status="active",
-                expires_at=datetime.utcnow() + timedelta(days=3650)
-            ))
+        demo_username = settings.DEMO_USERNAME.strip() or "demo"
+        demo_password = settings.DEMO_PASSWORD or "demo123"
+        admin_username = settings.ADMIN_USERNAME.strip() or "admin"
+        admin_password = settings.ADMIN_PASSWORD or "admin123"
+
+        demo = s.get(Account, demo_username)
+        if not demo:
+            demo = Account(username=demo_username, created_at=datetime.utcnow())
+            s.add(demo)
+        if settings.RESET_BOOTSTRAP_ACCOUNTS:
+            demo.password_hash = hpw(demo_password)
+            demo.pharmacy_name = "Pharmacie Démo"
+            demo.role = "client"
+            demo.subscription_status = "active"
+            demo.expires_at = datetime.utcnow() + timedelta(days=365)
+            demo.active = True
+            demo.ai_premium = False
+
+        admin = s.get(Account, admin_username)
+        if not admin:
+            admin = Account(username=admin_username, created_at=datetime.utcnow())
+            s.add(admin)
+        if settings.RESET_BOOTSTRAP_ACCOUNTS:
+            admin.password_hash = hpw(admin_password)
+            admin.pharmacy_name = "admin"
+            admin.role = "platform_admin"
+            admin.ai_premium = True
+            admin.subscription_status = "active"
+            admin.expires_at = datetime.utcnow() + timedelta(days=3650)
+            admin.active = True
+
         s.commit()
     finally:
         s.close()
@@ -201,10 +227,35 @@ def ensure_demo():
 ensure_schema()
 ensure_demo()
 
+@app.get("/health")
+def health():
+    return {"ok": True, "service": "Smart Inventory API"}
+
 @app.post("/auth/login")
-def login(form: OAuth2PasswordRequestForm = Depends(), s: Session = Depends(db)):
-    acc = s.get(Account, form.username)
-    if not acc or not verify(form.password, acc.password_hash) or not acc.active:
+async def login(request: Request, s: Session = Depends(db)):
+    """Connexion robuste.
+
+    Accepte application/x-www-form-urlencoded, multipart/form-data et JSON.
+    Cela évite les échecs quand le navigateur ou Vercel envoie un Content-Type
+    légèrement différent.
+    """
+    username = ""
+    password = ""
+    content_type = (request.headers.get("content-type") or "").lower()
+    try:
+        if "application/json" in content_type:
+            payload = await request.json()
+            username = str(payload.get("username", "")).strip()
+            password = str(payload.get("password", ""))
+        else:
+            form = await request.form()
+            username = str(form.get("username", "")).strip()
+            password = str(form.get("password", ""))
+    except Exception:
+        raise HTTPException(400, "Invalid login payload")
+
+    acc = s.get(Account, username)
+    if not acc or not verify(password, acc.password_hash) or not acc.active:
         raise HTTPException(401, "Bad credentials")
     if acc.role != "platform_admin":
         if acc.subscription_status != "active" or acc.expires_at < datetime.utcnow():
