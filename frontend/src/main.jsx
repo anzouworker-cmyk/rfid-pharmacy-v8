@@ -1062,6 +1062,11 @@ function Dashboard({setTab}){
   const epcCounts={};
   associations.forEach(a=>{ const e=norm(a.EPC); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
   const duplicateEpcs=Object.values(epcCounts).filter(x=>x>1).length;
+  const healthStatus = products.length===0 ? "En attente de données" : duplicateEpcs>0 ? "À vérifier" : coverage>=85 ? "Excellent" : coverage>=60 ? "Stable" : "Priorité haute";
+  const healthTone = products.length===0 ? "neutral" : duplicateEpcs>0 || coverage<60 ? "warning" : "good";
+  const coverageLabel = coverage>=85 ? "Couverture avancée" : coverage>=60 ? "Couverture correcte" : products.length===0 ? "Aucune donnée" : "Couverture faible";
+  const remainingPercent = Math.max(100-coverage,0);
+  const todayLabel = new Date().toLocaleDateString("fr-CA", {year:"numeric", month:"short", day:"numeric"});
 
   function exportDashboardReport(){
     const rows=[{
@@ -1082,75 +1087,148 @@ function Dashboard({setTab}){
   }
 
   const alerts=[];
-  if(productsWithoutRfid>0) alerts.push({type:"warning",title:`${productsWithoutRfid} produits sans tag RFID`,text:"Priorisez les produits à forte rotation."});
-  if(duplicateEpcs>0) alerts.push({type:"danger",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,text:"Vérifier les associations RFID en double."});
-  if(coverage>=80) alerts.push({type:"success",title:"Couverture RFID élevée",text:"Votre catalogue est bien avancé."});
-  if(alerts.length===0) alerts.push({type:"success",title:"Aucune alerte prioritaire",text:"Les données RFID sont stables."});
+  if(products.length===0){
+    alerts.push({type:"info",title:"Catalogue non importé",text:"Importez le CSV pharmacie pour activer les indicateurs RFID."});
+  }else{
+    if(productsWithoutRfid>0) alerts.push({type:"warning",title:`${productsWithoutRfid} produits sans tag RFID`,text:"Associer les produits non couverts pour améliorer la traçabilité."});
+    if(duplicateEpcs>0) alerts.push({type:"danger",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,text:"Vérifier les associations RFID en double avant le prochain inventaire."});
+    if(coverage>=85 && duplicateEpcs===0) alerts.push({type:"success",title:"Situation RFID maîtrisée",text:"Votre couverture est élevée et aucune anomalie prioritaire n’est détectée."});
+  }
 
-  return <section className="proDashboardV31">
-    <p className="pageIntro">Vue d’ensemble de la couverture RFID et de l’activité de votre pharmacie.</p>
+  const reportCards=[
+    {title:"Rapport couverture", meta:"CSV", action:exportDashboardReport},
+    {title:"Produits sans tag", meta:"CSV", action:exportProductsWithoutRfid},
+    {title:"Écarts inventaire", meta:"CSV", action:exportDashboardReport},
+    {title:"Historique scans", meta:"CSV", action:()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{}))}
+  ];
 
-    <div className="dashKpiGrid">
-      <div className="dashKpiCard"><div className="dashKpiIcon blue">📦</div><div><span>Produits catalogués</span><b>{products.length}</b><small>Total dans le catalogue</small></div></div>
-      <div className="dashKpiCard clickableKpi" onClick={()=>setTab("association")}><div className="dashKpiIcon green">🏷️</div><div><span>Produits tagués</span><b>{productsWithRfid}</b><small>Produits avec RFID</small></div></div>
-      <div className="dashKpiCard clickableKpi" onClick={()=>setTab("dashboard")}><div className="dashKpiIcon blue">◎</div><div><span>Couverture RFID</span><b className="greenText">{coverage}%</b><small>Pourcentage global</small></div></div>
-      <div className="dashKpiCard clickableKpi" onClick={()=>setTab("inventory")}><div className="dashKpiIcon orange">⚠️</div><div><span>Produits sans tag</span><b>{productsWithoutRfid}</b><small>Nécessitent un tag</small></div></div>
+  return <section className="proDashboardV34">
+    <div className="dashExecutiveHeaderV34">
+      <div>
+        <span className="eyebrowV34">Smart Inventory Control Center</span>
+        <h2>Tableau de bord RFID professionnel</h2>
+        <p>Suivez la couverture, les risques et les prochaines actions pour garder l’inventaire de la pharmacie sous contrôle.</p>
+      </div>
+      <div className={`healthCardV34 ${healthTone}`}>
+        <span>État global</span>
+        <b>{healthStatus}</b>
+        <small>Mise à jour locale · {todayLabel}</small>
+      </div>
     </div>
 
-    <div className="dashboardMainGrid">
-      <div className="coveragePanelV31">
-        <div className="panelTitle"><h3>Couverture RFID</h3><span>ⓘ</span></div>
-        <div className="coverageContent">
-          <div className="coverageDonut" style={{"--progress": `${coverage * 3.6}deg`}}>
-            <div className="coverageCenter"><b>{coverage}%</b></div>
-          </div>
-          <div className="coverageText">
-            <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture RFID progresse." : "Votre couverture RFID doit être améliorée."}</h3>
-            <p>Vous avez atteint {coverage}% de couverture RFID.</p>
-            <p>Continuez à associer vos produits pour une traçabilité optimale.</p>
-            <button onClick={()=>setTab("operations")}>🔗 Associer maintenant</button>
-          </div>
-        </div>
-      </div>
+    <div className="dashMetricGridV34">
+      <button type="button" className="dashMetricCardV34" onClick={()=>setTab("inventory")}>
+        <span className="metricCodeV34">PRD</span>
+        <small>Produits catalogués</small>
+        <b>{products.length}</b>
+        <em>Total importé</em>
+      </button>
+      <button type="button" className="dashMetricCardV34" onClick={()=>setTab("association")}>
+        <span className="metricCodeV34 good">TAG</span>
+        <small>Produits tagués</small>
+        <b>{productsWithRfid}</b>
+        <em>{associations.length} associations</em>
+      </button>
+      <button type="button" className="dashMetricCardV34" onClick={()=>setTab("inventory")}>
+        <span className="metricCodeV34 warning">GAP</span>
+        <small>Produits sans tag</small>
+        <b>{productsWithoutRfid}</b>
+        <em>{remainingPercent}% restant</em>
+      </button>
+      <button type="button" className="dashMetricCardV34" onClick={()=>setTab("association")}>
+        <span className="metricCodeV34 danger">DUP</span>
+        <small>Doublons EPC</small>
+        <b>{duplicateEpcs}</b>
+        <em>{duplicateEpcs ? "À corriger" : "Aucun doublon"}</em>
+      </button>
+    </div>
 
-      <div className="adPlaceholderV31">
-        {currentDashboardAd ? <div className={`liveDashboardAd dynamicDashboardAd dashboardCarouselAd ${currentDashboardAd.extra_config==="cover" ? "cover" : "contain"}`}>
-          <img key={currentDashboardAd.id || currentDashboardAd.image_url} src={mediaUrl(currentDashboardAd.image_url)} alt="Publicité"/>
-          {currentDashboardAd.cta_label && <a href={currentDashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{currentDashboardAd.cta_label}</a>}
-          {activeDashboardAds.length > 1 && <>
-            <button type="button" className="carouselNav prev" onClick={prevDashboardAd} aria-label="Publicité précédente">‹</button>
-            <button type="button" className="carouselNav next" onClick={nextDashboardAd} aria-label="Publicité suivante">›</button>
-            <div className="carouselDots" aria-label="Navigation publicités">
-              {activeDashboardAds.map((ad,i)=><button type="button" key={ad.id || i} className={i===(dashboardAdIndex % activeDashboardAds.length) ? "active" : ""} onClick={()=>setDashboardAdIndex(i)} aria-label={`Afficher publicité ${i+1}`}></button>)}
+    <div className="dashboardCoreGridV34">
+      <div className="coveragePanelV34">
+        <div className="panelHeaderV34">
+          <div>
+            <span>Performance RFID</span>
+            <h3>{coverageLabel}</h3>
+          </div>
+          <strong>{coverage}%</strong>
+        </div>
+
+        <div className="coverageBodyV34">
+          <div className="coverageRingV34" style={{"--progress": `${coverage * 3.6}deg`}}>
+            <div><b>{coverage}</b><span>%</span><small>couvert</small></div>
+          </div>
+          <div className="coverageDetailsV34">
+            <div className="barRowV34">
+              <div><b>Produits avec RFID</b><span>{productsWithRfid} / {products.length || 0}</span></div>
+              <progress max="100" value={coverage}></progress>
             </div>
-          </>}
-        </div> : <div className="liveDashboardAd fullImageAd defaultAd dynamicDefaultAd"><img src={defaultAds[defaultAdIndex]} alt="Smart Inventory publicité dynamique"/></div>}
+            <div className="barRowV34">
+              <div><b>Produits à traiter</b><span>{productsWithoutRfid}</span></div>
+              <progress max="100" value={remainingPercent}></progress>
+            </div>
+            <div className="detailListV34">
+              <div><span>Objectif recommandé</span><b>95%</b></div>
+              <div><span>Risque prioritaire</span><b>{duplicateEpcs>0 ? "Doublons EPC" : productsWithoutRfid>0 ? "Produits non tagués" : "Aucun"}</b></div>
+              <div><span>Prochaine étape</span><b>{products.length===0 ? "Importer catalogue" : productsWithoutRfid>0 ? "Associer RFID" : "Contrôler inventaire"}</b></div>
+            </div>
+            <div className="coverageActionsV34">
+              <button type="button" onClick={()=>setTab("operations")}>Associer maintenant</button>
+              <button type="button" className="secondary" onClick={()=>setTab("inventory")}>Voir inventaire</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboardAdPanelV34">
+        <div className="panelHeaderV34 compact">
+          <div><span>Espace communication</span><h3>Publicité dynamique</h3></div>
+        </div>
+        <div className="adDisplayV34">
+          {currentDashboardAd ? <div className={`liveDashboardAd dynamicDashboardAd dashboardCarouselAd ${currentDashboardAd.extra_config==="cover" ? "cover" : "contain"}`}>
+            <img key={currentDashboardAd.id || currentDashboardAd.image_url} src={mediaUrl(currentDashboardAd.image_url)} alt="Publicité"/>
+            {currentDashboardAd.cta_label && <a href={currentDashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{currentDashboardAd.cta_label}</a>}
+            {activeDashboardAds.length > 1 && <>
+              <button type="button" className="carouselNav prev" onClick={prevDashboardAd} aria-label="Publicité précédente">‹</button>
+              <button type="button" className="carouselNav next" onClick={nextDashboardAd} aria-label="Publicité suivante">›</button>
+              <div className="carouselDots" aria-label="Navigation publicités">
+                {activeDashboardAds.map((ad,i)=><button type="button" key={ad.id || i} className={i===(dashboardAdIndex % activeDashboardAds.length) ? "active" : ""} onClick={()=>setDashboardAdIndex(i)} aria-label={`Afficher publicité ${i+1}`}></button>)}
+              </div>
+            </>}
+          </div> : <div className="liveDashboardAd fullImageAd defaultAd dynamicDefaultAd"><img src={defaultAds[defaultAdIndex]} alt="Smart Inventory publicité dynamique"/></div>}
+        </div>
       </div>
     </div>
 
-    <div className="dashboardBottomGrid">
-      <div className="reportsPanelV31">
-        <div className="panelTitle"><h3>Rapports et exports</h3></div>
-        <div className="miniReportGrid">
-          <button onClick={exportDashboardReport}><span>📄</span><b>Couverture RFID</b><small>CSV</small><em>↓</em></button>
-          <button onClick={exportProductsWithoutRfid}><span>📄</span><b>Produits sans tag</b><small>CSV</small><em>↓</em></button>
-          <button onClick={exportDashboardReport}><span>📄</span><b>Écarts d’inventaire</b><small>CSV</small><em>↓</em></button>
-          <button onClick={()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{}))}><span>📄</span><b>Historique scans</b><small>CSV</small><em>↓</em></button>
+    <div className="dashboardOpsGridV34">
+      <div className="quickActionsPanelV34">
+        <div className="panelHeaderV34 compact"><div><span>Exécution</span><h3>Actions rapides</h3></div></div>
+        <div className="quickActionsGridV34">
+          <button type="button" onClick={()=>setTab("operations")}><span>01</span><b>Importer / scanner</b><small>CSV, code-barres, EPC</small></button>
+          <button type="button" onClick={()=>setTab("association")}><span>02</span><b>Associations RFID</b><small>Produit ↔ EPC</small></button>
+          <button type="button" onClick={()=>setTab("inventory")}><span>03</span><b>Inventaire réel</b><small>Présent, manquant, non associé</small></button>
+          <button type="button" onClick={()=>setTab("ai")}><span>04</span><b>Assistant IA</b><small>Analyse et recommandations</small></button>
         </div>
-        <a className="panelLink">Voir tous les rapports ›</a>
       </div>
 
-      <div className="alertsPanelV31">
-        <div className="panelTitle"><h3>Alertes prioritaires</h3></div>
-        <div className="alertListV31">
-          {alerts.map((a,i)=><div className={`alertItemV31 ${a.type}`} key={i}><span>{a.type==="success"?"✅":a.type==="danger"?"⛔":"🔔"}</span><div><b>{a.title}</b><small>{a.text}</small></div></div>)}
+      <div className="reportsPanelV34">
+        <div className="panelHeaderV34 compact"><div><span>Documents</span><h3>Rapports</h3></div></div>
+        <div className="reportGridV34">
+          {reportCards.map((r,i)=><button type="button" key={i} onClick={r.action}><span>CSV</span><b>{r.title}</b><small>{r.meta}</small></button>)}
+        </div>
+      </div>
+
+      <div className="alertsPanelV34">
+        <div className="panelHeaderV34 compact"><div><span>Surveillance</span><h3>Alertes</h3></div></div>
+        <div className="alertListV34">
+          {alerts.map((a,i)=><div className={`alertItemV34 ${a.type}`} key={i}>
+            <span>{a.type==="success"?"OK":a.type==="danger"?"!":"•"}</span>
+            <div><b>{a.title}</b><small>{a.text}</small></div>
+          </div>)}
         </div>
       </div>
     </div>
   </section>
 }
-
-
 
 
 

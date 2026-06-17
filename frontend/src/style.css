@@ -2187,3 +2187,547 @@ body{
     white-space:normal!important;
   }
 }
+
+/* V34 - Professional executive dashboard, compact square design */
+.proDashboardV34{
+  max-width:1680px;
+  margin:0 auto;
+  color:#0b1220;
+}
+.proDashboardV34 button{
+  font-family:inherit;
+}
+.dashExecutiveHeaderV34{
+  display:grid;
+  grid-template-columns:1fr 320px;
+  gap:18px;
+  align-items:stretch;
+  margin-bottom:18px;
+}
+.dashExecutiveHeaderV34 > div:first-child,
+.healthCardV34{
+  background:#ffffff;
+  border:1px solid #dfe7f1;
+  border-radius:8px;
+  box-shadow:0 10px 28px rgba(15,23,42,.045);
+}
+.dashExecutiveHeaderV34 > div:first-child{
+  padding:24px 26px;
+  border-left:5px solid #0f3f8f;
+}
+.eyebrowV34,
+.panelHeaderV34 span{
+  display:block;
+  font-size:11px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:#607086;
+  margin-bottom:10px;
+}
+.dashExecutiveHeaderV34 h2{
+  margin:0 0 8px;
+  font-size:34px;
+  line-height:1.04;
+  letter-spacing:-1.1px;
+  font-weight:950;
+  color:#07152c;
+}
+.dashExecutiveHeaderV34 p{
+  margin:0;
+  max-width:880px;
+  color:#52627a;
+  line-height:1.55;
+  font-weight:650;
+}
+.healthCardV34{
+  padding:22px;
+  display:grid;
+  align-content:center;
+  border-left:5px solid #64748b;
+}
+.healthCardV34.good{border-left-color:#059669;background:linear-gradient(90deg,#ffffff,#f1fff9)}
+.healthCardV34.warning{border-left-color:#f59e0b;background:linear-gradient(90deg,#ffffff,#fff8ed)}
+.healthCardV34.neutral{border-left-color:#2563eb;background:linear-gradient(90deg,#ffffff,#f2f7ff)}
+.healthCardV34 span{
+  color:#607086;
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.healthCardV34 b{
+  margin:8px 0 6px;
+  font-size:28px;
+  line-height:1;
+  color:#07152c;
+  letter-spacing:-.6px;
+}
+.healthCardV34 small{
+  color:#66758b;
+  font-weight:750;
+}
+.dashMetricGridV34{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(180px,1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
+.dashMetricCardV34{
+  min-height:154px;
+  background:#ffffff!important;
+  border:1px solid #dfe7f1!important;
+  border-radius:8px!important;
+  color:#0b1220!important;
+  box-shadow:0 10px 28px rgba(15,23,42,.045)!important;
+  padding:18px!important;
+  display:grid!important;
+  grid-template-columns:64px 1fr;
+  grid-template-rows:auto 1fr auto;
+  gap:6px 14px;
+  text-align:left!important;
+  align-items:start;
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.dashMetricCardV34:hover{
+  transform:translateY(-2px)!important;
+  border-color:#b9c8da!important;
+  box-shadow:0 16px 34px rgba(15,23,42,.07)!important;
+}
+.metricCodeV34{
+  grid-row:1/4;
+  width:56px;
+  height:56px;
+  border-radius:6px;
+  display:grid;
+  place-items:center;
+  background:#edf4ff;
+  color:#1746b8;
+  font-weight:950;
+  letter-spacing:-.5px;
+  border:1px solid #d6e5ff;
+}
+.metricCodeV34.good{background:#ecfdf5;color:#047857;border-color:#bbf7d0}
+.metricCodeV34.warning{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.metricCodeV34.danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.dashMetricCardV34 small{
+  color:#5d6c82;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  font-size:11px;
+}
+.dashMetricCardV34 b{
+  font-size:38px;
+  line-height:1;
+  color:#07152c;
+  letter-spacing:-1px;
+  align-self:center;
+}
+.dashMetricCardV34 em{
+  font-style:normal;
+  color:#68778d;
+  font-weight:750;
+  font-size:13px;
+}
+.dashboardCoreGridV34{
+  display:grid;
+  grid-template-columns:minmax(0,1.25fr) minmax(360px,.75fr);
+  gap:18px;
+  margin-bottom:18px;
+}
+.coveragePanelV34,
+.dashboardAdPanelV34,
+.quickActionsPanelV34,
+.reportsPanelV34,
+.alertsPanelV34{
+  background:#ffffff;
+  border:1px solid #dfe7f1;
+  border-radius:8px;
+  box-shadow:0 10px 28px rgba(15,23,42,.045);
+  overflow:hidden;
+}
+.coveragePanelV34,
+.dashboardAdPanelV34{
+  min-height:454px;
+}
+.panelHeaderV34{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:22px 24px;
+  border-bottom:1px solid #e7edf5;
+  background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%);
+}
+.panelHeaderV34.compact{
+  padding:18px 20px;
+}
+.panelHeaderV34 h3{
+  margin:0;
+  font-size:24px;
+  line-height:1.05;
+  letter-spacing:-.6px;
+  color:#07152c;
+  font-weight:950;
+}
+.panelHeaderV34 strong{
+  font-size:46px;
+  line-height:1;
+  letter-spacing:-1.6px;
+  color:#0f3f8f;
+}
+.coverageBodyV34{
+  display:grid;
+  grid-template-columns:330px 1fr;
+  gap:24px;
+  align-items:center;
+  padding:26px 28px 30px;
+}
+.coverageRingV34{
+  width:292px;
+  height:292px;
+  margin:auto;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:conic-gradient(#0f3f8f var(--progress,0deg), #eef2f6 0deg)!important;
+  box-shadow:inset 0 0 0 1px #dfe7f1;
+}
+.coverageRingV34 > div{
+  width:186px;
+  height:186px;
+  border-radius:50%;
+  background:#ffffff;
+  border:1px solid #e4eaf2;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  text-align:center;
+  box-shadow:0 14px 35px rgba(15,23,42,.07);
+}
+.coverageRingV34 b{
+  font-size:54px;
+  line-height:.9;
+  color:#07152c;
+  letter-spacing:-2px;
+}
+.coverageRingV34 span{
+  font-weight:950;
+  color:#0f3f8f;
+  margin-top:-6px;
+}
+.coverageRingV34 small{
+  margin-top:4px;
+  color:#63728a;
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:10px;
+}
+.coverageDetailsV34{
+  display:grid;
+  gap:16px;
+}
+.barRowV34{
+  display:grid;
+  gap:8px;
+}
+.barRowV34 > div{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+}
+.barRowV34 b{
+  color:#10213a;
+  font-size:14px;
+}
+.barRowV34 span{
+  color:#607086;
+  font-weight:900;
+  font-size:13px;
+}
+.barRowV34 progress{
+  width:100%;
+  height:12px;
+  border:0;
+  border-radius:0;
+  overflow:hidden;
+  background:#edf2f7;
+}
+.barRowV34 progress::-webkit-progress-bar{background:#edf2f7;border-radius:0}
+.barRowV34 progress::-webkit-progress-value{background:#0f3f8f;border-radius:0}
+.barRowV34 progress::-moz-progress-bar{background:#0f3f8f;border-radius:0}
+.detailListV34{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  border:1px solid #e4eaf2;
+  border-radius:6px;
+  overflow:hidden;
+}
+.detailListV34 div{
+  padding:14px;
+  border-right:1px solid #e4eaf2;
+  background:#fbfcfe;
+}
+.detailListV34 div:last-child{border-right:0}
+.detailListV34 span{
+  display:block;
+  color:#607086;
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:8px;
+}
+.detailListV34 b{
+  display:block;
+  color:#07152c;
+  font-size:14px;
+}
+.coverageActionsV34{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:2px;
+}
+.coverageActionsV34 button,
+.quickActionsGridV34 button,
+.reportGridV34 button{
+  border-radius:6px!important;
+  box-shadow:none!important;
+}
+.coverageActionsV34 button{
+  background:#0f3f8f!important;
+  color:white!important;
+  border:1px solid #0f3f8f!important;
+  padding:13px 18px!important;
+  font-weight:900!important;
+}
+.coverageActionsV34 button.secondary{
+  background:#ffffff!important;
+  color:#0f3f8f!important;
+  border-color:#cbd7e6!important;
+}
+.dashboardAdPanelV34{
+  display:grid;
+  grid-template-rows:auto 1fr;
+}
+.adDisplayV34{
+  min-height:372px;
+  padding:16px;
+  background:#f8fafc;
+  display:grid;
+}
+.adDisplayV34 .liveDashboardAd,
+.adDisplayV34 .dynamicDashboardAd,
+.adDisplayV34 .fullImageAd{
+  min-height:340px!important;
+  height:100%!important;
+  border-radius:6px!important;
+  overflow:hidden!important;
+  background:#ffffff!important;
+  padding:0!important;
+  border:1px solid #e2e8f0!important;
+}
+.adDisplayV34 .dynamicDashboardAd{
+  padding:12px!important;
+  grid-template-rows:1fr auto!important;
+}
+.adDisplayV34 .liveDashboardAd img,
+.adDisplayV34 .fullImageAd img,
+.adDisplayV34 .defaultAd img{
+  width:100%!important;
+  height:100%!important;
+  min-height:330px!important;
+  max-height:none!important;
+  border-radius:4px!important;
+  object-fit:cover!important;
+}
+.adDisplayV34 .dynamicDashboardAd.contain img{
+  object-fit:contain!important;
+  background:#fff!important;
+}
+.adDisplayV34 .dynamicDashboardAd.cover img{
+  object-fit:cover!important;
+}
+.adDisplayV34 .dynamicDashboardAd a{
+  border-radius:4px!important;
+  justify-self:stretch!important;
+  margin-top:10px;
+  background:#0f3f8f!important;
+  box-shadow:none!important;
+}
+.dashboardOpsGridV34{
+  display:grid;
+  grid-template-columns:1.15fr .9fr .95fr;
+  gap:18px;
+}
+.quickActionsGridV34,
+.reportGridV34,
+.alertListV34{
+  padding:16px;
+  display:grid;
+  gap:10px;
+}
+.quickActionsGridV34{
+  grid-template-columns:repeat(2,1fr);
+}
+.quickActionsGridV34 button,
+.reportGridV34 button{
+  min-height:104px;
+  border:1px solid #dfe7f1!important;
+  background:#ffffff!important;
+  color:#07152c!important;
+  text-align:left!important;
+  padding:16px!important;
+  display:grid!important;
+  align-content:center;
+  gap:6px;
+  transition:background .16s ease, border-color .16s ease, transform .16s ease;
+}
+.quickActionsGridV34 button:hover,
+.reportGridV34 button:hover{
+  background:#f6f9fd!important;
+  border-color:#b9c8da!important;
+  transform:translateY(-1px)!important;
+}
+.quickActionsGridV34 span{
+  width:34px;
+  height:26px;
+  border-radius:4px;
+  display:grid;
+  place-items:center;
+  background:#edf4ff;
+  color:#1746b8;
+  font-size:12px;
+  font-weight:950;
+}
+.quickActionsGridV34 b,
+.reportGridV34 b{
+  font-size:15px;
+  line-height:1.18;
+  color:#07152c;
+}
+.quickActionsGridV34 small,
+.reportGridV34 small{
+  color:#65758b;
+  font-weight:750;
+  line-height:1.3;
+}
+.reportGridV34{
+  grid-template-columns:repeat(2,1fr);
+}
+.reportGridV34 button{
+  min-height:96px;
+}
+.reportGridV34 span{
+  width:max-content;
+  border:1px solid #d5e0ed;
+  border-radius:4px;
+  padding:4px 7px;
+  color:#0f3f8f;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.05em;
+}
+.alertListV34{
+  align-content:start;
+}
+.alertItemV34{
+  display:grid;
+  grid-template-columns:44px 1fr;
+  gap:12px;
+  align-items:center;
+  border:1px solid #dfe7f1;
+  background:#ffffff;
+  border-radius:6px;
+  padding:14px;
+}
+.alertItemV34 > span{
+  width:36px;
+  height:36px;
+  border-radius:4px;
+  display:grid;
+  place-items:center;
+  background:#eef2f7;
+  color:#344256;
+  font-size:12px;
+  font-weight:950;
+}
+.alertItemV34 b{
+  display:block;
+  color:#07152c;
+  font-size:14px;
+  line-height:1.25;
+  margin-bottom:4px;
+}
+.alertItemV34 small{
+  color:#65758b;
+  line-height:1.35;
+  font-weight:700;
+}
+.alertItemV34.success{border-left:4px solid #059669;background:#f8fffb}
+.alertItemV34.success > span{background:#ecfdf5;color:#047857}
+.alertItemV34.warning{border-left:4px solid #f59e0b;background:#fffaf2}
+.alertItemV34.warning > span{background:#fff7ed;color:#c2410c}
+.alertItemV34.danger{border-left:4px solid #dc2626;background:#fff7f7}
+.alertItemV34.danger > span{background:#fef2f2;color:#b91c1c}
+.alertItemV34.info{border-left:4px solid #2563eb;background:#f7faff}
+.alertItemV34.info > span{background:#edf4ff;color:#1746b8}
+.proDashboardV34 .carouselNav{
+  border-radius:4px!important;
+}
+.proDashboardV34 .carouselDots,
+.proDashboardV34 .carouselDots button{
+  border-radius:4px!important;
+}
+@media(max-width:1450px){
+  .dashboardCoreGridV34,
+  .dashboardOpsGridV34{
+    grid-template-columns:1fr;
+  }
+  .dashboardAdPanelV34,
+  .coveragePanelV34{
+    min-height:auto;
+  }
+}
+@media(max-width:1100px){
+  .dashExecutiveHeaderV34,
+  .coverageBodyV34{
+    grid-template-columns:1fr;
+  }
+  .dashMetricGridV34{
+    grid-template-columns:repeat(2,1fr);
+  }
+  .coverageRingV34{
+    width:240px;
+    height:240px;
+  }
+  .coverageRingV34 > div{
+    width:154px;
+    height:154px;
+  }
+  .coverageRingV34 b{font-size:44px}
+}
+@media(max-width:760px){
+  .dashMetricGridV34,
+  .quickActionsGridV34,
+  .reportGridV34,
+  .detailListV34{
+    grid-template-columns:1fr;
+  }
+  .dashExecutiveHeaderV34 h2{
+    font-size:28px;
+  }
+  .panelHeaderV34{
+    display:block;
+  }
+  .panelHeaderV34 strong{
+    display:block;
+    margin-top:12px;
+    font-size:38px;
+  }
+}
