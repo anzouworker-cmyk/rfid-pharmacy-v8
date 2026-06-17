@@ -103,9 +103,13 @@ function App(){
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
       <div className="whiteBrand">
-        <img className="sidebarLogoFull" src="/smart-inventory-logo.png" alt="Smart Inventory"/>
-        <img className="sidebarLogoIcon" src="/smart-inventory-icon.png" alt="Smart Inventory"/>
+        <img className="brandIcon" src="/smart-inventory-icon.png" alt="Smart Inventory"/>
+        <div className="brandTextWrap">
+          <div className="brandNameText">Smart Inventory</div>
+          <div className="brandSubText">Inventory Management Platform</div>
+        </div>
       </div>
+
       <nav className="whiteNav">
         {menu.map(m=><button key={m.id} title={m.label} className={tab===m.id ? "whiteNavItem active" : "whiteNavItem"} onClick={()=>setTab(m.id)}>
           <span>{m.icon}</span>
