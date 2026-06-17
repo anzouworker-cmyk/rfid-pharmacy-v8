@@ -1479,3 +1479,86 @@ table button{padding:8px 10px;font-size:13px}
   font-size:12px;
   font-weight:700;
 }
+
+/* V33.10 dashboard ads carousel + cleanup */
+.coverageDonut .coverageCenter{
+  width:190px;
+  height:190px;
+  border-radius:50%;
+  background:white;
+  display:grid;
+  place-items:center;
+  text-align:center;
+}
+.coverageDonut .coverageCenter small,
+.coverageDonut .coverageCenter em{
+  display:none!important;
+}
+.adPlaceholderV31 .dashboardCarouselAd,
+.adPlaceholderV31 .dashboardCarouselAd div{
+  border:0!important;
+}
+.dashboardCarouselAd{
+  position:relative!important;
+  overflow:hidden!important;
+  border-radius:16px!important;
+  padding:14px!important;
+  align-content:stretch!important;
+}
+.dashboardCarouselAd img{
+  animation:dashboardAdSlideFade .45s ease;
+}
+@keyframes dashboardAdSlideFade{
+  from{opacity:.55;transform:translateX(12px) scale(1.01)}
+  to{opacity:1;transform:translateX(0) scale(1)}
+}
+.carouselNav{
+  position:absolute!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(15,23,42,.14)!important;
+  background:rgba(255,255,255,.88)!important;
+  color:#0b1023!important;
+  font-size:30px!important;
+  line-height:1!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  box-shadow:0 10px 24px rgba(15,23,42,.18)!important;
+  z-index:5!important;
+}
+.carouselNav.prev{left:18px!important}
+.carouselNav.next{right:18px!important}
+.carouselDots{
+  position:absolute!important;
+  left:50%!important;
+  bottom:16px!important;
+  transform:translateX(-50%)!important;
+  display:flex!important;
+  gap:8px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:8px 10px!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.82)!important;
+  box-shadow:0 8px 20px rgba(15,23,42,.12)!important;
+  z-index:6!important;
+}
+.carouselDots button{
+  width:10px!important;
+  height:10px!important;
+  min-width:10px!important;
+  padding:0!important;
+  border-radius:999px!important;
+  border:0!important;
+  background:#94a3b8!important;
+  box-shadow:none!important;
+}
+.carouselDots button.active{
+  width:24px!important;
+  background:#075985!important;
+}

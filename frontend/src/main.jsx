@@ -923,19 +923,50 @@ return <section>
 
 function Dashboard({setTab}){
   const {products,associations}=useLocalStore();
-  const [dashboardAd,setDashboardAd]=useState(null);
+  const [dashboardAds,setDashboardAds]=useState([]);
+  const [dashboardAdIndex,setDashboardAdIndex]=useState(0);
   const [defaultAdIndex,setDefaultAdIndex]=useState(0);
-  const defaultAds=["/default-ads/ad1.png","/default-ads/ad2.png","/default-ads/ad3.png","/default-ads/ad4.png"];
+  const defaultAds=["/default-dashboard-ad.png"];
 
   useEffect(()=>{
     const token=localStorage.token||"";
     axios.get(`${API}/dashboard/content`,{headers:{Authorization:`Bearer ${token}`}})
       .then(r=>{
-        const ads=(r.data||[]).filter(x=>["publicite","publicité","promo","annonce","ad"].includes((x.content_type||"").toLowerCase()));
-        setDashboardAd(ads.find(x=>x.active!==false) || null);
+        const ads=(r.data||[])
+          .filter(x=>["publicite","publicité","promo","annonce","ad"].includes((x.content_type||"").toLowerCase()))
+          .filter(x=>x.active!==false && x.image_url);
+        setDashboardAds(ads);
+        setDashboardAdIndex(0);
       })
-      .catch(()=>setDashboardAd(null));
+      .catch(()=>setDashboardAds([]));
   },[]);
+
+  const activeDashboardAds = useMemo(()=>dashboardAds.filter(x=>x && x.image_url),[dashboardAds]);
+  const currentDashboardAd = activeDashboardAds.length ? activeDashboardAds[dashboardAdIndex % activeDashboardAds.length] : null;
+
+  useEffect(()=>{
+    if(activeDashboardAds.length <= 1) return;
+    const timer=setInterval(()=>{
+      setDashboardAdIndex(i=>(i+1)%activeDashboardAds.length);
+    },5000);
+    return ()=>clearInterval(timer);
+  },[activeDashboardAds.length]);
+
+  useEffect(()=>{
+    if(activeDashboardAds.length > 0 || defaultAds.length <= 1) return;
+    const timer=setInterval(()=>setDefaultAdIndex(i=>(i+1)%defaultAds.length),5000);
+    return ()=>clearInterval(timer);
+  },[activeDashboardAds.length, defaultAds.length]);
+
+  function nextDashboardAd(){
+    if(activeDashboardAds.length <= 1) return;
+    setDashboardAdIndex(i=>(i+1)%activeDashboardAds.length);
+  }
+
+  function prevDashboardAd(){
+    if(activeDashboardAds.length <= 1) return;
+    setDashboardAdIndex(i=>(i-1+activeDashboardAds.length)%activeDashboardAds.length);
+  }
 
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
@@ -985,7 +1016,7 @@ function Dashboard({setTab}){
         <div className="panelTitle"><h3>Couverture RFID</h3><span>ⓘ</span></div>
         <div className="coverageContent">
           <div className="coverageDonut" style={{"--progress": `${coverage * 3.6}deg`}}>
-            <div><b>{coverage}%</b><small>Couverture globale</small><em>🛡️</em></div>
+            <div className="coverageCenter"><b>{coverage}%</b></div>
           </div>
           <div className="coverageText">
             <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture RFID progresse." : "Votre couverture RFID doit être améliorée."}</h3>
@@ -997,9 +1028,16 @@ function Dashboard({setTab}){
       </div>
 
       <div className="adPlaceholderV31">
-        {dashboardAd && dashboardAd.image_url ? <div className={`liveDashboardAd dynamicDashboardAd ${dashboardAd.extra_config==="cover" ? "cover" : "contain"}`}>
-          <img src={mediaUrl(dashboardAd.image_url)} alt="Publicité"/>
-          {dashboardAd.cta_label && <a href={dashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{dashboardAd.cta_label}</a>}
+        {currentDashboardAd ? <div className={`liveDashboardAd dynamicDashboardAd dashboardCarouselAd ${currentDashboardAd.extra_config==="cover" ? "cover" : "contain"}`}>
+          <img key={currentDashboardAd.id || currentDashboardAd.image_url} src={mediaUrl(currentDashboardAd.image_url)} alt="Publicité"/>
+          {currentDashboardAd.cta_label && <a href={currentDashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{currentDashboardAd.cta_label}</a>}
+          {activeDashboardAds.length > 1 && <>
+            <button type="button" className="carouselNav prev" onClick={prevDashboardAd} aria-label="Publicité précédente">‹</button>
+            <button type="button" className="carouselNav next" onClick={nextDashboardAd} aria-label="Publicité suivante">›</button>
+            <div className="carouselDots" aria-label="Navigation publicités">
+              {activeDashboardAds.map((ad,i)=><button type="button" key={ad.id || i} className={i===(dashboardAdIndex % activeDashboardAds.length) ? "active" : ""} onClick={()=>setDashboardAdIndex(i)} aria-label={`Afficher publicité ${i+1}`}></button>)}
+            </div>
+          </>}
         </div> : <div className="liveDashboardAd fullImageAd defaultAd dynamicDefaultAd"><img src={defaultAds[defaultAdIndex]} alt="Smart Inventory publicité dynamique"/></div>}
       </div>
     </div>
@@ -1108,10 +1146,6 @@ function DashboardAdmin({auth}){
         return;
       }
 
-      for(const ad of ads.filter(x=>x.active)){
-        await axios.post(`${API}/platform/dashboard-content-toggle/${ad.id}`,{},auth);
-      }
-
       await axios.post(`${API}/platform/dashboard-content`,{
         scope:"global",
         target_username:null,
@@ -1132,7 +1166,7 @@ function DashboardAdmin({auth}){
       setCtaUrl("");
       setFitMode("contain");
       setActive(true);
-      setMsg("Publicité dashboard publiée.");
+      setMsg("Publicité dashboard publiée et ajoutée au carousel.");
       load();
     }catch(e){
       setMsg(apiErrorMessage(e, "publication publicité"));
