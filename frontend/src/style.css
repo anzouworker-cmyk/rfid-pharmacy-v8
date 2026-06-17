@@ -1725,3 +1725,211 @@ table button{padding:8px 10px;font-size:13px}
   .loginCodeLogo .smartCodeLogoSubRow{gap:7px}
   .loginCodeLogo .smartCodeLogoLine{width:20px}
 }
+
+/* V33.16 sidebar redesign based on approved mockup */
+:root{
+  --sidebar-bg:#fbfcff;
+  --sidebar-border:#e8edf5;
+  --sidebar-shadow:0 22px 60px rgba(31,45,74,.08);
+  --sidebar-text:#223554;
+  --sidebar-muted:#4b5f80;
+  --sidebar-active:#edf4ff;
+  --sidebar-icon-bg:#f7f9fc;
+  --sidebar-blue:#2563eb;
+}
+html,body,#root{min-height:100%;}
+body{
+  background:linear-gradient(90deg,#f6f8fb 0%,#f8fafc 54%,#eef2f7 100%)!important;
+}
+.whiteShell{
+  background:transparent!important;
+  padding:20px 22px!important;
+  gap:18px;
+}
+.whiteSidebar{
+  width:346px!important;
+  min-width:346px!important;
+  background:linear-gradient(180deg,#ffffff 0%,#fcfdff 100%)!important;
+  border:1px solid var(--sidebar-border)!important;
+  border-radius:34px!important;
+  box-shadow:var(--sidebar-shadow)!important;
+  padding:38px 22px 24px!important;
+  margin:0!important;
+  height:calc(100vh - 40px)!important;
+  position:sticky!important;
+  top:20px!important;
+  overflow:hidden;
+}
+.whiteMain{
+  background:#fff!important;
+  border-radius:34px!important;
+  border:1px solid #edf1f6;
+  box-shadow:0 18px 52px rgba(31,45,74,.05);
+  overflow:hidden;
+}
+.whiteBrand{
+  margin:2px 16px 42px!important;
+  min-height:auto!important;
+  padding:0!important;
+  overflow:visible!important;
+}
+.smartSidebarLogo{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+.smartSidebarLogoIcon{
+  width:58px;
+  height:58px;
+  flex:none;
+}
+.smartSidebarLogoText{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  font-size:31px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-.05em;
+  white-space:nowrap;
+}
+.smartSidebarLogoSmart{color:#113b98;}
+.smartSidebarLogoInventory{
+  background:linear-gradient(180deg,#16bfce 0%,#0da6b8 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.whiteNav{
+  display:grid!important;
+  gap:26px!important;
+  padding:0 10px;
+}
+.whiteNavItem,
+.whiteLogout{
+  width:100%;
+  min-height:128px;
+  border:0!important;
+  border-radius:28px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:26px!important;
+  padding:0 20px!important;
+  color:var(--sidebar-text)!important;
+  font-size:28px!important;
+  font-weight:700!important;
+  text-align:left!important;
+}
+.whiteNavItem b,
+.whiteLogout b{
+  font-weight:700!important;
+  letter-spacing:-.03em;
+}
+.whiteNavItem.active{
+  background:var(--sidebar-active)!important;
+  color:#173ea7!important;
+}
+.whiteNavItem:hover,
+.whiteLogout:hover{
+  transform:none!important;
+  box-shadow:none!important;
+  background:rgba(237,244,255,.55)!important;
+}
+.navIconTile{
+  width:72px;
+  height:72px;
+  border-radius:20px;
+  display:grid;
+  place-items:center;
+  background:var(--sidebar-icon-bg);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 6px 16px rgba(36,58,95,.04);
+  flex:none;
+}
+.whiteNavItem.active .navIconTile{
+  background:#e6efff;
+}
+.navIconTile svg{
+  width:36px;
+  height:36px;
+  display:block;
+}
+.whiteSideBottom{
+  margin-top:auto!important;
+  border-top:1px solid #e9edf5!important;
+  padding:28px 10px 0!important;
+}
+.whiteLogout{
+  min-height:108px;
+  color:var(--sidebar-text)!important;
+}
+.whiteTopbar{
+  height:92px!important;
+  padding:0 32px!important;
+  background:#fff!important;
+}
+.whiteContent{
+  padding:34px 36px!important;
+}
+.whiteFooter{
+  border-top:1px solid #eef2f6!important;
+}
+.sidebarIsCollapsed .whiteSidebar{
+  width:108px!important;
+  min-width:108px!important;
+  padding:30px 12px 20px!important;
+}
+.sidebarIsCollapsed .whiteBrand{
+  margin:0 0 26px!important;
+  justify-content:center!important;
+}
+.sidebarIsCollapsed .smartSidebarLogoText,
+.sidebarIsCollapsed .whiteNavItem b,
+.sidebarIsCollapsed .whiteLogout b{
+  display:none!important;
+}
+.sidebarIsCollapsed .whiteNav{
+  padding:0;
+  gap:18px!important;
+}
+.sidebarIsCollapsed .whiteNavItem,
+.sidebarIsCollapsed .whiteLogout{
+  min-height:84px;
+  justify-content:center!important;
+  gap:0!important;
+  padding:0!important;
+  border-radius:24px!important;
+}
+.sidebarIsCollapsed .navIconTile{
+  width:58px;
+  height:58px;
+  border-radius:18px;
+}
+.sidebarIsCollapsed .smartSidebarLogo{
+  justify-content:center;
+}
+.sidebarIsCollapsed .smartSidebarLogoIcon{
+  width:56px;
+  height:56px;
+}
+@media(max-width:1100px){
+  .whiteShell{padding:10px!important;display:block!important;}
+  .whiteSidebar{
+    width:100%!important;
+    min-width:0!important;
+    height:auto!important;
+    position:relative!important;
+    top:auto!important;
+    margin-bottom:14px!important;
+  }
+  .whiteMain{border-radius:28px!important;}
+}
+@media(max-width:700px){
+  .smartSidebarLogoIcon{width:52px;height:52px;}
+  .smartSidebarLogoText{font-size:27px;gap:6px;}
+  .whiteNavItem,.whiteLogout{font-size:22px!important;min-height:100px;gap:18px!important;padding:0 16px!important;}
+  .navIconTile{width:62px;height:62px;}
+  .navIconTile svg{width:32px;height:32px;}
+}

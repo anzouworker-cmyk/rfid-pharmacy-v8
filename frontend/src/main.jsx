@@ -84,18 +84,97 @@ function useLocalStore(){
 
 
 
+function BrandIcon({className=""}){
+  return <svg className={className} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="siBrandStroke" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#0b3ea9"/>
+        <stop offset="1" stopColor="#16c2cf"/>
+      </linearGradient>
+      <linearGradient id="siBrandBars" x1="20" y1="14" x2="44" y2="50" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#0b3ea9"/>
+        <stop offset="1" stopColor="#16c2cf"/>
+      </linearGradient>
+    </defs>
+    <path d="M32 6 49 16v32L32 58 15 48V16L32 6Z" stroke="url(#siBrandStroke)" strokeWidth="4.5" strokeLinejoin="round"/>
+    <path d="M21 43V31" stroke="url(#siBrandBars)" strokeWidth="5" strokeLinecap="round"/>
+    <path d="M31 43V22" stroke="url(#siBrandBars)" strokeWidth="5" strokeLinecap="round"/>
+    <path d="M41 43V17" stroke="url(#siBrandBars)" strokeWidth="5" strokeLinecap="round"/>
+    <path d="M15 16 26 9" stroke="#0b3ea9" strokeWidth="4.5" strokeLinecap="round"/>
+    <path d="M38 54 49 47" stroke="#16c2cf" strokeWidth="4.5" strokeLinecap="round"/>
+  </svg>
+}
+
 function SmartInventoryLogo({className=""}){
-  return <div className={`smartCodeLogo ${className}`.trim()} aria-label="Smart Inventory - Inventory Management Platform">
-    <div className="smartCodeLogoMain">
-      <span className="smartCodeLogoSmart">Smart</span>
-      <span className="smartCodeLogoInventory">Inventory</span>
-    </div>
-    <div className="smartCodeLogoSubRow">
-      <span className="smartCodeLogoLine"></span>
-      <small><span>Inventory Management Platform</span></small>
-      <span className="smartCodeLogoLine"></span>
+  return <div className={`smartSidebarLogo ${className}`.trim()} aria-label="Smart Inventory">
+    <BrandIcon className="smartSidebarLogoIcon"/>
+    <div className="smartSidebarLogoText">
+      <span className="smartSidebarLogoSmart">Smart</span>
+      <span className="smartSidebarLogoInventory">Inventory</span>
     </div>
   </div>
+}
+
+function SidebarGlyph({name, active=false}){
+  const stroke = active ? "#2563eb" : "#384a64";
+  const common = {stroke, strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round", fill: "none"};
+  if(name==="dashboard"){
+    return <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="2.1" fill="#2f7bff"/>
+      <rect x="14" y="3" width="7" height="7" rx="2.1" fill="#2f7bff"/>
+      <rect x="3" y="14" width="7" height="7" rx="2.1" fill="#2f7bff"/>
+      <rect x="14" y="14" width="7" height="7" rx="2.1" fill="#2f7bff"/>
+    </svg>;
+  }
+  if(name==="operations"){
+    return <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="6" y="4" width="12" height="16" rx="2.2" {...common}/>
+      <path d="M9 4.8h6" {...common}/>
+      <path d="M9 10h6" {...common}/>
+      <path d="M9 14.5h4.5" {...common}/>
+    </svg>;
+  }
+  if(name==="association"){
+    return <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="1.2" fill={stroke}/>
+      <path d="M8.6 8.2A6.4 6.4 0 0 0 8.6 15.8" {...common}/>
+      <path d="M15.4 8.2A6.4 6.4 0 0 1 15.4 15.8" {...common}/>
+      <path d="M5.1 5.1A10.7 10.7 0 0 0 5.1 18.9" {...common}/>
+      <path d="M18.9 5.1A10.7 10.7 0 0 1 18.9 18.9" {...common}/>
+    </svg>;
+  }
+  if(name==="inventory"){
+    return <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 8V6a2 2 0 0 1 2-2h2" {...common}/>
+      <path d="M16 4h2a2 2 0 0 1 2 2v2" {...common}/>
+      <path d="M20 16v2a2 2 0 0 1-2 2h-2" {...common}/>
+      <path d="M8 20H6a2 2 0 0 1-2-2v-2" {...common}/>
+      <path d="M9 9v6" {...common}/><path d="M12 8v8" {...common}/><path d="M15 9v6" {...common}/>
+    </svg>;
+  }
+  if(name==="ai"){
+    return <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10.2 5.3c-.8 0-1.5.4-2 .9-.6-.2-1.2-.2-1.8 0-1 .4-1.7 1.4-1.7 2.6 0 .4.1.8.3 1.2-.6.5-1 1.3-1 2.2 0 1.3.8 2.4 2 2.8.2 1.5 1.4 2.5 2.9 2.5.5 0 1-.1 1.4-.4.5.6 1.2.9 2 .9.8 0 1.5-.3 2-.9.4.3.9.4 1.4.4 1.5 0 2.7-1 2.9-2.5 1.2-.4 2-1.5 2-2.8 0-.9-.4-1.7-1-2.2.2-.4.3-.8.3-1.2 0-1.1-.6-2.2-1.7-2.6-.6-.2-1.2-.2-1.8 0-.5-.5-1.2-.9-2-.9-.6 0-1.2.2-1.7.5-.5-.3-1.1-.5-1.7-.5Z" {...common}/>
+      <path d="M12 8.5v7" {...common}/><path d="M9.2 11.1 12 12.5l2.8-1.4" {...common}/><path d="M9.2 15 12 13.5 14.8 15" {...common}/>
+    </svg>;
+  }
+  if(name==="platform"){
+    return <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="8" cy="9" r="2.5" {...common}/><circle cx="16" cy="9" r="2.5" {...common}/><path d="M4.5 18c.6-2 2.1-3 3.5-3s2.9 1 3.5 3" {...common}/><path d="M12.5 18c.6-2 2.1-3 3.5-3s2.9 1 3.5 3" {...common}/>
+    </svg>;
+  }
+  if(name==="dashboardAdmin"){
+    return <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 18 7.2 6.8a1.2 1.2 0 0 1 1.2-.9h7.2a1.2 1.2 0 0 1 1.2.9L19 18" {...common}/><path d="M4 18h16" {...common}/><path d="M9.2 10.2h5.6" {...common}/>
+    </svg>;
+  }
+  if(name==="logout"){
+    return <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10 5H6.5A2.5 2.5 0 0 0 4 7.5v9A2.5 2.5 0 0 0 6.5 19H10" {...common}/>
+      <path d="M13 8l4 4-4 4" {...common}/><path d="M9 12h8" {...common}/>
+    </svg>;
+  }
+  return null;
 }
 
 function App(){
@@ -131,15 +210,15 @@ function App(){
 
 
   const menu=[
-    {id:"dashboard",label:"Dashboard",icon:"📊"},
-    {id:"operations",label:"Operations",icon:"⌂"},
-    {id:"association",label:"Associations RFID",icon:"🔗"},
-    {id:"inventory",label:"Inventaire RFID",icon:"▥"},
-    {id:"ai",label:"Assistant IA",icon:"✣"},
+    {id:"dashboard",label:"Dashboard",icon:"dashboard"},
+    {id:"operations",label:"Operations",icon:"operations"},
+    {id:"association",label:"Associations RFID",icon:"association"},
+    {id:"inventory",label:"Inventaire RFID",icon:"inventory"},
+    {id:"ai",label:"Assistant IA",icon:"ai"},
   ];
   if(me?.role==="platform_admin"){
-    menu.push({id:"platform",label:"Clients SaaS",icon:"👥"});
-    menu.push({id:"dashboardAdmin",label:"Publicités",icon:"📣"});
+    menu.push({id:"platform",label:"Clients SaaS",icon:"platform"});
+    menu.push({id:"dashboardAdmin",label:"Publicités",icon:"dashboardAdmin"});
   }
 
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
@@ -149,14 +228,14 @@ function App(){
       </div>
 
       <nav className="whiteNav">
-        {menu.map(m=><button key={m.id} title={m.label} className={tab===m.id ? "whiteNavItem active" : "whiteNavItem"} onClick={()=>setTab(m.id)}>
-          <span>{m.icon}</span>
+        {menu.map(m=>{ const active = tab===m.id; return <button key={m.id} title={m.label} className={active ? "whiteNavItem active" : "whiteNavItem"} onClick={()=>setTab(m.id)}>
+          <span className="navIconTile"><SidebarGlyph name={m.icon} active={active}/></span>
           <b>{m.label}</b>
-        </button>)}
+        </button>})}
       </nav>
 
       <div className="whiteSideBottom">
-        <button className="whiteLogout" onClick={logout}>↪ <b>Log out</b></button>
+        <button className="whiteLogout" onClick={logout}><span className="navIconTile"><SidebarGlyph name="logout"/></span><b>Log out</b></button>
       </div>
     </aside>
 
