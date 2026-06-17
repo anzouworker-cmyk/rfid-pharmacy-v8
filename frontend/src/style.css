@@ -2019,3 +2019,171 @@ body{
     max-width:190px!important;
   }
 }
+
+
+/* V33.18 - menu redesign fix: compact, aligned, readable */
+.whiteShell{
+  padding:14px 16px!important;
+}
+.whiteSidebar{
+  width:372px!important;
+  min-width:372px!important;
+  height:calc(100vh - 28px)!important;
+  top:14px!important;
+  border-radius:32px!important;
+  padding:34px 22px 22px!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+.whiteBrand{
+  margin:0 10px 34px!important;
+  min-height:54px!important;
+}
+.sidebarBrandLogo{
+  gap:12px!important;
+}
+.sidebarBrandLogo .smartSidebarLogoIcon{
+  width:50px!important;
+  height:50px!important;
+  flex:0 0 50px!important;
+}
+.sidebarBrandLogo .smartSidebarLogoText{
+  font-size:28px!important;
+  max-width:250px!important;
+  gap:6px!important;
+  letter-spacing:-.055em!important;
+}
+
+.whiteNav{
+  gap:16px!important;
+  padding:0 8px!important;
+}
+.whiteNavItem,
+.whiteLogout{
+  min-height:92px!important;
+  border-radius:24px!important;
+  gap:20px!important;
+  padding:0 20px!important;
+  font-size:23px!important;
+  line-height:1.08!important;
+}
+.whiteNavItem b,
+.whiteLogout b{
+  white-space:nowrap!important;
+  font-weight:750!important;
+  letter-spacing:-.025em!important;
+}
+.navIconTile{
+  width:62px!important;
+  height:62px!important;
+  border-radius:18px!important;
+  background:#f4f7fb!important;
+  box-shadow:0 12px 28px rgba(38,61,95,.055), inset 0 1px 0 rgba(255,255,255,.9)!important;
+}
+.navIconTile svg{
+  width:32px!important;
+  height:32px!important;
+}
+.whiteNavItem.active{
+  background:#eaf2ff!important;
+  color:#1746b8!important;
+}
+.whiteNavItem.active .navIconTile{
+  background:#dfeaff!important;
+}
+.whiteSideBottom{
+  margin-top:auto!important;
+  padding:22px 8px 0!important;
+  border-top:1px solid #e7edf5!important;
+}
+.whiteLogout{
+  min-height:76px!important;
+  color:#263a58!important;
+}
+.whiteLogout .navIconTile{
+  width:58px!important;
+  height:58px!important;
+}
+.whiteLogout .navIconTile svg{
+  width:31px!important;
+  height:31px!important;
+}
+
+/* Remove old emoji/icon leftovers and keep menu icons centered */
+.whiteNavItem > span:not(.navIconTile),
+.whiteLogout > span:not(.navIconTile){
+  display:none!important;
+}
+
+/* Admin extra menu items must stay compact */
+.whiteNav .whiteNavItem:nth-child(n+6){
+  min-height:78px!important;
+  font-size:20px!important;
+}
+
+/* Collapsed mode still clean */
+.sidebarIsCollapsed .whiteSidebar{
+  width:106px!important;
+  min-width:106px!important;
+  padding:28px 12px 20px!important;
+}
+.sidebarIsCollapsed .whiteNav{
+  gap:14px!important;
+  padding:0!important;
+}
+.sidebarIsCollapsed .whiteNavItem,
+.sidebarIsCollapsed .whiteLogout{
+  min-height:74px!important;
+  padding:0!important;
+  justify-content:center!important;
+}
+.sidebarIsCollapsed .navIconTile{
+  width:56px!important;
+  height:56px!important;
+}
+.sidebarIsCollapsed .sidebarBrandLogo .smartSidebarLogoIcon{
+  width:56px!important;
+  height:56px!important;
+  flex-basis:56px!important;
+}
+
+@media(max-height:820px){
+  .whiteSidebar{
+    padding-top:26px!important;
+  }
+  .whiteBrand{
+    margin-bottom:24px!important;
+  }
+  .whiteNav{
+    gap:10px!important;
+  }
+  .whiteNavItem{
+    min-height:78px!important;
+    font-size:21px!important;
+  }
+  .navIconTile{
+    width:56px!important;
+    height:56px!important;
+  }
+  .whiteSideBottom{
+    padding-top:16px!important;
+  }
+  .whiteLogout{
+    min-height:66px!important;
+  }
+}
+
+@media(max-width:700px){
+  .whiteSidebar{
+    width:100%!important;
+    min-width:0!important;
+  }
+  .whiteNavItem,
+  .whiteLogout{
+    font-size:21px!important;
+  }
+  .whiteNavItem b,
+  .whiteLogout b{
+    white-space:normal!important;
+  }
+}
