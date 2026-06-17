@@ -83,6 +83,21 @@ function useLocalStore(){
 
 
 
+
+function SmartInventoryLogo({className=""}){
+  return <div className={`smartCodeLogo ${className}`.trim()} aria-label="Smart Inventory - Inventory Management Platform">
+    <div className="smartCodeLogoMain">
+      <span className="smartCodeLogoSmart">Smart</span>
+      <span className="smartCodeLogoInventory">Inventory</span>
+    </div>
+    <div className="smartCodeLogoSubRow">
+      <span className="smartCodeLogoLine"></span>
+      <small>INVENTORY MANAGEMENT PLATFORM</small>
+      <span className="smartCodeLogoLine"></span>
+    </div>
+  </div>
+}
+
 function App(){
   const [token,setToken]=useState(localStorage.token||"");
   const [me,setMe]=useState(null);
@@ -130,11 +145,7 @@ function App(){
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
       <div className="whiteBrand">
-        <img className="brandIcon" src="/smart-inventory-icon.png" alt="Smart Inventory"/>
-        <div className="brandTextWrap">
-          <div className="brandNameText">Smart Inventory</div>
-          <div className="brandSubText">Inventory Management Platform</div>
-        </div>
+        <SmartInventoryLogo className="sidebarCodeLogo"/>
       </div>
 
       <nav className="whiteNav">
@@ -403,11 +414,7 @@ function Login({setToken}){
 
   return <div className="login pharmaLogin">
     <form onSubmit={login} className="loginCard">
-      <div className="loginLogoWrap">
-        <div className="pharmaLogo loginLogo"><span></span></div>
-      </div>
-      <h2>Smart Inventory</h2>
-      <p className="loginSub">Inventory Management Platform pour pharmacies</p>
+      <SmartInventoryLogo className="loginCodeLogo"/>
 
       <label>Utilisateur</label>
       <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
