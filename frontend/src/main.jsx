@@ -224,7 +224,7 @@ function App(){
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
       <div className="whiteBrand">
-        <SmartInventoryLogo className="sidebarCodeLogo"/>
+        <SmartInventoryLogo className="sidebarBrandLogo"/>
       </div>
 
       <nav className="whiteNav">

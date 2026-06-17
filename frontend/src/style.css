@@ -1933,3 +1933,89 @@ body{
   .navIconTile{width:62px;height:62px;}
   .navIconTile svg{width:32px;height:32px;}
 }
+
+
+/* V33.17 - fix approved sidebar logo rendering */
+.whiteBrand{
+  margin:4px 4px 42px!important;
+  min-height:64px!important;
+  width:calc(100% - 8px)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  overflow:visible!important;
+}
+.sidebarBrandLogo{
+  width:100%!important;
+  max-width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:10px!important;
+  overflow:visible!important;
+}
+.sidebarBrandLogo .smartSidebarLogoIcon{
+  width:46px!important;
+  height:46px!important;
+  flex:0 0 46px!important;
+}
+.sidebarBrandLogo .smartSidebarLogoText{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:5px!important;
+  min-width:0!important;
+  max-width:210px!important;
+  font-size:25px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  letter-spacing:-.055em!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+}
+.sidebarBrandLogo .smartSidebarLogoSmart,
+.sidebarBrandLogo .smartSidebarLogoInventory{
+  display:inline-block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+.sidebarBrandLogo .smartSidebarLogoInventory{
+  margin-left:0!important;
+}
+.sidebarIsCollapsed .sidebarBrandLogo{
+  justify-content:center!important;
+}
+.sidebarIsCollapsed .sidebarBrandLogo .smartSidebarLogoText{
+  display:none!important;
+}
+.sidebarIsCollapsed .sidebarBrandLogo .smartSidebarLogoIcon{
+  width:56px!important;
+  height:56px!important;
+  flex-basis:56px!important;
+}
+.sidebarIsCollapsed .sidebarBrandLogo:before{
+  content:none!important;
+}
+.sidebarIsCollapsed .whiteBrand{
+  width:100%!important;
+  margin:0 0 26px!important;
+}
+
+/* Keep the big approved menu style, but prevent the active item from eating the brand area */
+.whiteSidebar{
+  overflow:hidden!important;
+}
+.whiteNav{
+  margin-top:0!important;
+}
+
+@media(max-width:700px){
+  .sidebarBrandLogo .smartSidebarLogoIcon{
+    width:42px!important;
+    height:42px!important;
+    flex-basis:42px!important;
+  }
+  .sidebarBrandLogo .smartSidebarLogoText{
+    font-size:23px!important;
+    max-width:190px!important;
+  }
+}
