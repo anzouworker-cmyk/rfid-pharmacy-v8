@@ -92,7 +92,7 @@ function SmartInventoryLogo({className=""}){
     </div>
     <div className="smartCodeLogoSubRow">
       <span className="smartCodeLogoLine"></span>
-      <small>INVENTORY MANAGEMENT PLATFORM</small>
+      <small><span>Inventory Management Platform</span></small>
       <span className="smartCodeLogoLine"></span>
     </div>
   </div>
