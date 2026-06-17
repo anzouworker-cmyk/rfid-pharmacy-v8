@@ -183,6 +183,7 @@ def ensure_schema():
 
     migrations = [
         ("accounts", "ai_premium", "ALTER TABLE accounts ADD COLUMN ai_premium BOOLEAN DEFAULT FALSE"),
+        ("dashboard_content", "ai_premium", "ALTER TABLE dashboard_content ADD COLUMN ai_premium BOOLEAN DEFAULT FALSE"),
         ("dashboard_content", "image_url", "ALTER TABLE dashboard_content ADD COLUMN image_url VARCHAR DEFAULT ''"),
         ("dashboard_content", "extra_config", "ALTER TABLE dashboard_content ADD COLUMN extra_config VARCHAR DEFAULT 'contain'"),
         ("dashboard_content", "cta_label", "ALTER TABLE dashboard_content ADD COLUMN cta_label VARCHAR DEFAULT ''"),
@@ -258,7 +259,7 @@ def health():
     return {
         "ok": True,
         "service": "Smart Inventory API",
-        "version": "V33.8_ADS_DIAGNOSTIC_FIX",
+        "version": "V33.9_ADS_DB_SCHEMA_FIX",
         "cors_origins": allowed_origins,
         "cors_origin_regex": allow_origin_regex or "",
         "db": db_status,
@@ -563,26 +564,39 @@ def create_dashboard_content(data: DashboardContentIn, acc: Account = Depends(cu
     except Exception:
         pass
 
-    obj = DashboardContent(
-        id="dash_" + uuid.uuid4().hex,
-        scope=data.scope,
-        target_username=data.target_username,
-        title=data.title or "Publicité Dashboard",
-        message=data.message or "",
-        cta_label=data.cta_label or "",
-        cta_url=data.cta_url or "",
-        content_type=data.content_type or "publicite",
-        image_url=data.image_url or "",
-        extra_config=(getattr(data, "extra_config", "contain") or "contain"),
-        active=data.active
-    )
+    content_id = "dash_" + uuid.uuid4().hex
+    created_at = datetime.utcnow()
+    params = {
+        "id": content_id,
+        "scope": data.scope or "global",
+        "target_username": data.target_username,
+        "title": data.title or "Publicité Dashboard",
+        "message": data.message or "",
+        "cta_label": data.cta_label or "",
+        "cta_url": data.cta_url or "",
+        "content_type": data.content_type or "publicite",
+        "image_url": data.image_url or "",
+        "extra_config": (getattr(data, "extra_config", "contain") or "contain"),
+        "active": bool(data.active),
+        "created_at": created_at,
+    }
+
+    # Insertion SQL explicite: évite les 500 quand une ancienne base Render/Postgres
+    # n'a pas exactement les mêmes colonnes que le modèle SQLAlchemy.
     try:
-        s.add(obj)
+        s.execute(text("""
+            INSERT INTO dashboard_content
+                (id, scope, target_username, title, message, cta_label, cta_url,
+                 content_type, image_url, extra_config, active, created_at)
+            VALUES
+                (:id, :scope, :target_username, :title, :message, :cta_label, :cta_url,
+                 :content_type, :image_url, :extra_config, :active, :created_at)
+        """), params)
         s.commit()
     except Exception as e:
         s.rollback()
-        raise HTTPException(500, f"Erreur sauvegarde publicité: {str(e)}")
-    return {"ok": True, "id": obj.id}
+        raise HTTPException(500, f"Erreur sauvegarde publicité DB: {str(e)}")
+    return {"ok": True, "id": content_id}
 
 @app.post("/platform/dashboard-content-toggle/{content_id}")
 def toggle_dashboard_content(content_id: str, acc: Account = Depends(current_user), s: Session = Depends(db)):

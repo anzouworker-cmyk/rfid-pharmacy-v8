@@ -1135,7 +1135,7 @@ function DashboardAdmin({auth}){
       setMsg("Publicité dashboard publiée.");
       load();
     }catch(e){
-      setMsg(e.message || apiErrorMessage(e, "création publicité"));
+      setMsg(apiErrorMessage(e, "publication publicité"));
     }
   }
 
@@ -1197,7 +1197,7 @@ function DashboardAdmin({auth}){
         </div>
 
         <button className="primaryBtn" onClick={publish} disabled={uploading}>{uploading ? "Upload..." : "Publier"}</button>
-        {msg && <p className={msg.toLowerCase().includes("erreur") ? "err" : "success"}>{msg}</p>}
+        {msg && <p className={(msg.toLowerCase().includes("erreur") || msg.toLowerCase().includes("failed") || msg.includes("500")) ? "err" : "success"}>{msg}</p>}
       </div>
 
       <div className="adPreviewPanel">
