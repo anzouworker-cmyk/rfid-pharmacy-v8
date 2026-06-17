@@ -6,6 +6,13 @@ import Papa from "papaparse";
 import "./style.css";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
+function mediaUrl(url){
+  const u = String(url || "").trim();
+  if(!u) return "";
+  if(/^https?:\/\//i.test(u) || u.startsWith("data:") || u.startsWith("blob:")) return u;
+  if(u.startsWith("/")) return API.replace(/\/$/, "") + u;
+  return u;
+}
 const LS_PRODUCTS="rfid_v7_products";
 const LS_ASSOC="rfid_v7_associations";
 
@@ -960,7 +967,7 @@ function Dashboard({setTab}){
 
       <div className="adPlaceholderV31">
         {dashboardAd && dashboardAd.image_url ? <div className={`liveDashboardAd dynamicDashboardAd ${dashboardAd.extra_config==="cover" ? "cover" : "contain"}`}>
-          <img src={dashboardAd.image_url} alt="Publicité"/>
+          <img src={mediaUrl(dashboardAd.image_url)} alt="Publicité"/>
           {dashboardAd.cta_label && <a href={dashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{dashboardAd.cta_label}</a>}
         </div> : <div className="liveDashboardAd fullImageAd defaultAd dynamicDefaultAd"><img src={defaultAds[defaultAdIndex]} alt="Smart Inventory publicité dynamique"/></div>}
       </div>
@@ -1097,7 +1104,7 @@ function DashboardAdmin({auth}){
     }catch(e){setMsg("Erreur suppression");}
   }
 
-  const previewSrc = imageFile ? URL.createObjectURL(imageFile) : imageUrl;
+  const previewSrc = imageFile ? URL.createObjectURL(imageFile) : mediaUrl(imageUrl);
 
   return <section className="simpleAdAdmin dynamicAdAdmin">
     <p className="notice">Gérez l’espace publicitaire du dashboard. L’image peut avoir une dimension dynamique; le bouton et son lien sont configurables.</p>
@@ -1110,7 +1117,17 @@ function DashboardAdmin({auth}){
         <div className="adFormGrid simpleAdForm">
           <div className="uploadBox">
             <label>Image publicité</label>
-            <input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setImageFile(e.target.files[0])}/>
+            <input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{
+              const f=e.target.files?.[0];
+              if(f && f.size > 3 * 1024 * 1024){
+                setMsg("Image trop lourde. Maximum 3 MB.");
+                e.target.value="";
+                setImageFile(null);
+                return;
+              }
+              setImageFile(f || null);
+              if(f) setMsg("");
+            }}/>
             <small>Recommandé : 1200 × 800 px. Max 3 MB.</small>
           </div>
 

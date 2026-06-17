@@ -3,8 +3,10 @@ from datetime import datetime, timedelta, date
 import hashlib
 import os
 import json
+import uuid
 from typing import Optional
-from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File
+from pathlib import Path
+from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
@@ -13,7 +15,7 @@ from pydantic import BaseModel
 from openai import OpenAI
 from sqlalchemy import create_engine, Column, String, DateTime, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
-from sqlalchemy import text
+from sqlalchemy import text, inspect
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -31,12 +33,14 @@ engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread":
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
+app = FastAPI(title="RFID Pharmacy Web SaaS Licence API")
+
+# Storage local pour les images publicitaires quand Cloudinary n'est pas configuré.
+# IMPORTANT: le mount doit être fait après la création de `app`.
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "uploads"))
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
-
-app = FastAPI(title="RFID Pharmacy Web SaaS Licence API")
 allowed_origins = [x.strip() for x in settings.FRONTEND_ORIGINS.split(",") if x.strip()]
 
 app.add_middleware(
@@ -138,45 +142,62 @@ class DashboardContentIn(BaseModel):
     extra_config: str = "contain"
     active: bool = True
 
-def 
-with engine.begin() as conn:
-    try:
-        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS extra_config VARCHAR DEFAULT 'contain'"))
-    except Exception:
-        pass
+
+def ensure_schema():
+    """Ajoute les colonnes manquantes quand une ancienne base SQLite/Postgres existe déjà."""
+    inspector = inspect(engine)
+    tables = set(inspector.get_table_names())
+
+    def add_column_if_missing(table_name: str, column_name: str, ddl: str):
+        if table_name not in tables:
+            return
+        existing = {c["name"] for c in inspector.get_columns(table_name)}
+        if column_name in existing:
+            return
+        with engine.begin() as conn:
+            conn.execute(text(ddl))
+
+    migrations = [
+        ("accounts", "ai_premium", "ALTER TABLE accounts ADD COLUMN ai_premium BOOLEAN DEFAULT FALSE"),
+        ("dashboard_content", "image_url", "ALTER TABLE dashboard_content ADD COLUMN image_url VARCHAR DEFAULT ''"),
+        ("dashboard_content", "extra_config", "ALTER TABLE dashboard_content ADD COLUMN extra_config VARCHAR DEFAULT 'contain'"),
+        ("dashboard_content", "cta_label", "ALTER TABLE dashboard_content ADD COLUMN cta_label VARCHAR DEFAULT ''"),
+        ("dashboard_content", "cta_url", "ALTER TABLE dashboard_content ADD COLUMN cta_url VARCHAR DEFAULT ''"),
+    ]
+    for table_name, column_name, ddl in migrations:
+        try:
+            add_column_if_missing(table_name, column_name, ddl)
+        except Exception:
+            # Ne bloque pas le démarrage; l'app continuera si la base est déjà correcte.
+            pass
 
 
-with engine.begin() as conn:
-    try:
-        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS image_url VARCHAR DEFAULT ''"))
-        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS extra_config VARCHAR DEFAULT 'contain'"))
-        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS cta_label VARCHAR DEFAULT ''"))
-        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS cta_url VARCHAR DEFAULT ''"))
-    except Exception:
-        pass
-
-ensure_demo():
+def ensure_demo():
     s = SessionLocal()
-    if not s.get(Account, "demo"):
-        s.add(Account(
-            username="demo",
-            password_hash=hpw("demo123"),
-            pharmacy_name="Pharmacie Démo",
-            subscription_status="active",
-            expires_at=datetime.utcnow() + timedelta(days=365)
-        ))
-    if not s.get(Account, "admin"):
-        s.add(Account(
-            username="admin",
-            password_hash=hpw("admin123"),
-            pharmacy_name="admin",
-            role="platform_admin",
-            ai_premium=True,
-            subscription_status="active",
-            expires_at=datetime.utcnow() + timedelta(days=3650)
-        ))
-    s.commit()
-    s.close()
+    try:
+        if not s.get(Account, "demo"):
+            s.add(Account(
+                username="demo",
+                password_hash=hpw("demo123"),
+                pharmacy_name="Pharmacie Démo",
+                subscription_status="active",
+                expires_at=datetime.utcnow() + timedelta(days=365)
+            ))
+        if not s.get(Account, "admin"):
+            s.add(Account(
+                username="admin",
+                password_hash=hpw("admin123"),
+                pharmacy_name="admin",
+                role="platform_admin",
+                ai_premium=True,
+                subscription_status="active",
+                expires_at=datetime.utcnow() + timedelta(days=3650)
+            ))
+        s.commit()
+    finally:
+        s.close()
+
+ensure_schema()
 ensure_demo()
 
 @app.post("/auth/login")
@@ -386,6 +407,7 @@ def dashboard_content(acc: Account = Depends(current_user), s: Session = Depends
                 "cta_url": x.cta_url,
                 "content_type": x.content_type,
                 "image_url": getattr(x, "image_url", ""),
+                "extra_config": getattr(x, "extra_config", "contain") or "contain",
                 "active": x.active,
                 "created_at": x.created_at.isoformat()
             })
@@ -404,6 +426,8 @@ def platform_dashboard_content(acc: Account = Depends(current_user), s: Session 
         "cta_label": x.cta_label,
         "cta_url": x.cta_url,
         "content_type": x.content_type,
+        "image_url": x.image_url,
+        "extra_config": x.extra_config or "contain",
         "active": x.active,
         "created_at": x.created_at.isoformat()
     } for x in s.query(DashboardContent).order_by(DashboardContent.created_at.desc()).all()]
@@ -540,7 +564,7 @@ def client_ai_premium(username: str, enabled: bool, acc: Account = Depends(curre
 
 
 @app.post("/platform/upload-ad-image")
-async def upload_ad_image(file: UploadFile = File(...), acc: Account = Depends(current_user)):
+async def upload_ad_image(request: Request, file: UploadFile = File(...), acc: Account = Depends(current_user)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
 
@@ -580,7 +604,9 @@ async def upload_ad_image(file: UploadFile = File(...), acc: Account = Depends(c
     filename = f"ad_{uuid.uuid4().hex}{ext}"
     path = UPLOAD_DIR / filename
     path.write_bytes(content)
+    # Retourner une URL absolue évite que le frontend cherche /uploads sur Vercel
+    # au lieu du backend. Définir BACKEND_PUBLIC_URL en production reste préférable.
     base_url = os.getenv("BACKEND_PUBLIC_URL", "").rstrip("/")
-    if base_url:
-        return {"image_url": f"{base_url}/uploads/{filename}"}
-    return {"image_url": f"/uploads/{filename}"}
+    if not base_url:
+        base_url = str(request.base_url).rstrip("/")
+    return {"image_url": f"{base_url}/uploads/{filename}"}
