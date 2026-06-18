@@ -1,0 +1,17 @@
+Smart Inventory V40 - Operations page professional redesign
+
+Applied changes:
+- Redesigned Operations page to match the dashboard visual system.
+- Reduced excessive spacing at the top of the Operations page.
+- Replaced emoji icons with clean SVG icons.
+- Converted aggressive full-color action cards into sober white SaaS cards with subtle accent bars.
+- Reduced fluorescent colors and aligned the palette with the dashboard.
+- Changed dangerous action styling: no full red card; a clear but more controlled red action style.
+- Standardized all file/action buttons, including the restore project file picker.
+- Changed "Exports & sauvegardes locales" to "Exports et sauvegardes locales".
+- Simplified blue notice boxes into cleaner descriptive subtitles.
+- Reduced card height and improved grid balance.
+- Kept the dashboard-like footer on the Operations page.
+
+Validation:
+- Frontend build passed with `npm run build`.

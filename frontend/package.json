@@ -1,16 +1,18 @@
 {
+  "private": true,
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "axios": "latest",
-    "papaparse": "latest"
+    "axios": "1.7.7",
+    "papaparse": "5.4.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.2",
+    "vite": "5.4.10"
+  }
 }
