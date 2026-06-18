@@ -26,10 +26,27 @@ function apiErrorMessage(e, action="requête API"){
 }
 const LS_PRODUCTS="rfid_v7_products";
 const LS_ASSOC="rfid_v7_associations";
+const LS_DETECTED_EPCS="rfid_v7_detected_epcs";
 
 function saveLS(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
 function loadLS(k,def){ try{return JSON.parse(localStorage.getItem(k)||"")}catch{return def} }
 function norm(v){ return String(v ?? "").trim().replaceAll(" ","").replaceAll("-","").toUpperCase(); }
+function isLikelyEpc(v){
+  const s=norm(v);
+  if(!s || ["EPC","TAG","RFID","DATE","PID","PRODUIT","PRODUCT"].includes(s)) return false;
+  return /^[0-9A-F]{8,64}$/i.test(s) || s.length >= 12;
+}
+function extractDetectedEpcs(rows){
+  const epcs=[];
+  (rows||[]).forEach(row=>{
+    const cells=Array.isArray(row) ? row : Object.values(row||{});
+    for(const cell of cells){
+      const v=norm(cell);
+      if(isLikelyEpc(v)){ epcs.push(v); break; }
+    }
+  });
+  return [...new Set(epcs)];
+}
 
 function downloadJSON(filename, data){
   const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json;charset=utf-8"});
@@ -73,9 +90,15 @@ function exportCSV(filename, rows, cols){
 function useLocalStore(){
   const [productsState,setProductsState]=useState(()=>loadLS(LS_PRODUCTS,[]));
   const [associationsState,setAssociationsState]=useState(()=>loadLS(LS_ASSOC,[]));
+  const [detectedEpcsState,setDetectedEpcsState]=useState(()=>loadLS(LS_DETECTED_EPCS,[]));
   function setProducts(rows){ setProductsState(rows); saveLS(LS_PRODUCTS,rows); }
   function setAssociations(rows){ setAssociationsState(rows); saveLS(LS_ASSOC,rows); }
-  return {products:productsState,setProducts,associations:associationsState,setAssociations};
+  function setDetectedEpcs(rows){
+    const cleaned=[...new Set((rows||[]).map(norm).filter(Boolean))];
+    setDetectedEpcsState(cleaned);
+    saveLS(LS_DETECTED_EPCS,cleaned);
+  }
+  return {products:productsState,setProducts,associations:associationsState,setAssociations,detectedEpcs:detectedEpcsState,setDetectedEpcs};
 }
 
 
@@ -271,7 +294,7 @@ function App(){
 
 
 function Operations(){
-  const {products,associations,setProducts,setAssociations}=useLocalStore();
+  const {products,associations,detectedEpcs,setProducts,setAssociations,setDetectedEpcs}=useLocalStore();
   const [scanModal,setScanModal]=useState(null);
   const [barcode,setBarcode]=useState("");
   const [epc,setEpc]=useState("");
@@ -340,9 +363,10 @@ function Operations(){
   function importDetectedEpc(file){
     if(!file) return;
     Papa.parse(file,{header:false,skipEmptyLines:true,complete:(res)=>{
-      const rows=res.data.map(r=>norm(r[0])).filter(Boolean);
-      downloadJSON(`epc_detectes_${new Date().toISOString().slice(0,10)}.json`,{epcs:[...new Set(rows)],date:new Date().toISOString()});
-      setMsg(`${rows.length} EPC détectés importés. Fichier JSON généré.`);
+      const rows=extractDetectedEpcs(res.data);
+      setDetectedEpcs(rows);
+      downloadJSON(`epc_detectes_${new Date().toISOString().slice(0,10)}.json`,{epcs:rows,date:new Date().toISOString()});
+      setMsg(`${rows.length} EPC détectés importés et enregistrés pour comparer le stock.`);
     }});
   }
 
@@ -356,14 +380,8 @@ function Operations(){
   function exportProducts(){ exportCSV("produits_locaux.csv",products,Object.keys(products[0]||{})); }
   function exportAssociations(){ exportCSV("associations_rfid.csv",associations,Object.keys(associations[0]||{})); }
   function exportProductsWithoutRfid(){
-    
-  useEffect(()=>{
-    const timer=setInterval(()=>setDefaultAdIndex(i=>(i+1)%defaultAds.length),10000);
-    return ()=>clearInterval(timer);
-  },[]);
-
-  const associatedPids=new Set(associations.map(a=>String(a.PID)));
-    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Sans RFID"}));
+    const associatedPids=new Set(associations.map(a=>String(a.PID)));
+    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Non associé"}));
     exportCSV("produits_sans_rfid.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]);
   }
   function exportCoverageReport(){
@@ -375,7 +393,7 @@ function Operations(){
     exportCSV("rapport_couverture_rfid.csv",rows,Object.keys(rows[0]));
   }
   function backupProject(){
-    downloadJSON(`pharmainventory_backup_${new Date().toISOString().slice(0,10)}.json`,{products,associations,backup_date:new Date().toISOString()});
+    downloadJSON(`pharmainventory_backup_${new Date().toISOString().slice(0,10)}.json`,{products,associations,detectedEpcs,backup_date:new Date().toISOString()});
   }
   async function restoreProject(file){
     if(!file) return;
@@ -383,6 +401,7 @@ function Operations(){
       const data=await readJSONFile(file);
       if(Array.isArray(data.products)) setProducts(data.products);
       if(Array.isArray(data.associations)) setAssociations(data.associations);
+      if(Array.isArray(data.detectedEpcs)) setDetectedEpcs(data.detectedEpcs);
       setMsg("Projet restauré.");
     }catch(e){ alert("Fichier JSON invalide"); }
   }
@@ -667,27 +686,30 @@ function Association(){
 
 
 function Inventory(){
-  const {products,associations}=useLocalStore();
+  const {products,associations,detectedEpcs}=useLocalStore();
   const [q,setQ]=useState("");
   const [statusFilter,setStatusFilter]=useState("all");
 
   const associatedByPid = new Map();
   associations.forEach(a=>{
     const pid=String(a.PID||"");
-    if(pid) associatedByPid.set(pid,a);
+    const epc=norm(a.EPC);
+    if(!pid || !epc) return;
+    if(!associatedByPid.has(pid)) associatedByPid.set(pid,[]);
+    associatedByPid.get(pid).push(epc);
   });
+  const detectedSet = new Set((detectedEpcs||[]).map(norm).filter(Boolean));
 
-  // If an association has a detected/present flag in future imports, use it.
-  // Otherwise, any associated product is considered Présent.
+  // Statut réel = Catalogue produits + Associations Produit/EPC + CSV des EPC détectés.
+  // Les associations seules ne rendent plus un produit "Présent".
   function getStatus(p){
-    const a=associatedByPid.get(String(p.PID));
-    if(!a) return "Non associé";
-    const raw=String(a.Statut||a.status||a.Etat||a.etat||"").toLowerCase();
-    if(raw.includes("manquant") || raw.includes("missing") || raw.includes("absent")) return "Manquant";
-    return "Présent";
+    const epcs=associatedByPid.get(String(p.PID)) || [];
+    if(epcs.length===0) return "Non associé";
+    return epcs.some(epc=>detectedSet.has(epc)) ? "Présent" : "Manquant";
   }
 
   const rows = products.map(p=>{
+    const epcs=associatedByPid.get(String(p.PID)) || [];
     const status=getStatus(p);
     return {
       PID:p.PID,
@@ -697,6 +719,7 @@ function Inventory(){
       Stock:p.Stock || "",
       "Code barre 1":p["Code barre 1"] || "",
       "Code barre 2":p["Code barre 2"] || "",
+      "EPC associé":epcs.join(", "),
       "Statut RFID": status,
       _rowClass: status==="Présent" ? "rowPresent" : status==="Manquant" ? "rowMissing" : "rowUnassociated"
     };
@@ -713,7 +736,7 @@ function Inventory(){
   const unassociatedCount=products.filter(p=>getStatus(p)==="Non associé").length;
 
   return <section className="tableOnlyPage inventoryStatusPage">
-    <p className="notice">Tableau de consultation de l’inventaire RFID réel et du statut de couverture RFID.</p>
+    <p className="notice">Stock calculé avec le catalogue produits + les associations Produit/EPC + le dernier CSV des EPC détectés importé.</p>
 
     <div className="statusSummaryGrid">
       <div className="statusSummary present"><b>{presentCount}</b><span>Présents</span></div>
@@ -730,13 +753,13 @@ function Inventory(){
         <option value="Manquant">Manquant</option>
         <option value="Non associé">Non associé</option>
       </select>
-      <span>{rows.length} produit(s)</span>
+      <span>{rows.length} produit(s) · {detectedSet.size} EPC détecté(s)</span>
     </div>
 
     <div className="smartTableWrap">
       <table className="smartTable statusTable">
         <thead>
-          <tr>{["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"].map(c=><th key={c}>{c}</th>)}</tr>
+          <tr>{["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associé","Statut RFID"].map(c=><th key={c}>{c}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((r,i)=><tr key={i} className={r._rowClass}>
@@ -747,6 +770,7 @@ function Inventory(){
             <td>{r.Stock}</td>
             <td>{r["Code barre 1"]}</td>
             <td>{r["Code barre 2"]}</td>
+            <td>{r["EPC associé"]}</td>
             <td><span className={`statusBadge ${r._rowClass}`}>{r["Statut RFID"]}</span></td>
           </tr>)}
         </tbody>
@@ -758,7 +782,7 @@ function Inventory(){
 
 
 function LocalData(){
-  const {products,setProducts,associations,setAssociations}=useLocalStore();
+  const {products,setProducts,associations,setAssociations,detectedEpcs,setDetectedEpcs}=useLocalStore();
   const [msg,setMsg]=useState("");
 
   function saveProject(){
@@ -768,6 +792,7 @@ function LocalData(){
       backup_date:new Date().toISOString(),
       products,
       associations,
+      detectedEpcs,
       settings:{storage:"local-browser",cloud_business_data:false}
     };
     downloadJSON(`pharmainventory_backup_${new Date().toISOString().slice(0,10)}.json`, backup);
@@ -784,7 +809,8 @@ function LocalData(){
       }
       setProducts(data.products);
       setAssociations(data.associations);
-      setMsg(`Projet restauré: ${data.products.length} produits, ${data.associations.length} associations.`);
+      if(Array.isArray(data.detectedEpcs)) setDetectedEpcs(data.detectedEpcs);
+      setMsg(`Projet restauré: ${data.products.length} produits, ${data.associations.length} associations, ${Array.isArray(data.detectedEpcs) ? data.detectedEpcs.length : 0} EPC détectés.`);
     }catch(e){
       setMsg("Erreur lecture JSON: fichier invalide.");
     }
@@ -815,6 +841,7 @@ function LocalData(){
       "Produits avec RFID":productsWithRfid,
       "Produits sans RFID":productsWithoutRfid,
       "Associations RFID":associations.length,
+      "EPC détectés importés":detectedEpcCount,
       "Couverture RFID":coverage+"%",
       "Date rapport":new Date().toISOString()
     }];
@@ -1013,7 +1040,7 @@ return <section>
 
 
 function Dashboard({setTab}){
-  const {products,associations}=useLocalStore();
+  const {products,associations,detectedEpcs}=useLocalStore();
   const [dashboardAds,setDashboardAds]=useState([]);
   const [dashboardAdIndex,setDashboardAdIndex]=useState(0);
   const [defaultAdIndex,setDefaultAdIndex]=useState(0);
@@ -1052,6 +1079,7 @@ function Dashboard({setTab}){
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
   const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
+  const detectedEpcCount=(detectedEpcs||[]).length;
 
   const epcCounts={};
   associations.forEach(a=>{ const e=norm(a.EPC); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
@@ -1067,6 +1095,7 @@ function Dashboard({setTab}){
       "Produits tagués":productsWithRfid,
       "Produits sans tag":productsWithoutRfid,
       "Associations RFID":associations.length,
+      "EPC détectés importés":detectedEpcCount,
       "Couverture RFID":coverage+"%",
       "Doublons EPC":duplicateEpcs,
       "Date rapport":new Date().toISOString()
@@ -1082,7 +1111,7 @@ function Dashboard({setTab}){
   const alerts=[];
   if(productsWithoutRfid>0) alerts.push({type:"warning",icon:"warning",title:`${productsWithoutRfid} produits sans tag RFID`,text:"Aucun tag détecté pour ces produits."});
   if(duplicateEpcs>0) alerts.push({type:"danger",icon:"warning",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,text:"Vérifier les associations RFID en double."});
-  if(associations.length===0) alerts.push({type:"info",icon:"rfid",title:"0 scan RFID détecté",text:"Connectez votre lecteur RFID ou importez un fichier EPC."});
+  if(detectedEpcCount===0) alerts.push({type:"info",icon:"rfid",title:"0 scan RFID détecté",text:"Importez le CSV des EPC détectés pour calculer le stock réel."});
   if(coverage<100) alerts.push({type:"warning",icon:"warning",title:"Aucun tag détecté pour ces produits.",text:"À taguer en priorité pour améliorer votre suivi."});
   if(alerts.length===0) alerts.push({type:"success",icon:"check",title:"Aucune alerte prioritaire",text:"Les données RFID sont stables."});
 
@@ -1096,7 +1125,7 @@ function Dashboard({setTab}){
   const kpis=[
     {label:"Produits enregistrés",value:products.length,sub:products.length ? "Catalogue importé" : "Aucun catalogue importé",icon:"box",tone:"blue",action:()=>setTab("operations")},
     {label:"Produits tagués",value:productsWithRfid,sub:productsWithRfid ? "Avec association RFID" : "Aucun tag détecté",icon:"tag",tone:"green",action:()=>setTab("association")},
-    {label:"Transactions RFID",value:associations.length,sub:associations.length ? "Associations enregistrées" : "Aucune transaction",icon:"rfid",tone:"purple",action:()=>setTab("inventory")},
+    {label:"Transactions RFID",value:detectedEpcCount,sub:detectedEpcCount ? "EPC détectés importés" : "Aucune transaction",icon:"rfid",tone:"purple",action:()=>setTab("inventory")},
     {label:"Produits sans tag",value:productsWithoutRfid,sub:productsWithoutRfid ? "À taguer en priorité" : "Synchronisés",icon:"warning",tone:"orange",action:()=>setTab("operations")},
   ];
 

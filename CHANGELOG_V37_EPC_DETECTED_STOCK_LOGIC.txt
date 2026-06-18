@@ -1,0 +1,21 @@
+Smart Inventory V37 - Correct inventory stock comparison logic
+
+Problem fixed:
+- The product stock/inventory status table was using the associations table alone to mark products as present.
+- This was incorrect because an association only means Product ↔ EPC is configured, not that the tag was detected in the latest scan.
+
+New logic:
+- Product catalog CSV = list of products/stock.
+- Associations CSV = mapping Product/PID ↔ EPC.
+- EPC detected CSV = latest scan result.
+- Inventory status is now calculated as:
+  - Présent: product has an associated EPC and that EPC exists in the imported EPC detected CSV.
+  - Manquant: product has an associated EPC but the EPC is not found in the imported EPC detected CSV.
+  - Non associé: product has no EPC association.
+
+Other updates:
+- Imported EPC detected CSV is now saved in localStorage instead of only downloading JSON.
+- Backup/restore now includes detected EPCs.
+- Inventory table now shows the associated EPC column and the count of imported detected EPCs.
+- Dashboard RFID transaction counter now uses imported detected EPC count.
+- Build verified with npm run build.
