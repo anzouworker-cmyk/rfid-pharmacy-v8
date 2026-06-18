@@ -195,38 +195,36 @@ function App(){
 
   if(!token) return <Login setToken={setToken}/>;
 
-  const displayName = me?.username || "Admin User";
+  const displayName = me?.username || "Utilisateur";
   const accountName = me?.pharmacy_name || displayName;
-  const roleName = me?.role==="platform_admin" ? "Super Admin" : "Utilisateur";
-  const userInitials = String(displayName).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()).join("") || "AU";
+  const roleName = me?.role==="platform_admin" ? "Administrateur" : "Utilisateur";
 
-  const pageTitles={
-    operations:"RFID Scan",
-    dashboard:"Dashboard",
-    association:"Associations RFID",
-    inventory:"Inventory",
-    ai:"Reports & AI",
-    platform:"Clients SaaS",
-    dashboardAdmin:"Publicités"
-  };
-  const pageTitle=pageTitles[tab]||"Smart Inventory";
+  const pageTitle =
+    tab==="operations" ? "Operations" :
+    tab==="dashboard" ? "Dashboard" :
+    tab==="association" ? "Associations RFID" :
+    tab==="inventory" ? "Inventaire RFID réel" :
+    tab==="ai" ? "Assistant IA" :
+    tab==="platform" ? "Clients SaaS" :
+    tab==="dashboardAdmin" ? "Publicités" : "Smart Inventory";
+
 
   const menu=[
     {id:"dashboard",label:"Dashboard",icon:"dashboard"},
-    {id:"inventory",label:"Inventory",icon:"inventory"},
-    {id:"operations",label:"RFID Scan",icon:"operations"},
-    {id:"association",label:"Associations",icon:"association"},
-    {id:"ai",label:"Reports & AI",icon:"ai"},
+    {id:"operations",label:"Operations",icon:"operations"},
+    {id:"association",label:"Associations RFID",icon:"association"},
+    {id:"inventory",label:"Inventaire RFID",icon:"inventory"},
+    {id:"ai",label:"Assistant IA",icon:"ai"},
   ];
   if(me?.role==="platform_admin"){
     menu.push({id:"platform",label:"Clients SaaS",icon:"platform"});
-    menu.push({id:"dashboardAdmin",label:"Ads",icon:"dashboardAdmin"});
+    menu.push({id:"dashboardAdmin",label:"Publicités",icon:"dashboardAdmin"});
   }
 
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
       <div className="whiteBrand">
-        <SmartInventoryLogo className="sidebarCodeLogo"/>
+        <SmartInventoryLogo className="sidebarBrandLogo"/>
       </div>
 
       <nav className="whiteNav">
@@ -237,63 +235,31 @@ function App(){
       </nav>
 
       <div className="whiteSideBottom">
-        {!sidebarCollapsed && <div className="sidebarOrgCard">
-          <span className="sidebarSectionLabel">Organization</span>
-          <div className="sidebarOrgRow">
-            <span className="sidebarOrgIcon">🏥</span>
-            <div>
-              <b>{accountName}</b>
-              <small>Smart Inventory Workspace</small>
-            </div>
-          </div>
-        </div>}
         <button className="whiteLogout" onClick={logout}><span className="navIconTile"><SidebarGlyph name="logout"/></span><b>Log out</b></button>
-        <button className="sidebarCollapseBtn" onClick={toggleSidebar}>{sidebarCollapsed ? "Expand" : "Collapse"}</button>
       </div>
     </aside>
 
     <section className="whiteMain">
       <header className="whiteTopbar">
-        <div className="topbarLeft">
-          <button className="hamburger" onClick={toggleSidebar} aria-label="Toggle sidebar">☰</button>
-          <div className="dashboardSearch" role="search">
-            <span className="searchIcon">⌕</span>
-            <input type="text" placeholder="Search products, tags, locations..." aria-label="Search"/>
-            <kbd>⌘ K</kbd>
-          </div>
-        </div>
-
-        <div className="whiteTopbarRight">
-          <button className="topIconBtn" aria-label="Notifications"><span>🔔</span><sup>3</sup></button>
-          <button className="topIconBtn" aria-label="Help">?</button>
-          <button className="topIconBtn" aria-label="Menu">⋮</button>
-          <div className="whiteAccount">
-            <div className="accountAvatar">{userInitials}</div>
-            <div>
-              <b>{displayName}</b>
-              <small>{roleName}</small>
-            </div>
+        <button className="hamburger" onClick={toggleSidebar}>{sidebarCollapsed ? "☰" : "☰"}</button><h1 className="topPageTitle">{pageTitle}</h1>{(() => { const pageTitles={operations:"Operations",dashboard:"Dashboard",association:"Associations RFID",inventory:"Inventaire RFID réel",ai:"Assistant IA",platform:"Clients SaaS",dashboardAdmin:"Publicités"}; return <h1 className="topPageTitle">{pageTitles[tab]||""}</h1>; })()}
+        <div className="whiteAccount">
+          <div>
+            <b>{accountName}</b>
+            <small>{roleName}</small>
           </div>
         </div>
       </header>
 
-      {tab!=="dashboard" && <div className="contentPageHeader">
-        <div>
-          <h1>{pageTitle}</h1>
-          <p>Manage your RFID workflows, data and exports from Smart Inventory.</p>
-        </div>
-      </div>}
-
       <main className="whiteContent">
         {tab==="operations" && <Operations/>}
-        {tab==="dashboard" && <Dashboard setTab={setTab}/>} 
+        {tab==="dashboard" && <Dashboard setTab={setTab}/>}
         {tab==="ai" && <AIAssistant/>}
         {tab==="association" && <Association/>}
         {tab==="inventory" && <Inventory/>}
-        {tab==="platform" && <Platform auth={auth}/>} 
-        {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>} 
+        {tab==="platform" && <Platform auth={auth}/>}
+        {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>}
       </main>
-      <footer className="whiteFooter">© 2026 Smart Inventory · Inventory Management Platform</footer>
+      <footer className="whiteFooter">© 2026 Smart Inventory. All rights reserved.</footer>
     </section>
   </div>
 }
@@ -1066,7 +1032,9 @@ function Dashboard({setTab}){
 
   useEffect(()=>{
     if(activeDashboardAds.length <= 1) return;
-    const timer=setInterval(()=>setDashboardAdIndex(i=>(i+1)%activeDashboardAds.length),5000);
+    const timer=setInterval(()=>{
+      setDashboardAdIndex(i=>(i+1)%activeDashboardAds.length);
+    },5000);
     return ()=>clearInterval(timer);
   },[activeDashboardAds.length]);
 
@@ -1086,46 +1054,14 @@ function Dashboard({setTab}){
     setDashboardAdIndex(i=>(i-1+activeDashboardAds.length)%activeDashboardAds.length);
   }
 
-  function relativeTime(dateStr){
-    if(!dateStr) return "—";
-    const ts = new Date(dateStr).getTime();
-    if(Number.isNaN(ts)) return "—";
-    const diff = Math.max(0, Date.now() - ts);
-    const min = Math.round(diff / 60000);
-    if(min < 1) return "just now";
-    if(min < 60) return `${min} min ago`;
-    const hrs = Math.round(min / 60);
-    if(hrs < 24) return `${hrs} hr${hrs>1?"s":""} ago`;
-    const days = Math.round(hrs / 24);
-    return `${days} day${days>1?"s":""} ago`;
-  }
-
-  const productsByPid = new Map(products.map(p=>[String(p.PID),p]));
-  const associatedPids=new Set(associations.map(a=>String(a.PID)).filter(Boolean));
+  const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
   const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
-  const coverage=products.length ? Math.round((productsWithRfid/products.length)*1000)/10 : 0;
-  const coverageRounded=Math.round(coverage);
-  const remainingPercent = Math.max(100-coverageRounded,0);
+  const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
 
   const epcCounts={};
-  const lastAssociationByPid={};
-  associations.forEach(a=>{
-    const e=norm(a.EPC);
-    if(e) epcCounts[e]=(epcCounts[e]||0)+1;
-    const pid=String(a.PID||"");
-    if(pid && a.Date){
-      const current=lastAssociationByPid[pid];
-      if(!current || new Date(a.Date).getTime() > new Date(current).getTime()) lastAssociationByPid[pid]=a.Date;
-    }
-  });
+  associations.forEach(a=>{ const e=norm(a.EPC); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
   const duplicateEpcs=Object.values(epcCounts).filter(x=>x>1).length;
-  const unassignedTags=associations.filter(a=>!a.PID || !productsByPid.has(String(a.PID))).length;
-  const latestScanDate = associations.map(a=>a.Date).filter(Boolean).sort().slice(-1)[0] || "";
-  const zones=[...new Set(products.map(p=>String(p.Zone||"").trim()).filter(Boolean))];
-  const scannedZones=[...new Set(products.filter(p=>associatedPids.has(String(p.PID))).map(p=>String(p.Zone||"").trim()).filter(Boolean))];
-  const scanQuality = Math.max(0, Math.min(99.8, Math.round((coverageRounded - duplicateEpcs*3 - unassignedTags*2 + 10) * 10) / 10));
-  const lowStockCount = products.filter(p=>{const v=parseFloat(String(p.Stock||"").replace(',', '.')); return Number.isFinite(v) && v<=5;}).length;
 
   function exportDashboardReport(){
     const rows=[{
@@ -1133,7 +1069,7 @@ function Dashboard({setTab}){
       "Produits tagués":productsWithRfid,
       "Produits sans tag":productsWithoutRfid,
       "Associations RFID":associations.length,
-      "Couverture RFID":coverageRounded+"%",
+      "Couverture RFID":coverage+"%",
       "Doublons EPC":duplicateEpcs,
       "Date rapport":new Date().toISOString()
     }];
@@ -1145,180 +1081,77 @@ function Dashboard({setTab}){
     exportCSV("produits_sans_tag.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]);
   }
 
-  function exportAssociationHistory(){
-    exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{}));
-  }
+  const alerts=[];
+  if(productsWithoutRfid>0) alerts.push({type:"warning",title:`${productsWithoutRfid} produits sans tag RFID`,text:"Priorisez les produits à forte rotation."});
+  if(duplicateEpcs>0) alerts.push({type:"danger",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,text:"Vérifier les associations RFID en double."});
+  if(coverage>=80) alerts.push({type:"success",title:"Couverture RFID élevée",text:"Votre catalogue est bien avancé."});
+  if(alerts.length===0) alerts.push({type:"success",title:"Aucune alerte prioritaire",text:"Les données RFID sont stables."});
 
-  const alertItems=[];
-  if(productsWithoutRfid>0) alertItems.push({tone:"danger", title:"High Missing Items", text:`${productsWithoutRfid} products still need RFID coverage`, time:"5 min ago"});
-  if(unassignedTags>0) alertItems.push({tone:"warning", title:"Unassigned Tags", text:`${unassignedTags} tag(s) are not linked to a product`, time:"15 min ago"});
-  if(lowStockCount>0) alertItems.push({tone:"info", title:"Low Stock Alert", text:`${lowStockCount} product(s) are below threshold`, time:"1 hr ago"});
-  if(duplicateEpcs>0) alertItems.push({tone:"danger", title:"Duplicate EPC Detected", text:`${duplicateEpcs} EPC duplicate(s) require validation`, time:"2 hrs ago"});
-  if(products.length && productsWithoutRfid===0 && duplicateEpcs===0) alertItems.push({tone:"success", title:"Daily Report Ready", text:"Inventory quality is stable and report is ready to export", time:"3 hrs ago"});
-  if(!alertItems.length) alertItems.push({tone:"info", title:"Catalogue non importé", text:"Importez votre catalogue pour activer les indicateurs du dashboard.", time:"Now"});
+  return <section className="proDashboardV31">
+    <p className="pageIntro">Vue d’ensemble de la couverture RFID et de l’activité de votre pharmacie.</p>
 
-  const recentActivity = products.slice(0,5).map((p,idx)=>{
-    const pid=String(p.PID);
-    const hasTag=associatedPids.has(pid);
-    const noBarcode=!String(p["Code barre 1"]||"").trim() && !String(p["Code barre 2"]||"").trim();
-    const status = hasTag ? "Present" : noBarcode ? "Unassigned" : "Missing";
-    return {
-      id: pid || `ROW-${idx+1}`,
-      name: p.Produit || "Unnamed product",
-      category: p["Catégorie"] || "—",
-      location: p.Zone || "Main Warehouse",
-      status,
-      lastSeen: hasTag ? relativeTime(lastAssociationByPid[pid]) : (status==="Unassigned" ? "—" : "1 day ago")
-    };
-  });
+    <div className="dashKpiGrid">
+      <div className="dashKpiCard"><div className="dashKpiIcon blue">📦</div><div><span>Produits catalogués</span><b>{products.length}</b><small>Total dans le catalogue</small></div></div>
+      <div className="dashKpiCard clickableKpi" onClick={()=>setTab("association")}><div className="dashKpiIcon green">🏷️</div><div><span>Produits tagués</span><b>{productsWithRfid}</b><small>Produits avec RFID</small></div></div>
+      <div className="dashKpiCard clickableKpi" onClick={()=>setTab("dashboard")}><div className="dashKpiIcon blue">◎</div><div><span>Couverture RFID</span><b className="greenText">{coverage}%</b><small>Pourcentage global</small></div></div>
+      <div className="dashKpiCard clickableKpi" onClick={()=>setTab("inventory")}><div className="dashKpiIcon orange">⚠️</div><div><span>Produits sans tag</span><b>{productsWithoutRfid}</b><small>Nécessitent un tag</small></div></div>
+    </div>
 
-  return <section className="dashboardReferenceV35">
-    <div className="dashboardKpiGridV35">
-      <div className="dashboardKpiCardV35">
-        <div className="kpiIconV35 blue">📦</div>
-        <div className="kpiBodyV35"><span>TOTAL PRODUCTS</span><strong>{products.length}</strong><small>Across all locations</small></div>
-        <div className="kpiTrendV35 positive">{products.length ? `↑ ${Math.min(9.9, Math.max(1.2, coverageRounded/10)).toFixed(1)}%` : "—"}<small>vs last 30 days</small></div>
+    <div className="dashboardMainGrid">
+      <div className="coveragePanelV31">
+        <div className="panelTitle"><h3>Couverture RFID</h3><span>ⓘ</span></div>
+        <div className="coverageContent">
+          <div className="coverageDonut" style={{"--progress": `${coverage * 3.6}deg`}}>
+            <div className="coverageCenter"><b>{coverage}%</b></div>
+          </div>
+          <div className="coverageText">
+            <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture RFID progresse." : "Votre couverture RFID doit être améliorée."}</h3>
+            <p>Vous avez atteint {coverage}% de couverture RFID.</p>
+            <p>Continuez à associer vos produits pour une traçabilité optimale.</p>
+            <button onClick={()=>setTab("operations")}>🔗 Associer maintenant</button>
+          </div>
+        </div>
       </div>
-      <div className="dashboardKpiCardV35">
-        <div className="kpiIconV35 green">✓</div>
-        <div className="kpiBodyV35"><span>ITEMS PRESENT</span><strong>{productsWithRfid}</strong><small>{products.length ? `${coverageRounded}% of total` : "Waiting for data"}</small></div>
-        <div className="kpiTrendV35 positive">{products.length ? `↑ ${(coverageRounded/15 || 0).toFixed(1)}%` : "—"}<small>vs last 30 days</small></div>
-      </div>
-      <div className="dashboardKpiCardV35">
-        <div className="kpiIconV35 red">✕</div>
-        <div className="kpiBodyV35"><span>MISSING ITEMS</span><strong>{productsWithoutRfid}</strong><small>{products.length ? `${remainingPercent}% of total` : "No gaps yet"}</small></div>
-        <div className="kpiTrendV35 negative">{productsWithoutRfid ? `↑ ${Math.min(12.9, Math.max(1.1, productsWithoutRfid/(products.length||1)*100)).toFixed(1)}%` : "↓ 0.0%"}<small>vs last 30 days</small></div>
-      </div>
-      <div className="dashboardKpiCardV35">
-        <div className="kpiIconV35 amber">🏷</div>
-        <div className="kpiBodyV35"><span>UNASSIGNED TAGS</span><strong>{unassignedTags}</strong><small>{associations.length ? `${Math.round((unassignedTags/Math.max(associations.length,1))*100)}% of tags` : "No tag data"}</small></div>
-        <div className="kpiTrendV35 warning">{associations.length ? `↓ ${Math.max(0.5, 5.1 - Math.min(unassignedTags,4)).toFixed(1)}%` : "—"}<small>vs last 30 days</small></div>
+
+      <div className="adPlaceholderV31">
+        {currentDashboardAd ? <div className={`liveDashboardAd dynamicDashboardAd dashboardCarouselAd ${currentDashboardAd.extra_config==="cover" ? "cover" : "contain"}`}>
+          <img key={currentDashboardAd.id || currentDashboardAd.image_url} src={mediaUrl(currentDashboardAd.image_url)} alt="Publicité"/>
+          {currentDashboardAd.cta_label && <a href={currentDashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{currentDashboardAd.cta_label}</a>}
+          {activeDashboardAds.length > 1 && <>
+            <button type="button" className="carouselNav prev" onClick={prevDashboardAd} aria-label="Publicité précédente">‹</button>
+            <button type="button" className="carouselNav next" onClick={nextDashboardAd} aria-label="Publicité suivante">›</button>
+            <div className="carouselDots" aria-label="Navigation publicités">
+              {activeDashboardAds.map((ad,i)=><button type="button" key={ad.id || i} className={i===(dashboardAdIndex % activeDashboardAds.length) ? "active" : ""} onClick={()=>setDashboardAdIndex(i)} aria-label={`Afficher publicité ${i+1}`}></button>)}
+            </div>
+          </>}
+        </div> : <div className="liveDashboardAd fullImageAd defaultAd dynamicDefaultAd"><img src={defaultAds[defaultAdIndex]} alt="Smart Inventory publicité dynamique"/></div>}
       </div>
     </div>
 
-    <div className="dashboardMainGridV35">
-      <div className="dashboardLeftColumnV35">
-        <section className="panelV35 coveragePanelV35">
-          <div className="panelTitleRowV35">
-            <div><span>RFID INVENTORY COVERAGE</span></div>
-          </div>
-          <div className="coverageContentV35">
-            <div className="coverageRingWrapV35">
-              <div className="coverageRingV35" style={{"--progress": `${coverageRounded * 3.6}deg`}}>
-                <div className="coverageRingInnerV35">
-                  <strong>{coverage.toFixed(1)}%</strong>
-                  <small>Coverage</small>
-                </div>
-              </div>
-            </div>
-
-            <div className="coverageStatsV35">
-              <div className="progressHeaderV35">
-                <b>Overall Scan Progress</b>
-                <span>{productsWithRfid} / {products.length || 0}</span>
-              </div>
-              <div className="linearProgressV35"><i style={{width:`${coverageRounded}%`}}></i></div>
-
-              <div className="coverageMiniGridV35">
-                <div className="miniStatV35"><span>📡</span><label>SCANNED TAGS</label><strong>{associations.length}</strong><small>{associations.length ? `+${Math.min(1382, associations.length)} today` : "0 today"}</small></div>
-                <div className="miniStatV35"><span>📍</span><label>LOCATIONS SCANNED</label><strong>{scannedZones.length} / {zones.length || 0}</strong><small>{zones.length ? `${Math.round((scannedZones.length/Math.max(zones.length,1))*100)}% completed` : "No locations"}</small></div>
-                <div className="miniStatV35"><span>🕒</span><label>LAST SCAN</label><strong>{relativeTime(latestScanDate)}</strong><small>{scannedZones[0] || "Main Warehouse"}</small></div>
-                <div className="miniStatV35"><span>〰</span><label>SCAN QUALITY</label><strong>{scanQuality}%</strong><small>{scanQuality>=95 ? "Excellent" : scanQuality>=80 ? "Stable" : "Review required"}</small></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="panelV35 bannerPanelV35">
-          <div className="bannerMediaV35">
-            <img src={currentDashboardAd ? mediaUrl(currentDashboardAd.image_url) : defaultAds[defaultAdIndex]} alt="Dashboard promotion"/>
-            <div className="bannerOverlayV35">
-              <span>SMART INVENTORY</span>
-              <h3>Smarter Tracking. Better Control.</h3>
-              <p>Leverage RFID technology to reduce manual errors and maintain accurate, real-time inventory.</p>
-              <div className="bannerActionsV35">
-                <a href={currentDashboardAd?.cta_url || "#"} target="_blank" rel="noreferrer">{currentDashboardAd?.cta_label || "Learn More"}</a>
-                {activeDashboardAds.length > 1 && <div className="bannerDotsV35">
-                  <button type="button" onClick={prevDashboardAd}>‹</button>
-                  <button type="button" onClick={nextDashboardAd}>›</button>
-                </div>}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="panelV35 activityPanelV35">
-          <div className="panelTitleRowV35 between">
-            <div><span>RECENT INVENTORY ACTIVITY</span></div>
-            <button type="button" className="panelLinkBtnV35" onClick={()=>setTab("inventory")}>View all</button>
-          </div>
-          <div className="tableWrapV35">
-            <table className="activityTableV35">
-              <thead>
-                <tr>
-                  <th>PRODUCT ID</th>
-                  <th>PRODUCT NAME</th>
-                  <th>CATEGORY</th>
-                  <th>LOCATION</th>
-                  <th>STATUS</th>
-                  <th>LAST SEEN</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentActivity.map((row)=><tr key={row.id}>
-                  <td>{row.id}</td>
-                  <td>{row.name}</td>
-                  <td>{row.category}</td>
-                  <td>{row.location}</td>
-                  <td><span className={`statusPillV35 ${row.status.toLowerCase()}`}>{row.status}</span></td>
-                  <td>{row.lastSeen}</td>
-                  <td>•••</td>
-                </tr>)}
-              </tbody>
-            </table>
-          </div>
-        </section>
+    <div className="dashboardBottomGrid">
+      <div className="reportsPanelV31">
+        <div className="panelTitle"><h3>Rapports et exports</h3></div>
+        <div className="miniReportGrid">
+          <button onClick={exportDashboardReport}><span>📄</span><b>Couverture RFID</b><small>CSV</small><em>↓</em></button>
+          <button onClick={exportProductsWithoutRfid}><span>📄</span><b>Produits sans tag</b><small>CSV</small><em>↓</em></button>
+          <button onClick={exportDashboardReport}><span>📄</span><b>Écarts d’inventaire</b><small>CSV</small><em>↓</em></button>
+          <button onClick={()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{}))}><span>📄</span><b>Historique scans</b><small>CSV</small><em>↓</em></button>
+        </div>
+        <a className="panelLink">Voir tous les rapports ›</a>
       </div>
 
-      <div className="dashboardRightColumnV35">
-        <section className="panelV35 alertsPanelV35">
-          <div className="panelTitleRowV35 between">
-            <div><span>ALERTS & NOTIFICATIONS</span></div>
-            <button type="button" className="panelLinkBtnV35" onClick={()=>setTab("inventory")}>View all</button>
-          </div>
-          <div className="alertsListV35">
-            {alertItems.map((a,i)=><div className={`alertRowV35 ${a.tone}`} key={i}>
-              <div className="alertIconV35">{a.tone==="success" ? "✓" : a.tone==="warning" ? "!" : a.tone==="danger" ? "⚠" : "i"}</div>
-              <div className="alertCopyV35"><strong>{a.title}</strong><small>{a.text}</small></div>
-              <time>{a.time}</time>
-            </div>)}
-          </div>
-          <button type="button" className="fullWidthActionV35" onClick={exportDashboardReport}>View all alerts</button>
-        </section>
-
-        <section className="panelV35 quickActionsPanelV35">
-          <div className="panelTitleRowV35"><div><span>QUICK ACTIONS</span></div></div>
-          <div className="quickGridV35">
-            <button type="button" onClick={()=>setTab("operations")}><span>☁</span><b>Import CSV</b><small>Import inventory data</small></button>
-            <button type="button" onClick={()=>setTab("operations")}><span>📡</span><b>Start Scan</b><small>Begin RFID scanning</small></button>
-            <button type="button" onClick={()=>setTab("association")}><span>🔗</span><b>New Association</b><small>Associate tags</small></button>
-            <button type="button" onClick={exportDashboardReport}><span>📄</span><b>Export Report</b><small>Download report</small></button>
-          </div>
-        </section>
-
-        <section className="panelV35 quickActionsPanelV35 reportsCompactV35">
-          <div className="panelTitleRowV35"><div><span>REPORTS</span></div></div>
-          <div className="quickGridV35 singleColumn">
-            <button type="button" onClick={exportDashboardReport}><span>CSV</span><b>Coverage Report</b><small>RFID dashboard summary</small></button>
-            <button type="button" onClick={exportProductsWithoutRfid}><span>CSV</span><b>Products Without Tag</b><small>Items requiring association</small></button>
-            <button type="button" onClick={exportAssociationHistory}><span>CSV</span><b>Scan History</b><small>Association activity export</small></button>
-          </div>
-        </section>
+      <div className="alertsPanelV31">
+        <div className="panelTitle"><h3>Alertes prioritaires</h3></div>
+        <div className="alertListV31">
+          {alerts.map((a,i)=><div className={`alertItemV31 ${a.type}`} key={i}><span>{a.type==="success"?"✅":a.type==="danger"?"⛔":"🔔"}</span><div><b>{a.title}</b><small>{a.text}</small></div></div>)}
+        </div>
       </div>
     </div>
   </section>
 }
+
+
+
 
 
 function DashboardAdmin({auth}){
