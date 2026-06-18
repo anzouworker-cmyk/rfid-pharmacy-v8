@@ -3113,3 +3113,84 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .operationsPage .operationCard,
   .operationsPage .exportOperationCard{height:auto!important;min-height:190px!important;}
 }
+
+/* V41 Operations visual polish */
+.operationsPage{
+  max-width:none!important;
+  gap:14px!important;
+  min-height:calc(100vh - 104px)!important;
+}
+.operationsPage>p{
+  margin:0 0 4px!important;
+  font-size:14px!important;
+}
+.operationsActionPanel,
+.exportsPanel{
+  padding:22px 26px!important;
+  border-radius:7px!important;
+}
+.operationsActionPanel{margin-top:2px!important;margin-bottom:14px!important;}
+.operationsActionPanel h2,.exportsPanel h2{font-size:18px!important;font-weight:650!important;margin-bottom:6px!important;}
+.operationsActionPanel .notice,.exportsPanel .notice{font-size:13.5px!important;margin-bottom:16px!important;}
+.operationsPage .operationGrid.workflowGrid,
+.operationsPage .exportOperationGrid{gap:16px!important;}
+.operationsPage .operationCard,
+.operationsPage .exportOperationCard{
+  height:198px!important;
+  min-height:198px!important;
+  padding:16px 14px!important;
+  grid-template-rows:48px 40px 38px 32px!important;
+}
+.operationsPage .operationCard .opIcon,
+.operationsPage .exportOperationCard .opIcon{
+  width:46px!important;
+  height:46px!important;
+  margin-bottom:0!important;
+}
+.operationsPage .operationCard .opIcon svg,
+.operationsPage .exportOperationCard .opIcon svg{
+  width:24px!important;
+  height:24px!important;
+  display:block!important;
+  opacity:1!important;
+}
+.operationsPage .operationCard h3,
+.operationsPage .exportOperationCard h3{
+  font-size:14px!important;
+  font-weight:600!important;
+  min-height:34px!important;
+}
+.operationsPage .operationCard p,
+.operationsPage .exportOperationCard p,
+.workflowGrid .operationCard.blue p,
+.workflowGrid .operationCard.green p,
+.operationCard.dangerOp p,
+.exportOperationCard.blue p,
+.exportOperationCard.green p{
+  font-size:12px!important;
+  min-height:30px!important;
+}
+.operationsPage .operationCard span,
+.operationsPage .operationCard span:last-child,
+.operationsPage .exportOperationCard span:last-child{
+  height:32px!important;
+  min-width:104px!important;
+  font-size:12.5px!important;
+  font-weight:600!important;
+}
+.operationsPage .operationCard:before,
+.operationsPage .exportOperationCard:before{top:18px!important;bottom:18px!important;width:2px!important;}
+.operationsPage .dangerOp:before,
+.operationsPage .exportOperationCard:nth-child(6):before{background:#dc2626!important;}
+.operationsPage .pageFooterLikeDashboard{
+  margin-top:auto!important;
+  padding:12px 0 0!important;
+  color:#7d899d!important;
+  font-size:12px!important;
+}
+@media(max-width:1500px){
+  .operationsPage .operationCard,.operationsPage .exportOperationCard{height:208px!important;min-height:208px!important;}
+}
+@media(max-width:1200px){
+  .operationsPage .operationGrid.workflowGrid,.operationsPage .exportOperationGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+}

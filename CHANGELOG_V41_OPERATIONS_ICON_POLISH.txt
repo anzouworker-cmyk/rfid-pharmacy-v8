@@ -1,0 +1,13 @@
+Smart Inventory V41 - Operations visual polish
+
+Fixes applied:
+- Added missing SVG icons used in Operations: upload, link, barcode, trash, chart, save and restore.
+- Fixed blank icon boxes in the Operations cards.
+- Reduced card height and spacing for a more compact Operations page.
+- Refined typography and reduced excessive boldness.
+- Made Operations page title consistent in French: Opérations.
+- Kept the Operations page aligned with the dashboard design system.
+- Footer remains aligned with the dashboard style.
+
+Validation:
+- Frontend build passed with `npm run build`.

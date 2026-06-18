@@ -245,6 +245,14 @@ function DashIcon({name}){
   if(name==="download") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11" {...common}/><path d="m8 11 4 4 4-4" {...common}/><path d="M5 20h14" {...common}/></svg>;
   if(name==="bell") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9a5 5 0 0 0-10 0c0 5-2 6-2 6h14s-2-1-2-6Z" {...common}/><path d="M10 19a2 2 0 0 0 4 0" {...common}/></svg>;
   if(name==="dots") return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>;
+
+  if(name==="upload") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4" {...common}/><path d="m8 8 4-4 4 4" {...common}/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" {...common}/></svg>;
+  if(name==="link") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5a3.5 3.5 0 0 0 5 0l2.8-2.8a3.5 3.5 0 0 0-5-5L12 7" {...common}/><path d="M13.5 10.5a3.5 3.5 0 0 0-5 0l-2.8 2.8a3.5 3.5 0 0 0 5 5L12 17" {...common}/></svg>;
+  if(name==="barcode") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12" {...common}/><path d="M7 6v12" {...common}/><path d="M11 6v12" {...common}/><path d="M14 6v12" {...common}/><path d="M18 6v12" {...common}/><path d="M21 6v12" {...common}/></svg>;
+  if(name==="trash") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16" {...common}/><path d="M10 11v6" {...common}/><path d="M14 11v6" {...common}/><path d="M6 7l1 13h10l1-13" {...common}/><path d="M9 7V4h6v3" {...common}/></svg>;
+  if(name==="chart") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10" {...common}/><path d="M12 20V5" {...common}/><path d="M19 20v-7" {...common}/><path d="M3 20h18" {...common}/></svg>;
+  if(name==="save") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Z" {...common}/><path d="M8 4v6h8V4" {...common}/><path d="M8 20v-6h8v6" {...common}/></svg>;
+  if(name==="restore") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7" {...common}/><path d="M4 5v5h5" {...common}/><path d="M12 8v5l3 2" {...common}/></svg>;
   return null;
 }
 
@@ -271,7 +279,7 @@ function App(){
   const roleName = me?.role==="platform_admin" ? "Administrateur" : "Utilisateur";
 
   const pageTitle =
-    tab==="operations" ? "Operations" :
+    tab==="operations" ? "Opérations" :
     tab==="dashboard" ? "Dashboard" :
     tab==="association" ? "Associations RFID" :
     tab==="inventory" ? "Inventaire RFID réel" :
@@ -282,7 +290,7 @@ function App(){
 
   const menu=[
     {id:"dashboard",label:"Dashboard",icon:"dashboard"},
-    {id:"operations",label:"Operations",icon:"operations"},
+    {id:"operations",label:"Opérations",icon:"operations"},
     {id:"association",label:"Associations RFID",icon:"association"},
     {id:"inventory",label:"Inventaire RFID",icon:"inventory"},
     {id:"ai",label:"Assistant IA",icon:"ai"},
@@ -452,7 +460,7 @@ function Operations(){
   }
 
   return <section className="operationsPage">
-    <h1>Operations</h1>
+    <h1>Opérations</h1>
     <p>Import, scan, associations, EPC détectés, exports et sauvegardes locales.</p>
 
     <div className="operationsActionPanel">
