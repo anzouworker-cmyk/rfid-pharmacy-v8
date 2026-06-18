@@ -1,0 +1,8 @@
+V34 - Dashboard design update
+
+- Dashboard updated to match the uploaded reference design.
+- Dark compact sidebar, cleaner topbar and flatter application shell.
+- New dashboard KPI cards, RFID SVG progress gauge, dynamic advertisement card, reports/export cards and priority alerts.
+- Existing SmartInventory features preserved: login, operations, RFID association, inventory, SaaS clients and advertisements admin.
+- Dashboard ads still load from /dashboard/content and default images rotate when no ad is configured.
+- Build verified with: npm run build.
