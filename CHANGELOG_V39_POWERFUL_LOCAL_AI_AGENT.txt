@@ -1,0 +1,21 @@
+Smart Inventory V39 - Powerful local RFID agent
+
+New AI Agent capabilities:
+- Works locally without paid API.
+- Lists missing/absent products directly from Catalogue + Associations + EPC detected CSV.
+- Understands requests like: "montre-moi les 20 produits absents".
+- Filters product lists by detected zone/category/name when the values exist in imported data.
+- Generates an action plan based on missing, non-associated and duplicate EPC data.
+- Exports CSV reports directly from the chat.
+- Exports a simple PDF summary directly from the chat.
+- Detects duplicate EPCs in the associations table.
+- Explains why a product is "Présent", "Manquant" or "Non associé" using PID, barcode or product name.
+- Adds quick action buttons inside the Assistant IA page: CSV manquants, PDF résumé, Doublons EPC.
+
+Logic reminder:
+- Présent = product has an associated EPC and this EPC is present in the imported EPC detected CSV.
+- Manquant = product has an associated EPC but this EPC is absent from the imported EPC detected CSV.
+- Non associé = product has no associated EPC.
+
+Validation:
+- Frontend build passed with `npm run build`.

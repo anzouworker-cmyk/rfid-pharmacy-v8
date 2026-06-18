@@ -87,6 +87,43 @@ function exportCSV(filename, rows, cols){
   URL.revokeObjectURL(url);
 }
 
+function cleanSearchText(v){
+  return String(v ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function downloadTextPDF(filename, title, lines){
+  const safe = v => String(v ?? "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\x20-\x7E]/g, " ")
+    .replace(/[()\\]/g, " ")
+    .slice(0, 105);
+  const allLines=[title, "", ...(lines||[])].map(safe).slice(0, 48);
+  const bodyLines=["BT", "/F1 12 Tf", "50 800 Td", "16 TL", ...allLines.map(line=>`(${line}) Tj T*`), "ET"];
+  const stream=bodyLines.join("\n");
+  const objects=[
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`
+  ];
+  let pdf="%PDF-1.4\n";
+  const offsets=[0];
+  objects.forEach((obj,i)=>{
+    offsets.push(pdf.length);
+    pdf += `${i+1} 0 obj\n${obj}\nendobj\n`;
+  });
+  const xrefStart=pdf.length;
+  pdf += `xref\n0 ${objects.length+1}\n0000000000 65535 f \n`;
+  offsets.slice(1).forEach(o=>{ pdf += `${String(o).padStart(10,"0")} 00000 n \n`; });
+  pdf += `trailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  const blob=new Blob([pdf],{type:"application/pdf"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
 function useLocalStore(){
   const [productsState,setProductsState]=useState(()=>loadLS(LS_PRODUCTS,[]));
   const [associationsState,setAssociationsState]=useState(()=>loadLS(LS_ASSOC,[]));
@@ -554,48 +591,195 @@ function findProduct(products,value){
 function AIAssistant(){
   const {products,associations,detectedEpcs}=useLocalStore();
   const [messages,setMessages]=useState(()=>[
-    {role:"assistant",content:"Bonjour, je suis votre assistant RFID. Posez-moi une question sur votre stock, vos EPC détectés ou votre couverture RFID."}
+    {role:"assistant",content:"Bonjour, je suis votre agent RFID. Je peux lister les produits manquants, filtrer par zone/catégorie/nom, générer un plan d’action, créer un rapport CSV/PDF, détecter les doublons EPC et expliquer pourquoi un produit est Présent, Manquant ou Non associé."}
   ]);
   const [input,setInput]=useState("");
   const [loading,setLoading]=useState(false);
   const messagesEndRef=useRef(null);
-  const token=localStorage.token||"";
-  const auth={headers:{Authorization:`Bearer ${token}`}};
 
-  const associatedByPid = new Map();
-  associations.forEach(a=>{
-    const pid=String(a.PID||"");
-    const epc=norm(a.EPC);
-    if(!pid || !epc) return;
-    if(!associatedByPid.has(pid)) associatedByPid.set(pid,[]);
-    associatedByPid.get(pid).push(epc);
-  });
-  const detectedSet = new Set((detectedEpcs||[]).map(norm).filter(Boolean));
-  function productStatus(p){
-    const epcs=associatedByPid.get(String(p.PID)) || [];
-    if(epcs.length===0) return "Non associé";
-    return epcs.some(epc=>detectedSet.has(epc)) ? "Présent" : "Manquant";
-  }
-  const productsWithRfid=products.filter(p=>(associatedByPid.get(String(p.PID))||[]).length>0).length;
-  const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
-  const presentCount=products.filter(p=>productStatus(p)==="Présent").length;
-  const missingCount=products.filter(p=>productStatus(p)==="Manquant").length;
-  const noAssociationCount=products.filter(p=>productStatus(p)==="Non associé").length;
+  const agentData=useMemo(()=>{
+    const associatedByPid = new Map();
+    const epcToAssociations = new Map();
+    associations.forEach(a=>{
+      const pid=String(a.PID||"");
+      const epc=norm(a.EPC);
+      if(!pid || !epc) return;
+      if(!associatedByPid.has(pid)) associatedByPid.set(pid,[]);
+      associatedByPid.get(pid).push(epc);
+      if(!epcToAssociations.has(epc)) epcToAssociations.set(epc,[]);
+      epcToAssociations.get(epc).push(a);
+    });
+    const detectedSet = new Set((detectedEpcs||[]).map(norm).filter(Boolean));
+    const rows=products.map(p=>{
+      const pid=String(p.PID||"");
+      const epcs=associatedByPid.get(pid) || [];
+      const detectedForProduct=epcs.filter(epc=>detectedSet.has(epc));
+      const status=epcs.length===0 ? "Non associé" : detectedForProduct.length ? "Présent" : "Manquant";
+      return {
+        PID:p.PID || "",
+        Produit:p.Produit || p.produit || p.name || p.Nom || "",
+        Catégorie:p["Catégorie"] || p.Catégorie || p.categorie || p.category || "",
+        Zone:p.Zone || p.zone || "",
+        Stock:p.Stock || p.stock || "",
+        "Code barre 1":p["Code barre 1"] || p.barcode || p.UPC || "",
+        "Code barre 2":p["Code barre 2"] || "",
+        "EPC associé":epcs.join(", "),
+        "EPC détecté":detectedForProduct.join(", "),
+        "Statut RFID":status,
+        _epcs:epcs,
+        _detectedForProduct:detectedForProduct
+      };
+    });
+    const duplicateEpcs=[...epcToAssociations.entries()]
+      .filter(([epc,items])=>epc && items.length>1)
+      .map(([epc,items])=>({epc,items}));
+    return {rows,detectedSet,duplicateEpcs};
+  },[products,associations,detectedEpcs]);
+
+  const rows=agentData.rows;
+  const presentRows=rows.filter(r=>r["Statut RFID"]==="Présent");
+  const missingRows=rows.filter(r=>r["Statut RFID"]==="Manquant");
+  const noAssociationRows=rows.filter(r=>r["Statut RFID"]==="Non associé");
+  const productsWithRfid=rows.filter(r=>r._epcs.length>0).length;
+  const productsWithoutRfid=noAssociationRows.length;
+  const presentCount=presentRows.length;
+  const missingCount=missingRows.length;
+  const noAssociationCount=noAssociationRows.length;
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
   const stockAccuracy=products.length ? Math.round((presentCount/products.length)*100) : 0;
 
   useEffect(()=>{ messagesEndRef.current?.scrollIntoView({behavior:"smooth",block:"end"}); },[messages,loading]);
 
-  function formatAnalysis(a){
-    if(!a) return "Analyse terminée.";
-    const lines=[];
-    lines.push(a.resume || a.summary || "Analyse terminée.");
-    const recs=a.recommandations || a.recommendations || [];
-    if(recs.length) lines.push("\nRecommandations :\n" + recs.map(x=>`• ${x}`).join("\n"));
-    const alerts=a.alertes || a.risks || [];
-    if(alerts.length) lines.push("\nAlertes :\n" + alerts.map(x=>`• ${x}`).join("\n"));
-    if(a.prochaine_action) lines.push(`\nProchaine action : ${a.prochaine_action}`);
-    return lines.join("\n");
+  function extractLimit(q){
+    const n=String(q).match(/\b(\d{1,4})\b/);
+    return Math.max(1, Math.min(n ? Number(n[1]) : 20, 200));
+  }
+
+  function rowLine(r,i){
+    return `${i+1}. PID ${r.PID || "-"} — ${r.Produit || "Sans nom"} | Zone: ${r.Zone || "-"} | Catégorie: ${r.Catégorie || "-"} | Statut: ${r["Statut RFID"]} | EPC: ${r["EPC associé"] || "-"}`;
+  }
+
+  function filterRows(baseRows,q){
+    const text=cleanSearchText(q);
+    let filtered=[...baseRows];
+    const applied=[];
+    const uniqueZones=[...new Set(rows.map(r=>r.Zone).filter(Boolean))].sort((a,b)=>String(b).length-String(a).length);
+    const uniqueCategories=[...new Set(rows.map(r=>r.Catégorie).filter(Boolean))].sort((a,b)=>String(b).length-String(a).length);
+    const zoneFound=uniqueZones.find(z=>cleanSearchText(z).length>=2 && text.includes(cleanSearchText(z)));
+    const catFound=uniqueCategories.find(c=>cleanSearchText(c).length>=2 && text.includes(cleanSearchText(c)));
+    if(zoneFound){
+      filtered=filtered.filter(r=>cleanSearchText(r.Zone).includes(cleanSearchText(zoneFound)));
+      applied.push(`zone: ${zoneFound}`);
+    }
+    if(catFound){
+      filtered=filtered.filter(r=>cleanSearchText(r.Catégorie).includes(cleanSearchText(catFound)));
+      applied.push(`catégorie: ${catFound}`);
+    }
+
+    const explicitName=String(q).match(/(?:nom|produit|chercher|recherche)\s*[:=]?\s*([\wÀ-ÿ0-9\- ]{3,50})/i);
+    if(explicitName){
+      const name=cleanSearchText(explicitName[1]).replace(/\b(est|manquant|present|présent|absent|non|associe|associé|dans|zone|categorie|catégorie)\b.*$/i, "").trim();
+      if(name.length>=3){
+        filtered=filtered.filter(r=>cleanSearchText(`${r.Produit} ${r.PID} ${r["Code barre 1"]} ${r["Code barre 2"]}`).includes(name));
+        applied.push(`nom: ${explicitName[1].trim()}`);
+      }
+    }
+    return {filtered,applied};
+  }
+
+  function chooseRowsByIntent(q){
+    const text=cleanSearchText(q);
+    if(/non\s*assoc|sans\s*(epc|tag|association)/i.test(text)) return {base:noAssociationRows,label:"produits non associés"};
+    if(/present|présent|detecte|détecté/i.test(text)) return {base:presentRows,label:"produits présents"};
+    if(/manquant|absent|missing/i.test(text)) return {base:missingRows,label:"produits manquants"};
+    return {base:rows,label:"produits"};
+  }
+
+  function findProductInQuestion(q){
+    const text=cleanSearchText(q);
+    let found=rows.find(r=>r.PID && text.includes(cleanSearchText(r.PID)));
+    if(found) return found;
+    const stop=new Set(["pourquoi","produit","est","manquant","present","présent","associe","associé","statut","explique","donne","moi","avec","dans","zone","categorie","catégorie"]);
+    const tokens=text.split(/[^a-z0-9]+/).filter(t=>t.length>=4 && !stop.has(t));
+    return rows.find(r=>tokens.some(t=>cleanSearchText(`${r.Produit} ${r["Code barre 1"]} ${r["Code barre 2"]}`).includes(t)));
+  }
+
+  function explainProduct(r){
+    if(!r) return "Je n’ai pas trouvé le produit demandé. Indiquez le PID, le code-barres ou une partie du nom du produit.";
+    if(r["Statut RFID"]==="Présent"){
+      return `Produit trouvé : ${r.Produit || "Sans nom"} (PID ${r.PID || "-"}).\nStatut : Présent.\nRaison : ce produit possède au moins un EPC associé (${r["EPC associé"]}) et au moins un de ces EPC est présent dans le CSV des EPC détectés (${r["EPC détecté"]}).`;
+    }
+    if(r["Statut RFID"]==="Manquant"){
+      return `Produit trouvé : ${r.Produit || "Sans nom"} (PID ${r.PID || "-"}).\nStatut : Manquant.\nRaison : ce produit possède un EPC associé (${r["EPC associé"]}), mais aucun de ses EPC n’existe dans le dernier CSV des EPC détectés. Il est donc attendu dans le stock, mais non lu par le lecteur RFID.`;
+    }
+    return `Produit trouvé : ${r.Produit || "Sans nom"} (PID ${r.PID || "-"}).\nStatut : Non associé.\nRaison : aucun EPC n’est lié à ce produit dans le tableau des associations. Il faut d’abord associer un tag EPC au produit avant de pouvoir savoir s’il est présent ou manquant.`;
+  }
+
+  function buildActionPlan(){
+    const steps=[];
+    if((detectedEpcs||[]).length===0) steps.push("1. Importer le dernier CSV des EPC détectés pour calculer le stock réel.");
+    if(missingCount>0) steps.push(`${steps.length+1}. Traiter les produits manquants : vérifier physiquement les rayons et refaire un scan RFID ciblé.`);
+    if(noAssociationCount>0) steps.push(`${steps.length+1}. Associer les produits non associés à un EPC avant le prochain inventaire.`);
+    if(agentData.duplicateEpcs.length>0) steps.push(`${steps.length+1}. Corriger les doublons EPC : un même EPC ne doit pas être lié à plusieurs produits.`);
+    steps.push(`${steps.length+1}. Exporter un rapport CSV/PDF après correction pour garder une preuve d’inventaire.`);
+    return `Plan d’action recommandé :\n${steps.join("\n")}\n\nRésumé actuel : ${products.length} produits, ${presentCount} présents, ${missingCount} manquants, ${noAssociationCount} non associés, ${agentData.duplicateEpcs.length} doublon(s) EPC.`;
+  }
+
+  function duplicateReport(){
+    if(agentData.duplicateEpcs.length===0) return "Aucun doublon EPC détecté dans le tableau des associations.";
+    const lines=agentData.duplicateEpcs.slice(0,30).map((d,i)=>{
+      const linked=d.items.map(a=>`PID ${a.PID || "-"} ${a.Produit || ""}`.trim()).join(" | ");
+      return `${i+1}. EPC ${d.epc} utilisé ${d.items.length} fois : ${linked}`;
+    });
+    return `Doublons EPC détectés : ${agentData.duplicateEpcs.length}\n${lines.join("\n")}${agentData.duplicateEpcs.length>30 ? "\n... liste limitée aux 30 premiers doublons." : ""}`;
+  }
+
+  function exportRowsToCSV(q){
+    const intent=chooseRowsByIntent(q);
+    const {filtered,applied}=filterRows(intent.base,q);
+    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associé","EPC détecté","Statut RFID"];
+    const suffix=intent.label.replaceAll(" ","_").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    exportCSV(`rapport_${suffix}.csv`,filtered,cols);
+    return `CSV généré : ${filtered.length} ${intent.label}${applied.length ? ` (${applied.join(", ")})` : ""}.`;
+  }
+
+  function exportRowsToPDF(q){
+    const intent=chooseRowsByIntent(q);
+    const {filtered,applied}=filterRows(intent.base,q);
+    const title=`Smart Inventory - Rapport ${intent.label}`;
+    const lines=[
+      `Date: ${new Date().toLocaleString("fr-CA")}`,
+      `Produits: ${products.length}`,
+      `Presents: ${presentCount}`,
+      `Manquants: ${missingCount}`,
+      `Non associes: ${noAssociationCount}`,
+      `EPC detectes importes: ${(detectedEpcs||[]).length}`,
+      `Filtres: ${applied.length ? applied.join(", ") : "aucun"}`,
+      "",
+      ...filtered.slice(0,30).map(rowLine)
+    ];
+    downloadTextPDF(`rapport_${intent.label.replaceAll(" ","_")}.pdf`,title,lines);
+    return `PDF généré : résumé + ${Math.min(filtered.length,30)} ligne(s) listée(s). Pour une liste complète, demandez aussi un rapport CSV.`;
+  }
+
+  function buildLocalResponse(q){
+    const text=cleanSearchText(q);
+    if(/\b(pdf)\b/.test(text)) return exportRowsToPDF(q);
+    if(/\b(csv)\b|export/.test(text)) return exportRowsToCSV(q);
+    if(/doublon|duplicate|meme epc|même epc/.test(text)) return duplicateReport();
+    if(/plan|action|priorite|priorité|semaine/.test(text)) return buildActionPlan();
+    if(/pourquoi|explique|raison/.test(text)) return explainProduct(findProductInQuestion(q));
+
+    const intent=chooseRowsByIntent(q);
+    const {filtered,applied}=filterRows(intent.base,q);
+    if(/montre|affiche|liste|donne|chercher|recherche|filtre|filtrer|absent|manquant|present|présent|non\s*assoc/.test(text)){
+      const limit=extractLimit(q);
+      const lines=filtered.slice(0,limit).map(rowLine);
+      if(!lines.length) return `Aucun résultat trouvé pour ${intent.label}${applied.length ? ` avec ${applied.join(", ")}` : ""}.`;
+      return `${filtered.length} ${intent.label} trouvé(s)${applied.length ? ` avec filtre ${applied.join(", ")}` : ""}.\n\n${lines.join("\n")}${filtered.length>limit ? `\n\nListe limitée aux ${limit} premiers résultats. Demandez un CSV pour exporter toute la liste.` : ""}`;
+    }
+
+    return `Résumé RFID actuel :\n• Produits : ${products.length}\n• Présents : ${presentCount}\n• Manquants : ${missingCount}\n• Non associés : ${noAssociationCount}\n• Couverture RFID : ${coverage}%\n• Présence réelle selon EPC détectés : ${stockAccuracy}%\n• Doublons EPC : ${agentData.duplicateEpcs.length}\n\nJe peux aussi répondre à : “montre-moi les 20 produits absents”, “filtre les manquants par zone”, “crée un rapport CSV”, “crée un rapport PDF”, “détecte les doublons EPC”, ou “explique pourquoi PID X est manquant”.`;
   }
 
   async function sendMessage(text){
@@ -604,51 +788,32 @@ function AIAssistant(){
     setInput("");
     setMessages(prev=>[...prev,{role:"user",content:q}]);
     setLoading(true);
-
-    const payload={
-      products_count:products.length,
-      associations_count:associations.length,
-      products_with_rfid:productsWithRfid,
-      products_without_rfid:productsWithoutRfid,
-      coverage,
-      detected_epc_count:(detectedEpcs||[]).length,
-      present_count:presentCount,
-      missing_count:missingCount,
-      no_association_count:noAssociationCount,
-      question:q
-    };
-    try{
-      const r=await axios.post(`${API}/ai/analyze`,payload,auth);
-      setMessages(prev=>[...prev,{role:"assistant",content:formatAnalysis(r.data.analysis || r.data)}]);
-    }catch(e){
-      const fallback={
-        resume:"L’assistant IA cloud n’est pas disponible pour le moment. Voici une analyse locale basée sur vos données.",
-        recommandations:[
-          `Importer ou mettre à jour le CSV des EPC détectés avant de valider le stock réel. EPC détectés actuels : ${(detectedEpcs||[]).length}.`,
-          `Traiter les produits manquants en priorité : ${missingCount} produit(s) associé(s) à un EPC mais non détecté(s).`,
-          `Associer les produits non associés : ${noAssociationCount} produit(s) sans EPC.`
-        ],
-        alertes: missingCount>0 ? [`${missingCount} produit(s) manquant(s) selon le CSV EPC détectés.`] : [],
-        prochaine_action:"Importer le dernier fichier EPC détectés, puis vérifier la page Inventaire RFID."
-      };
-      setMessages(prev=>[...prev,{role:"assistant",content:formatAnalysis(fallback)}]);
-    }
-    setLoading(false);
+    window.setTimeout(()=>{
+      try{
+        const answer=buildLocalResponse(q);
+        setMessages(prev=>[...prev,{role:"assistant",content:answer}]);
+      }catch(e){
+        setMessages(prev=>[...prev,{role:"assistant",content:"Erreur pendant l’analyse locale. Vérifiez que les fichiers produits, associations et EPC détectés sont bien importés."}]);
+      }
+      setLoading(false);
+    },180);
   }
 
   const quickQuestions=[
-    "Quels produits dois-je traiter en priorité ?",
-    "Explique la différence entre présent, manquant et non associé.",
-    "Que dois-je faire cette semaine pour améliorer l’inventaire RFID ?",
-    "Comment améliorer ma couverture RFID ?"
+    "Montre-moi les 20 produits absents",
+    "Filtrer les manquants par zone",
+    "Génère un plan d’action",
+    "Détecte les doublons EPC",
+    "Créer rapport CSV des manquants",
+    "Créer rapport PDF résumé"
   ];
 
   return <section className="aiChatPage">
     <div className="aiChatTop">
       <div>
-        <span className="aiChatBadge">Assistant IA</span>
+        <span className="aiChatBadge">Agent local gratuit</span>
         <h2>Chat inventaire RFID</h2>
-        <p>Discutez avec l’agent IA sur votre stock, les EPC détectés, les produits manquants et les prochaines actions.</p>
+        <p>L’agent analyse le catalogue, les associations et le CSV des EPC détectés. Il peut lister, filtrer, expliquer et exporter les données.</p>
       </div>
       <div className="aiChatScore">
         <b>{stockAccuracy}%</b>
@@ -660,10 +825,10 @@ function AIAssistant(){
       <div className="aiChatPanel">
         <div className="aiMessages">
           {messages.map((m,i)=><div key={i} className={m.role==="user" ? "aiBubble user" : "aiBubble assistant"}>
-            <span>{m.role==="user" ? "Vous" : "Assistant"}</span>
+            <span>{m.role==="user" ? "Vous" : "Agent RFID"}</span>
             <p>{m.content}</p>
           </div>)}
-          {loading && <div className="aiBubble assistant typing"><span>Assistant</span><p>Analyse en cours...</p></div>}
+          {loading && <div className="aiBubble assistant typing"><span>Agent RFID</span><p>Analyse en cours...</p></div>}
           <div ref={messagesEndRef}/>
         </div>
 
@@ -672,7 +837,7 @@ function AIAssistant(){
         </div>
 
         <div className="aiComposer">
-          <textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendMessage();}}} placeholder="Écrivez votre question ici..."/>
+          <textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendMessage();}}} placeholder="Exemple : montre-moi les 20 produits absents en zone A..."/>
           <button type="button" onClick={()=>sendMessage()} disabled={loading || !input.trim()}>{loading ? "..." : "Envoyer"}</button>
         </div>
       </div>
@@ -685,13 +850,18 @@ function AIAssistant(){
         <div className="aiContextStat"><span>Présents</span><b>{presentCount}</b></div>
         <div className="aiContextStat"><span>Manquants</span><b>{missingCount}</b></div>
         <div className="aiContextStat"><span>Non associés</span><b>{noAssociationCount}</b></div>
+        <div className="aiContextStat"><span>Doublons EPC</span><b>{agentData.duplicateEpcs.length}</b></div>
+        <div className="aiSideActions">
+          <button type="button" onClick={()=>sendMessage("Créer rapport CSV des manquants")}>CSV manquants</button>
+          <button type="button" onClick={()=>sendMessage("Créer rapport PDF résumé")}>PDF résumé</button>
+          <button type="button" onClick={()=>sendMessage("Détecte les doublons EPC")}>Doublons EPC</button>
+        </div>
       </aside>
     </div>
 
     <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
-
 
 
 function Association(){

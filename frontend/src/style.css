@@ -2895,3 +2895,45 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .aiBubble{max-width:94%!important;}
   .aiContextPanel{grid-template-columns:1fr!important;}
 }
+
+/* V39 - Powerful local RFID agent */
+.aiChatBadge{
+  background:#eef7f1!important;
+  color:#1f6b3e!important;
+  border-color:#cfe9d8!important;
+}
+.aiContextPanel{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.aiSideActions{
+  display:grid!important;
+  gap:9px!important;
+  margin-top:16px!important;
+  padding-top:16px!important;
+  border-top:1px solid #edf1f6!important;
+}
+.aiSideActions button{
+  width:100%!important;
+  min-height:38px!important;
+  border:1px solid #dce4f1!important;
+  background:#f8fbff!important;
+  color:#244f88!important;
+  border-radius:7px!important;
+  font-size:13px!important;
+  font-weight:650!important;
+  box-shadow:none!important;
+}
+.aiSideActions button:hover{
+  background:#eef4ff!important;
+  border-color:#cddbf0!important;
+}
+.aiBubble.assistant p{
+  font-family:Inter,"Segoe UI",Arial,sans-serif!important;
+}
+@media(max-width:1100px){
+  .aiSideActions{grid-column:1/-1!important;grid-template-columns:repeat(3,1fr)!important;}
+}
+@media(max-width:760px){
+  .aiSideActions{grid-template-columns:1fr!important;}
+}
