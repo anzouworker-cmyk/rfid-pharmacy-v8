@@ -1,0 +1,9 @@
+Smart Inventory V42 - Operations bottom whitespace fix
+
+Changes:
+- Reduced excessive blank space below the Operations cards.
+- Removed forced full-height behavior on the Operations page.
+- Moved the footer closer to the content for a more compact layout.
+
+Validation:
+- Frontend build passed with npm run build.

@@ -3194,3 +3194,13 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
 @media(max-width:1200px){
   .operationsPage .operationGrid.workflowGrid,.operationsPage .exportOperationGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
 }
+
+/* V42 reduce extra bottom whitespace on Operations */
+.operationsPage{
+  min-height:auto!important;
+  padding-bottom:0!important;
+}
+.operationsPage .pageFooterLikeDashboard{
+  margin-top:10px!important;
+  padding-top:6px!important;
+}
