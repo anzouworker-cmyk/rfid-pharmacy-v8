@@ -3,20 +3,17 @@ from datetime import datetime, timedelta, date
 import hashlib
 import os
 import json
-import uuid
-import mimetypes
 from typing import Optional
-from pathlib import Path
-from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File, Request
+from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from pydantic import BaseModel
 from openai import OpenAI
-from sqlalchemy import create_engine, Column, String, DateTime, Boolean, Text
+from sqlalchemy import create_engine, Column, String, DateTime, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
-from sqlalchemy import text, inspect
+from sqlalchemy import text
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -25,19 +22,7 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
     CLOUDINARY_API_SECRET: str = ""
-    # CORS strict:
-    # - NE PAS utiliser "*" en production.
-    # - Mettre ici uniquement les origines frontend autorisées, séparées par des virgules.
-    # - Une origine = protocole + domaine, sans chemin et sans slash final.
-    #   Exemple: https://mon-site.vercel.app
-    FRONTEND_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
-    # Optionnel. Laisser vide pour désactiver les regex et accepter seulement FRONTEND_ORIGINS.
-    CORS_ORIGIN_REGEX: str = ""
-    DEMO_USERNAME: str = "demo"
-    DEMO_PASSWORD: str = "demo123"
-    ADMIN_USERNAME: str = "admin"
-    ADMIN_PASSWORD: str = "admin123"
-    RESET_BOOTSTRAP_ACCOUNTS: bool = True
+    FRONTEND_ORIGINS: str = "https://rfid-pharmacy-v8-staging-cr53cfcaz-anzou-s-projects.vercel.app,https://rfid-pharmacy-v8-staging.vercel.app,http://localhost:5173,http://localhost:3000"
     class Config:
         env_file = ".env"
 
@@ -46,34 +31,21 @@ engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread":
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-app = FastAPI(title="RFID Pharmacy Web SaaS Licence API")
-
-# Storage local pour les images publicitaires quand Cloudinary n'est pas configuré.
-# IMPORTANT: le mount doit être fait après la création de `app`.
-UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "uploads"))
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
-allowed_origins = [x.strip().rstrip("/") for x in settings.FRONTEND_ORIGINS.split(",") if x.strip()]
-# En production, on préfère une liste exacte d'origines.
-# CORS_ORIGIN_REGEX reste disponible seulement si vous voulez volontairement accepter un motif.
-allow_origin_regex = settings.CORS_ORIGIN_REGEX.strip() or None
+
+app = FastAPI(title="RFID Pharmacy Web SaaS Licence API")
+allowed_origins = [x.strip() for x in settings.FRONTEND_ORIGINS.split(",") if x.strip()]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_origin_regex=allow_origin_regex,
     allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-    max_age=86400,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
 )
-
-@app.options("/{full_path:path}")
-def cors_preflight_fallback(full_path: str):
-    # Fallback inoffensif si un proxy envoie directement un OPTIONS à l'app.
-    return {"ok": True}
 
 class Account(Base):
     __tablename__ = "accounts"
@@ -98,7 +70,7 @@ class DashboardContent(Base):
     cta_label = Column(String, default="")
     cta_url = Column(String, default="")
     content_type = Column(String, default="info")
-    image_url = Column(Text, default="")
+    image_url = Column(String, default="")
     extra_config = Column(String, default="contain")
     active = Column(Boolean, default=True)
     ai_premium = Column(Boolean, default=False)
@@ -166,130 +138,51 @@ class DashboardContentIn(BaseModel):
     extra_config: str = "contain"
     active: bool = True
 
-
-def ensure_schema():
-    """Ajoute les colonnes manquantes quand une ancienne base SQLite/Postgres existe déjà."""
-    inspector = inspect(engine)
-    tables = set(inspector.get_table_names())
-
-    def add_column_if_missing(table_name: str, column_name: str, ddl: str):
-        if table_name not in tables:
-            return
-        existing = {c["name"] for c in inspector.get_columns(table_name)}
-        if column_name in existing:
-            return
-        with engine.begin() as conn:
-            conn.execute(text(ddl))
-
-    migrations = [
-        ("accounts", "ai_premium", "ALTER TABLE accounts ADD COLUMN ai_premium BOOLEAN DEFAULT FALSE"),
-        ("dashboard_content", "ai_premium", "ALTER TABLE dashboard_content ADD COLUMN ai_premium BOOLEAN DEFAULT FALSE"),
-        ("dashboard_content", "image_url", "ALTER TABLE dashboard_content ADD COLUMN image_url VARCHAR DEFAULT ''"),
-        ("dashboard_content", "extra_config", "ALTER TABLE dashboard_content ADD COLUMN extra_config VARCHAR DEFAULT 'contain'"),
-        ("dashboard_content", "cta_label", "ALTER TABLE dashboard_content ADD COLUMN cta_label VARCHAR DEFAULT ''"),
-        ("dashboard_content", "cta_url", "ALTER TABLE dashboard_content ADD COLUMN cta_url VARCHAR DEFAULT ''"),
-    ]
-    for table_name, column_name, ddl in migrations:
-        try:
-            add_column_if_missing(table_name, column_name, ddl)
-        except Exception:
-            # Ne bloque pas le démarrage; l'app continuera si la base est déjà correcte.
-            pass
-
-
-def ensure_demo():
-    """Crée ou répare les comptes de démarrage.
-
-    Sur Render/Postgres, la base peut déjà contenir un ancien compte demo
-    désactivé ou avec un ancien mot de passe. Dans ce cas, le frontend affiche
-    "Connexion échouée" même si demo/demo123 est indiqué à l'écran.
-    RESET_BOOTSTRAP_ACCOUNTS=True remet les comptes demo/admin dans un état
-    utilisable à chaque redémarrage.
-    """
-    s = SessionLocal()
+def 
+with engine.begin() as conn:
     try:
-        demo_username = settings.DEMO_USERNAME.strip() or "demo"
-        demo_password = settings.DEMO_PASSWORD or "demo123"
-        admin_username = settings.ADMIN_USERNAME.strip() or "admin"
-        admin_password = settings.ADMIN_PASSWORD or "admin123"
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS extra_config VARCHAR DEFAULT 'contain'"))
+    except Exception:
+        pass
 
-        demo = s.get(Account, demo_username)
-        if not demo:
-            demo = Account(username=demo_username, created_at=datetime.utcnow())
-            s.add(demo)
-        if settings.RESET_BOOTSTRAP_ACCOUNTS:
-            demo.password_hash = hpw(demo_password)
-            demo.pharmacy_name = "Pharmacie Démo"
-            demo.role = "client"
-            demo.subscription_status = "active"
-            demo.expires_at = datetime.utcnow() + timedelta(days=365)
-            demo.active = True
-            demo.ai_premium = False
 
-        admin = s.get(Account, admin_username)
-        if not admin:
-            admin = Account(username=admin_username, created_at=datetime.utcnow())
-            s.add(admin)
-        if settings.RESET_BOOTSTRAP_ACCOUNTS:
-            admin.password_hash = hpw(admin_password)
-            admin.pharmacy_name = "admin"
-            admin.role = "platform_admin"
-            admin.ai_premium = True
-            admin.subscription_status = "active"
-            admin.expires_at = datetime.utcnow() + timedelta(days=3650)
-            admin.active = True
+with engine.begin() as conn:
+    try:
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS image_url VARCHAR DEFAULT ''"))
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS extra_config VARCHAR DEFAULT 'contain'"))
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS cta_label VARCHAR DEFAULT ''"))
+        conn.execute(text("ALTER TABLE dashboard_content ADD COLUMN IF NOT EXISTS cta_url VARCHAR DEFAULT ''"))
+    except Exception:
+        pass
 
-        s.commit()
-    finally:
-        s.close()
-
-ensure_schema()
+ensure_demo():
+    s = SessionLocal()
+    if not s.get(Account, "demo"):
+        s.add(Account(
+            username="demo",
+            password_hash=hpw("demo123"),
+            pharmacy_name="Pharmacie Démo",
+            subscription_status="active",
+            expires_at=datetime.utcnow() + timedelta(days=365)
+        ))
+    if not s.get(Account, "admin"):
+        s.add(Account(
+            username="admin",
+            password_hash=hpw("admin123"),
+            pharmacy_name="admin",
+            role="platform_admin",
+            ai_premium=True,
+            subscription_status="active",
+            expires_at=datetime.utcnow() + timedelta(days=3650)
+        ))
+    s.commit()
+    s.close()
 ensure_demo()
 
-@app.get("/health")
-def health():
-    db_status = {"ok": True, "tables": [], "dashboard_columns": []}
-    try:
-        inspector = inspect(engine)
-        db_status["tables"] = inspector.get_table_names()
-        if "dashboard_content" in db_status["tables"]:
-            db_status["dashboard_columns"] = [c["name"] for c in inspector.get_columns("dashboard_content")]
-    except Exception as e:
-        db_status = {"ok": False, "error": str(e)}
-    return {
-        "ok": True,
-        "service": "Smart Inventory API",
-        "version": "V33.17_SIDEBAR_LOGO_FIX",
-        "cors_origins": allowed_origins,
-        "cors_origin_regex": allow_origin_regex or "",
-        "db": db_status,
-    }
-
 @app.post("/auth/login")
-async def login(request: Request, s: Session = Depends(db)):
-    """Connexion robuste.
-
-    Accepte application/x-www-form-urlencoded, multipart/form-data et JSON.
-    Cela évite les échecs quand le navigateur ou Vercel envoie un Content-Type
-    légèrement différent.
-    """
-    username = ""
-    password = ""
-    content_type = (request.headers.get("content-type") or "").lower()
-    try:
-        if "application/json" in content_type:
-            payload = await request.json()
-            username = str(payload.get("username", "")).strip()
-            password = str(payload.get("password", ""))
-        else:
-            form = await request.form()
-            username = str(form.get("username", "")).strip()
-            password = str(form.get("password", ""))
-    except Exception:
-        raise HTTPException(400, "Invalid login payload")
-
-    acc = s.get(Account, username)
-    if not acc or not verify(password, acc.password_hash) or not acc.active:
+def login(form: OAuth2PasswordRequestForm = Depends(), s: Session = Depends(db)):
+    acc = s.get(Account, form.username)
+    if not acc or not verify(form.password, acc.password_hash) or not acc.active:
         raise HTTPException(401, "Bad credentials")
     if acc.role != "platform_admin":
         if acc.subscription_status != "active" or acc.expires_at < datetime.utcnow():
@@ -477,78 +370,43 @@ def client_update_expiry(username: str, data: ExpiryIn, acc: Account = Depends(c
     return {"ok": True, "username": username, "expires_at": obj.expires_at.isoformat(), "subscription_status": obj.subscription_status}
 
 
-
-
-def _dashboard_content_rows(s: Session, include_inactive: bool = False, username: Optional[str] = None):
-    """Lecture robuste du contenu dashboard.
-
-    Anciennes bases Render/Postgres peuvent avoir une table dashboard_content créée
-    avant l'ajout de image_url / extra_config / cta_label. Une requête ORM peut alors
-    tomber en 500. Cette fonction lit les colonnes existantes avec SELECT * et remplit
-    les champs manquants avec des valeurs par défaut.
-    """
-    try:
-        ensure_schema()
-    except Exception:
-        pass
-
-    try:
-        inspector = inspect(engine)
-        if "dashboard_content" not in inspector.get_table_names():
-            return []
-    except Exception:
-        return []
-
-    where = []
-    params = {}
-    if not include_inactive:
-        where.append("active = :active")
-        params["active"] = True
-    if username:
-        where.append("(scope = :global_scope OR target_username = :username)")
-        params["global_scope"] = "global"
-        params["username"] = username
-    sql = "SELECT * FROM dashboard_content"
-    if where:
-        sql += " WHERE " + " AND ".join(where)
-    sql += " ORDER BY created_at DESC"
-
-    try:
-        rows = s.execute(text(sql), params).mappings().all()
-    except Exception:
-        # Dernier filet de sécurité: ne pas casser l'écran admin à cause d'une ancienne table.
-        return []
-
-    result = []
-    for r in rows:
-        created_at = r.get("created_at")
-        if hasattr(created_at, "isoformat"):
-            created_at = created_at.isoformat()
-        result.append({
-            "id": r.get("id", ""),
-            "scope": r.get("scope", "global") or "global",
-            "target_username": r.get("target_username", None),
-            "title": r.get("title", ""),
-            "message": r.get("message", ""),
-            "cta_label": r.get("cta_label", "") or "",
-            "cta_url": r.get("cta_url", "") or "",
-            "content_type": r.get("content_type", "info") or "info",
-            "image_url": r.get("image_url", "") or "",
-            "extra_config": r.get("extra_config", "contain") or "contain",
-            "active": bool(r.get("active", True)),
-            "created_at": created_at or "",
-        })
-    return result
-
 @app.get("/dashboard/content")
 def dashboard_content(acc: Account = Depends(current_user), s: Session = Depends(db)):
-    return _dashboard_content_rows(s, include_inactive=False, username=acc.username)
+    rows = s.query(DashboardContent).filter(DashboardContent.active == True).order_by(DashboardContent.created_at.desc()).all()
+    result = []
+    for x in rows:
+        if x.scope == "global" or x.target_username == acc.username:
+            result.append({
+                "id": x.id,
+                "scope": x.scope,
+                "target_username": x.target_username,
+                "title": x.title,
+                "message": x.message,
+                "cta_label": x.cta_label,
+                "cta_url": x.cta_url,
+                "content_type": x.content_type,
+                "image_url": getattr(x, "image_url", ""),
+                "active": x.active,
+                "created_at": x.created_at.isoformat()
+            })
+    return result
 
 @app.get("/platform/dashboard-content")
 def platform_dashboard_content(acc: Account = Depends(current_user), s: Session = Depends(db)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
-    return _dashboard_content_rows(s, include_inactive=True)
+    return [{
+        "id": x.id,
+        "scope": x.scope,
+        "target_username": x.target_username,
+        "title": x.title,
+        "message": x.message,
+        "cta_label": x.cta_label,
+        "cta_url": x.cta_url,
+        "content_type": x.content_type,
+        "active": x.active,
+        "created_at": x.created_at.isoformat()
+    } for x in s.query(DashboardContent).order_by(DashboardContent.created_at.desc()).all()]
 
 @app.post("/platform/dashboard-content")
 def create_dashboard_content(data: DashboardContentIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
@@ -558,77 +416,42 @@ def create_dashboard_content(data: DashboardContentIn, acc: Account = Depends(cu
         raise HTTPException(400, "scope must be global or pharmacy")
     if data.scope == "pharmacy" and not data.target_username:
         raise HTTPException(400, "target_username required")
-
-    try:
-        ensure_schema()
-    except Exception:
-        pass
-
-    content_id = "dash_" + uuid.uuid4().hex
-    created_at = datetime.utcnow()
-    params = {
-        "id": content_id,
-        "scope": data.scope or "global",
-        "target_username": data.target_username,
-        "title": data.title or "Publicité Dashboard",
-        "message": data.message or "",
-        "cta_label": data.cta_label or "",
-        "cta_url": data.cta_url or "",
-        "content_type": data.content_type or "publicite",
-        "image_url": data.image_url or "",
-        "extra_config": (getattr(data, "extra_config", "contain") or "contain"),
-        "active": bool(data.active),
-        "created_at": created_at,
-    }
-
-    # Insertion SQL explicite: évite les 500 quand une ancienne base Render/Postgres
-    # n'a pas exactement les mêmes colonnes que le modèle SQLAlchemy.
-    try:
-        s.execute(text("""
-            INSERT INTO dashboard_content
-                (id, scope, target_username, title, message, cta_label, cta_url,
-                 content_type, image_url, extra_config, active, created_at)
-            VALUES
-                (:id, :scope, :target_username, :title, :message, :cta_label, :cta_url,
-                 :content_type, :image_url, :extra_config, :active, :created_at)
-        """), params)
-        s.commit()
-    except Exception as e:
-        s.rollback()
-        raise HTTPException(500, f"Erreur sauvegarde publicité DB: {str(e)}")
-    return {"ok": True, "id": content_id}
+    obj = DashboardContent(
+        id="dash_" + str(int(datetime.utcnow().timestamp() * 1000)),
+        scope=data.scope,
+        target_username=data.target_username,
+        title=data.title,
+        message=data.message,
+        cta_label=data.cta_label,
+        cta_url=data.cta_url,
+        content_type=data.content_type,
+        image_url=data.image_url,
+        extra_config=getattr(data, "extra_config", "contain"),
+        active=data.active
+    )
+    s.add(obj)
+    s.commit()
+    return {"ok": True, "id": obj.id}
 
 @app.post("/platform/dashboard-content-toggle/{content_id}")
 def toggle_dashboard_content(content_id: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
-    try:
-        res = s.execute(
-            text("UPDATE dashboard_content SET active = CASE WHEN active THEN false ELSE true END WHERE id = :id"),
-            {"id": content_id},
-        )
-        if res.rowcount == 0:
-            raise HTTPException(404, "Content not found")
-        s.commit()
-        rows = _dashboard_content_rows(s, include_inactive=True)
-        active = next((x["active"] for x in rows if x["id"] == content_id), None)
-        return {"ok": True, "active": active}
-    except HTTPException:
-        raise
-    except Exception as e:
-        s.rollback()
-        raise HTTPException(500, f"Erreur changement statut publicité: {str(e)}")
+    obj = s.get(DashboardContent, content_id)
+    if not obj:
+        raise HTTPException(404, "Content not found")
+    obj.active = not obj.active
+    s.commit()
+    return {"ok": True, "active": obj.active}
 
 @app.post("/platform/dashboard-content-delete/{content_id}")
 def delete_dashboard_content(content_id: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
-    try:
-        s.execute(text("DELETE FROM dashboard_content WHERE id = :id"), {"id": content_id})
+    obj = s.get(DashboardContent, content_id)
+    if obj:
+        s.delete(obj)
         s.commit()
-    except Exception as e:
-        s.rollback()
-        raise HTTPException(500, f"Erreur suppression publicité: {str(e)}")
     return {"ok": True}
 
 
@@ -717,39 +540,19 @@ def client_ai_premium(username: str, enabled: bool, acc: Account = Depends(curre
 
 
 @app.post("/platform/upload-ad-image")
-async def upload_ad_image(request: Request, file: UploadFile = File(...), acc: Account = Depends(current_user)):
+async def upload_ad_image(file: UploadFile = File(...), acc: Account = Depends(current_user)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
 
-    # Le navigateur peut parfois envoyer image/png, image/x-png ou même application/octet-stream.
-    # On valide donc le type MIME, l'extension ET la signature du fichier pour éviter les faux rejets.
-    allowed_mimes = {"image/png": ".png", "image/x-png": ".png", "image/jpeg": ".jpg", "image/jpg": ".jpg", "image/webp": ".webp"}
-    allowed_exts = {".png", ".jpg", ".jpeg", ".webp"}
+    allowed = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp"}
+    if file.content_type not in allowed:
+        raise HTTPException(400, "Format image non supporté. Utilisez PNG, JPG ou WEBP.")
 
     content = await file.read()
-    if not content:
-        raise HTTPException(400, "Image vide ou illisible.")
     if len(content) > 3 * 1024 * 1024:
         raise HTTPException(400, "Image trop lourde. Maximum 3 MB.")
 
-    content_type = (file.content_type or "").split(";", 1)[0].strip().lower()
-    original_ext = Path(file.filename or "").suffix.lower()
-    ext = allowed_mimes.get(content_type)
-    if not ext and original_ext in allowed_exts:
-        ext = ".jpg" if original_ext == ".jpeg" else original_ext
-
-    # Validation par signature fichier.
-    if content.startswith(b"\x89PNG\r\n\x1a\n"):
-        ext = ".png"
-    elif content.startswith(b"\xff\xd8\xff"):
-        ext = ".jpg"
-    elif content.startswith(b"RIFF") and content[8:12] == b"WEBP":
-        ext = ".webp"
-
-    if ext not in {".png", ".jpg", ".webp"}:
-        raise HTTPException(400, "Format image non supporté. Utilisez PNG, JPG ou WEBP.")
-
-    cloudinary_error = ""
+    # Cloudinary recommended for production
     if settings.CLOUDINARY_CLOUD_NAME and settings.CLOUDINARY_API_KEY and settings.CLOUDINARY_API_SECRET:
         try:
             import cloudinary
@@ -763,30 +566,21 @@ async def upload_ad_image(request: Request, file: UploadFile = File(...), acc: A
             result = cloudinary.uploader.upload(
                 content,
                 folder="smart_inventory_ads",
-                resource_type="image"
+                resource_type="image",
+                transformation=[
+                    {"width": 1200, "height": 800, "crop": "fill", "quality": "auto", "fetch_format": "auto"}
+                ]
             )
-            secure_url = result.get("secure_url")
-            if secure_url:
-                return {"image_url": secure_url}
-            cloudinary_error = "Cloudinary n'a pas retourné d'URL."
+            return {"image_url": result.get("secure_url")}
         except Exception as e:
-            # Ne bloque pas la publication: on tente le stockage local ensuite.
-            cloudinary_error = str(e)
+            raise HTTPException(500, f"Erreur upload Cloudinary: {str(e)}")
 
-    # Fallback local storage pour développement/testing ou si Cloudinary n'est pas configuré.
-    try:
-        filename = f"ad_{uuid.uuid4().hex}{ext}"
-        path = UPLOAD_DIR / filename
-        path.write_bytes(content)
-    except Exception as e:
-        detail = f"Erreur sauvegarde image locale: {str(e)}"
-        if cloudinary_error:
-            detail += f" | Cloudinary: {cloudinary_error}"
-        raise HTTPException(500, detail)
-
-    # Retourner une URL absolue évite que le frontend cherche /uploads sur Vercel
-    # au lieu du backend. Définir BACKEND_PUBLIC_URL en production reste préférable.
+    # Fallback local storage for development/testing
+    ext = allowed[file.content_type]
+    filename = f"ad_{uuid.uuid4().hex}{ext}"
+    path = UPLOAD_DIR / filename
+    path.write_bytes(content)
     base_url = os.getenv("BACKEND_PUBLIC_URL", "").rstrip("/")
-    if not base_url:
-        base_url = str(request.base_url).rstrip("/")
-    return {"image_url": f"{base_url}/uploads/{filename}"}
+    if base_url:
+        return {"image_url": f"{base_url}/uploads/{filename}"}
+    return {"image_url": f"/uploads/{filename}"}
