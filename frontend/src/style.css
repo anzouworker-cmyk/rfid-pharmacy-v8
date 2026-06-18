@@ -1933,6 +1933,7 @@ body{
   .navIconTile{width:62px;height:62px;}
   .navIconTile svg{width:32px;height:32px;}
 }
+<<<<<<< HEAD
 
 
 /* V33.17 - fix approved sidebar logo rendering */
@@ -3068,3 +3069,5 @@ body{
   .kpiTrendV35{text-align:left}
   .bannerOverlayV35{max-width:100%}
 }
+=======
+>>>>>>> parent of a092c49 (update menu)

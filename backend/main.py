@@ -259,7 +259,11 @@ def health():
     return {
         "ok": True,
         "service": "Smart Inventory API",
+<<<<<<< HEAD
         "version": "V33.18_MENU_FIX",
+=======
+        "version": "V33.13_LOGO_SIDEBAR_FIX",
+>>>>>>> parent of a092c49 (update menu)
         "cors_origins": allowed_origins,
         "cors_origin_regex": allow_origin_regex or "",
         "db": db_status,
