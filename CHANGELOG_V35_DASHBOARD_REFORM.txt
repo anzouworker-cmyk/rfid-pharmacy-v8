@@ -1,0 +1,12 @@
+SmartInventory V35 - Dashboard reformé
+
+- Refonte visuelle complète du dashboard pour un rendu SaaS plus professionnel.
+- Sidebar sombre premium avec meilleure hiérarchie, icônes lisibles et état actif plus net.
+- Topbar modernisée avec profil admin complet.
+- Cartes KPI agrandies avec accent vertical et icônes SVG propres.
+- Bloc Couverture RFID retravaillé avec jauge plus lisible, meilleur spacing et CTA professionnel.
+- Bloc Publicité Dashboard agrandi, mieux intégré et compatible avec les publicités configurées.
+- Section Rapports et exports refaite avec cartes CSV et zone téléchargement.
+- Panel Alertes prioritaires amélioré avec lignes d’alerte plus claires.
+- Angles réduits pour respecter le style demandé, sans coins trop arrondis.
+- Build frontend vérifié avec npm run build.

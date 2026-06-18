@@ -2313,3 +2313,259 @@ body{background:var(--background)!important;color:var(--foreground)!important;fo
 
 @media(max-width:1180px){.figmaKpiGrid{grid-template-columns:repeat(2,1fr)}.figmaMiddleGrid,.figmaBottomGrid{grid-template-columns:1fr}.figmaAdCard{min-height:300px}.figmaAdMedia{height:180px}}
 @media(max-width:800px){.whiteShell{display:block!important}.whiteSidebar{width:100%!important;min-width:0!important;height:auto!important;position:relative!important}.whiteNav{grid-template-columns:repeat(2,1fr)}.whiteSideBottom{padding-top:8px!important}.whiteMain{min-height:0!important}.figmaKpiGrid,.figmaReportGrid{grid-template-columns:1fr}.figmaCoverageContent{display:block}.figmaGauge{margin:0 auto 18px}.figmaMiddleGrid,.figmaBottomGrid{grid-template-columns:1fr}.figmaDashboardFooter{text-align:left}.whiteTopbar{position:relative!important}}
+
+/* V35 - Premium dashboard reform: closer to the approved professional mockup */
+:root{
+  --si-bg:#f7f9fc;
+  --si-surface:#ffffff;
+  --si-ink:#071227;
+  --si-sub:#53627c;
+  --si-muted:#8a96ad;
+  --si-line:#dfe6f1;
+  --si-blue:#2563eb;
+  --si-blue-2:#3b82f6;
+  --si-green:#17a56a;
+  --si-purple:#4f46e5;
+  --si-orange:#f08a10;
+  --si-sidebar:#081d3a;
+  --si-sidebar-2:#0b315f;
+}
+body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family:Inter,"Segoe UI",Arial,sans-serif!important;}
+.whiteShell{background:var(--si-bg)!important;min-height:100vh!important;}
+.whiteSidebar{
+  width:268px!important;
+  min-width:268px!important;
+  padding:26px 16px 22px!important;
+  background:
+    radial-gradient(circle at 0 0,rgba(52,144,255,.34),transparent 28%),
+    linear-gradient(180deg,#071a34 0%,#09284e 48%,#061a35 100%)!important;
+  border-right:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:14px 0 34px rgba(8,18,38,.12)!important;
+}
+.whiteBrand{min-height:50px!important;margin:0 0 22px!important;padding:0 4px!important;display:flex!important;align-items:center!important;}
+.sidebarBrandLogo{gap:12px!important;}
+.sidebarBrandLogo .smartSidebarLogoIcon{
+  width:40px!important;height:40px!important;flex:0 0 40px!important;
+  border-radius:7px!important;
+  background:linear-gradient(145deg,#2b7cff,#0d53c7)!important;
+  padding:7px!important;
+  box-shadow:0 10px 22px rgba(37,99,235,.34)!important;
+}
+.sidebarBrandLogo .smartSidebarLogoText{
+  font-size:19px!important;font-weight:800!important;letter-spacing:-.045em!important;gap:5px!important;max-width:190px!important;color:white!important;
+}
+.whiteNav{gap:7px!important;padding:0!important;margin-top:8px!important;}
+.whiteNavItem,.whiteLogout{
+  min-height:48px!important;
+  padding:0 15px!important;
+  border-radius:6px!important;
+  color:#e6edf8!important;
+  gap:13px!important;
+  font-size:15px!important;
+  letter-spacing:-.01em!important;
+}
+.whiteNavItem b,.whiteLogout b{font-size:15px!important;font-weight:600!important;color:inherit!important;}
+.navIconTile{width:22px!important;height:22px!important;min-width:22px!important;color:inherit!important;}
+.navIconTile svg{width:22px!important;height:22px!important;opacity:.98;}
+.whiteNavItem.active{
+  background:linear-gradient(135deg,#3489ff,#1767e8)!important;
+  color:white!important;
+  box-shadow:0 12px 26px rgba(23,103,232,.34)!important;
+}
+.whiteNavItem:hover,.whiteLogout:hover{background:rgba(255,255,255,.10)!important;color:white!important;}
+.whiteSideBottom{margin-top:auto!important;border-top:1px solid rgba(255,255,255,.12)!important;padding-top:18px!important;}
+.whiteMain{background:var(--si-bg)!important;}
+.whiteTopbar{
+  height:80px!important;min-height:80px!important;
+  padding:0 32px!important;
+  background:rgba(255,255,255,.96)!important;
+  border-bottom:1px solid var(--si-line)!important;
+  box-shadow:0 1px 0 rgba(15,23,42,.02)!important;
+}
+.hamburger{
+  width:44px!important;height:44px!important;
+  border-radius:6px!important;
+  background:#f1f5fb!important;
+  color:#0f1b31!important;
+  border:1px solid #dce4f1!important;
+  font-size:24px!important;
+}
+.topPageTitle{font-size:26px!important;font-weight:800!important;letter-spacing:-.045em!important;color:#071227!important;}
+.whiteAccount{
+  display:flex!important;align-items:center!important;gap:10px!important;
+  min-height:54px!important;padding:7px 12px 7px 8px!important;
+  border:1px solid #dce4f1!important;
+  border-radius:6px!important;
+  background:#fff!important;color:#071227!important;
+  box-shadow:0 12px 28px rgba(15,23,42,.05)!important;
+}
+.whiteAvatar{
+  width:38px;height:38px;display:grid;place-items:center;border-radius:50%;
+  background:linear-gradient(145deg,#3b82f6,#1d4ed8);color:#fff;font-weight:800;font-size:14px;
+}
+.whiteAccount b{font-size:14px!important;color:#071227!important;font-weight:700!important;line-height:1.1!important;}
+.whiteAccount small{display:block!important;font-size:12px!important;color:#53627c!important;margin-top:3px!important;}
+.accountChevron{color:#53627c;font-size:18px;margin-left:2px;line-height:1;}
+.whiteContent{padding:24px 32px 0!important;}
+.whiteFooter{display:none!important;}
+.sidebarIsCollapsed .whiteSidebar{width:86px!important;min-width:86px!important;padding:26px 13px 22px!important;}
+.sidebarIsCollapsed .whiteNavItem,.sidebarIsCollapsed .whiteLogout{justify-content:center!important;padding:0!important;}
+.sidebarIsCollapsed .sidebarBrandLogo .smartSidebarLogoIcon{width:42px!important;height:42px!important;flex-basis:42px!important;}
+.sidebarIsCollapsed .whiteBrand{justify-content:center!important;padding:0!important;}
+
+.figmaDashboard{
+  max-width:none!important;
+  width:100%!important;
+  gap:18px!important;
+  padding-bottom:14px!important;
+}
+.figmaIntro{
+  margin:0 0 2px!important;
+  color:#43536d!important;
+  font-size:15px!important;
+  font-weight:500!important;
+}
+.figmaKpiGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:20px!important;}
+.figmaKpiCard{
+  position:relative!important;
+  min-height:118px!important;
+  padding:24px 28px!important;
+  gap:26px!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:7px!important;
+  background:#fff!important;
+  box-shadow:0 14px 36px rgba(15,23,42,.045)!important;
+  overflow:hidden!important;
+}
+.figmaKpiCard:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:0;background:var(--si-blue);}
+.figmaKpiCard:nth-child(2):before{background:var(--si-green);}
+.figmaKpiCard:nth-child(3):before{background:var(--si-purple);}
+.figmaKpiCard:nth-child(4):before{background:var(--si-orange);}
+.figmaKpiCard:hover{box-shadow:0 20px 48px rgba(15,23,42,.08)!important;transform:translateY(-1px)!important;border-color:#ccd7e8!important;}
+.figmaKpiIcon{
+  width:66px!important;height:66px!important;border-radius:8px!important;
+  font-size:0!important;
+}
+.figmaKpiIcon svg{width:34px;height:34px;}
+.figmaKpiIcon.blue{background:#eef4ff!important;color:#2563eb!important;}
+.figmaKpiIcon.green{background:#eafaf1!important;color:#16a34a!important;}
+.figmaKpiIcon.purple{background:#f0efff!important;color:#4f46e5!important;}
+.figmaKpiIcon.orange{background:#fff3e4!important;color:#f08a10!important;}
+.figmaKpiBody b{font-size:31px!important;font-weight:800!important;color:#071227!important;}
+.figmaKpiBody small{font-size:15px!important;font-weight:700!important;color:#18233b!important;margin-top:8px!important;}
+.figmaKpiBody em{font-size:13px!important;color:#53627c!important;opacity:1!important;margin-top:3px!important;}
+.figmaMiddleGrid{grid-template-columns:1.1fr 1fr!important;gap:22px!important;align-items:stretch!important;}
+.figmaBottomGrid{grid-template-columns:1.75fr .65fr!important;gap:22px!important;align-items:stretch!important;}
+.figmaPanel{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:7px!important;
+  box-shadow:0 14px 36px rgba(15,23,42,.04)!important;
+}
+.figmaPanel h2,.figmaPanelTitle h2{font-size:19px!important;font-weight:800!important;color:#071227!important;letter-spacing:-.02em!important;}
+.figmaPanelTitle{margin-bottom:28px!important;}
+.figmaPanelTitle span{width:22px!important;height:22px!important;background:#f3f6fb!important;border:1px solid #dce4f1!important;color:#64748b!important;font-size:12px!important;}
+.figmaCoveragePanel{padding:28px 34px!important;min-height:360px!important;}
+.figmaCoverageContent{gap:52px!important;min-height:240px!important;}
+.figmaGauge{width:214px!important;height:214px!important;}
+.figmaGauge svg{width:214px!important;height:214px!important;overflow:visible;}
+.figmaGauge svg circle:first-child{stroke:#edf1f7!important;stroke-width:16!important;}
+.figmaGauge b{font-size:44px!important;font-weight:800!important;color:#071227!important;}
+.figmaGauge:after{content:"Couverture RFID";position:absolute;left:0;right:0;top:124px;text-align:center;font-size:14px;font-weight:500;color:#69758c;}
+.figmaCoverageText h3{font-size:20px!important;font-weight:800!important;color:#071227!important;margin-bottom:14px!important;letter-spacing:-.02em!important;}
+.figmaCoverageText p{font-size:16px!important;color:#53627c!important;line-height:1.65!important;max-width:560px!important;}
+.figmaCoverageText button{
+  display:inline-flex!important;align-items:center!important;gap:10px!important;
+  margin-top:24px!important;padding:13px 24px!important;
+  border-radius:6px!important;background:linear-gradient(135deg,#246bff,#155ce6)!important;
+  font-size:15px!important;font-weight:700!important;
+  box-shadow:0 12px 24px rgba(37,99,235,.22)!important;
+}
+.figmaCoverageText button svg{width:18px;height:18px;}
+.figmaAdCard{min-height:360px!important;overflow:hidden!important;padding:0 22px 16px!important;display:flex!important;flex-direction:column!important;}
+.figmaAdHeader{height:60px;display:flex;align-items:center;gap:12px;justify-content:space-between;}
+.figmaAdHeader h2{font-size:19px!important;font-weight:800!important;margin:0!important;color:#071227!important;}
+.figmaAdHeader a{margin-left:auto;text-decoration:none;color:#2563eb;font-size:13px;font-weight:800;border:1px solid #d6e3ff;border-radius:6px;padding:7px 10px;background:#f5f8ff;}
+.figmaAdHeader button{width:34px!important;height:34px!important;padding:0!important;background:transparent!important;color:#51617a!important;box-shadow:none!important;border:0!important;display:grid!important;place-items:center!important;}
+.figmaAdHeader button svg{width:21px;height:21px;}
+.figmaAdMedia{
+  height:272px!important;
+  border-radius:6px!important;
+  border:1px solid #dce4f1!important;
+  background:#eff7f2!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)!important;
+}
+.figmaAdMedia img.cover{object-fit:cover!important;}
+.figmaAdMedia img.contain{object-fit:contain!important;padding:0!important;background:#fff!important;}
+.figmaCarousel{
+  width:42px!important;height:42px!important;border-radius:5px!important;
+  background:rgba(255,255,255,.95)!important;color:#071227!important;
+  border:1px solid rgba(15,23,42,.08)!important;
+  font-size:29px!important;font-weight:600!important;
+  box-shadow:0 10px 24px rgba(15,23,42,.12)!important;
+}
+.figmaCarousel.prev{left:14px!important}.figmaCarousel.next{right:14px!important}
+.figmaDots{height:34px!important;display:flex!important;justify-content:center!important;align-items:center!important;gap:8px!important;margin-top:0!important;}
+.figmaDots button{width:8px!important;height:8px!important;border-radius:50%!important;background:#d5dbe6!important;}
+.figmaDots button.active{width:24px!important;border-radius:999px!important;background:#2563eb!important;}
+.figmaAdText{display:none!important;}
+.figmaReportsPanel{padding:26px 26px 30px!important;min-height:276px!important;}
+.figmaReportGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important;margin-top:22px!important;}
+.figmaReportBtn{
+  min-height:154px!important;
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:7px!important;
+  padding:24px 12px 0!important;
+  position:relative!important;
+  overflow:hidden!important;
+  color:#071227!important;
+}
+.figmaReportBtn:hover{border-color:#b8c7dc!important;box-shadow:0 16px 30px rgba(15,23,42,.07)!important;}
+.figmaReportIcon{width:50px!important;height:50px!important;border-radius:8px!important;margin-bottom:6px!important;}
+.figmaReportIcon svg{width:28px;height:28px;}
+.figmaReportIcon.blue{background:#eef4ff!important;color:#2563eb!important;}
+.figmaReportIcon.green{background:#eafaf1!important;color:#16a34a!important;}
+.figmaReportIcon.orange{background:#fff3e4!important;color:#f08a10!important;}
+.figmaReportIcon.purple{background:#f0efff!important;color:#4f46e5!important;}
+.figmaReportBtn b{font-size:14px!important;font-weight:800!important;color:#071227!important;}
+.figmaReportBtn small{font-size:13px!important;color:#53627c!important;font-weight:600!important;}
+.figmaReportBtn em{position:absolute;left:0;right:0;bottom:0;height:42px;display:grid;place-items:center;border-top:1px solid var(--si-line);background:#fbfcfe;color:#071227;}
+.figmaReportBtn em svg{width:19px;height:19px;}
+.figmaReportLink,.figmaAlertLink{background:transparent!important;border:0!important;box-shadow:none!important;color:#2563eb!important;font-size:15px!important;font-weight:800!important;margin-top:20px!important;padding:0!important;}
+.figmaAlertsPanel{display:flex!important;flex-direction:column!important;min-height:276px!important;}
+.figmaAlertHeader{min-height:62px!important;padding:0 24px!important;border-bottom:1px solid var(--si-line)!important;display:flex!important;gap:14px!important;}
+.figmaAlertHeader span{width:21px;height:21px;color:#f08a10!important;display:grid;place-items:center;}
+.figmaAlertHeader span svg{width:21px;height:21px;}
+.figmaAlertList{padding:10px 0!important;}
+.figmaAlert{display:grid!important;grid-template-columns:52px 1fr 20px!important;align-items:center!important;gap:12px!important;padding:16px 24px!important;}
+.figmaAlert:hover{background:#f7f9fc!important;}
+.figmaAlert>span{width:52px!important;height:52px!important;border-radius:8px!important;margin:0!important;}
+.figmaAlert>span svg{width:28px;height:28px;}
+.figmaAlert.warning>span{background:#fff3e4!important;color:#f08a10!important;}
+.figmaAlert.danger>span{background:#fff0f0!important;color:#dc2626!important;}
+.figmaAlert.info>span{background:#eef4ff!important;color:#2563eb!important;}
+.figmaAlert.success>span{background:#eafaf1!important;color:#16a34a!important;}
+.figmaAlert b{font-size:15px!important;font-weight:800!important;color:#071227!important;}
+.figmaAlert small{font-size:14px!important;color:#53627c!important;line-height:1.45!important;margin-top:4px!important;}
+.figmaAlert em{font-style:normal;font-size:34px;line-height:1;color:#7c879a;font-weight:300;}
+.figmaAlertLink{margin:2px 24px 24px!important;align-self:flex-start!important;}
+.figmaDashboardFooter{font-size:13px!important;color:#7d899d!important;text-align:center!important;padding:0 0 2px!important;}
+@media(max-width:1400px){
+  .whiteSidebar{width:244px!important;min-width:244px!important;}
+  .figmaKpiGrid{gap:14px!important;}
+  .figmaKpiCard{padding:20px!important;gap:18px!important;}
+  .figmaMiddleGrid{grid-template-columns:1fr!important;}
+  .figmaBottomGrid{grid-template-columns:1fr!important;}
+}
+@media(max-width:900px){
+  .whiteShell{display:block!important;}
+  .whiteSidebar{width:100%!important;min-width:0!important;height:auto!important;position:relative!important;}
+  .whiteNav{grid-template-columns:repeat(2,1fr)!important;}
+  .whiteTopbar{height:auto!important;min-height:74px!important;position:relative!important;flex-wrap:wrap!important;padding:14px 18px!important;}
+  .whiteContent{padding:18px!important;}
+  .figmaKpiGrid,.figmaReportGrid{grid-template-columns:1fr!important;}
+  .figmaCoverageContent{display:block!important;}
+  .figmaGauge{margin:0 auto 26px!important;}
+  .figmaAdMedia{height:210px!important;}
+}

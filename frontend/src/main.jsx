@@ -116,14 +116,14 @@ function SmartInventoryLogo({className=""}){
 }
 
 function SidebarGlyph({name, active=false}){
-  const stroke = active ? "#2563eb" : "#384a64";
+  const stroke = active ? "#ffffff" : "#c8d4e6";
   const common = {stroke, strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round", fill: "none"};
   if(name==="dashboard"){
     return <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="3" y="3" width="7" height="7" rx="2.1" fill="#2f7bff"/>
-      <rect x="14" y="3" width="7" height="7" rx="2.1" fill="#2f7bff"/>
-      <rect x="3" y="14" width="7" height="7" rx="2.1" fill="#2f7bff"/>
-      <rect x="14" y="14" width="7" height="7" rx="2.1" fill="#2f7bff"/>
+      <rect x="3" y="3" width="7" height="7" rx="1.6" fill={active ? "#ffffff" : "#c8d4e6"}/>
+      <rect x="14" y="3" width="7" height="7" rx="1.6" fill={active ? "#ffffff" : "#c8d4e6"}/>
+      <rect x="3" y="14" width="7" height="7" rx="1.6" fill={active ? "#ffffff" : "#c8d4e6"}/>
+      <rect x="14" y="14" width="7" height="7" rx="1.6" fill={active ? "#ffffff" : "#c8d4e6"}/>
     </svg>;
   }
   if(name==="operations"){
@@ -174,6 +174,22 @@ function SidebarGlyph({name, active=false}){
       <path d="M13 8l4 4-4 4" {...common}/><path d="M9 12h8" {...common}/>
     </svg>;
   }
+  return null;
+}
+
+
+function DashIcon({name}){
+  const common={fill:"none",stroke:"currentColor",strokeWidth:2.1,strokeLinecap:"round",strokeLinejoin:"round"};
+  if(name==="box") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 7.1 12 11.2l7.5-4.1L12 3Z" {...common}/><path d="M4.5 7.1v8.4L12 20l7.5-4.5V7.1" {...common}/><path d="M12 11.2V20" {...common}/></svg>;
+  if(name==="tag") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13.1 13.1 20a2.2 2.2 0 0 1-3.1 0L4 14V4h10l6 6a2.2 2.2 0 0 1 0 3.1Z" {...common}/><circle cx="9" cy="9" r="1.5" fill="currentColor"/></svg>;
+  if(name==="rfid") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13.5a10 10 0 0 1 14 0" {...common}/><path d="M8.2 16.5a5.8 5.8 0 0 1 7.6 0" {...common}/><path d="M11.3 19.3a1.1 1.1 0 0 1 1.4 0" {...common}/></svg>;
+  if(name==="warning") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 4.9 2.7 18a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 4.9a2 2 0 0 0-3.4 0Z" {...common}/><path d="M12 9v5" {...common}/><path d="M12 17.5h.01" {...common}/></svg>;
+  if(name==="check") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7" {...common}/></svg>;
+  if(name==="doc") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7V3Z" {...common}/><path d="M14 3v5h5" {...common}/><path d="M9.5 12h5" {...common}/><path d="M9.5 16h5" {...common}/></svg>;
+  if(name==="clock") return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" {...common}/><path d="M12 7.8v4.7l3 1.9" {...common}/></svg>;
+  if(name==="download") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11" {...common}/><path d="m8 11 4 4 4-4" {...common}/><path d="M5 20h14" {...common}/></svg>;
+  if(name==="bell") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9a5 5 0 0 0-10 0c0 5-2 6-2 6h14s-2-1-2-6Z" {...common}/><path d="M10 19a2 2 0 0 0 4 0" {...common}/></svg>;
+  if(name==="dots") return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>;
   return null;
 }
 
@@ -244,10 +260,12 @@ function App(){
         <button className="hamburger" onClick={toggleSidebar} aria-label="Menu">☰</button>
         <h1 className="topPageTitle">{pageTitle}</h1>
         <div className="whiteAccount">
+          <span className="whiteAvatar" aria-hidden="true">AD</span>
           <div>
             <b>{accountName}</b>
             <small>{roleName}</small>
           </div>
+          <span className="accountChevron" aria-hidden="true">⌄</span>
         </div>
       </header>
 
@@ -1086,34 +1104,34 @@ function Dashboard({setTab}){
   }
 
   const alerts=[];
-  if(productsWithoutRfid>0) alerts.push({type:"warning",icon:"⚠",title:`${productsWithoutRfid} produits sans tag RFID`,text:"Aucun tag détecté pour ces produits."});
-  if(duplicateEpcs>0) alerts.push({type:"danger",icon:"!",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,text:"Vérifier les associations RFID en double."});
-  if(associations.length===0) alerts.push({type:"info",icon:"⌁",title:"0 scan RFID détecté",text:"Connectez votre lecteur RFID ou importez un fichier EPC."});
-  if(coverage>=80) alerts.push({type:"success",icon:"✓",title:"Couverture RFID élevée",text:"Votre catalogue est bien avancé."});
-  if(alerts.length===0) alerts.push({type:"success",icon:"✓",title:"Aucune alerte prioritaire",text:"Les données RFID sont stables."});
+  if(productsWithoutRfid>0) alerts.push({type:"warning",icon:"warning",title:`${productsWithoutRfid} produits sans tag RFID`,text:"Aucun tag détecté pour ces produits."});
+  if(duplicateEpcs>0) alerts.push({type:"danger",icon:"warning",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,text:"Vérifier les associations RFID en double."});
+  if(associations.length===0) alerts.push({type:"info",icon:"rfid",title:"0 scan RFID détecté",text:"Connectez votre lecteur RFID ou importez un fichier EPC."});
+  if(coverage>=80) alerts.push({type:"success",icon:"check",title:"Couverture RFID élevée",text:"Votre catalogue est bien avancé."});
+  if(alerts.length===0) alerts.push({type:"success",icon:"check",title:"Aucune alerte prioritaire",text:"Les données RFID sont stables."});
 
   const reports=[
-    {label:"Couverture RFID",sub:"CSV",icon:"⌁",action:exportDashboardReport,type:"blue"},
-    {label:"Produits avec tag",sub:"CSV",icon:"✓",action:exportDashboardReport,type:"green"},
-    {label:"Produits sans tag",sub:"CSV",icon:"□",action:exportProductsWithoutRfid,type:"orange"},
-    {label:"Historique scans",sub:"CSV",icon:"↧",action:()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{})),type:"purple"},
+    {label:"Couverture RFID",sub:"CSV",icon:"doc",action:exportDashboardReport,type:"blue"},
+    {label:"Produits avec tag",sub:"CSV",icon:"tag",action:exportDashboardReport,type:"green"},
+    {label:"Produits sans tag",sub:"CSV",icon:"warning",action:exportProductsWithoutRfid,type:"orange"},
+    {label:"Historique scans",sub:"CSV",icon:"clock",action:()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{})),type:"purple"},
   ];
 
   const kpis=[
-    {label:"Produits enregistrés",value:products.length,sub:products.length ? "Catalogue importé" : "Aucun catalogue importé",icon:"📦",tone:"orange",action:()=>setTab("operations")},
-    {label:"Produits tagués",value:productsWithRfid,sub:productsWithRfid ? "Avec association RFID" : "Aucun tag détecté",icon:"🏷",tone:"green",action:()=>setTab("association")},
-    {label:"Transactions RFID",value:associations.length,sub:associations.length ? "Associations enregistrées" : "Aucune transaction",icon:"⌁",tone:"blue",action:()=>setTab("inventory")},
-    {label:"Produits sans tag",value:productsWithoutRfid,sub:productsWithoutRfid ? "À traiter en priorité" : "Synchronisés",icon:"✓",tone:"pink",action:()=>setTab("operations")},
+    {label:"Produits enregistrés",value:products.length,sub:products.length ? "Catalogue importé" : "Aucun catalogue importé",icon:"box",tone:"blue",action:()=>setTab("operations")},
+    {label:"Produits tagués",value:productsWithRfid,sub:productsWithRfid ? "Avec association RFID" : "Aucun tag détecté",icon:"tag",tone:"green",action:()=>setTab("association")},
+    {label:"Transactions RFID",value:associations.length,sub:associations.length ? "Associations enregistrées" : "Aucune transaction",icon:"rfid",tone:"purple",action:()=>setTab("inventory")},
+    {label:"Produits sans tag",value:productsWithoutRfid,sub:productsWithoutRfid ? "À traiter en priorité" : "Synchronisés",icon:"warning",tone:"orange",action:()=>setTab("operations")},
   ];
 
   const defaultAdSrc=defaultAds[defaultAdIndex % defaultAds.length];
 
   return <section className="figmaDashboard">
-    <p className="figmaIntro">Suivi en temps réel de la couverture RFID et de l’activité de votre pharmacie</p>
+    <p className="figmaIntro">Suivi en temps réel de la couverture RFID et de l’activité de votre pharmacie.</p>
 
     <div className="figmaKpiGrid">
       {kpis.map(k=><button key={k.label} className="figmaKpiCard" onClick={k.action} type="button">
-        <span className={`figmaKpiIcon ${k.tone}`}>{k.icon}</span>
+        <span className={`figmaKpiIcon ${k.tone}`}><DashIcon name={k.icon}/></span>
         <span className="figmaKpiBody">
           <b>{k.value}</b>
           <small>{k.label}</small>
@@ -1142,12 +1160,17 @@ function Dashboard({setTab}){
             <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture RFID progresse." : "Votre couverture RFID doit être améliorée."}</h3>
             <p>Vous avez étiqueté {coverage}% de vos produits en pharmacie.</p>
             <p>Commencez ou continuez l’étiquetage pour améliorer votre suivi d’inventaire.</p>
-            <button type="button" onClick={()=>setTab("operations")}>Accéder avancement</button>
+            <button type="button" onClick={()=>setTab("operations")}><DashIcon name="tag"/>Accéder à l'avancement</button>
           </div>
         </div>
       </div>
 
       <div className="figmaPanel figmaAdCard">
+        <div className="figmaAdHeader">
+          <h2>Publicité Dashboard</h2>
+          {currentDashboardAd?.cta_label && <a href={currentDashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{currentDashboardAd.cta_label}</a>}
+          <button type="button" aria-label="Options publicité"><DashIcon name="dots"/></button>
+        </div>
         <div className="figmaAdMedia">
           {currentDashboardAd ? <>
             <img key={currentDashboardAd.id || currentDashboardAd.image_url} src={mediaUrl(currentDashboardAd.image_url)} alt="Publicité" className={currentDashboardAd.extra_config==="cover" ? "cover" : "contain"}/>
@@ -1163,39 +1186,35 @@ function Dashboard({setTab}){
             </>}
           </>}
         </div>
-
-        <div className="figmaAdText">
-          <b>{currentDashboardAd?.cta_label || currentDashboardAd?.message || "Publicité Dashboard"}</b>
-          <p>{currentDashboardAd ? "Bannière configurée depuis le module Publicités." : "Image par défaut dynamique intégrée à l’application."}</p>
-          {currentDashboardAd?.cta_label && <a href={currentDashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{currentDashboardAd.cta_label}</a>}
-          <div className="figmaDots">
-            {(currentDashboardAd ? activeDashboardAds : defaultAds).map((ad,i)=><button type="button" key={currentDashboardAd ? (ad.id || i) : ad} className={i===((currentDashboardAd ? dashboardAdIndex : defaultAdIndex) % (currentDashboardAd ? activeDashboardAds.length : defaultAds.length)) ? "active" : ""} onClick={()=> currentDashboardAd ? setDashboardAdIndex(i) : setDefaultAdIndex(i)} aria-label={`Afficher image ${i+1}`}></button>)}
-          </div>
+        <div className="figmaDots">
+          {(currentDashboardAd ? activeDashboardAds : defaultAds).map((ad,i)=><button type="button" key={currentDashboardAd ? (ad.id || i) : ad} className={i===((currentDashboardAd ? dashboardAdIndex : defaultAdIndex) % (currentDashboardAd ? activeDashboardAds.length : defaultAds.length)) ? "active" : ""} onClick={()=> currentDashboardAd ? setDashboardAdIndex(i) : setDefaultAdIndex(i)} aria-label={`Afficher image ${i+1}`}></button>)}
         </div>
-      </div>
-    </div>
+      </div>    </div>
 
     <div className="figmaBottomGrid">
       <div className="figmaPanel figmaReportsPanel">
         <h2>Rapports et exports</h2>
         <div className="figmaReportGrid">
           {reports.map(r=><button type="button" key={r.label} className="figmaReportBtn" onClick={r.action}>
-            <span className={`figmaReportIcon ${r.type}`}>{r.icon}</span>
+            <span className={`figmaReportIcon ${r.type}`}><DashIcon name={r.icon}/></span>
             <b>{r.label}</b>
             <small>{r.sub}</small>
+            <em><DashIcon name="download"/></em>
           </button>)}
         </div>
         <button type="button" className="figmaReportLink" onClick={exportDashboardReport}>Voir tous les rapports →</button>
       </div>
 
       <div className="figmaPanel figmaAlertsPanel">
-        <div className="figmaAlertHeader"><span>⚠</span><h2>Alertes prioritaires</h2></div>
+        <div className="figmaAlertHeader"><span><DashIcon name="bell"/></span><h2>Alertes prioritaires</h2></div>
         <div className="figmaAlertList">
           {alerts.map((a,i)=><div className={`figmaAlert ${a.type}`} key={i}>
-            <span>{a.icon}</span>
+            <span><DashIcon name={a.icon}/></span>
             <div><b>{a.title}</b><small>{a.text}</small></div>
+            <em>›</em>
           </div>)}
         </div>
+        <button type="button" className="figmaAlertLink" onClick={()=>setTab("operations")}>Voir toutes les alertes →</button>
       </div>
     </div>
 
