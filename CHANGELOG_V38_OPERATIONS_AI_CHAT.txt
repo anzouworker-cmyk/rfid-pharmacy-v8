@@ -1,0 +1,12 @@
+Smart Inventory V38 - Operations spacing + AI chat
+
+Corrections appliquées :
+- Page Operations alignée visuellement avec le dashboard : moins d'espace vide en haut, sections rapprochées, cartes plus compactes.
+- Ajout d'un pied de page sur la page Operations avec le même style que le dashboard.
+- Assistant IA transformé en vraie interface de chat : messages utilisateur/assistant, zone de saisie en bas, questions rapides, scrolling automatique.
+- Le chat IA utilise maintenant le contexte réel : catalogue produits, associations RFID, EPC détectés importés, présents, manquants et non associés.
+- Ajout d'un panneau de contexte à droite dans le chat IA.
+- Ajout d'un pied de page sur la page Assistant IA.
+
+Validation :
+- Build frontend vérifié avec `npm run build`.

@@ -2651,3 +2651,247 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .figmaGauge svg{width:220px!important;height:220px!important;}
   .figmaAdMedia{min-height:220px!important;}
 }
+
+/* V38 operations spacing + AI chat mode */
+.operationsPage{
+  max-width:none!important;
+  min-height:calc(100vh - 104px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:18px!important;
+  padding-bottom:10px!important;
+}
+.operationsPage h1{display:none!important;}
+.operationsPage>p{
+  margin:0!important;
+  max-width:none!important;
+  font-size:15px!important;
+  line-height:1.6!important;
+  color:#43536d!important;
+}
+.operationsActionPanel{
+  margin-top:12px!important;
+  margin-bottom:18px!important;
+  border-radius:7px!important;
+  padding:22px 24px!important;
+  box-shadow:0 14px 36px rgba(15,23,42,.04)!important;
+}
+.operationsActionPanel h2,
+.exportsPanel h2{
+  font-size:20px!important;
+  font-weight:700!important;
+  letter-spacing:-.02em!important;
+  color:#071227!important;
+}
+.operationsActionPanel .notice,
+.exportsPanel .notice{
+  margin:0 0 18px!important;
+  color:#53627c!important;
+  font-size:14px!important;
+}
+.operationsPage .operationGrid.workflowGrid{
+  gap:14px!important;
+}
+.operationsPage .operationCard,
+.operationsPage .exportOperationCard{
+  min-height:240px!important;
+  height:240px!important;
+  grid-template-rows:70px 54px 48px 42px!important;
+  padding:20px 16px!important;
+  border-radius:7px!important;
+}
+.operationsPage .operationCard .opIcon,
+.operationsPage .exportOperationCard .opIcon{
+  width:62px!important;
+  height:62px!important;
+  border-radius:12px!important;
+  font-size:30px!important;
+}
+.operationsPage .operationCard h3,
+.operationsPage .exportOperationCard h3{
+  font-size:16px!important;
+  line-height:1.2!important;
+  font-weight:650!important;
+  letter-spacing:-.02em!important;
+  min-height:44px!important;
+}
+.operationsPage .operationCard p,
+.operationsPage .exportOperationCard p{
+  font-size:13px!important;
+  line-height:1.35!important;
+  min-height:38px!important;
+}
+.operationsPage .operationCard span:last-child,
+.operationsPage .exportOperationCard span:last-child{
+  min-height:34px!important;
+  padding:8px 12px!important;
+  font-size:13px!important;
+  border-radius:6px!important;
+}
+.exportsPanel{
+  margin-top:0!important;
+  margin-bottom:0!important;
+  border-radius:7px!important;
+  padding:22px 24px!important;
+  box-shadow:0 14px 36px rgba(15,23,42,.04)!important;
+}
+.pageFooterLikeDashboard{
+  margin-top:auto!important;
+  padding:8px 0 2px!important;
+  text-align:center!important;
+  color:#7d899d!important;
+  font-size:12px!important;
+}
+
+.aiChatPage{
+  min-height:calc(100vh - 104px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:18px!important;
+  padding-bottom:10px!important;
+}
+.aiChatTop{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  gap:18px!important;
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:7px!important;
+  padding:22px 24px!important;
+  box-shadow:0 14px 36px rgba(15,23,42,.04)!important;
+}
+.aiChatBadge{
+  display:inline-flex!important;
+  align-items:center!important;
+  background:#eef4ff!important;
+  color:#24508c!important;
+  border:1px solid #dce7fb!important;
+  border-radius:999px!important;
+  padding:6px 10px!important;
+  font-size:12px!important;
+  font-weight:700!important;
+}
+.aiChatTop h2{
+  margin:10px 0 6px!important;
+  color:#071227!important;
+  font-size:24px!important;
+  font-weight:700!important;
+  letter-spacing:-.03em!important;
+}
+.aiChatTop p{margin:0!important;color:#53627c!important;font-size:15px!important;}
+.aiChatScore{
+  min-width:150px!important;
+  height:84px!important;
+  border:1px solid #dce4f1!important;
+  border-radius:7px!important;
+  display:grid!important;
+  place-items:center!important;
+  background:#f8fbff!important;
+}
+.aiChatScore b{font-size:30px!important;color:#071227!important;line-height:1!important;}
+.aiChatScore span{font-size:12px!important;color:#53627c!important;}
+.aiChatLayout{
+  display:grid!important;
+  grid-template-columns:1fr 320px!important;
+  gap:22px!important;
+  align-items:stretch!important;
+  flex:1!important;
+}
+.aiChatPanel,
+.aiContextPanel{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:7px!important;
+  box-shadow:0 14px 36px rgba(15,23,42,.04)!important;
+}
+.aiChatPanel{display:flex!important;flex-direction:column!important;min-height:560px!important;overflow:hidden!important;}
+.aiMessages{
+  flex:1!important;
+  padding:24px!important;
+  overflow:auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:14px!important;
+  background:linear-gradient(180deg,#ffffff,#f8fbff)!important;
+}
+.aiBubble{
+  max-width:78%!important;
+  border:1px solid #dce4f1!important;
+  border-radius:10px!important;
+  padding:12px 14px!important;
+  white-space:pre-wrap!important;
+}
+.aiBubble span{display:block!important;font-size:11px!important;font-weight:700!important;margin-bottom:6px!important;color:#53627c!important;}
+.aiBubble p{margin:0!important;line-height:1.55!important;color:#1a2940!important;font-size:14px!important;}
+.aiBubble.assistant{align-self:flex-start!important;background:#fff!important;}
+.aiBubble.user{align-self:flex-end!important;background:#244f88!important;border-color:#244f88!important;}
+.aiBubble.user span,.aiBubble.user p{color:#fff!important;}
+.aiBubble.typing{opacity:.78!important;}
+.aiQuickChips{
+  padding:12px 18px!important;
+  border-top:1px solid var(--si-line)!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+  background:#fff!important;
+}
+.aiQuickChips button{
+  border:1px solid #dce4f1!important;
+  background:#f8fbff!important;
+  color:#244f88!important;
+  border-radius:999px!important;
+  padding:8px 12px!important;
+  font-size:13px!important;
+  font-weight:600!important;
+  box-shadow:none!important;
+}
+.aiComposer{
+  border-top:1px solid var(--si-line)!important;
+  padding:14px!important;
+  display:grid!important;
+  grid-template-columns:1fr 110px!important;
+  gap:10px!important;
+  background:#fff!important;
+}
+.aiComposer textarea{
+  min-height:54px!important;
+  max-height:130px!important;
+  resize:vertical!important;
+  border:1px solid #dce4f1!important;
+  border-radius:7px!important;
+  padding:12px!important;
+  outline:none!important;
+  font-family:inherit!important;
+}
+.aiComposer textarea:focus{border-color:#244f88!important;box-shadow:0 0 0 3px rgba(36,79,136,.10)!important;}
+.aiComposer button{
+  border-radius:7px!important;
+  background:#244f88!important;
+  color:#fff!important;
+  font-weight:700!important;
+  box-shadow:none!important;
+}
+.aiContextPanel{padding:22px!important;}
+.aiContextPanel h3{font-size:18px!important;font-weight:700!important;margin:0 0 16px!important;color:#071227!important;}
+.aiContextStat{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  padding:13px 0!important;
+  border-bottom:1px solid #edf1f6!important;
+}
+.aiContextStat span{color:#53627c!important;font-size:14px!important;}
+.aiContextStat b{font-size:20px!important;color:#071227!important;}
+@media(max-width:1100px){
+  .aiChatLayout{grid-template-columns:1fr!important;}
+  .aiContextPanel{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:8px 18px!important;}
+  .aiContextPanel h3{grid-column:1/-1!important;}
+}
+@media(max-width:760px){
+  .aiChatTop{display:block!important;}
+  .aiChatScore{margin-top:14px!important;}
+  .aiComposer{grid-template-columns:1fr!important;}
+  .aiBubble{max-width:94%!important;}
+  .aiContextPanel{grid-template-columns:1fr!important;}
+}

@@ -478,6 +478,8 @@ function Operations(){
         </>}
       </div>
     </div>}
+
+    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
 
@@ -550,111 +552,143 @@ function findProduct(products,value){
 
 
 function AIAssistant(){
-  const {products,associations}=useLocalStore();
-  const [dashboardAds,setDashboardAds]=useState([]);
-  useEffect(()=>{
-    const token=localStorage.token||"";
-    axios.get(`${API}/dashboard/content`,{headers:{Authorization:`Bearer ${token}`}}).then(r=>{
-      setDashboardAds(r.data.filter(x=>["publicite","publicité","promo","annonce","ad"].includes((x.content_type||"").toLowerCase())));
-    }).catch(()=>setDashboardAds([]));
-  },[]);
-  const dashboardAd = dashboardAds.find(x=>x.active!==false) || null;
-  const [question,setQuestion]=useState("");
-  const [answer,setAnswer]=useState(null);
+  const {products,associations,detectedEpcs}=useLocalStore();
+  const [messages,setMessages]=useState(()=>[
+    {role:"assistant",content:"Bonjour, je suis votre assistant RFID. Posez-moi une question sur votre stock, vos EPC détectés ou votre couverture RFID."}
+  ]);
+  const [input,setInput]=useState("");
   const [loading,setLoading]=useState(false);
+  const messagesEndRef=useRef(null);
   const token=localStorage.token||"";
   const auth={headers:{Authorization:`Bearer ${token}`}};
 
-  const associatedPids=new Set(associations.map(a=>String(a.PID)));
-  const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
+  const associatedByPid = new Map();
+  associations.forEach(a=>{
+    const pid=String(a.PID||"");
+    const epc=norm(a.EPC);
+    if(!pid || !epc) return;
+    if(!associatedByPid.has(pid)) associatedByPid.set(pid,[]);
+    associatedByPid.get(pid).push(epc);
+  });
+  const detectedSet = new Set((detectedEpcs||[]).map(norm).filter(Boolean));
+  function productStatus(p){
+    const epcs=associatedByPid.get(String(p.PID)) || [];
+    if(epcs.length===0) return "Non associé";
+    return epcs.some(epc=>detectedSet.has(epc)) ? "Présent" : "Manquant";
+  }
+  const productsWithRfid=products.filter(p=>(associatedByPid.get(String(p.PID))||[]).length>0).length;
   const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
+  const presentCount=products.filter(p=>productStatus(p)==="Présent").length;
+  const missingCount=products.filter(p=>productStatus(p)==="Manquant").length;
+  const noAssociationCount=products.filter(p=>productStatus(p)==="Non associé").length;
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
+  const stockAccuracy=products.length ? Math.round((presentCount/products.length)*100) : 0;
 
-  async function analyze(q){
+  useEffect(()=>{ messagesEndRef.current?.scrollIntoView({behavior:"smooth",block:"end"}); },[messages,loading]);
+
+  function formatAnalysis(a){
+    if(!a) return "Analyse terminée.";
+    const lines=[];
+    lines.push(a.resume || a.summary || "Analyse terminée.");
+    const recs=a.recommandations || a.recommendations || [];
+    if(recs.length) lines.push("\nRecommandations :\n" + recs.map(x=>`• ${x}`).join("\n"));
+    const alerts=a.alertes || a.risks || [];
+    if(alerts.length) lines.push("\nAlertes :\n" + alerts.map(x=>`• ${x}`).join("\n"));
+    if(a.prochaine_action) lines.push(`\nProchaine action : ${a.prochaine_action}`);
+    return lines.join("\n");
+  }
+
+  async function sendMessage(text){
+    const q=String(text || input || "").trim();
+    if(!q || loading) return;
+    setInput("");
+    setMessages(prev=>[...prev,{role:"user",content:q}]);
     setLoading(true);
-    setAnswer(null);
+
     const payload={
       products_count:products.length,
       associations_count:associations.length,
       products_with_rfid:productsWithRfid,
       products_without_rfid:productsWithoutRfid,
       coverage,
-      detected_epc_count:0,
-      present_count:0,
-      missing_count:0,
-      no_association_count:productsWithoutRfid,
-      question:q || question || "Analyse ma situation RFID et donne les prochaines actions."
+      detected_epc_count:(detectedEpcs||[]).length,
+      present_count:presentCount,
+      missing_count:missingCount,
+      no_association_count:noAssociationCount,
+      question:q
     };
     try{
       const r=await axios.post(`${API}/ai/analyze`,payload,auth);
-      setAnswer(r.data.analysis || r.data);
+      setMessages(prev=>[...prev,{role:"assistant",content:formatAnalysis(r.data.analysis || r.data)}]);
     }catch(e){
-      setAnswer({
-        score:coverage,
-        niveau:"Analyse locale",
-        resume:"L’assistant IA cloud n’est pas encore disponible ou le compte n’a pas l’option Premium AI.",
+      const fallback={
+        resume:"L’assistant IA cloud n’est pas disponible pour le moment. Voici une analyse locale basée sur vos données.",
         recommandations:[
-          "Vérifier que l’option Premium AI est activée pour ce client.",
-          "Vérifier OPENAI_API_KEY sur Render.",
-          "Continuer à associer les produits sans RFID."
+          `Importer ou mettre à jour le CSV des EPC détectés avant de valider le stock réel. EPC détectés actuels : ${(detectedEpcs||[]).length}.`,
+          `Traiter les produits manquants en priorité : ${missingCount} produit(s) associé(s) à un EPC mais non détecté(s).`,
+          `Associer les produits non associés : ${noAssociationCount} produit(s) sans EPC.`
         ],
-        alertes: productsWithoutRfid>0 ? [`${productsWithoutRfid} produits sans RFID.`] : [],
-        prochaine_action:"Activer Premium AI depuis la gestion clients si nécessaire."
-      });
+        alertes: missingCount>0 ? [`${missingCount} produit(s) manquant(s) selon le CSV EPC détectés.`] : [],
+        prochaine_action:"Importer le dernier fichier EPC détectés, puis vérifier la page Inventaire RFID."
+      };
+      setMessages(prev=>[...prev,{role:"assistant",content:formatAnalysis(fallback)}]);
     }
     setLoading(false);
   }
 
-  return <section className="aiPagePro">
-    <div className="aiHeroPro">
+  const quickQuestions=[
+    "Quels produits dois-je traiter en priorité ?",
+    "Explique la différence entre présent, manquant et non associé.",
+    "Que dois-je faire cette semaine pour améliorer l’inventaire RFID ?",
+    "Comment améliorer ma couverture RFID ?"
+  ];
+
+  return <section className="aiChatPage">
+    <div className="aiChatTop">
       <div>
-        <span className="pill">Premium AI Assistant</span>
-        <h2>Assistant intelligent pour inventaire RFID</h2>
-        <p>Analyse vos produits, associations RFID et couverture pour recommander les prochaines actions.</p>
+        <span className="aiChatBadge">Assistant IA</span>
+        <h2>Chat inventaire RFID</h2>
+        <p>Discutez avec l’agent IA sur votre stock, les EPC détectés, les produits manquants et les prochaines actions.</p>
       </div>
-      <div className="aiScoreCircle">
-        <b>{coverage}</b>
-        <span>/100</span>
+      <div className="aiChatScore">
+        <b>{stockAccuracy}%</b>
+        <span>présence réelle</span>
       </div>
     </div>
 
-    <div className="statsGrid proStats">
-      <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
-      <div className="statCard"><span>Associations</span><b>{associations.length}</b><small>EPC liés</small></div>
-      <div className="statCard"><span>Couverture</span><b>{coverage}%</b><small>{productsWithRfid} produits couverts</small></div>
-      <div className="statCard"><span>Sans RFID</span><b>{productsWithoutRfid}</b><small>à associer</small></div>
-    </div>
+    <div className="aiChatLayout">
+      <div className="aiChatPanel">
+        <div className="aiMessages">
+          {messages.map((m,i)=><div key={i} className={m.role==="user" ? "aiBubble user" : "aiBubble assistant"}>
+            <span>{m.role==="user" ? "Vous" : "Assistant"}</span>
+            <p>{m.content}</p>
+          </div>)}
+          {loading && <div className="aiBubble assistant typing"><span>Assistant</span><p>Analyse en cours...</p></div>}
+          <div ref={messagesEndRef}/>
+        </div>
 
-    <div className="grid">
-      <div className="card aiPromptCard">
-        <h3>Poser une question</h3>
-        <textarea className="textArea" value={question} onChange={e=>setQuestion(e.target.value)} placeholder="Ex: Comment atteindre 95% de couverture RFID ?"/>
-        <button className="primaryBtn" onClick={()=>analyze()} disabled={loading}>{loading ? "Analyse..." : "Analyser"}</button>
-      </div>
-      <div className="card">
-        <h3>Questions rapides</h3>
-        <div className="quickGrid">
-          <button onClick={()=>analyze("Donne-moi les priorités pour améliorer la couverture RFID.")}>Priorités</button>
-          <button onClick={()=>analyze("Quels sont les risques actuels de mon inventaire RFID ?")}>Risques</button>
-          <button onClick={()=>analyze("Donne un plan d’action pour atteindre 95% de couverture RFID.")}>Plan 95%</button>
-          <button onClick={()=>analyze("Que dois-je faire cette semaine ?")}>Cette semaine</button>
+        <div className="aiQuickChips">
+          {quickQuestions.map(q=><button type="button" key={q} onClick={()=>sendMessage(q)} disabled={loading}>{q}</button>)}
+        </div>
+
+        <div className="aiComposer">
+          <textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendMessage();}}} placeholder="Écrivez votre question ici..."/>
+          <button type="button" onClick={()=>sendMessage()} disabled={loading || !input.trim()}>{loading ? "..." : "Envoyer"}</button>
         </div>
       </div>
+
+      <aside className="aiContextPanel">
+        <h3>Contexte actuel</h3>
+        <div className="aiContextStat"><span>Produits</span><b>{products.length}</b></div>
+        <div className="aiContextStat"><span>Associations EPC</span><b>{associations.length}</b></div>
+        <div className="aiContextStat"><span>EPC détectés importés</span><b>{(detectedEpcs||[]).length}</b></div>
+        <div className="aiContextStat"><span>Présents</span><b>{presentCount}</b></div>
+        <div className="aiContextStat"><span>Manquants</span><b>{missingCount}</b></div>
+        <div className="aiContextStat"><span>Non associés</span><b>{noAssociationCount}</b></div>
+      </aside>
     </div>
 
-    {answer && <div className="aiAnswerPanel">
-      <h3>Résultat de l’analyse</h3>
-      <p>{answer.resume || answer.summary || "Analyse terminée."}</p>
-      {(answer.recommandations || answer.recommendations || []).length>0 && <>
-        <h4>Recommandations</h4>
-        <ul>{(answer.recommandations || answer.recommendations).map((x,i)=><li key={i}>{x}</li>)}</ul>
-      </>}
-      {(answer.alertes || answer.risks || []).length>0 && <>
-        <h4>Alertes</h4>
-        <ul>{(answer.alertes || answer.risks).map((x,i)=><li key={i}>{x}</li>)}</ul>
-      </>}
-      {answer.prochaine_action && <p><b>Prochaine action :</b> {answer.prochaine_action}</p>}
-    </div>}
+    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
 
