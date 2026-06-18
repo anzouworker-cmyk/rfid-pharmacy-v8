@@ -3204,3 +3204,45 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   margin-top:10px!important;
   padding-top:6px!important;
 }
+
+/* V43 Operations full-height layout fix: no empty area under footer */
+.operationsPage{
+  min-height:calc(100vh - 104px)!important;
+  display:grid!important;
+  grid-template-rows:auto minmax(250px,1fr) minmax(250px,1fr) auto auto!important;
+  gap:18px!important;
+  padding-bottom:0!important;
+}
+.operationsActionPanel,
+.exportsPanel{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+}
+.operationsPage .operationGrid.workflowGrid,
+.operationsPage .exportOperationGrid{
+  flex:1!important;
+  align-items:stretch!important;
+}
+.operationsPage .operationCard,
+.operationsPage .exportOperationCard{
+  height:100%!important;
+  min-height:218px!important;
+  align-content:center!important;
+}
+.operationsPage .pageFooterLikeDashboard{
+  margin-top:0!important;
+  padding:4px 0 0!important;
+  align-self:end!important;
+}
+@media(max-width:1200px){
+  .operationsPage{
+    display:flex!important;
+    min-height:auto!important;
+  }
+  .operationsPage .operationCard,
+  .operationsPage .exportOperationCard{
+    height:auto!important;
+    min-height:208px!important;
+  }
+}

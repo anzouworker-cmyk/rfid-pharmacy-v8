@@ -1,0 +1,11 @@
+Smart Inventory V43 - Operations full-height layout fix
+
+Changes:
+- Fixed the remaining empty area under the Operations footer.
+- Operations page now uses a full-height grid layout like the dashboard.
+- The two Operations panels stretch cleanly to use the available page height.
+- Footer stays aligned at the bottom without creating a large blank gap.
+- Responsive behavior preserved for smaller screens.
+
+Validation:
+- Frontend build passed with npm run build.
