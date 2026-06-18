@@ -1,0 +1,21 @@
+Smart Inventory V36 - Dashboard aligned to provided reference image
+
+Applied changes:
+- Dashboard updated to match the provided mockup more closely.
+- Removed the info icon in the "Couverture RFID" header.
+- Removed the label inside the progress circle; only the percentage remains.
+- Increased the size and thickness of the RFID progress ring.
+- Removed the "Publicité Dashboard" title above the ad.
+- Removed left/right image navigation buttons in the ad section.
+- Moved image navigation dots to the top of the ad image.
+- Forced dashboard ad images to fill the reserved space (cover mode).
+- Removed the "Voir tous les rapports" link.
+- Removed the "Voir toutes les alertes" link.
+- Alerts panel now displays all alerts directly without chevron arrows.
+- Refined the top-right admin area and removed the dropdown arrow.
+- Reduced excessive font boldness on titles and menu items.
+- Refined sidebar logo styling and made the active menu color less fluorescent.
+- Footer text on dashboard updated to "© 2026 Smart Inventory. Tous droits réservés."
+
+Validation:
+- Frontend build passed with `npm run build`.

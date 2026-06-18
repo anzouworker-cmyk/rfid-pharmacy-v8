@@ -84,30 +84,17 @@ function useLocalStore(){
 
 
 
-function BrandIcon({className=""}){
+function SidebarBrandIcon({className=""}){
   return <svg className={className} viewBox="0 0 64 64" fill="none" aria-hidden="true">
-    <defs>
-      <linearGradient id="siBrandStroke" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#0b3ea9"/>
-        <stop offset="1" stopColor="#16c2cf"/>
-      </linearGradient>
-      <linearGradient id="siBrandBars" x1="20" y1="14" x2="44" y2="50" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#0b3ea9"/>
-        <stop offset="1" stopColor="#16c2cf"/>
-      </linearGradient>
-    </defs>
-    <path d="M32 6 49 16v32L32 58 15 48V16L32 6Z" stroke="url(#siBrandStroke)" strokeWidth="4.5" strokeLinejoin="round"/>
-    <path d="M21 43V31" stroke="url(#siBrandBars)" strokeWidth="5" strokeLinecap="round"/>
-    <path d="M31 43V22" stroke="url(#siBrandBars)" strokeWidth="5" strokeLinecap="round"/>
-    <path d="M41 43V17" stroke="url(#siBrandBars)" strokeWidth="5" strokeLinecap="round"/>
-    <path d="M15 16 26 9" stroke="#0b3ea9" strokeWidth="4.5" strokeLinecap="round"/>
-    <path d="M38 54 49 47" stroke="#16c2cf" strokeWidth="4.5" strokeLinecap="round"/>
+    <path d="M32 8 50 18v28L32 56 14 46V18L32 8Z" stroke="currentColor" strokeWidth="4" strokeLinejoin="round"/>
+    <path d="M32 8v20m18-10-18 10-18-10" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" strokeLinecap="round"/>
+    <path d="M32 28v28" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
   </svg>
 }
 
 function SmartInventoryLogo({className=""}){
   return <div className={`smartSidebarLogo ${className}`.trim()} aria-label="Smart Inventory">
-    <BrandIcon className="smartSidebarLogoIcon"/>
+    <SidebarBrandIcon className="smartSidebarLogoIcon"/>
     <div className="smartSidebarLogoText">
       <span className="smartSidebarLogoSmart">Smart</span>
       <span className="smartSidebarLogoInventory">Inventory</span>
@@ -265,7 +252,6 @@ function App(){
             <b>{accountName}</b>
             <small>{roleName}</small>
           </div>
-          <span className="accountChevron" aria-hidden="true">⌄</span>
         </div>
       </header>
 
@@ -1060,17 +1046,7 @@ function Dashboard({setTab}){
       }
     },5000);
     return ()=>clearInterval(timer);
-  },[activeDashboardAds.length, defaultAds.length]);
-
-  function nextDashboardAd(){
-    if(activeDashboardAds.length > 1) setDashboardAdIndex(i=>(i+1)%activeDashboardAds.length);
-    else setDefaultAdIndex(i=>(i+1)%defaultAds.length);
-  }
-
-  function prevDashboardAd(){
-    if(activeDashboardAds.length > 1) setDashboardAdIndex(i=>(i-1+activeDashboardAds.length)%activeDashboardAds.length);
-    else setDefaultAdIndex(i=>(i-1+defaultAds.length)%defaultAds.length);
-  }
+  },[activeDashboardAds.length]);
 
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
@@ -1107,7 +1083,7 @@ function Dashboard({setTab}){
   if(productsWithoutRfid>0) alerts.push({type:"warning",icon:"warning",title:`${productsWithoutRfid} produits sans tag RFID`,text:"Aucun tag détecté pour ces produits."});
   if(duplicateEpcs>0) alerts.push({type:"danger",icon:"warning",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,text:"Vérifier les associations RFID en double."});
   if(associations.length===0) alerts.push({type:"info",icon:"rfid",title:"0 scan RFID détecté",text:"Connectez votre lecteur RFID ou importez un fichier EPC."});
-  if(coverage>=80) alerts.push({type:"success",icon:"check",title:"Couverture RFID élevée",text:"Votre catalogue est bien avancé."});
+  if(coverage<100) alerts.push({type:"warning",icon:"warning",title:"Aucun tag détecté pour ces produits.",text:"À taguer en priorité pour améliorer votre suivi."});
   if(alerts.length===0) alerts.push({type:"success",icon:"check",title:"Aucune alerte prioritaire",text:"Les données RFID sont stables."});
 
   const reports=[
@@ -1121,9 +1097,11 @@ function Dashboard({setTab}){
     {label:"Produits enregistrés",value:products.length,sub:products.length ? "Catalogue importé" : "Aucun catalogue importé",icon:"box",tone:"blue",action:()=>setTab("operations")},
     {label:"Produits tagués",value:productsWithRfid,sub:productsWithRfid ? "Avec association RFID" : "Aucun tag détecté",icon:"tag",tone:"green",action:()=>setTab("association")},
     {label:"Transactions RFID",value:associations.length,sub:associations.length ? "Associations enregistrées" : "Aucune transaction",icon:"rfid",tone:"purple",action:()=>setTab("inventory")},
-    {label:"Produits sans tag",value:productsWithoutRfid,sub:productsWithoutRfid ? "À traiter en priorité" : "Synchronisés",icon:"warning",tone:"orange",action:()=>setTab("operations")},
+    {label:"Produits sans tag",value:productsWithoutRfid,sub:productsWithoutRfid ? "À taguer en priorité" : "Synchronisés",icon:"warning",tone:"orange",action:()=>setTab("operations")},
   ];
 
+  const shownAds=currentDashboardAd ? activeDashboardAds : defaultAds;
+  const activeAdIndex=(currentDashboardAd ? dashboardAdIndex : defaultAdIndex) % shownAds.length;
   const defaultAdSrc=defaultAds[defaultAdIndex % defaultAds.length];
 
   return <section className="figmaDashboard">
@@ -1144,14 +1122,13 @@ function Dashboard({setTab}){
       <div className="figmaPanel figmaCoveragePanel">
         <div className="figmaPanelTitle">
           <h2>Couverture RFID</h2>
-          <span title="Pourcentage de produits associés à un tag RFID">?</span>
         </div>
 
         <div className="figmaCoverageContent">
           <div className="figmaGauge" aria-label={`Couverture RFID ${coverage}%`}>
-            <svg width="168" height="168" viewBox="0 0 168 168">
-              <circle cx="84" cy="84" r={radius} fill="none" stroke="#f0f1f7" strokeWidth="14"/>
-              {coverage>0 && <circle cx="84" cy="84" r={radius} fill="none" stroke="var(--primary)" strokeWidth="14" strokeDasharray={`${dash} ${circumference}`} strokeLinecap="round" transform="rotate(-90 84 84)"/>}
+            <svg width="188" height="188" viewBox="0 0 188 188">
+              <circle cx="94" cy="94" r={radius} fill="none" stroke="#eef2f7" strokeWidth="20"/>
+              {coverage>0 && <circle cx="94" cy="94" r={radius} fill="none" stroke="var(--primary)" strokeWidth="20" strokeDasharray={`${dash} ${circumference}`} strokeLinecap="round" transform="rotate(-90 94 94)"/>}
             </svg>
             <b>{coverage}%</b>
           </div>
@@ -1166,30 +1143,16 @@ function Dashboard({setTab}){
       </div>
 
       <div className="figmaPanel figmaAdCard">
-        <div className="figmaAdHeader">
-          <h2>Publicité Dashboard</h2>
-          {currentDashboardAd?.cta_label && <a href={currentDashboardAd.cta_url || "#"} target="_blank" rel="noreferrer">{currentDashboardAd.cta_label}</a>}
-          <button type="button" aria-label="Options publicité"><DashIcon name="dots"/></button>
-        </div>
         <div className="figmaAdMedia">
-          {currentDashboardAd ? <>
-            <img key={currentDashboardAd.id || currentDashboardAd.image_url} src={mediaUrl(currentDashboardAd.image_url)} alt="Publicité" className={currentDashboardAd.extra_config==="cover" ? "cover" : "contain"}/>
-            {activeDashboardAds.length > 1 && <>
-              <button type="button" className="figmaCarousel prev" onClick={prevDashboardAd} aria-label="Publicité précédente">‹</button>
-              <button type="button" className="figmaCarousel next" onClick={nextDashboardAd} aria-label="Publicité suivante">›</button>
-            </>}
-          </> : <>
-            <img src={defaultAdSrc} alt="Smart Inventory publicité dynamique" className="cover"/>
-            {defaultAds.length > 1 && <>
-              <button type="button" className="figmaCarousel prev" onClick={prevDashboardAd} aria-label="Publicité précédente">‹</button>
-              <button type="button" className="figmaCarousel next" onClick={nextDashboardAd} aria-label="Publicité suivante">›</button>
-            </>}
-          </>}
+          <div className="figmaDots figmaDotsOverlay">
+            {shownAds.map((ad,i)=><button type="button" key={currentDashboardAd ? (ad.id || i) : ad} className={i===activeAdIndex ? "active" : ""} onClick={()=> currentDashboardAd ? setDashboardAdIndex(i) : setDefaultAdIndex(i)} aria-label={`Afficher image ${i+1}`}></button>)}
+          </div>
+          {currentDashboardAd
+            ? <img key={currentDashboardAd.id || currentDashboardAd.image_url} src={mediaUrl(currentDashboardAd.image_url)} alt="Publicité" className="cover"/>
+            : <img src={defaultAdSrc} alt="Smart Inventory publicité dynamique" className="cover"/>}
         </div>
-        <div className="figmaDots">
-          {(currentDashboardAd ? activeDashboardAds : defaultAds).map((ad,i)=><button type="button" key={currentDashboardAd ? (ad.id || i) : ad} className={i===((currentDashboardAd ? dashboardAdIndex : defaultAdIndex) % (currentDashboardAd ? activeDashboardAds.length : defaultAds.length)) ? "active" : ""} onClick={()=> currentDashboardAd ? setDashboardAdIndex(i) : setDefaultAdIndex(i)} aria-label={`Afficher image ${i+1}`}></button>)}
-        </div>
-      </div>    </div>
+      </div>
+    </div>
 
     <div className="figmaBottomGrid">
       <div className="figmaPanel figmaReportsPanel">
@@ -1202,26 +1165,22 @@ function Dashboard({setTab}){
             <em><DashIcon name="download"/></em>
           </button>)}
         </div>
-        <button type="button" className="figmaReportLink" onClick={exportDashboardReport}>Voir tous les rapports →</button>
       </div>
 
       <div className="figmaPanel figmaAlertsPanel">
-        <div className="figmaAlertHeader"><span><DashIcon name="bell"/></span><h2>Alertes prioritaires</h2></div>
+        <div className="figmaAlertHeader"><h2>Alertes prioritaires</h2></div>
         <div className="figmaAlertList">
           {alerts.map((a,i)=><div className={`figmaAlert ${a.type}`} key={i}>
             <span><DashIcon name={a.icon}/></span>
             <div><b>{a.title}</b><small>{a.text}</small></div>
-            <em>›</em>
           </div>)}
         </div>
-        <button type="button" className="figmaAlertLink" onClick={()=>setTab("operations")}>Voir toutes les alertes →</button>
       </div>
     </div>
 
-    <div className="figmaDashboardFooter">Données mises à jour le {todayLabel}</div>
+    <div className="figmaDashboardFooter">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
-
 
 
 function DashboardAdmin({auth}){

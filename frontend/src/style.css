@@ -2569,3 +2569,85 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .figmaGauge{margin:0 auto 26px!important;}
   .figmaAdMedia{height:210px!important;}
 }
+
+/* V36 dashboard refinement to match provided mockup */
+.whiteSidebar{
+  background:
+    radial-gradient(circle at 0 0,rgba(98,139,212,.18),transparent 26%),
+    linear-gradient(180deg,#081c38 0%,#0a2446 50%,#081b36 100%)!important;
+}
+.sidebarBrandLogo{gap:10px!important;align-items:center!important;}
+.sidebarBrandLogo .smartSidebarLogoIcon{
+  width:34px!important;height:34px!important;flex:0 0 34px!important;
+  border-radius:0!important;background:none!important;padding:0!important;box-shadow:none!important;color:#ffffff!important;
+}
+.sidebarBrandLogo .smartSidebarLogoText{
+  font-size:18px!important;font-weight:650!important;letter-spacing:-.03em!important;gap:4px!important;color:#fff!important;
+}
+.sidebarBrandLogo .smartSidebarLogoSmart,
+.sidebarBrandLogo .smartSidebarLogoInventory{color:#fff!important;font-weight:650!important;}
+.whiteNavItem.active{
+  background:linear-gradient(135deg,#2b5d9d,#244f88)!important;
+  box-shadow:none!important;
+}
+.whiteNavItem b,.whiteLogout b{font-weight:500!important;}
+.topPageTitle{font-size:24px!important;font-weight:700!important;}
+.whiteAccount{gap:12px!important;padding:6px 14px 6px 8px!important;min-width:182px!important;box-shadow:none!important;}
+.whiteAccount b{font-size:13px!important;font-weight:600!important;}
+.whiteAccount small{font-size:12px!important;color:#70809a!important;}
+.whiteAccount div{text-align:left!important;}
+.accountChevron{display:none!important;}
+.figmaPanel h2,.figmaPanelTitle h2{font-size:18px!important;font-weight:700!important;}
+.figmaKpiBody small{font-size:15px!important;font-weight:600!important;}
+.figmaKpiBody em{font-size:13px!important;}
+.figmaCoveragePanel{padding:24px 28px!important;}
+.figmaPanelTitle{margin-bottom:18px!important;}
+.figmaPanelTitle span{display:none!important;}
+.figmaGauge{width:260px!important;height:260px!important;}
+.figmaGauge svg{width:260px!important;height:260px!important;}
+.figmaGauge svg circle:first-child{stroke-width:20!important;}
+.figmaGauge:after{display:none!important;content:none!important;}
+.figmaGauge b{font-size:52px!important;font-weight:700!important;}
+.figmaCoverageText h3{font-size:18px!important;font-weight:650!important;}
+.figmaCoverageText p{font-size:15px!important;line-height:1.55!important;}
+.figmaAdCard{padding:0!important;min-height:324px!important;}
+.figmaAdHeader,.figmaAdText,.figmaCarousel,.figmaReportLink,.figmaAlertLink,.figmaAlert em{display:none!important;}
+.figmaAdMedia{
+  position:relative!important;
+  height:100%!important;
+  min-height:324px!important;
+  border:0!important;
+  border-radius:7px!important;
+  background:#eef6f0!important;
+}
+.figmaAdMedia img.cover,.figmaAdMedia img.contain{object-fit:cover!important;width:100%!important;height:100%!important;}
+.figmaDotsOverlay{
+  position:absolute!important;
+  top:14px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  z-index:2!important;
+  margin:0!important;
+  height:22px!important;
+  background:transparent!important;
+}
+.figmaDotsOverlay button{width:10px!important;height:10px!important;background:rgba(140,152,172,.55)!important;}
+.figmaDotsOverlay button.active{width:10px!important;background:#3b82f6!important;border-radius:50%!important;}
+.figmaBottomGrid{grid-template-columns:1.6fr .95fr!important;}
+.figmaReportsPanel{padding:24px 24px 24px!important;}
+.figmaReportsPanel h2{margin-bottom:0!important;}
+.figmaReportBtn b{font-size:14px!important;font-weight:600!important;}
+.figmaAlertsPanel{padding-bottom:8px!important;}
+.figmaAlertHeader{min-height:58px!important;padding:0 18px!important;justify-content:flex-start!important;}
+.figmaAlertHeader span{display:none!important;}
+.figmaAlertHeader h2{margin:0!important;}
+.figmaAlertList{padding:6px 0 8px!important;}
+.figmaAlert{grid-template-columns:52px 1fr!important;padding:12px 18px!important;gap:12px!important;}
+.figmaAlert b{font-size:14px!important;font-weight:600!important;}
+.figmaAlert small{font-size:13px!important;line-height:1.35!important;}
+.figmaDashboardFooter{text-align:center!important;font-size:12px!important;color:#7d899d!important;}
+@media(max-width:900px){
+  .figmaGauge{width:220px!important;height:220px!important;}
+  .figmaGauge svg{width:220px!important;height:220px!important;}
+  .figmaAdMedia{min-height:220px!important;}
+}
