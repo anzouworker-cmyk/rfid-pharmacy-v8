@@ -3246,3 +3246,621 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
     min-height:208px!important;
   }
 }
+
+/* V44 - Cash register calculator page */
+.cashRegisterPage{
+  min-height:calc(100vh - 104px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:16px!important;
+  max-width:none!important;
+  color:#071227!important;
+}
+.cashRegisterHeader{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:flex-start!important;
+  gap:16px!important;
+}
+.cashRegisterHeader h1{
+  margin:0 0 6px!important;
+  font-size:28px!important;
+  font-weight:750!important;
+  letter-spacing:-.03em!important;
+  color:#071227!important;
+}
+.cashRegisterHeader p{
+  margin:0!important;
+  color:#53627c!important;
+  font-size:14px!important;
+}
+.cashHeaderActions{
+  display:flex!important;
+  gap:10px!important;
+  flex-wrap:wrap!important;
+}
+.cashHeaderActions button{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  min-height:38px!important;
+  border-radius:7px!important;
+  background:#244f88!important;
+  color:#fff!important;
+  box-shadow:none!important;
+  padding:9px 14px!important;
+  font-size:13px!important;
+  font-weight:650!important;
+}
+.cashHeaderActions svg{width:16px!important;height:16px!important;}
+.cashHeaderActions .cashResetBtn{
+  background:#fff0f0!important;
+  color:#b91c1c!important;
+  border:1px solid #fecaca!important;
+}
+.cashRegisterPanel{
+  flex:1!important;
+  background:#fff!important;
+  border:1px solid var(--si-line,#dce4f1)!important;
+  border-radius:7px!important;
+  box-shadow:0 14px 36px rgba(15,23,42,.04)!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+.cashTabs{
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  border-bottom:1px solid var(--si-line,#dce4f1)!important;
+  background:#fff!important;
+}
+.cashTabs button{
+  min-height:54px!important;
+  border-radius:0!important;
+  background:#fff!important;
+  color:#071227!important;
+  box-shadow:none!important;
+  border:0!important;
+  border-bottom:2px solid transparent!important;
+  font-size:14px!important;
+  font-weight:650!important;
+}
+.cashTabs button.active{
+  color:#ff3158!important;
+  border-bottom-color:#ff3158!important;
+}
+.cashDateBar{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  padding:12px 16px!important;
+  background:#f6f7f9!important;
+  border-bottom:1px solid var(--si-line,#dce4f1)!important;
+}
+.cashDateBar button{
+  min-width:34px!important;
+  min-height:34px!important;
+  border-radius:6px!important;
+  background:#fff!important;
+  color:#071227!important;
+  border:1px solid #dce4f1!important;
+  box-shadow:none!important;
+  padding:6px 10px!important;
+}
+.cashDateBar input{
+  min-height:34px!important;
+  border-radius:6px!important;
+  margin:0!important;
+  padding:6px 10px!important;
+  border:1px solid #dce4f1!important;
+  font-weight:650!important;
+  color:#071227!important;
+}
+.cashMainGrid{
+  flex:1!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 150px!important;
+  align-items:start!important;
+}
+.cashTableWrap{
+  min-width:0!important;
+  padding:0!important;
+}
+.cashTableWrap h2{
+  margin:0!important;
+  padding:14px 10px!important;
+  font-size:18px!important;
+  font-weight:600!important;
+  color:#1a1d2e!important;
+}
+.cashTable{
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#fff!important;
+}
+.cashTable th,
+.cashTable td{
+  height:50px!important;
+  border-bottom:1px solid #edf1f6!important;
+  text-align:center!important;
+  vertical-align:middle!important;
+  color:#1a1d2e!important;
+  font-size:14px!important;
+}
+.cashTable th{
+  background:#f1f2f4!important;
+  font-weight:750!important;
+}
+.cashTable td:first-child,
+.cashTable th:first-child{width:34%!important;}
+.cashTable td:nth-child(2),
+.cashTable th:nth-child(2){width:34%!important;}
+.cashTable td:nth-child(3),
+.cashTable th:nth-child(3){width:32%!important;}
+.cashTable input{
+  width:min(160px,90%)!important;
+  min-height:34px!important;
+  margin:0!important;
+  border:1px solid transparent!important;
+  background:#fff!important;
+  text-align:center!important;
+  border-radius:6px!important;
+  color:#071227!important;
+  font-size:14px!important;
+}
+.cashTable input:focus{
+  outline:none!important;
+  border-color:#244f88!important;
+  box-shadow:0 0 0 3px rgba(36,79,136,.10)!important;
+}
+.cashTable .qtyInput{
+  font-weight:650!important;
+}
+.cashTotalCard{
+  min-height:144px!important;
+  align-self:stretch!important;
+  background:#f1f2f4!important;
+  border-left:1px solid var(--si-line,#dce4f1)!important;
+  padding:28px 14px!important;
+  text-align:center!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  gap:12px!important;
+}
+.cashTotalCard span{
+  display:block!important;
+  color:#000!important;
+  font-size:28px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  letter-spacing:-.04em!important;
+}
+.cashTotalCard b{
+  display:block!important;
+  color:#000!important;
+  font-size:26px!important;
+  line-height:1!important;
+  font-weight:800!important;
+}
+.cashTotalCard small{
+  color:#53627c!important;
+  font-size:11px!important;
+  line-height:1.3!important;
+}
+.cashSummaryList{
+  width:100%!important;
+  margin-top:8px!important;
+  display:grid!important;
+  gap:8px!important;
+}
+.cashSummaryList div{
+  display:grid!important;
+  gap:3px!important;
+  padding:9px 7px!important;
+  border-radius:6px!important;
+  background:#fff!important;
+  border:1px solid #e5eaf3!important;
+}
+.cashSummaryList em{
+  font-style:normal!important;
+  color:#53627c!important;
+  font-size:11px!important;
+}
+.cashSummaryList strong{
+  font-size:14px!important;
+  color:#071227!important;
+}
+.cashSummaryList .ok strong{color:#15803d!important;}
+.cashSummaryList .warn strong{color:#b91c1c!important;}
+.managementTable th:first-child,.managementTable td:first-child{text-align:left!important;padding-left:20px!important;width:50%!important;}
+.managementTable th:nth-child(2),.managementTable td:nth-child(2){width:12%!important;}
+.managementTable th:nth-child(3),.managementTable td:nth-child(3){width:38%!important;}
+.managementTable input{width:180px!important;text-align:right!important;padding-right:12px!important;border-color:#dce4f1!important;}
+.cashTotalRow td{font-weight:800!important;background:#f8fafc!important;}
+.cashOkRow td{font-weight:800!important;background:#f0fdf4!important;color:#15803d!important;}
+.cashWarnRow td{font-weight:800!important;background:#fff7ed!important;color:#b45309!important;}
+.expenseTitleRow{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  padding:0 10px!important;
+}
+.expenseTitleRow h2{padding:14px 0!important;}
+.expenseTitleRow button{
+  min-height:34px!important;
+  border-radius:6px!important;
+  background:#244f88!important;
+  color:#fff!important;
+  box-shadow:none!important;
+  font-size:13px!important;
+}
+.expenseTable th:first-child,.expenseTable td:first-child{width:34%!important;text-align:left!important;padding-left:16px!important;}
+.expenseTable th:nth-child(2),.expenseTable td:nth-child(2){width:22%!important;}
+.expenseTable th:nth-child(3),.expenseTable td:nth-child(3){width:34%!important;}
+.expenseTable th:nth-child(4),.expenseTable td:nth-child(4){width:10%!important;}
+.expenseTable input{width:94%!important;text-align:left!important;border-color:#dce4f1!important;}
+.expenseTable td:nth-child(2) input{text-align:right!important;}
+.cashMiniDanger{
+  width:30px!important;
+  height:30px!important;
+  min-height:30px!important;
+  padding:0!important;
+  border-radius:6px!important;
+  background:#fff0f0!important;
+  color:#b91c1c!important;
+  border:1px solid #fecaca!important;
+  box-shadow:none!important;
+  font-size:18px!important;
+  line-height:1!important;
+}
+.cashMsg{
+  margin:0!important;
+  border-radius:7px!important;
+  font-weight:650!important;
+}
+.cashRegisterPage .pageFooterLikeDashboard{
+  margin-top:auto!important;
+  padding:4px 0 0!important;
+  color:#7d899d!important;
+  font-size:12px!important;
+  text-align:center!important;
+}
+@media(max-width:1000px){
+  .cashRegisterHeader{display:block!important;}
+  .cashHeaderActions{margin-top:12px!important;}
+  .cashMainGrid{grid-template-columns:1fr!important;}
+  .cashTotalCard{border-left:0!important;border-top:1px solid var(--si-line,#dce4f1)!important;}
+  .cashTabs{grid-template-columns:1fr!important;}
+  .cashDateBar{flex-wrap:wrap!important;}
+}
+
+.cashExpensesSection{
+  border-bottom:1px solid #edf1f6!important;
+  padding-bottom:10px!important;
+}
+.cashExpenseHistorySection{
+  padding-bottom:0!important;
+  border-bottom:0!important;
+}
+.expenseEntryTable th:first-child,.expenseEntryTable td:first-child{width:24%!important;text-align:left!important;padding-left:16px!important;}
+.expenseEntryTable th:nth-child(2),.expenseEntryTable td:nth-child(2){width:14%!important;}
+.expenseEntryTable th:nth-child(3),.expenseEntryTable td:nth-child(3){width:18%!important;}
+.expenseEntryTable th:nth-child(4),.expenseEntryTable td:nth-child(4){width:18%!important;}
+.expenseEntryTable th:nth-child(5),.expenseEntryTable td:nth-child(5){width:18%!important;}
+.expenseEntryTable th:nth-child(6),.expenseEntryTable td:nth-child(6){width:8%!important;}
+.expenseEntryTable input{width:94%!important;text-align:left!important;border-color:#dce4f1!important;}
+.expenseEntryTable td:nth-child(2) input{text-align:right!important;}
+.expenseHistoryTopbar{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  padding:10px 10px 0!important;
+}
+.expenseHistoryTopbar h2{
+  padding:0 0 10px!important;
+}
+.expenseMonthBar{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+}
+.expenseMonthBar button,
+.expensePagerButtons button{
+  min-width:32px!important;
+  min-height:32px!important;
+  border-radius:6px!important;
+  background:#fff!important;
+  color:#071227!important;
+  border:1px solid #dce4f1!important;
+  box-shadow:none!important;
+  padding:4px 8px!important;
+}
+.expenseMonthBar button:disabled,
+.expensePagerButtons button:disabled{
+  opacity:.45!important;
+  cursor:not-allowed!important;
+}
+.expenseMonthBar input{
+  min-height:32px!important;
+  border-radius:6px!important;
+  border:1px solid #dce4f1!important;
+  padding:6px 8px!important;
+  margin:0!important;
+}
+.expenseMonthValue{
+  min-width:160px!important;
+  text-align:center!important;
+  font-size:14px!important;
+  font-weight:700!important;
+  color:#071227!important;
+  text-transform:capitalize!important;
+}
+.expenseHistoryTable th:first-child,.expenseHistoryTable td:first-child{width:16%!important;text-align:left!important;padding-left:18px!important;}
+.expenseHistoryTable th:nth-child(2),.expenseHistoryTable td:nth-child(2){width:28%!important;text-align:left!important;}
+.expenseHistoryTable th:nth-child(3),.expenseHistoryTable td:nth-child(3){width:14%!important;}
+.expenseHistoryTable th:nth-child(4),.expenseHistoryTable td:nth-child(4){width:16%!important;text-align:left!important;}
+.expenseHistoryTable th:nth-child(5),.expenseHistoryTable td:nth-child(5){width:13%!important;text-align:left!important;}
+.expenseHistoryTable th:nth-child(6),.expenseHistoryTable td:nth-child(6){width:13%!important;text-align:left!important;}
+.expenseHistoryEmpty{
+  text-align:center!important;
+  color:#7d899d!important;
+  font-style:italic!important;
+}
+.expenseHistoryFooter{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:14px!important;
+  padding:12px 16px 16px!important;
+  color:#7d899d!important;
+  font-size:12px!important;
+}
+.expenseHistoryFooter strong{
+  color:#071227!important;
+  font-size:12px!important;
+}
+.expensePagerButtons{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+@media(max-width:1000px){
+  .expenseHistoryTopbar{display:block!important;}
+  .expenseMonthBar{justify-content:flex-start!important;padding-bottom:10px!important;}
+  .expenseHistoryFooter{flex-wrap:wrap!important;justify-content:flex-start!important;}
+}
+
+.cashManagementSection{
+  border-bottom:1px solid #edf1f6!important;
+  padding-bottom:10px!important;
+}
+.cashManagementHistorySection{
+  border-bottom:0!important;
+  padding-bottom:0!important;
+}
+.managementEntryTable th:first-child,.managementEntryTable td:first-child{text-align:left!important;padding-left:20px!important;width:58%!important;}
+.managementEntryTable th:nth-child(2),.managementEntryTable td:nth-child(2){width:10%!important;}
+.managementEntryTable th:nth-child(3),.managementEntryTable td:nth-child(3){width:32%!important;}
+.managementEntryTable input{width:180px!important;text-align:right!important;padding-right:12px!important;border-color:#dce4f1!important;}
+.cashWideTableWrap{
+  width:100%!important;
+  overflow-x:auto!important;
+  padding:0 10px!important;
+}
+.managementHistoryTable{
+  min-width:1600px!important;
+}
+.managementHistoryTable th,
+.managementHistoryTable td{
+  white-space:nowrap!important;
+}
+.managementHistoryTable th:first-child,.managementHistoryTable td:first-child{width:120px!important;text-align:left!important;padding-left:18px!important;}
+.managementHistoryTable th:nth-child(n+2),.managementHistoryTable td:nth-child(n+2){width:122px!important;}
+
+
+/* V47 cash admin dashboard */
+.cashAdminDashboardPage{
+  min-height:calc(100vh - 104px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:18px!important;
+  color:#071227!important;
+}
+.cashAdminDashboardHeader{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:flex-end!important;
+  gap:16px!important;
+  flex-wrap:wrap!important;
+}
+.cashAdminDashboardHeader h1{
+  margin:0 0 6px!important;
+  font-size:24px!important;
+  font-weight:750!important;
+  letter-spacing:-.03em!important;
+}
+.cashAdminDashboardHeader p{
+  margin:0!important;
+  color:#64748b!important;
+  font-size:14px!important;
+}
+.cashAdminToolbar{
+  display:flex!important;
+  gap:12px!important;
+  flex-wrap:wrap!important;
+}
+.cashAdminToolbar label{
+  display:grid!important;
+  gap:6px!important;
+  min-width:180px!important;
+}
+.cashAdminToolbar span{
+  font-size:12px!important;
+  font-weight:700!important;
+  color:#64748b!important;
+}
+.cashAdminToolbar input{
+  min-height:38px!important;
+  border:1px solid #dce4f1!important;
+  border-radius:8px!important;
+  padding:8px 10px!important;
+  margin:0!important;
+}
+.cashAdminGrid{
+  display:grid!important;
+  gap:0!important;
+  border:1px solid #dce4f1!important;
+  border-radius:8px!important;
+  overflow:hidden!important;
+  background:#fff!important;
+}
+.cashAdminGridTop{grid-template-columns:repeat(5,minmax(0,1fr))!important;}
+.cashAdminGridBottom{grid-template-columns:repeat(5,minmax(0,1fr))!important;}
+.cashAdminCard{
+  min-height:238px!important;
+  background:#fff!important;
+  border-right:1px solid #dce4f1!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+.cashAdminGrid .cashAdminCard:last-child{border-right:0!important;}
+.cashAdminCardHeader{
+  min-height:52px!important;
+  padding:12px 18px!important;
+  border-bottom:1px solid #e9eef6!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:4px!important;
+}
+.cashAdminCardHeader h3{
+  margin:0!important;
+  font-size:17px!important;
+  font-weight:700!important;
+  color:#111827!important;
+}
+.cashAdminCardMeta{
+  min-height:18px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  color:#7c879a!important;
+  font-size:12px!important;
+}
+.cashAdminCardRight{font-weight:700!important;color:#7c879a!important;}
+.cashAdminCardBody{
+  flex:1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:18px!important;
+}
+.cashAdminMainValue,
+.cashAdminBigMetric{
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:center!important;
+  gap:8px!important;
+  line-height:1!important;
+}
+.cashAdminMainValue small,
+.cashAdminBigMetric small{
+  font-size:18px!important;
+  font-weight:800!important;
+  color:#111827!important;
+  padding-bottom:10px!important;
+}
+.cashAdminMainValue b,
+.cashAdminBigMetric b{
+  font-size:58px!important;
+  font-weight:700!important;
+  letter-spacing:-.05em!important;
+  color:#000!important;
+}
+.cashAdminBigMetric b{font-size:56px!important;}
+.cashAdminRingWrap{
+  display:grid!important;
+  justify-items:center!important;
+  gap:10px!important;
+}
+.cashAdminRing{
+  width:132px!important;
+  height:132px!important;
+  position:relative!important;
+}
+.cashAdminRing svg{width:132px!important;height:132px!important;transform:rotate(-90deg)!important;}
+.cashAdminRing circle:first-child{
+  fill:none!important;
+  stroke:#e5e7eb!important;
+  stroke-width:10!important;
+}
+.cashAdminRing circle:last-child{
+  fill:none!important;
+  stroke:#d1d5db!important;
+  stroke-width:10!important;
+  stroke-linecap:round!important;
+}
+.cashAdminRing div{
+  position:absolute!important;
+  inset:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:#111827!important;
+}
+.cashAdminRing b{font-size:28px!important;font-weight:700!important;letter-spacing:-.03em!important;}
+.cashAdminRing small{font-size:14px!important;font-weight:700!important;color:#6b7280!important;}
+.cashAdminRingWrap strong{
+  font-size:15px!important;
+  font-weight:700!important;
+  color:#111827!important;
+}
+.cashAdminRingWrap span{
+  font-size:13px!important;
+  color:#6b7280!important;
+}
+.cashAdminDateStepper{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+.cashAdminDateStepper button{
+  width:24px!important;
+  height:24px!important;
+  min-height:24px!important;
+  padding:0!important;
+  border-radius:999px!important;
+  border:1px solid #dce4f1!important;
+  background:#fff!important;
+  color:#64748b!important;
+  box-shadow:none!important;
+}
+.cashAdminDateStepper button:disabled{opacity:.45!important;cursor:not-allowed!important;}
+.cashAdminDateStepper span{font-size:12px!important;color:#64748b!important;}
+.cashAdminBottomNote{
+  margin-top:auto!important;
+  text-align:center!important;
+  color:#7d899d!important;
+  font-size:12px!important;
+  padding-top:4px!important;
+}
+@media(max-width:1400px){
+  .cashAdminGridTop,.cashAdminGridBottom{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .cashAdminGrid .cashAdminCard:nth-child(2n){border-right:0!important;}
+  .cashAdminGrid .cashAdminCard:nth-child(n+3){border-top:1px solid #dce4f1!important;}
+}
+@media(max-width:800px){
+  .cashAdminGridTop,.cashAdminGridBottom{grid-template-columns:1fr!important;}
+  .cashAdminGrid .cashAdminCard{border-right:0!important;border-top:1px solid #dce4f1!important;}
+  .cashAdminGrid .cashAdminCard:first-child{border-top:0!important;}
+  .cashAdminMainValue b,.cashAdminBigMetric b{font-size:46px!important;}
+}

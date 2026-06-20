@@ -1,0 +1,20 @@
+V47 - Cash admin dashboard page added
+
+Changes:
+- Added a new admin page: "Dashboard Caisse".
+- Visible in sidebar for platform admin users.
+- Added cash dashboard cards inspired by the provided mockup.
+- Included metrics for:
+  - Balance due progress
+  - Real time CR balance
+  - Total missing amount
+  - Total surplus amount
+  - Total expenses
+  - Balance due
+  - Missing amount
+  - Surplus amount
+  - Withdrawn amount
+  - Expenses
+- Added date and month selectors for admin cash dashboard analysis.
+- Dashboard values are computed from saved cash register data in local storage.
+- Rebuilt frontend dist files.

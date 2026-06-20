@@ -1,0 +1,16 @@
+V44 - Cash Register Tables
+
+Ajout d'une nouvelle page "Caisse" dans le menu.
+
+Fonctionnalités ajoutées :
+- Tableau "Monnaie d’échange" pour compter les billets/pièces DH 200, 100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1.
+- Calcul automatique par ligne : Quantité × Bill = Somme.
+- Carte Total à droite comme l’exemple fourni.
+- Sélecteur de date avec navigation jour précédent / suivant / aujourd’hui.
+- Onglet "Gestion de caisse" : fond initial, ventes cash, dépôts, retraits, remboursements, dépenses, total attendu, cash comptée et écart.
+- Onglet "Dépenses" : ajout/suppression de lignes de dépenses.
+- Sauvegarde automatique locale par date via localStorage.
+- Export CSV de la caisse du jour.
+- Bouton Reset pour réinitialiser la journée sélectionnée.
+
+Build frontend dist mis à jour.

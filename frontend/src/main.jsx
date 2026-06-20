@@ -27,6 +27,7 @@ function apiErrorMessage(e, action="requête API"){
 const LS_PRODUCTS="rfid_v7_products";
 const LS_ASSOC="rfid_v7_associations";
 const LS_DETECTED_EPCS="rfid_v7_detected_epcs";
+const LS_CASH_REGISTER="smart_inventory_cash_register_v1";
 
 function saveLS(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
 function loadLS(k,def){ try{return JSON.parse(localStorage.getItem(k)||"")}catch{return def} }
@@ -215,6 +216,15 @@ function SidebarGlyph({name, active=false}){
       <path d="M5 18 7.2 6.8a1.2 1.2 0 0 1 1.2-.9h7.2a1.2 1.2 0 0 1 1.2.9L19 18" {...common}/><path d="M4 18h16" {...common}/><path d="M9.2 10.2h5.6" {...common}/>
     </svg>;
   }
+  if(name==="cash"){
+    return <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3.5" y="7" width="17" height="11" rx="2" {...common}/>
+      <path d="M7 7V5.5h10V7" {...common}/>
+      <path d="M7 12h4" {...common}/>
+      <path d="M15.5 13.5h1.8" {...common}/>
+      <path d="M6 18v1.5h12V18" {...common}/>
+    </svg>;
+  }
   if(name==="logout"){
     return <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M10 5H6.5A2.5 2.5 0 0 0 4 7.5v9A2.5 2.5 0 0 0 6.5 19H10" {...common}/>
@@ -253,6 +263,7 @@ function DashIcon({name}){
   if(name==="chart") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10" {...common}/><path d="M12 20V5" {...common}/><path d="M19 20v-7" {...common}/><path d="M3 20h18" {...common}/></svg>;
   if(name==="save") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Z" {...common}/><path d="M8 4v6h8V4" {...common}/><path d="M8 20v-6h8v6" {...common}/></svg>;
   if(name==="restore") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7" {...common}/><path d="M4 5v5h5" {...common}/><path d="M12 8v5l3 2" {...common}/></svg>;
+  if(name==="cash") return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="7" width="17" height="11" rx="2" {...common}/><path d="M7 7V5.5h10V7" {...common}/><path d="M7 12h4" {...common}/><path d="M15.5 13.5h1.8" {...common}/></svg>;
   return null;
 }
 
@@ -283,6 +294,8 @@ function App(){
     tab==="dashboard" ? "Dashboard" :
     tab==="association" ? "Associations RFID" :
     tab==="inventory" ? "Inventaire RFID réel" :
+    tab==="cash" ? "Caisse" :
+    tab==="cashAdmin" ? "Dashboard Caisse" :
     tab==="ai" ? "Assistant IA" :
     tab==="platform" ? "Clients SaaS" :
     tab==="dashboardAdmin" ? "Publicités" : "Smart Inventory";
@@ -293,9 +306,11 @@ function App(){
     {id:"operations",label:"Opérations",icon:"operations"},
     {id:"association",label:"Associations RFID",icon:"association"},
     {id:"inventory",label:"Inventaire RFID",icon:"inventory"},
+    {id:"cash",label:"Caisse",icon:"cash"},
     {id:"ai",label:"Assistant IA",icon:"ai"},
   ];
   if(me?.role==="platform_admin"){
+    menu.push({id:"cashAdmin",label:"Dashboard Caisse",icon:"cash"});
     menu.push({id:"platform",label:"Clients SaaS",icon:"platform"});
     menu.push({id:"dashboardAdmin",label:"Publicités",icon:"dashboardAdmin"});
   }
@@ -337,6 +352,8 @@ function App(){
         {tab==="ai" && <AIAssistant/>}
         {tab==="association" && <Association/>}
         {tab==="inventory" && <Inventory/>}
+        {tab==="cash" && <CashRegister/>}
+        {tab==="cashAdmin" && <CashDashboardAdmin/>}
         {tab==="platform" && <Platform auth={auth}/>}
         {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>}
       </main>
@@ -534,6 +551,606 @@ function Operations(){
 
     <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
+}
+
+
+const CASH_DENOMINATIONS = [
+  {label:"DH 200", cents:20000},
+  {label:"DH 100", cents:10000},
+  {label:"DH 50", cents:5000},
+  {label:"DH 20", cents:2000},
+  {label:"DH 10", cents:1000},
+  {label:"DH 5", cents:500},
+  {label:"DH 2", cents:200},
+  {label:"DH 1", cents:100},
+  {label:"DH 0.5", cents:50},
+  {label:"DH 0.2", cents:20},
+  {label:"DH 0.1", cents:10}
+];
+
+function todayISO(){
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  return new Date(d.getTime() - off * 60000).toISOString().slice(0,10);
+}
+
+function shiftISODate(iso, days){
+  const d = new Date(`${iso}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0,10);
+}
+
+function todayMonthISO(){
+  return todayISO().slice(0,7);
+}
+
+function shiftISOMonth(isoMonth, months){
+  const [year,month] = String(isoMonth || todayMonthISO()).split("-").map(Number);
+  const d = new Date(year || new Date().getFullYear(), ((month || 1) - 1) + months, 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+}
+
+function formatMonthLabel(isoMonth){
+  const [year,month] = String(isoMonth || todayMonthISO()).split("-").map(Number);
+  const d = new Date(year || new Date().getFullYear(), (month || 1) - 1, 1);
+  return new Intl.DateTimeFormat("fr-FR", {year:"numeric", month:"long"}).format(d);
+}
+
+function parseMoneyToCents(value){
+  const raw = String(value ?? "").replace(/[^0-9,.-]/g, "").replace(",", ".");
+  if(!raw || raw==="-" || raw===".") return 0;
+  const n = Number(raw);
+  if(!Number.isFinite(n)) return 0;
+  return Math.round(n * 100);
+}
+
+function moneyInputValue(cents){
+  if(!cents) return "";
+  const value = Number(cents) / 100;
+  return Number.isInteger(value) ? String(value) : String(value.toFixed(2)).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+function formatDH(cents){
+  const value = (Number(cents) || 0) / 100;
+  const formatted = new Intl.NumberFormat("fr-FR", {minimumFractionDigits: value % 1 ? 2 : 0, maximumFractionDigits: 2}).format(value);
+  return `DH ${formatted}`;
+}
+
+function createExpenseRow(){
+  return {id:Date.now()+Math.random(), label:"", amountCents:0, note:"", type:"", employeeId:"", invoiceId:""};
+}
+
+function normalizeExpenseRow(expense){
+  return {
+    id: expense?.id ?? (Date.now()+Math.random()),
+    label: expense?.label ?? expense?.description ?? "",
+    amountCents: Number(expense?.amountCents || 0),
+    note: expense?.note ?? "",
+    type: expense?.type ?? "",
+    employeeId: expense?.employeeId ?? "",
+    invoiceId: expense?.invoiceId ?? ""
+  };
+}
+
+function defaultCashDay(){
+  return {
+    quantities:{},
+    management:{openingCents:0, salesCashCents:0, depositsCents:0, withdrawalsCents:0, refundsCents:0, toWithdrawCents:0, withdrawnCents:0, creditSalesCents:0, atmSalesCents:0, creditSettlementCents:0, closingRealCents:0},
+    expenses:[createExpenseRow()]
+  };
+}
+
+function CashRegister(){
+  const [active,setActive]=useState("exchange");
+  const [cashDate,setCashDate]=useState(()=>todayISO());
+  const [managementMonth,setManagementMonth]=useState(()=>todayMonthISO());
+  const [managementPage,setManagementPage]=useState(0);
+  const [expensesMonth,setExpensesMonth]=useState(()=>todayMonthISO());
+  const [expensesPage,setExpensesPage]=useState(0);
+  const [store,setStore]=useState(()=>loadLS(LS_CASH_REGISTER,{}));
+  const [msg,setMsg]=useState("");
+
+  const current = useMemo(()=>({
+    ...defaultCashDay(),
+    ...(store[cashDate] || {}),
+    management:{...defaultCashDay().management, ...((store[cashDate] || {}).management || {})},
+    quantities:{...((store[cashDate] || {}).quantities || {})},
+    expenses: Array.isArray((store[cashDate] || {}).expenses) && (store[cashDate] || {}).expenses.length
+      ? (store[cashDate] || {}).expenses.map(normalizeExpenseRow)
+      : defaultCashDay().expenses
+  }),[store,cashDate]);
+
+  function saveDay(next){
+    const updated={...store,[cashDate]:next};
+    setStore(updated);
+    saveLS(LS_CASH_REGISTER,updated);
+  }
+
+  function updateQuantity(cents,value){
+    const qty = Math.max(0, Number.parseInt(String(value || "0"),10) || 0);
+    saveDay({...current, quantities:{...current.quantities,[cents]:qty}});
+    setMsg("");
+  }
+
+  function updateManagement(key,value){
+    saveDay({...current, management:{...current.management,[key]:parseMoneyToCents(value)}});
+    setMsg("");
+  }
+
+  function updateExpense(id,key,value){
+    const expenses=current.expenses.map(x=>x.id===id ? {...x,[key]: key==="amountCents" ? parseMoneyToCents(value) : value} : x);
+    saveDay({...current, expenses});
+    setMsg("");
+  }
+
+  function addExpense(){
+    saveDay({...current, expenses:[...current.expenses,createExpenseRow()]});
+  }
+
+  function removeExpense(id){
+    const expenses=current.expenses.filter(x=>x.id!==id);
+    saveDay({...current, expenses: expenses.length ? expenses : defaultCashDay().expenses});
+  }
+
+  function resetDay(){
+    if(!confirm(`Réinitialiser la caisse du ${cashDate} ?`)) return;
+    const updated={...store};
+    delete updated[cashDate];
+    setStore(updated);
+    saveLS(LS_CASH_REGISTER,updated);
+    setMsg("La journée de caisse a été réinitialisée.");
+  }
+
+  function exportCashCSV(){
+    const rows=[];
+    CASH_DENOMINATIONS.forEach(d=>{
+      const qty=Number(current.quantities[d.cents] || 0);
+      rows.push({Date:cashDate, Onglet:"Monnaie stock", Libellé:d.label, Quantité:qty, Somme:formatDH(qty*d.cents)});
+    });
+    const m=current.management;
+    const totalSalesCents = Number(m.salesCashCents || 0) + Number(m.creditSalesCents || 0) + Number(m.atmSalesCents || 0);
+    const closingCalculatedCents = Number(m.openingCents || 0) + Number(m.salesCashCents || 0) + Number(m.depositsCents || 0) - Number(m.withdrawnCents || 0) - Number(m.refundsCents || 0) - expensesCents;
+    const shortageCents = Math.max(0, closingCalculatedCents - Number(m.closingRealCents || 0));
+    const surplusCents = Math.max(0, Number(m.closingRealCents || 0) - closingCalculatedCents);
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Fond initial", Quantité:"", Somme:formatDH(m.openingCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"À retirer", Quantité:"", Somme:formatDH(m.toWithdrawCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Retiré", Quantité:"", Somme:formatDH(m.withdrawnCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente", Quantité:"", Somme:formatDH(totalSalesCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente en espèce", Quantité:"", Somme:formatDH(m.salesCashCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente type crédit", Quantité:"", Somme:formatDH(m.creditSalesCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente type ATM", Quantité:"", Somme:formatDH(m.atmSalesCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Réglement crédit", Quantité:"", Somme:formatDH(m.creditSettlementCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"C. fermeture (réel)", Quantité:"", Somme:formatDH(m.closingRealCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"C. fermeture (calculé)", Quantité:"", Somme:formatDH(closingCalculatedCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant manquant", Quantité:"", Somme:formatDH(shortageCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant surplus", Quantité:"", Somme:formatDH(surplusCents)});
+    current.expenses.forEach(e=>rows.push({Date:cashDate, Onglet:"Dépenses", Libellé:e.label || "Dépense", Type:e.type || "", EmployeId:e.employeeId || "", FactureId:e.invoiceId || "", Quantité:e.note || "", Somme:formatDH(e.amountCents)}));
+    exportCSV(`caisse_${cashDate}.csv`,rows,["Date","Onglet","Libellé","Type","EmployeId","FactureId","Quantité","Somme"]);
+    setMsg("Export CSV de la caisse généré.");
+  }
+
+  const countedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(current.quantities[d.cents] || 0) * d.cents),0);
+  const expensesCents = current.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
+  const totalSalesCents = Number(current.management.salesCashCents || 0) + Number(current.management.creditSalesCents || 0) + Number(current.management.atmSalesCents || 0);
+  const closingCalculatedCents = Number(current.management.openingCents || 0) + Number(current.management.salesCashCents || 0) + Number(current.management.depositsCents || 0) - Number(current.management.withdrawnCents || 0) - Number(current.management.refundsCents || 0) - expensesCents;
+  const closingRealCents = Number(current.management.closingRealCents || 0);
+  const shortageCents = Math.max(0, closingCalculatedCents - closingRealCents);
+  const surplusCents = Math.max(0, closingRealCents - closingCalculatedCents);
+  const expectedCents = closingCalculatedCents;
+  const gapCents = countedCents - expectedCents;
+
+  const managementHistory = useMemo(()=>Object.entries(store)
+    .filter(([date])=>date.startsWith(managementMonth))
+    .map(([date,day])=>{
+      const management = {...defaultCashDay().management, ...(day?.management || {})};
+      const dayExpenses = (Array.isArray(day?.expenses) ? day.expenses : []).map(normalizeExpenseRow).reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
+      const dayTotalSales = Number(management.salesCashCents || 0) + Number(management.creditSalesCents || 0) + Number(management.atmSalesCents || 0);
+      const dayClosingCalculated = Number(management.openingCents || 0) + Number(management.salesCashCents || 0) + Number(management.depositsCents || 0) - Number(management.withdrawnCents || 0) - Number(management.refundsCents || 0) - dayExpenses;
+      const dayClosingReal = Number(management.closingRealCents || 0);
+      return {
+        date,
+        openingCents:Number(management.openingCents || 0),
+        toWithdrawCents:Number(management.toWithdrawCents || 0),
+        withdrawnCents:Number(management.withdrawnCents || 0),
+        closingRealCents:dayClosingReal,
+        totalSalesCents:dayTotalSales,
+        salesCashCents:Number(management.salesCashCents || 0),
+        creditSalesCents:Number(management.creditSalesCents || 0),
+        atmSalesCents:Number(management.atmSalesCents || 0),
+        creditSettlementCents:Number(management.creditSettlementCents || 0),
+        closingCalculatedCents:dayClosingCalculated,
+        shortageCents:Math.max(0, dayClosingCalculated - dayClosingReal),
+        surplusCents:Math.max(0, dayClosingReal - dayClosingCalculated)
+      };
+    })
+    .filter(item=>item.openingCents || item.toWithdrawCents || item.withdrawnCents || item.closingRealCents || item.totalSalesCents || item.salesCashCents || item.creditSalesCents || item.atmSalesCents || item.creditSettlementCents || item.closingCalculatedCents || item.shortageCents || item.surplusCents)
+    .sort((a,b)=>b.date.localeCompare(a.date)), [store,managementMonth]);
+
+  const managementRowsPerPage = 5;
+  const managementPageCount = Math.max(1, Math.ceil(managementHistory.length / managementRowsPerPage));
+  const currentManagementPage = Math.min(managementPage, managementPageCount - 1);
+  const pagedManagementHistory = managementHistory.slice(currentManagementPage * managementRowsPerPage, (currentManagementPage + 1) * managementRowsPerPage);
+
+  const expenseHistory = useMemo(()=>Object.entries(store)
+    .filter(([date])=>date.startsWith(expensesMonth))
+    .flatMap(([date,day])=>((Array.isArray(day?.expenses) ? day.expenses : [])
+      .map(normalizeExpenseRow)
+      .filter(e=>e.label || e.amountCents || e.type || e.employeeId || e.invoiceId || e.note)
+      .map(e=>({date,...e}))))
+    .sort((a,b)=>b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id))), [store,expensesMonth]);
+
+  const expenseRowsPerPage = 5;
+  const expensePageCount = Math.max(1, Math.ceil(expenseHistory.length / expenseRowsPerPage));
+  const currentExpensePage = Math.min(expensesPage, expensePageCount - 1);
+  const pagedExpenseHistory = expenseHistory.slice(currentExpensePage * expenseRowsPerPage, (currentExpensePage + 1) * expenseRowsPerPage);
+
+  useEffect(()=>{
+    setManagementPage(0);
+  },[managementMonth]);
+
+  useEffect(()=>{
+    setExpensesPage(0);
+  },[expensesMonth]);
+
+  return <section className="cashRegisterPage">
+    <div className="cashRegisterHeader">
+      <div>
+        <h1>Tables de caisse</h1>
+        <p>Calculez la cash dans la caisse par billets/pièces, date, dépenses et écart de caisse.</p>
+      </div>
+      <div className="cashHeaderActions">
+        <button type="button" onClick={exportCashCSV}><DashIcon name="download"/> Export CSV</button>
+        <button type="button" className="cashResetBtn" onClick={resetDay}><DashIcon name="trash"/> Reset</button>
+      </div>
+    </div>
+
+    <div className="cashRegisterPanel">
+      <div className="cashTabs">
+        <button type="button" className={active==="exchange" ? "active" : ""} onClick={()=>setActive("exchange")}>Monnaie d’échange</button>
+        <button type="button" className={active==="management" ? "active" : ""} onClick={()=>setActive("management")}>Gestion de caisse</button>
+        <button type="button" className={active==="expenses" ? "active" : ""} onClick={()=>setActive("expenses")}>Dépenses</button>
+      </div>
+
+      <div className="cashDateBar">
+        <button type="button" onClick={()=>setCashDate(shiftISODate(cashDate,-1))}>‹</button>
+        <input type="date" value={cashDate} onChange={e=>setCashDate(e.target.value || todayISO())}/>
+        <button type="button" onClick={()=>setCashDate(shiftISODate(cashDate,1))}>›</button>
+        <button type="button" onClick={()=>setCashDate(todayISO())}>Aujourd’hui</button>
+      </div>
+
+      <div className="cashMainGrid">
+        <div className="cashTableWrap">
+          {active==="exchange" && <>
+            <h2>Monnaie stock</h2>
+            <table className="cashTable">
+              <thead><tr><th>Quantité</th><th>Bill</th><th>Somme</th></tr></thead>
+              <tbody>
+                {CASH_DENOMINATIONS.map(d=>{
+                  const qty=Number(current.quantities[d.cents] || 0);
+                  return <tr key={d.cents}>
+                    <td><input className="qtyInput" type="number" min="0" step="1" value={qty} onChange={e=>updateQuantity(d.cents,e.target.value)}/></td>
+                    <td>{d.label}</td>
+                    <td>{formatDH(qty * d.cents)}</td>
+                  </tr>
+                })}
+              </tbody>
+            </table>
+          </>}
+
+          {active==="management" && <>
+            <section className="cashManagementSection">
+              <h2>Gestion de caisse</h2>
+              <table className="cashTable managementTable managementEntryTable">
+                <thead><tr><th>Élément</th><th>Type</th><th>Montant</th></tr></thead>
+                <tbody>
+                  <tr><td>S. caisse (compté)</td><td>=</td><td><input value={moneyInputValue(current.management.openingCents)} onChange={e=>updateManagement("openingCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>À retirer</td><td>-</td><td><input value={moneyInputValue(current.management.toWithdrawCents)} onChange={e=>updateManagement("toWithdrawCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>Retiré</td><td>-</td><td><input value={moneyInputValue(current.management.withdrawnCents)} onChange={e=>updateManagement("withdrawnCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>Dépôts / ajouts</td><td>+</td><td><input value={moneyInputValue(current.management.depositsCents)} onChange={e=>updateManagement("depositsCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>Tot. vente en espèce</td><td>+</td><td><input value={moneyInputValue(current.management.salesCashCents)} onChange={e=>updateManagement("salesCashCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>Tot. vente type crédit</td><td>+</td><td><input value={moneyInputValue(current.management.creditSalesCents)} onChange={e=>updateManagement("creditSalesCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>Tot. vente type ATM</td><td>+</td><td><input value={moneyInputValue(current.management.atmSalesCents)} onChange={e=>updateManagement("atmSalesCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>Réglement crédit</td><td>=</td><td><input value={moneyInputValue(current.management.creditSettlementCents)} onChange={e=>updateManagement("creditSettlementCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>Remboursements</td><td>-</td><td><input value={moneyInputValue(current.management.refundsCents)} onChange={e=>updateManagement("refundsCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>Dépenses enregistrées</td><td>-</td><td>{formatDH(expensesCents)}</td></tr>
+                  <tr className="cashTotalRow"><td>Tot. vente</td><td>=</td><td>{formatDH(totalSalesCents)}</td></tr>
+                  <tr><td>C. fermeture (calculé)</td><td>=</td><td>{formatDH(closingCalculatedCents)}</td></tr>
+                  <tr><td>C. fermeture (réel)</td><td>=</td><td><input value={moneyInputValue(current.management.closingRealCents)} onChange={e=>updateManagement("closingRealCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr className={shortageCents>0 ? "cashWarnRow" : "cashOkRow"}><td>Montant manquant</td><td>=</td><td>{formatDH(shortageCents)}</td></tr>
+                  <tr className={surplusCents>0 ? "cashOkRow" : "cashTotalRow"}><td>Montant surplus</td><td>=</td><td>{formatDH(surplusCents)}</td></tr>
+                  <tr className={gapCents===0 ? "cashOkRow" : "cashWarnRow"}><td>Écart cash comptée vs calculée</td><td>=</td><td>{formatDH(gapCents)}</td></tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section className="cashManagementSection cashManagementHistorySection">
+              <div className="expenseHistoryTopbar">
+                <h2>Cash register history</h2>
+                <div className="expenseMonthBar">
+                  <button type="button" onClick={()=>setManagementMonth(shiftISOMonth(managementMonth,-1))}>‹</button>
+                  <div className="expenseMonthValue">{formatMonthLabel(managementMonth)}</div>
+                  <button type="button" onClick={()=>setManagementMonth(shiftISOMonth(managementMonth,1))}>›</button>
+                  <input type="month" value={managementMonth} onChange={e=>setManagementMonth(e.target.value || todayMonthISO())}/>
+                </div>
+              </div>
+
+              <div className="cashWideTableWrap">
+                <table className="cashTable managementHistoryTable">
+                  <thead><tr><th>Date</th><th>S. caisse (compté)</th><th>À retirer</th><th>Retiré</th><th>C. fermeture (réel)</th><th>Tot. vente</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>C. fermeture (calculé)</th><th>Montant manquant</th><th>Montant surplus</th></tr></thead>
+                  <tbody>
+                    {pagedManagementHistory.length ? pagedManagementHistory.map(item=><tr key={item.date}>
+                      <td>{item.date}</td>
+                      <td>{formatDH(item.openingCents)}</td>
+                      <td>{formatDH(item.toWithdrawCents)}</td>
+                      <td>{formatDH(item.withdrawnCents)}</td>
+                      <td>{formatDH(item.closingRealCents)}</td>
+                      <td>{formatDH(item.totalSalesCents)}</td>
+                      <td>{formatDH(item.salesCashCents)}</td>
+                      <td>{formatDH(item.creditSalesCents)}</td>
+                      <td>{formatDH(item.atmSalesCents)}</td>
+                      <td>{formatDH(item.creditSettlementCents)}</td>
+                      <td>{formatDH(item.closingCalculatedCents)}</td>
+                      <td>{formatDH(item.shortageCents)}</td>
+                      <td>{formatDH(item.surplusCents)}</td>
+                    </tr>) : <tr><td colSpan="13" className="expenseHistoryEmpty">Aucune donnée de gestion de caisse pour ce mois.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="expenseHistoryFooter">
+                <span>Rows per page:</span>
+                <strong>{managementRowsPerPage}</strong>
+                <span>{managementHistory.length ? `${currentManagementPage * managementRowsPerPage + 1}-${Math.min((currentManagementPage + 1) * managementRowsPerPage, managementHistory.length)} of ${managementHistory.length}` : "0-0 of 0"}</span>
+                <div className="expensePagerButtons">
+                  <button type="button" disabled={currentManagementPage===0} onClick={()=>setManagementPage(0)}>«</button>
+                  <button type="button" disabled={currentManagementPage===0} onClick={()=>setManagementPage(p=>Math.max(0,p-1))}>‹</button>
+                  <button type="button" disabled={currentManagementPage>=managementPageCount-1 || managementHistory.length===0} onClick={()=>setManagementPage(p=>Math.min(managementPageCount-1,p+1))}>›</button>
+                  <button type="button" disabled={currentManagementPage>=managementPageCount-1 || managementHistory.length===0} onClick={()=>setManagementPage(managementPageCount-1)}>»</button>
+                </div>
+              </div>
+            </section>
+          </>}
+
+          {active==="expenses" && <>
+            <section className="cashExpensesSection">
+              <div className="expenseTitleRow"><h2>Dépenses</h2><button type="button" onClick={addExpense}>+ Ajouter</button></div>
+              <table className="cashTable expenseTable expenseEntryTable">
+                <thead><tr><th>Description</th><th>Montant</th><th>Type</th><th>Employé id</th><th>Facture id</th><th></th></tr></thead>
+                <tbody>
+                  {current.expenses.map(e=><tr key={e.id}>
+                    <td><input value={e.label} onChange={ev=>updateExpense(e.id,"label",ev.target.value)} placeholder="Ex: achat fournitures"/></td>
+                    <td><input value={moneyInputValue(e.amountCents)} onChange={ev=>updateExpense(e.id,"amountCents",ev.target.value)} placeholder="0"/></td>
+                    <td><input value={e.type} onChange={ev=>updateExpense(e.id,"type",ev.target.value)} placeholder="Type"/></td>
+                    <td><input value={e.employeeId} onChange={ev=>updateExpense(e.id,"employeeId",ev.target.value)} placeholder="ID employé"/></td>
+                    <td><input value={e.invoiceId} onChange={ev=>updateExpense(e.id,"invoiceId",ev.target.value)} placeholder="ID facture"/></td>
+                    <td><button type="button" className="cashMiniDanger" onClick={()=>removeExpense(e.id)}>×</button></td>
+                  </tr>)}
+                  <tr className="cashTotalRow"><td>Total dépenses</td><td>{formatDH(expensesCents)}</td><td></td><td></td><td></td><td></td></tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section className="cashExpensesSection cashExpenseHistorySection">
+              <div className="expenseHistoryTopbar">
+                <h2>Expenses history</h2>
+                <div className="expenseMonthBar">
+                  <button type="button" onClick={()=>setExpensesMonth(shiftISOMonth(expensesMonth,-1))}>‹</button>
+                  <div className="expenseMonthValue">{formatMonthLabel(expensesMonth)}</div>
+                  <button type="button" onClick={()=>setExpensesMonth(shiftISOMonth(expensesMonth,1))}>›</button>
+                  <input type="month" value={expensesMonth} onChange={e=>setExpensesMonth(e.target.value || todayMonthISO())}/>
+                </div>
+              </div>
+
+              <table className="cashTable expenseHistoryTable">
+                <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Type</th><th>Employé id</th><th>Facture id</th></tr></thead>
+                <tbody>
+                  {pagedExpenseHistory.length ? pagedExpenseHistory.map(item=><tr key={`${item.date}-${item.id}`}>
+                    <td>{item.date}</td>
+                    <td>{item.label || "-"}</td>
+                    <td>{formatDH(item.amountCents)}</td>
+                    <td>{item.type || "-"}</td>
+                    <td>{item.employeeId || "nan"}</td>
+                    <td>{item.invoiceId || "nan"}</td>
+                  </tr>) : <tr><td colSpan="6" className="expenseHistoryEmpty">Aucune dépense enregistrée pour ce mois.</td></tr>}
+                </tbody>
+              </table>
+
+              <div className="expenseHistoryFooter">
+                <span>Rows per page:</span>
+                <strong>{expenseRowsPerPage}</strong>
+                <span>{expenseHistory.length ? `${currentExpensePage * expenseRowsPerPage + 1}-${Math.min((currentExpensePage + 1) * expenseRowsPerPage, expenseHistory.length)} of ${expenseHistory.length}` : "0-0 of 0"}</span>
+                <div className="expensePagerButtons">
+                  <button type="button" disabled={currentExpensePage===0} onClick={()=>setExpensesPage(0)}>«</button>
+                  <button type="button" disabled={currentExpensePage===0} onClick={()=>setExpensesPage(p=>Math.max(0,p-1))}>‹</button>
+                  <button type="button" disabled={currentExpensePage>=expensePageCount-1 || expenseHistory.length===0} onClick={()=>setExpensesPage(p=>Math.min(expensePageCount-1,p+1))}>›</button>
+                  <button type="button" disabled={currentExpensePage>=expensePageCount-1 || expenseHistory.length===0} onClick={()=>setExpensesPage(expensePageCount-1)}>»</button>
+                </div>
+              </div>
+            </section>
+          </>}
+        </div>
+
+        <aside className="cashTotalCard">
+          <span>Total</span>
+          <b>{formatDH(countedCents)}</b>
+          <small>Cash comptée dans la caisse</small>
+          <div className="cashSummaryList">
+            <div><em>Total attendu</em><strong>{formatDH(expectedCents)}</strong></div>
+            <div><em>Dépenses</em><strong>{formatDH(expensesCents)}</strong></div>
+            <div className={gapCents===0 ? "ok" : "warn"}><em>Écart</em><strong>{formatDH(gapCents)}</strong></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    {msg && <p className="success cashMsg">{msg}</p>}
+    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
+  </section>
+}
+
+
+function buildCashDayMetrics(date, dayData){
+  const day = { ...defaultCashDay(), ...(dayData || {}), management:{...defaultCashDay().management, ...((dayData || {}).management || {})}, quantities:{...((dayData || {}).quantities || {})}, expenses:Array.isArray((dayData || {}).expenses) ? (dayData || {}).expenses.map(normalizeExpenseRow) : [] };
+  const countedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(day.quantities[d.cents] || 0) * d.cents),0);
+  const expensesCents = day.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
+  const totalSalesCents = Number(day.management.salesCashCents || 0) + Number(day.management.creditSalesCents || 0) + Number(day.management.atmSalesCents || 0);
+  const closingCalculatedCents = Number(day.management.openingCents || 0) + Number(day.management.salesCashCents || 0) + Number(day.management.depositsCents || 0) - Number(day.management.withdrawnCents || 0) - Number(day.management.refundsCents || 0) - expensesCents;
+  const closingRealBase = Number(day.management.closingRealCents || 0);
+  const closingRealCents = closingRealBase || countedCents;
+  const shortageCents = Math.max(0, closingCalculatedCents - closingRealCents);
+  const surplusCents = Math.max(0, closingRealCents - closingCalculatedCents);
+  const dueBalanceCents = Math.max(0, Number(day.management.toWithdrawCents || 0) - Number(day.management.withdrawnCents || 0));
+  const isBalanced = shortageCents===0 && surplusCents===0;
+  return {
+    date,
+    countedCents,
+    expensesCents,
+    totalSalesCents,
+    closingCalculatedCents,
+    closingRealCents,
+    shortageCents,
+    surplusCents,
+    dueBalanceCents,
+    withdrawnCents:Number(day.management.withdrawnCents || 0),
+    creditSalesCents:Number(day.management.creditSalesCents || 0),
+    atmSalesCents:Number(day.management.atmSalesCents || 0),
+    salesCashCents:Number(day.management.salesCashCents || 0),
+    isBalanced
+  };
+}
+
+function CashProgressRing({value,label,subLabel}){
+  const safe = Math.max(0, Math.min(100, Number(value) || 0));
+  const radius = 44;
+  const circumference = 2 * Math.PI * radius;
+  const dash = circumference - (safe / 100) * circumference;
+  return <div className="cashAdminRingWrap">
+    <div className="cashAdminRing">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r={radius}></circle>
+        <circle cx="60" cy="60" r={radius} style={{strokeDasharray:`${circumference} ${circumference}`, strokeDashoffset:dash}}></circle>
+      </svg>
+      <div>
+        <b>{safe.toFixed(1)}</b>
+        <small>%</small>
+      </div>
+    </div>
+    {label && <strong>{label}</strong>}
+    {subLabel && <span>{subLabel}</span>}
+  </div>;
+}
+
+function CashAdminCard({title, children, meta, right}){
+  return <article className="cashAdminCard">
+    <div className="cashAdminCardHeader">
+      <h3>{title}</h3>
+      <div className="cashAdminCardMeta">{meta}{right ? <span className="cashAdminCardRight">{right}</span> : null}</div>
+    </div>
+    <div className="cashAdminCardBody">{children}</div>
+  </article>;
+}
+
+function CashDashboardAdmin(){
+  const [store] = useState(()=>loadLS(LS_CASH_REGISTER,{}));
+  const allDates = useMemo(()=>Object.keys(store).sort(),[store]);
+  const latestDate = allDates.length ? allDates[allDates.length-1] : todayISO();
+  const [selectedDate,setSelectedDate] = useState(latestDate);
+  const [selectedMonth,setSelectedMonth] = useState(()=>latestDate.slice(0,7));
+
+  useEffect(()=>{
+    if(!allDates.length) return;
+    if(!store[selectedDate]) setSelectedDate(latestDate);
+  },[allDates.length, latestDate]);
+
+  const selectedMetrics = useMemo(()=>buildCashDayMetrics(selectedDate, store[selectedDate]),[selectedDate,store]);
+  const monthMetrics = useMemo(()=>Object.entries(store)
+    .filter(([date])=>date.startsWith(selectedMonth))
+    .map(([date,day])=>buildCashDayMetrics(date, day))
+    .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth]);
+
+  const monthlyShortageCents = monthMetrics.reduce((sum,x)=>sum + x.shortageCents,0);
+  const monthlySurplusCents = monthMetrics.reduce((sum,x)=>sum + x.surplusCents,0);
+  const monthlyExpensesCents = monthMetrics.reduce((sum,x)=>sum + x.expensesCents,0);
+  const monthlyWithdrawnCents = monthMetrics.reduce((sum,x)=>sum + x.withdrawnCents,0);
+  const monthlyDueBalanceCents = monthMetrics.reduce((sum,x)=>sum + x.dueBalanceCents,0);
+  const monthBalancedDays = monthMetrics.filter(x=>x.isBalanced).length;
+  const progressValue = monthMetrics.length ? (monthBalancedDays / monthMetrics.length) * 100 : 0;
+  const monthSalesCents = monthMetrics.reduce((sum,x)=>sum + x.totalSalesCents,0);
+  const expensesProgress = monthSalesCents>0 ? Math.min(100, (monthlyExpensesCents / monthSalesCents) * 100) : 0;
+
+  function shiftSelectedDate(delta){
+    if(!allDates.length) return;
+    const idx = Math.max(0, allDates.indexOf(selectedDate));
+    const nextIndex = Math.min(allDates.length - 1, Math.max(0, idx + delta));
+    setSelectedDate(allDates[nextIndex]);
+  }
+
+  return <section className="cashAdminDashboardPage">
+    <div className="cashAdminDashboardHeader">
+      <div>
+        <h1>Cash register dashboard</h1>
+        <p>Vue admin pour suivre la gestion de caisse, les écarts, les surplus et les dépenses.</p>
+      </div>
+      <div className="cashAdminToolbar">
+        <label>
+          <span>Date temps réel</span>
+          <input type="date" value={selectedDate} onChange={e=>setSelectedDate(e.target.value || latestDate)} />
+        </label>
+        <label>
+          <span>Mois d’analyse</span>
+          <input type="month" value={selectedMonth} onChange={e=>setSelectedMonth(e.target.value || todayMonthISO())} />
+        </label>
+      </div>
+    </div>
+
+    <div className="cashAdminGrid cashAdminGridTop">
+      <CashAdminCard title="Balance due progress" meta={<span>{monthMetrics.length} jour(s)</span>}>
+        <CashProgressRing value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
+      </CashAdminCard>
+
+      <CashAdminCard title="Real time CR balance" meta={<span>{selectedDate}</span>} right="SD">
+        <div className="cashAdminBigMetric">
+          <small>DH</small>
+          <b>{((selectedMetrics.countedCents || 0) / 100).toFixed(1)}</b>
+        </div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Tot. montant manquant" meta={<span>à partir de {formatMonthLabel(selectedMonth)}</span>} right="📅">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(monthlyShortageCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Tot. montant surplus" meta={<span>à partir de {formatMonthLabel(selectedMonth)}</span>} right="📅">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(monthlySurplusCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Tot. dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
+        <CashProgressRing value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Aucune vente"} />
+      </CashAdminCard>
+    </div>
+
+    <div className="cashAdminGrid cashAdminGridBottom">
+      <CashAdminCard title="Balance due" meta={<span>{selectedDate}</span>} right="SD">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.dueBalanceCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Montant manquant" meta={<span>{selectedDate}</span>} right="SD">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.shortageCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Montant surplus" meta={<span>{selectedDate}</span>} right="SD">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Retiré" meta={<div className="cashAdminDateStepper"><button type="button" onClick={()=>shiftSelectedDate(-1)} disabled={!allDates.length || selectedDate===allDates[0]}>‹</button><span>{selectedDate}</span><button type="button" onClick={()=>shiftSelectedDate(1)} disabled={!allDates.length || selectedDate===allDates[allDates.length-1]}>›</button></div>}>
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.withdrawnCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
+        <div className="cashAdminMainValue"><small>DH</small><b>{Math.round(monthlyExpensesCents/100)}</b></div>
+      </CashAdminCard>
+    </div>
+
+    <div className="cashAdminBottomNote">© 2026 Smart Inventory. Tous droits réservés.</div>
+  </section>;
 }
 
 

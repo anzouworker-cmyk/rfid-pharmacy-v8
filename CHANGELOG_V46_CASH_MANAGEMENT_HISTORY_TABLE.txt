@@ -1,0 +1,22 @@
+V46 - Cash management history table added
+
+Changes:
+- Added a new wide history table in the "Gestion de caisse" tab.
+- Added columns:
+  Date,
+  S. caisse (compté),
+  À retirer,
+  Retiré,
+  C. fermeture (réel),
+  Tot. vente,
+  Tot. vente en espèce,
+  Tot. vente type crédit,
+  Tot. vente type ATM,
+  Réglement crédit,
+  C. fermeture (calculé),
+  Montant manquant,
+  Montant surplus.
+- Added month navigation and pagination for cash register history.
+- Extended the management form with new fields to feed the history table.
+- Kept the cash calculator summary on the same page.
+- Rebuilt frontend dist files.

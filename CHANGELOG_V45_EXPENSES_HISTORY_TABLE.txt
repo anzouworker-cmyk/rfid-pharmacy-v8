@@ -1,0 +1,12 @@
+V45 - Expense history table added to Cash Register Tables
+
+Changes:
+- Added a second expenses table in the "Dépenses" tab.
+- Kept the editable expenses input table for entering expense lines.
+- Added "Expenses history" table with columns:
+  Date, Description, Amount, Type, Employé id, Facture id.
+- Added month navigation and month picker for expense history.
+- Added pagination footer (5 rows per page).
+- Extended expense data model with: type, employeeId, invoiceId.
+- Updated cash CSV export to include these expense fields.
+- Rebuilt frontend dist files.
