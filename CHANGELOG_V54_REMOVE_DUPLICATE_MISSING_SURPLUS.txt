@@ -1,0 +1,8 @@
+V54 - Remove duplicate shortage/surplus cards
+
+Changes:
+- Removed the duplicate final cards for:
+  - Montant manquant
+  - Montant surplus
+- Kept the earlier shortage/surplus cards only.
+- Rebuilt frontend dist files.

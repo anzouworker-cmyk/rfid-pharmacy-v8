@@ -1227,13 +1227,6 @@ function CashDashboardAdmin(){
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.closingRealCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Montant manquant" meta={null} right="-">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.shortageCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Montant surplus" meta={null} right="+">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
 
       <CashAdminCard title="Écart cash comptée vs calculée" meta={null} right="Δ">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.gapCents/100).toFixed(1)}</b></div>
