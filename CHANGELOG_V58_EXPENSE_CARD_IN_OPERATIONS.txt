@@ -1,0 +1,17 @@
+V58 - Expense entry moved to Operations page
+
+Changes:
+- Removed the expense entry table/form from the "Dépenses" tab in Cash Register.
+- Kept the "Expenses history" table in the "Dépenses" tab.
+- Added a new operation card on the Operations page:
+  - Ajouter dépense
+- Clicking this card opens a popup window to enter an expense.
+- The popup allows entering:
+  - Description
+  - Montant
+  - Type
+  - Employé ID
+  - Facture ID
+- Saved expenses are stored on the selected cash date and appear in expense history.
+- The expense card also shows the total expenses amount for the selected date.
+- Rebuilt frontend dist files.

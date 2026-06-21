@@ -373,6 +373,8 @@ function Operations(){
   const [cashDate,setCashDate]=useState(()=>todayISO());
   const [cashStore,setCashStore]=useState(()=>loadLS(LS_CASH_REGISTER,{}));
   const [cashOpModal,setCashOpModal]=useState(null);
+  const [expenseModalOpen,setExpenseModalOpen]=useState(false);
+  const [expenseDraft,setExpenseDraft]=useState(()=>createExpenseRow());
 
   function importProducts(file){
     if(!file) return;
@@ -510,6 +512,29 @@ function Operations(){
     saveCashDay({...cashCurrent, quantities});
   }
 
+  function openExpenseModal(){
+    setExpenseDraft(createExpenseRow());
+    setExpenseModalOpen(true);
+  }
+
+  function updateExpenseDraft(key,value){
+    setExpenseDraft(prev=>({
+      ...prev,
+      [key]: key==="amountCents" ? parseMoneyToCents(value) : value
+    }));
+  }
+
+  function saveExpenseFromOperations(){
+    if(!(expenseDraft.label || expenseDraft.amountCents || expenseDraft.type || expenseDraft.employeeId || expenseDraft.invoiceId || expenseDraft.note)){
+      alert("Veuillez saisir au moins une information pour la dépense.");
+      return;
+    }
+    const existing=(Array.isArray(cashCurrent.expenses) ? cashCurrent.expenses : []).filter(e=>e.label || e.amountCents || e.type || e.employeeId || e.invoiceId || e.note);
+    saveCashDay({...cashCurrent, expenses:[...existing, normalizeExpenseRow(expenseDraft)]});
+    setExpenseModalOpen(false);
+    setMsg(`Dépense ajoutée pour le ${cashDate}.`);
+  }
+
   const cashOperationCards = [
     {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Cliquer pour compter la caisse avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse"},
     {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 2000 DH.", type:"-", editable:false, tone:"neutral", cta:"Automatique"},
@@ -519,7 +544,8 @@ function Operations(){
     {key:"creditSalesCents", title:"Tot. vente type crédit", value:Number(cashCurrent.management.creditSalesCents || 0), description:"Saisir le total des ventes crédit.", type:"+", editable:true, tone:"danger", cta:"Entrer valeur"},
     {key:"atmSalesCents", title:"Tot. vente type ATM", value:Number(cashCurrent.management.atmSalesCents || 0), description:"Saisir le total des ventes ATM.", type:"+", editable:true, tone:"blue", cta:"Entrer valeur"},
     {key:"creditSettlementCents", title:"Réglement crédit", value:Number(cashCurrent.management.creditSettlementCents || 0), description:"Saisir le réglement crédit.", type:"=", editable:true, tone:"indigo", cta:"Entrer valeur"},
-    {key:"closingRealCents", title:"C. fermeture (réel)", value:Number(cashCurrent.management.closingRealCents || 0), description:"Saisir la fermeture réelle en caisse.", type:"=", editable:true, tone:"blue", cta:"Entrer valeur"}
+    {key:"closingRealCents", title:"C. fermeture (réel)", value:Number(cashCurrent.management.closingRealCents || 0), description:"Saisir la fermeture réelle en caisse.", type:"=", editable:true, tone:"blue", cta:"Entrer valeur"},
+    {key:"expenseEntry", title:"Ajouter dépense", value:cashCurrent.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0), description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true}
   ];
 
   return <section className="operationsPage">
@@ -571,7 +597,7 @@ function Operations(){
         </div>
       </div>
       <div className="exportOperationGrid cashOpsGrid">
-        {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.editable ? setCashOpModal(card) : null}>
+        {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.isExpense ? openExpenseModal() : (card.editable ? setCashOpModal(card) : null)}>
           <div className="opIcon"><DashIcon name="cash"/></div>
           <h3>{card.title}</h3>
           <p>{card.description}</p>
@@ -644,6 +670,25 @@ function Operations(){
           </div>
         </> : <input autoFocus value={moneyInputValue(cashCurrent.management[cashOpModal.key] || 0)} onChange={e=>updateCashOperation(cashOpModal.key,e.target.value)} placeholder="0"/>}
         <button className="primaryBtn" onClick={()=>setCashOpModal(null)}>Fermer</button>
+      </div>
+    </div>}
+
+    {expenseModalOpen && <div className="modalOverlay">
+      <div className="scanModal cashValueModal expenseValueModal">
+        <button className="modalClose" onClick={()=>setExpenseModalOpen(false)}>×</button>
+        <h2>Ajouter dépense</h2>
+        <p>Saisissez une dépense qui sera enregistrée pour la date sélectionnée.</p>
+        <div className="foundProduct"><b>Date de caisse</b><small>{cashDate}</small></div>
+        <div className="expenseModalFields">
+          <input autoFocus value={expenseDraft.label} onChange={e=>updateExpenseDraft("label",e.target.value)} placeholder="Description"/>
+          <input value={moneyInputValue(expenseDraft.amountCents)} onChange={e=>updateExpenseDraft("amountCents",e.target.value)} placeholder="Montant"/>
+          <input value={expenseDraft.type} onChange={e=>updateExpenseDraft("type",e.target.value)} placeholder="Type"/>
+          <input value={expenseDraft.employeeId} onChange={e=>updateExpenseDraft("employeeId",e.target.value)} placeholder="ID employé"/>
+          <input value={expenseDraft.invoiceId} onChange={e=>updateExpenseDraft("invoiceId",e.target.value)} placeholder="ID facture"/>
+        </div>
+        <div className="expenseModalActions">
+          <button className="primaryBtn" onClick={saveExpenseFromOperations}>Ajouter la dépense</button>
+        </div>
       </div>
     </div>}
 
@@ -998,25 +1043,12 @@ function CashRegister(){
             </section>
           </>}
           {active==="expenses" && <>
-            <section className="cashExpensesSection">
-              <div className="expenseTitleRow"><h2>Dépenses</h2><button type="button" onClick={addExpense}>+ Ajouter</button></div>
-              <table className="cashTable expenseTable expenseEntryTable">
-                <thead><tr><th>Description</th><th>Montant</th><th>Type</th><th>Employé id</th><th>Facture id</th><th></th></tr></thead>
-                <tbody>
-                  {current.expenses.map(e=><tr key={e.id}>
-                    <td><input value={e.label} onChange={ev=>updateExpense(e.id,"label",ev.target.value)} placeholder="Ex: achat fournitures"/></td>
-                    <td><input value={moneyInputValue(e.amountCents)} onChange={ev=>updateExpense(e.id,"amountCents",ev.target.value)} placeholder="0"/></td>
-                    <td><input value={e.type} onChange={ev=>updateExpense(e.id,"type",ev.target.value)} placeholder="Type"/></td>
-                    <td><input value={e.employeeId} onChange={ev=>updateExpense(e.id,"employeeId",ev.target.value)} placeholder="ID employé"/></td>
-                    <td><input value={e.invoiceId} onChange={ev=>updateExpense(e.id,"invoiceId",ev.target.value)} placeholder="ID facture"/></td>
-                    <td><button type="button" className="cashMiniDanger" onClick={()=>removeExpense(e.id)}>×</button></td>
-                  </tr>)}
-                  <tr className="cashTotalRow"><td>Total dépenses</td><td>{formatDH(expensesCents)}</td><td></td><td></td><td></td><td></td></tr>
-                </tbody>
-              </table>
-            </section>
-
             <section className="cashExpensesSection cashExpenseHistorySection">
+              <div className="cashSectionHeading">
+                <h2>Dépenses</h2>
+                <p>La saisie des dépenses se fait maintenant depuis la page Opérations avec une carte dédiée.</p>
+              </div>
+
               <div className="expenseHistoryTopbar">
                 <h2>Expenses history</h2>
                 <div className="expenseMonthBar">

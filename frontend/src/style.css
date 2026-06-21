@@ -4131,3 +4131,21 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   font-weight:800!important;
   color:#071227!important;
 }
+
+.expenseValueModal{
+  width:min(560px, calc(100vw - 32px))!important;
+}
+.expenseModalFields{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:12px!important;
+  margin:14px 0!important;
+}
+.expenseModalFields input{
+  min-height:42px!important;
+}
+.expenseModalActions{
+  display:flex!important;
+  justify-content:flex-end!important;
+  margin-top:8px!important;
+}
