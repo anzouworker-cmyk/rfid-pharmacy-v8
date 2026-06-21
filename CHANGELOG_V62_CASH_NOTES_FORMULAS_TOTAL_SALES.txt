@@ -1,0 +1,18 @@
+V62 - Cash formulas updated with Notes 1 to 6
+
+Changes:
+- Added a new Operations card: TOTAL DE VENTE PAR JOUR.
+- The admin/user can enter the total sales amount of the day from this card.
+- Tot. vente en espèce is now calculated automatically:
+  Tot. vente en espèce = TOTAL DE VENTE PAR JOUR - Tot. vente type crédit - Tot. vente type ATM.
+- Corrected cash formulas according to notes 1 to 6:
+  Note 1: Montant manquant = max(0, C. fermeture calculé - C. fermeture réel).
+  Note 2: Montant surplus = max(0, C. fermeture réel - C. fermeture calculé).
+  Note 3: Solde de caisse à la fermeture théorique = max(0, Solde de caisse à la fermeture réel + Tot. vente en espèce + Règlement de crédit).
+  Note 4: Solde de caisse à la fermeture réel = Solde de caisse comptée.
+  Note 5: Totale de vente réel en espèce = TOTAL DE VENTE PAR JOUR - Totale de ventes crédit - PAYE PAR ATM.
+  Note 6: Montant à retirer = Totale de vente réel en espèce + Règlement de crédit.
+- C. fermeture réel is now automatic from S. caisse comptée.
+- C. fermeture théorique is now displayed/calculated as a card in Operations.
+- Updated exports, Cash Register history, and Dashboard calculations.
+- Rebuilt frontend dist files.
