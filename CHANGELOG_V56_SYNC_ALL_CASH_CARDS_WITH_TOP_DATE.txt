@@ -1,0 +1,8 @@
+V56 - Sync cash dashboard cards with top date
+
+Changes:
+- Updated Dashboard Caisse so the top date selector now drives all daily cash cards.
+- When the top date changes, all result cards also move to that same date automatically.
+- Individual result cards still calculate their value from the date shown inside each card.
+- Kept month-based cards linked to the month selector.
+- Rebuilt frontend dist files.

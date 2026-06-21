@@ -1127,10 +1127,27 @@ function CashDashboardAdmin(){
     gap: latestDate
   }));
 
+  function syncAllResultDates(date){
+    setResultsDates({
+      totalSales: date,
+      closingCalculated: date,
+      closingReal: date,
+      gap: date
+    });
+  }
+
   useEffect(()=>{
     if(!allDates.length) return;
-    if(!store[selectedDate]) setSelectedDate(latestDate);
+    if(!store[selectedDate]){
+      setSelectedDate(latestDate);
+      syncAllResultDates(latestDate);
+    }
   },[allDates.length, latestDate]);
+
+  useEffect(()=>{
+    if(!selectedDate) return;
+    syncAllResultDates(selectedDate);
+  },[selectedDate]);
 
   useEffect(()=>{
     if(!allDates.length) return;
@@ -1168,7 +1185,9 @@ function CashDashboardAdmin(){
     if(!allDates.length) return;
     const idx = Math.max(0, allDates.indexOf(selectedDate));
     const nextIndex = Math.min(allDates.length - 1, Math.max(0, idx + delta));
-    setSelectedDate(allDates[nextIndex]);
+    const nextDate = allDates[nextIndex];
+    setSelectedDate(nextDate);
+    syncAllResultDates(nextDate);
   }
 
   function updateResultDate(key,value){
@@ -1190,7 +1209,7 @@ function CashDashboardAdmin(){
       <div className="cashAdminToolbar">
         <label>
           <span>Date temps réel</span>
-          <input type="date" value={selectedDate} onChange={e=>setSelectedDate(e.target.value || latestDate)} />
+          <input type="date" value={selectedDate} onChange={e=>{ const nextDate = e.target.value || latestDate; setSelectedDate(nextDate); syncAllResultDates(nextDate); }} />
         </label>
         <label>
           <span>Mois d’analyse</span>
