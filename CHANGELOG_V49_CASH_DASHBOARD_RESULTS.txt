@@ -1,0 +1,16 @@
+V49 - Cash dashboard results cards added
+
+Changes:
+- Added the following cash result cards into the admin cash dashboard:
+  - Tot. vente
+  - C. fermeture (calculé)
+  - C. fermeture (réel)
+  - Montant manquant
+  - Montant surplus
+  - Écart cash comptée vs calculée
+- Added a dedicated "Résultats de caisse" section in the cash dashboard.
+- Updated cash dashboard calculations to follow the new cash management logic:
+  - S. caisse (compté) comes from Monnaie stock total
+  - À retirer = S. caisse (compté) - 2000 DH if positive
+  - C. fermeture (calculé) based on current operations/results logic
+- Rebuilt frontend dist files.

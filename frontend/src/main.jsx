@@ -708,18 +708,21 @@ function CashRegister(){
       rows.push({Date:cashDate, Onglet:"Monnaie stock", Libellé:d.label, Quantité:qty, Somme:formatDH(qty*d.cents)});
     });
     const m=current.management;
+    const sCaisseCompteeCents = countedCents;
+    const autoToWithdrawCents = Math.max(0, sCaisseCompteeCents - 200000);
     const totalSalesCents = Number(m.salesCashCents || 0) + Number(m.creditSalesCents || 0) + Number(m.atmSalesCents || 0);
-    const closingCalculatedCents = Number(m.openingCents || 0) + Number(m.salesCashCents || 0) + Number(m.depositsCents || 0) - Number(m.withdrawnCents || 0) - Number(m.refundsCents || 0) - expensesCents;
+    const closingCalculatedCents = sCaisseCompteeCents - Number(m.withdrawnCents || 0) + Number(m.depositsCents || 0) + Number(m.salesCashCents || 0) - expensesCents;
     const shortageCents = Math.max(0, closingCalculatedCents - Number(m.closingRealCents || 0));
     const surplusCents = Math.max(0, Number(m.closingRealCents || 0) - closingCalculatedCents);
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Fond initial", Quantité:"", Somme:formatDH(m.openingCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"À retirer", Quantité:"", Somme:formatDH(m.toWithdrawCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"S. caisse (compté)", Quantité:"", Somme:formatDH(sCaisseCompteeCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"À retirer", Quantité:"", Somme:formatDH(autoToWithdrawCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Retiré", Quantité:"", Somme:formatDH(m.withdrawnCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente", Quantité:"", Somme:formatDH(totalSalesCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente en espèce", Quantité:"", Somme:formatDH(m.salesCashCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente type crédit", Quantité:"", Somme:formatDH(m.creditSalesCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente type ATM", Quantité:"", Somme:formatDH(m.atmSalesCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Réglement crédit", Quantité:"", Somme:formatDH(m.creditSettlementCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Dépenses enregistrées", Quantité:"", Somme:formatDH(expensesCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"C. fermeture (réel)", Quantité:"", Somme:formatDH(m.closingRealCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"C. fermeture (calculé)", Quantité:"", Somme:formatDH(closingCalculatedCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant manquant", Quantité:"", Somme:formatDH(shortageCents)});
@@ -731,27 +734,34 @@ function CashRegister(){
 
   const countedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(current.quantities[d.cents] || 0) * d.cents),0);
   const expensesCents = current.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
+  const sCaisseCompteeCents = countedCents;
+  const autoToWithdrawCents = Math.max(0, sCaisseCompteeCents - 200000);
   const totalSalesCents = Number(current.management.salesCashCents || 0) + Number(current.management.creditSalesCents || 0) + Number(current.management.atmSalesCents || 0);
-  const closingCalculatedCents = Number(current.management.openingCents || 0) + Number(current.management.salesCashCents || 0) + Number(current.management.depositsCents || 0) - Number(current.management.withdrawnCents || 0) - Number(current.management.refundsCents || 0) - expensesCents;
+  const closingCalculatedCents = sCaisseCompteeCents - Number(current.management.withdrawnCents || 0) + Number(current.management.depositsCents || 0) + Number(current.management.salesCashCents || 0) - expensesCents;
   const closingRealCents = Number(current.management.closingRealCents || 0);
   const shortageCents = Math.max(0, closingCalculatedCents - closingRealCents);
   const surplusCents = Math.max(0, closingRealCents - closingCalculatedCents);
   const expectedCents = closingCalculatedCents;
-  const gapCents = countedCents - expectedCents;
+  const gapCents = closingRealCents - expectedCents;
 
   const managementHistory = useMemo(()=>Object.entries(store)
     .filter(([date])=>date.startsWith(managementMonth))
     .map(([date,day])=>{
       const management = {...defaultCashDay().management, ...(day?.management || {})};
+      const quantities = {...((day?.quantities) || {})};
+      const daySCaisseCompteeCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(quantities[d.cents] || 0) * d.cents),0);
       const dayExpenses = (Array.isArray(day?.expenses) ? day.expenses : []).map(normalizeExpenseRow).reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
+      const dayToWithdrawCents = Math.max(0, daySCaisseCompteeCents - 200000);
       const dayTotalSales = Number(management.salesCashCents || 0) + Number(management.creditSalesCents || 0) + Number(management.atmSalesCents || 0);
-      const dayClosingCalculated = Number(management.openingCents || 0) + Number(management.salesCashCents || 0) + Number(management.depositsCents || 0) - Number(management.withdrawnCents || 0) - Number(management.refundsCents || 0) - dayExpenses;
+      const dayClosingCalculated = daySCaisseCompteeCents - Number(management.withdrawnCents || 0) + Number(management.depositsCents || 0) + Number(management.salesCashCents || 0) - dayExpenses;
       const dayClosingReal = Number(management.closingRealCents || 0);
       return {
         date,
-        openingCents:Number(management.openingCents || 0),
-        toWithdrawCents:Number(management.toWithdrawCents || 0),
+        openingCents:daySCaisseCompteeCents,
+        toWithdrawCents:dayToWithdrawCents,
         withdrawnCents:Number(management.withdrawnCents || 0),
+        depositsCents:Number(management.depositsCents || 0),
+        expensesCents:dayExpenses,
         closingRealCents:dayClosingReal,
         totalSalesCents:dayTotalSales,
         salesCashCents:Number(management.salesCashCents || 0),
@@ -763,7 +773,7 @@ function CashRegister(){
         surplusCents:Math.max(0, dayClosingReal - dayClosingCalculated)
       };
     })
-    .filter(item=>item.openingCents || item.toWithdrawCents || item.withdrawnCents || item.closingRealCents || item.totalSalesCents || item.salesCashCents || item.creditSalesCents || item.atmSalesCents || item.creditSettlementCents || item.closingCalculatedCents || item.shortageCents || item.surplusCents)
+    .filter(item=>item.openingCents || item.toWithdrawCents || item.withdrawnCents || item.closingRealCents || item.totalSalesCents || item.salesCashCents || item.creditSalesCents || item.atmSalesCents || item.creditSettlementCents || item.closingCalculatedCents || item.shortageCents || item.surplusCents || item.depositsCents || item.expensesCents)
     .sort((a,b)=>b.date.localeCompare(a.date)), [store,managementMonth]);
 
   const managementRowsPerPage = 5;
@@ -839,26 +849,40 @@ function CashRegister(){
 
           {active==="management" && <>
             <section className="cashManagementSection">
-              <h2>Gestion de caisse</h2>
+              <div className="cashSectionHeading">
+                <h2>Opérations de caisse</h2>
+                <p>Séparer les opérations de saisie des résultats calculés.</p>
+              </div>
               <table className="cashTable managementTable managementEntryTable">
-                <thead><tr><th>Élément</th><th>Type</th><th>Montant</th></tr></thead>
+                <thead><tr><th>Opération</th><th>Type</th><th>Montant</th></tr></thead>
                 <tbody>
-                  <tr><td>S. caisse (compté)</td><td>=</td><td><input value={moneyInputValue(current.management.openingCents)} onChange={e=>updateManagement("openingCents",e.target.value)} placeholder="0"/></td></tr>
-                  <tr><td>À retirer</td><td>-</td><td><input value={moneyInputValue(current.management.toWithdrawCents)} onChange={e=>updateManagement("toWithdrawCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>S. caisse (compté)</td><td>=</td><td><div className="cashReadOnlyValue">{formatDH(sCaisseCompteeCents)}</div></td></tr>
+                  <tr><td>À retirer</td><td>-</td><td><div className="cashReadOnlyValue">{formatDH(autoToWithdrawCents)}</div></td></tr>
                   <tr><td>Retiré</td><td>-</td><td><input value={moneyInputValue(current.management.withdrawnCents)} onChange={e=>updateManagement("withdrawnCents",e.target.value)} placeholder="0"/></td></tr>
                   <tr><td>Dépôts / ajouts</td><td>+</td><td><input value={moneyInputValue(current.management.depositsCents)} onChange={e=>updateManagement("depositsCents",e.target.value)} placeholder="0"/></td></tr>
                   <tr><td>Tot. vente en espèce</td><td>+</td><td><input value={moneyInputValue(current.management.salesCashCents)} onChange={e=>updateManagement("salesCashCents",e.target.value)} placeholder="0"/></td></tr>
                   <tr><td>Tot. vente type crédit</td><td>+</td><td><input value={moneyInputValue(current.management.creditSalesCents)} onChange={e=>updateManagement("creditSalesCents",e.target.value)} placeholder="0"/></td></tr>
                   <tr><td>Tot. vente type ATM</td><td>+</td><td><input value={moneyInputValue(current.management.atmSalesCents)} onChange={e=>updateManagement("atmSalesCents",e.target.value)} placeholder="0"/></td></tr>
                   <tr><td>Réglement crédit</td><td>=</td><td><input value={moneyInputValue(current.management.creditSettlementCents)} onChange={e=>updateManagement("creditSettlementCents",e.target.value)} placeholder="0"/></td></tr>
-                  <tr><td>Remboursements</td><td>-</td><td><input value={moneyInputValue(current.management.refundsCents)} onChange={e=>updateManagement("refundsCents",e.target.value)} placeholder="0"/></td></tr>
+                  <tr><td>C. fermeture (réel)</td><td>=</td><td><input value={moneyInputValue(current.management.closingRealCents)} onChange={e=>updateManagement("closingRealCents",e.target.value)} placeholder="0"/></td></tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section className="cashManagementSection cashManagementResultsSection">
+              <div className="cashSectionHeading">
+                <h2>Résultats de caisse</h2>
+                <p>Résultats calculés automatiquement à partir des opérations et des dépenses.</p>
+              </div>
+              <table className="cashTable managementTable managementResultsTable">
+                <thead><tr><th>Résultat</th><th>Type</th><th>Montant</th></tr></thead>
+                <tbody>
                   <tr><td>Dépenses enregistrées</td><td>-</td><td>{formatDH(expensesCents)}</td></tr>
                   <tr className="cashTotalRow"><td>Tot. vente</td><td>=</td><td>{formatDH(totalSalesCents)}</td></tr>
                   <tr><td>C. fermeture (calculé)</td><td>=</td><td>{formatDH(closingCalculatedCents)}</td></tr>
-                  <tr><td>C. fermeture (réel)</td><td>=</td><td><input value={moneyInputValue(current.management.closingRealCents)} onChange={e=>updateManagement("closingRealCents",e.target.value)} placeholder="0"/></td></tr>
                   <tr className={shortageCents>0 ? "cashWarnRow" : "cashOkRow"}><td>Montant manquant</td><td>=</td><td>{formatDH(shortageCents)}</td></tr>
                   <tr className={surplusCents>0 ? "cashOkRow" : "cashTotalRow"}><td>Montant surplus</td><td>=</td><td>{formatDH(surplusCents)}</td></tr>
-                  <tr className={gapCents===0 ? "cashOkRow" : "cashWarnRow"}><td>Écart cash comptée vs calculée</td><td>=</td><td>{formatDH(gapCents)}</td></tr>
+                  <tr className={gapCents===0 ? "cashOkRow" : "cashWarnRow"}><td>Écart fermeture réel vs calculée</td><td>=</td><td>{formatDH(gapCents)}</td></tr>
                 </tbody>
               </table>
             </section>
@@ -992,25 +1016,29 @@ function buildCashDayMetrics(date, dayData){
   const day = { ...defaultCashDay(), ...(dayData || {}), management:{...defaultCashDay().management, ...((dayData || {}).management || {})}, quantities:{...((dayData || {}).quantities || {})}, expenses:Array.isArray((dayData || {}).expenses) ? (dayData || {}).expenses.map(normalizeExpenseRow) : [] };
   const countedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(day.quantities[d.cents] || 0) * d.cents),0);
   const expensesCents = day.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
+  const autoToWithdrawCents = Math.max(0, countedCents - 200000);
   const totalSalesCents = Number(day.management.salesCashCents || 0) + Number(day.management.creditSalesCents || 0) + Number(day.management.atmSalesCents || 0);
-  const closingCalculatedCents = Number(day.management.openingCents || 0) + Number(day.management.salesCashCents || 0) + Number(day.management.depositsCents || 0) - Number(day.management.withdrawnCents || 0) - Number(day.management.refundsCents || 0) - expensesCents;
-  const closingRealBase = Number(day.management.closingRealCents || 0);
-  const closingRealCents = closingRealBase || countedCents;
+  const closingCalculatedCents = countedCents - Number(day.management.withdrawnCents || 0) + Number(day.management.depositsCents || 0) + Number(day.management.salesCashCents || 0) - expensesCents;
+  const closingRealCents = Number(day.management.closingRealCents || 0);
   const shortageCents = Math.max(0, closingCalculatedCents - closingRealCents);
   const surplusCents = Math.max(0, closingRealCents - closingCalculatedCents);
-  const dueBalanceCents = Math.max(0, Number(day.management.toWithdrawCents || 0) - Number(day.management.withdrawnCents || 0));
+  const gapCents = closingRealCents - closingCalculatedCents;
+  const dueBalanceCents = Math.max(0, autoToWithdrawCents - Number(day.management.withdrawnCents || 0));
   const isBalanced = shortageCents===0 && surplusCents===0;
   return {
     date,
     countedCents,
     expensesCents,
+    autoToWithdrawCents,
     totalSalesCents,
     closingCalculatedCents,
     closingRealCents,
     shortageCents,
     surplusCents,
+    gapCents,
     dueBalanceCents,
     withdrawnCents:Number(day.management.withdrawnCents || 0),
+    depositsCents:Number(day.management.depositsCents || 0),
     creditSalesCents:Number(day.management.creditSalesCents || 0),
     atmSalesCents:Number(day.management.atmSalesCents || 0),
     salesCashCents:Number(day.management.salesCashCents || 0),
@@ -1146,6 +1174,37 @@ function CashDashboardAdmin(){
 
       <CashAdminCard title="Dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
         <div className="cashAdminMainValue"><small>DH</small><b>{Math.round(monthlyExpensesCents/100)}</b></div>
+      </CashAdminCard>
+    </div>
+
+    <div className="cashAdminSectionTitle">
+      <h2>Résultats de caisse</h2>
+      <span>{selectedDate}</span>
+    </div>
+
+    <div className="cashAdminGrid cashAdminGridResults">
+      <CashAdminCard title="Tot. vente" meta={<span>{selectedDate}</span>} right="=">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.totalSalesCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="C. fermeture (calculé)" meta={<span>{selectedDate}</span>} right="=">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.closingCalculatedCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="C. fermeture (réel)" meta={<span>{selectedDate}</span>} right="=">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.closingRealCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Montant manquant" meta={<span>{selectedDate}</span>} right="-">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.shortageCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Montant surplus" meta={<span>{selectedDate}</span>} right="+">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Écart cash comptée vs calculée" meta={<span>{selectedDate}</span>} right="Δ">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.gapCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
     </div>
 

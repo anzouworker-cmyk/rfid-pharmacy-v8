@@ -1,0 +1,19 @@
+V48 - Cash management operations/results separation
+
+Changes:
+- In "Gestion de caisse", separated the content into 3 blocks:
+  1. Opérations de caisse
+  2. Résultats de caisse
+  3. Cash register history
+- S. caisse (compté) now comes automatically from the total of "Monnaie stock".
+- À retirer is now auto-calculated as: S. caisse (compté) - 2000 DH if positive.
+- Remboursements field removed from the main management table.
+- Results section now shows calculated values separately:
+  - Dépenses enregistrées
+  - Tot. vente
+  - C. fermeture (calculé)
+  - Montant manquant
+  - Montant surplus
+  - Écart fermeture réel vs calculée
+- Updated export logic to reflect the new structure.
+- Rebuilt frontend dist files.
