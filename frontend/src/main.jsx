@@ -370,6 +370,9 @@ function Operations(){
   const [epc,setEpc]=useState("");
   const [selectedProduct,setSelectedProduct]=useState(null);
   const [msg,setMsg]=useState("");
+  const [cashDate,setCashDate]=useState(()=>todayISO());
+  const [cashStore,setCashStore]=useState(()=>loadLS(LS_CASH_REGISTER,{}));
+  const [cashOpModal,setCashOpModal]=useState(null);
 
   function importProducts(file){
     if(!file) return;
@@ -476,6 +479,43 @@ function Operations(){
     }catch(e){ alert("Fichier JSON invalide"); }
   }
 
+  const cashCurrent = useMemo(()=>({
+    ...defaultCashDay(),
+    ...(cashStore[cashDate] || {}),
+    management:{...defaultCashDay().management, ...((cashStore[cashDate] || {}).management || {})},
+    quantities:{...((cashStore[cashDate] || {}).quantities || {})},
+    expenses:Array.isArray((cashStore[cashDate] || {}).expenses) && (cashStore[cashDate] || {}).expenses.length
+      ? (cashStore[cashDate] || {}).expenses.map(normalizeExpenseRow)
+      : defaultCashDay().expenses
+  }),[cashStore,cashDate]);
+
+  const cashCountedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(cashCurrent.quantities[d.cents] || 0) * d.cents),0);
+  const cashToWithdrawCents = Math.max(0, cashCountedCents - 200000);
+
+  function saveCashDay(day){
+    const updated={...cashStore,[cashDate]:day};
+    setCashStore(updated);
+    saveLS(LS_CASH_REGISTER,updated);
+  }
+
+  function updateCashOperation(key,value){
+    const management={...cashCurrent.management,[key]:parseMoneyToCents(value)};
+    saveCashDay({...cashCurrent, management});
+    setMsg(`Opération de caisse mise à jour pour le ${cashDate}.`);
+  }
+
+  const cashOperationCards = [
+    {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Total automatique depuis Monnaie stock.", type:"=", editable:false},
+    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 2000 DH.", type:"-", editable:false},
+    {key:"withdrawnCents", title:"Retiré", value:Number(cashCurrent.management.withdrawnCents || 0), description:"Saisir le montant retiré.", type:"-", editable:true},
+    {key:"depositsCents", title:"Dépôts / ajouts", value:Number(cashCurrent.management.depositsCents || 0), description:"Saisir les dépôts ou ajouts.", type:"+", editable:true},
+    {key:"salesCashCents", title:"Tot. vente en espèce", value:Number(cashCurrent.management.salesCashCents || 0), description:"Saisir le total des ventes cash.", type:"+", editable:true},
+    {key:"creditSalesCents", title:"Tot. vente type crédit", value:Number(cashCurrent.management.creditSalesCents || 0), description:"Saisir le total des ventes crédit.", type:"+", editable:true},
+    {key:"atmSalesCents", title:"Tot. vente type ATM", value:Number(cashCurrent.management.atmSalesCents || 0), description:"Saisir le total des ventes ATM.", type:"+", editable:true},
+    {key:"creditSettlementCents", title:"Réglement crédit", value:Number(cashCurrent.management.creditSettlementCents || 0), description:"Saisir le réglement crédit.", type:"=", editable:true},
+    {key:"closingRealCents", title:"C. fermeture (réel)", value:Number(cashCurrent.management.closingRealCents || 0), description:"Saisir la fermeture réelle en caisse.", type:"=", editable:true}
+  ];
+
   return <section className="operationsPage">
     <h1>Opérations</h1>
     <p>Import, scan, associations, EPC détectés, exports et sauvegardes locales.</p>
@@ -513,6 +553,27 @@ function Operations(){
     </div>
     </div>
 
+    <div className="cashOpsPanel">
+      <div className="cashOpsHeader">
+        <div>
+          <h2>Opérations de caisse</h2>
+          <p className="notice">Ces opérations ont été déplacées ici. Cliquez sur une carte pour saisir ou modifier la valeur.</p>
+        </div>
+        <div className="cashOpsDateBox">
+          <span>Date de caisse</span>
+          <input type="date" value={cashDate} onChange={e=>setCashDate(e.target.value || todayISO())}/>
+        </div>
+      </div>
+      <div className="cashOpsGrid">
+        {cashOperationCards.map(card=><button key={card.key} type="button" className={card.editable ? "operationCard cashOperationCard" : "operationCard cashOperationCard cashOperationCardReadOnly"} onClick={()=>card.editable ? setCashOpModal(card) : null}>
+          <div className="opIcon"><DashIcon name="cash"/></div>
+          <h3>{card.title}</h3>
+          <p>{card.description}</p>
+          <div className="cashCardFooter"><em>{card.type}</em><span>{formatDH(card.value)}</span></div>
+        </button>)}
+      </div>
+    </div>
+
     <div className="exportsPanel">
       <h2>Exports et sauvegardes locales</h2>
       <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales.</p>
@@ -546,6 +607,17 @@ function Operations(){
           <input autoFocus value={epc} onChange={e=>setEpc(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")associateEpc()}} placeholder="EPC RFID"/>
           <button className="primaryBtn" onClick={associateEpc}>Associer EPC</button>
         </>}
+      </div>
+    </div>}
+
+    {cashOpModal && <div className="modalOverlay">
+      <div className="scanModal cashValueModal">
+        <button className="modalClose" onClick={()=>setCashOpModal(null)}>×</button>
+        <h2>{cashOpModal.title}</h2>
+        <p>{cashOpModal.description}</p>
+        <div className="foundProduct"><b>Date de caisse</b><small>{cashDate}</small></div>
+        <input autoFocus value={moneyInputValue(cashCurrent.management[cashOpModal.key] || 0)} onChange={e=>updateCashOperation(cashOpModal.key,e.target.value)} placeholder="0"/>
+        <button className="primaryBtn" onClick={()=>setCashOpModal(null)}>Fermer</button>
       </div>
     </div>}
 
@@ -847,49 +919,14 @@ function CashRegister(){
             </table>
           </>}
 
-          {active==="management" && <>
-            <section className="cashManagementSection">
-              <div className="cashSectionHeading">
-                <h2>Opérations de caisse</h2>
-                <p>Séparer les opérations de saisie des résultats calculés.</p>
-              </div>
-              <table className="cashTable managementTable managementEntryTable">
-                <thead><tr><th>Opération</th><th>Type</th><th>Montant</th></tr></thead>
-                <tbody>
-                  <tr><td>S. caisse (compté)</td><td>=</td><td><div className="cashReadOnlyValue">{formatDH(sCaisseCompteeCents)}</div></td></tr>
-                  <tr><td>À retirer</td><td>-</td><td><div className="cashReadOnlyValue">{formatDH(autoToWithdrawCents)}</div></td></tr>
-                  <tr><td>Retiré</td><td>-</td><td><input value={moneyInputValue(current.management.withdrawnCents)} onChange={e=>updateManagement("withdrawnCents",e.target.value)} placeholder="0"/></td></tr>
-                  <tr><td>Dépôts / ajouts</td><td>+</td><td><input value={moneyInputValue(current.management.depositsCents)} onChange={e=>updateManagement("depositsCents",e.target.value)} placeholder="0"/></td></tr>
-                  <tr><td>Tot. vente en espèce</td><td>+</td><td><input value={moneyInputValue(current.management.salesCashCents)} onChange={e=>updateManagement("salesCashCents",e.target.value)} placeholder="0"/></td></tr>
-                  <tr><td>Tot. vente type crédit</td><td>+</td><td><input value={moneyInputValue(current.management.creditSalesCents)} onChange={e=>updateManagement("creditSalesCents",e.target.value)} placeholder="0"/></td></tr>
-                  <tr><td>Tot. vente type ATM</td><td>+</td><td><input value={moneyInputValue(current.management.atmSalesCents)} onChange={e=>updateManagement("atmSalesCents",e.target.value)} placeholder="0"/></td></tr>
-                  <tr><td>Réglement crédit</td><td>=</td><td><input value={moneyInputValue(current.management.creditSettlementCents)} onChange={e=>updateManagement("creditSettlementCents",e.target.value)} placeholder="0"/></td></tr>
-                  <tr><td>C. fermeture (réel)</td><td>=</td><td><input value={moneyInputValue(current.management.closingRealCents)} onChange={e=>updateManagement("closingRealCents",e.target.value)} placeholder="0"/></td></tr>
-                </tbody>
-              </table>
-            </section>
-
-            <section className="cashManagementSection cashManagementResultsSection">
-              <div className="cashSectionHeading">
-                <h2>Résultats de caisse</h2>
-                <p>Résultats calculés automatiquement à partir des opérations et des dépenses.</p>
-              </div>
-              <table className="cashTable managementTable managementResultsTable">
-                <thead><tr><th>Résultat</th><th>Type</th><th>Montant</th></tr></thead>
-                <tbody>
-                  <tr><td>Dépenses enregistrées</td><td>-</td><td>{formatDH(expensesCents)}</td></tr>
-                  <tr className="cashTotalRow"><td>Tot. vente</td><td>=</td><td>{formatDH(totalSalesCents)}</td></tr>
-                  <tr><td>C. fermeture (calculé)</td><td>=</td><td>{formatDH(closingCalculatedCents)}</td></tr>
-                  <tr className={shortageCents>0 ? "cashWarnRow" : "cashOkRow"}><td>Montant manquant</td><td>=</td><td>{formatDH(shortageCents)}</td></tr>
-                  <tr className={surplusCents>0 ? "cashOkRow" : "cashTotalRow"}><td>Montant surplus</td><td>=</td><td>{formatDH(surplusCents)}</td></tr>
-                  <tr className={gapCents===0 ? "cashOkRow" : "cashWarnRow"}><td>Écart fermeture réel vs calculée</td><td>=</td><td>{formatDH(gapCents)}</td></tr>
-                </tbody>
-              </table>
-            </section>
-
+                    {active==="management" && <>
             <section className="cashManagementSection cashManagementHistorySection">
-              <div className="expenseHistoryTopbar">
+              <div className="cashSectionHeading">
                 <h2>Cash register history</h2>
+                <p>Les opérations sont maintenant sur la page Opérations et les résultats restent sur le Dashboard Caisse.</p>
+              </div>
+              <div className="expenseHistoryTopbar">
+                <div></div>
                 <div className="expenseMonthBar">
                   <button type="button" onClick={()=>setManagementMonth(shiftISOMonth(managementMonth,-1))}>‹</button>
                   <div className="expenseMonthValue">{formatMonthLabel(managementMonth)}</div>
@@ -934,7 +971,6 @@ function CashRegister(){
               </div>
             </section>
           </>}
-
           {active==="expenses" && <>
             <section className="cashExpensesSection">
               <div className="expenseTitleRow"><h2>Dépenses</h2><button type="button" onClick={addExpense}>+ Ajouter</button></div>

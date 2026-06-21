@@ -1,0 +1,22 @@
+V50 - Cash operations moved to Operations page
+
+Changes:
+- Removed the "Résultats de caisse" section from "Gestion de caisse".
+- Removed the editable cash operations table from "Gestion de caisse".
+- Kept only the "Cash register history" table in the "Gestion de caisse" tab.
+- Added a new "Opérations de caisse" card section on the main Operations page.
+- Added cards for:
+  - S. caisse (compté)
+  - À retirer
+  - Retiré
+  - Dépôts / ajouts
+  - Tot. vente en espèce
+  - Tot. vente type crédit
+  - Tot. vente type ATM
+  - Réglement crédit
+  - C. fermeture (réel)
+- Clicking an editable cash card opens a popup window to enter the value.
+- S. caisse (compté) remains automatic from "Monnaie stock".
+- À retirer remains automatic: S. caisse (compté) - 2000 DH if positive.
+- Dashboard Caisse remains the only place showing cash result cards.
+- Rebuilt frontend dist files.

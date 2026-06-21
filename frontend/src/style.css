@@ -3948,3 +3948,38 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .cashAdminGridResults .cashAdminCard{border-right:0!important;border-top:1px solid #dce4f1!important;}
   .cashAdminGridResults .cashAdminCard:first-child{border-top:0!important;}
 }
+
+.cashOpsPanel{
+  background:#fff!important;
+  border:1px solid #dce4f1!important;
+  border-radius:8px!important;
+  padding:22px!important;
+  margin-top:2px!important;
+}
+.cashOpsHeader{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  flex-wrap:wrap!important;
+  margin-bottom:16px!important;
+}
+.cashOpsHeader h2{margin:0 0 10px!important;font-size:22px!important;font-weight:750!important;color:#071227!important;}
+.cashOpsHeader .notice{margin:0!important;max-width:760px!important;}
+.cashOpsDateBox{display:grid!important;gap:6px!important;min-width:180px!important;}
+.cashOpsDateBox span{font-size:12px!important;font-weight:700!important;color:#64748b!important;}
+.cashOpsDateBox input{min-height:38px!important;border:1px solid #dce4f1!important;border-radius:8px!important;padding:8px 10px!important;margin:0!important;}
+.cashOpsGrid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important;}
+.cashOperationCard{height:auto!important;min-height:200px!important;text-align:left!important;align-items:flex-start!important;justify-content:flex-start!important;}
+.cashOperationCardReadOnly{cursor:default!important;opacity:1!important;}
+.cashOperationCardReadOnly:hover{transform:none!important;box-shadow:0 12px 24px rgba(15,23,42,.04)!important;}
+.cashCardFooter{margin-top:auto!important;width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;}
+.cashCardFooter em{font-style:normal!important;font-size:22px!important;font-weight:800!important;color:#0f172a!important;}
+.cashCardFooter span{font-size:20px!important;font-weight:800!important;color:#071227!important;}
+.cashValueModal input{text-align:right!important;}
+@media(max-width:1100px){
+  .cashOpsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+@media(max-width:700px){
+  .cashOpsGrid{grid-template-columns:1fr!important;}
+}
