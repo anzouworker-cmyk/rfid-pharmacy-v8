@@ -1,0 +1,14 @@
+V66 - Replace closing real card with new cash balance formula
+
+Changes:
+- Replaced the previous automatic "C. fermeture (réel)" logic.
+- New automatic card/title is now: "Nouvelle solde caisse".
+- New formula used:
+  Nouvelle solde caisse = S. caisse (compté) - Tot. vente en espèce - Règlement de crédit - Retiré - Dépenses + Dépôt
+- Updated this value in:
+  - Operations page card
+  - Cash export CSV
+  - Cash management history table
+  - Cash admin dashboard card
+  - Metrics calculations that depend on this value
+- Rebuilt frontend dist files.

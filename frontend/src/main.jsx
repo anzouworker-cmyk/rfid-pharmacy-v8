@@ -504,7 +504,7 @@ function Operations({me}){
   const creditSettlementCents = Number(cashCurrent.management.creditSettlementCents || 0);
   const withdrawnCents = Number(cashCurrent.management.withdrawnCents || 0);
   const depositsCents = Number(cashCurrent.management.depositsCents || 0);
-  const closingRealAutoCents = getClosingRealCentsForDate(cashStore, cashDate);
+  const newCashBalanceCents = getClosingRealCentsForDate(cashStore, cashDate);
   const cashToWithdrawCents = Math.max(0, cashCountedCents - 300000);
   const closingTheoreticalCents = Math.max(0, (cashCountedCents - withdrawnCents) + salesCashCalculatedCents + creditSettlementCents + depositsCents);
 
@@ -565,7 +565,7 @@ function Operations({me}){
     {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 3000 DH, minimum 0.", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"withdrawnCents", title:"Retiré", value:withdrawnCents, description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"depositsCents", title:"Dépôts / ajouts", value:depositsCents, description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
-    {key:"closingRealCents", title:"C. fermeture (réel)", value:closingRealAutoCents, description:"Calcul automatique : S. caisse (compté) de demain.", type:"=", editable:false, tone:"blue", cta:"Automatique", valueLabel:"Valeur calculée"},
+    {key:"closingRealCents", title:"Nouvelle solde caisse", value:newCashBalanceCents, description:"Calcul automatique : S. caisse (compté) - Tot. vente en espèce - Règlement de crédit - Retiré + Dépôt.", type:"=", editable:false, tone:"blue", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul : max(0, S. caisse comptée - retiré + vente espèce + crédit réglé + dépôt).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"}
   ];
@@ -826,8 +826,20 @@ function getCountedCentsForDate(store, date){
   return CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(quantities[d.cents] || 0) * d.cents),0);
 }
 
+function getCalculatedCashBalanceCents(dayData){
+  const day = { ...defaultCashDay(), ...(dayData || {}), management:{...defaultCashDay().management, ...((dayData || {}).management || {})}, quantities:{...((dayData || {}).quantities || {})}, expenses:Array.isArray((dayData || {}).expenses) ? (dayData || {}).expenses.map(normalizeExpenseRow) : [] };
+  const countedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(day.quantities[d.cents] || 0) * d.cents),0);
+  const totalSalesCents = Number(day.management.totalDailySalesCents || 0);
+  const salesCashCents = totalSalesCents - Number(day.management.creditSalesCents || 0) - Number(day.management.atmSalesCents || 0);
+  return countedCents
+    - salesCashCents
+    - Number(day.management.creditSettlementCents || 0)
+    - Number(day.management.withdrawnCents || 0)
+    + Number(day.management.depositsCents || 0);
+}
+
 function getClosingRealCentsForDate(store, date){
-  return getCountedCentsForDate(store, shiftISODate(date, 1));
+  return getCalculatedCashBalanceCents((store || {})[date]);
 }
 
 function getNextDayCountedAsClosingRealCents(store, date){
@@ -921,7 +933,7 @@ function CashRegister(){
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente type ATM", Quantité:"", Somme:formatDH(m.atmSalesCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Réglement crédit", Quantité:"", Somme:formatDH(m.creditSettlementCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Dépenses enregistrées", Quantité:"", Somme:formatDH(expensesCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"C. fermeture (réel)", Quantité:"", Somme:formatDH(closingRealCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Nouvelle solde caisse", Quantité:"", Somme:formatDH(closingRealCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"C. fermeture (calculé)", Quantité:"", Somme:formatDH(closingCalculatedCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant manquant", Quantité:"", Somme:formatDH(shortageCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant surplus", Quantité:"", Somme:formatDH(surplusCents)});
@@ -1065,7 +1077,7 @@ function CashRegister(){
 
               <div className="cashWideTableWrap">
                 <table className="cashTable managementHistoryTable">
-                  <thead><tr><th>Date</th><th>S. caisse (compté)</th><th>À retirer</th><th>Retiré</th><th>C. fermeture (réel)</th><th>Tot. vente</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>C. fermeture (calculé)</th><th>Montant manquant</th><th>Montant surplus</th></tr></thead>
+                  <thead><tr><th>Date</th><th>S. caisse (compté)</th><th>À retirer</th><th>Retiré</th><th>Nouvelle solde caisse</th><th>Tot. vente</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>C. fermeture (calculé)</th><th>Montant manquant</th><th>Montant surplus</th></tr></thead>
                   <tbody>
                     {pagedManagementHistory.length ? pagedManagementHistory.map(item=><tr key={item.date}>
                       <td>{item.date}</td>
@@ -1393,7 +1405,7 @@ function CashDashboardAdmin(){
         <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingCalculated.closingCalculatedCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="C. fermeture (réel)" meta={resultDateMeta("closingReal")} right="=">
+      <CashAdminCard title="Nouvelle solde caisse" meta={resultDateMeta("closingReal")} right="=">
         <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingReal.closingRealCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 

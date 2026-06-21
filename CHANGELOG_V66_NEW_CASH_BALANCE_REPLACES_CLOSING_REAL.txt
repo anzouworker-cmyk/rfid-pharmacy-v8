@@ -1,0 +1,9 @@
+V66 - Replace C. fermeture (réel) with Nouvelle solde caisse
+
+Changes:
+- Replaced the user-facing label "C. fermeture (réel)" with "Nouvelle solde caisse".
+- Updated the automatic formula for this value to:
+  Nouvelle solde caisse = S. caisse (compté) - Tot. vente en espèce - Règlement de crédit - Retiré + Dépôt.
+- Removed expenses from this calculation, following the requested formula.
+- Updated the label in operations cards, management history, exports, and dashboard cards.
+- Rebuilt frontend dist files.
