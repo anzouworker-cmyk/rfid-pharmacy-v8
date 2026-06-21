@@ -1,0 +1,12 @@
+V51 - Cash operations cards redesigned to match Exports section
+
+Changes:
+- Redesigned the "Opérations de caisse" section so it matches the visual style of "Exports et sauvegardes locales".
+- Cash operation cards now use the same export-card layout style.
+- Added the amount display inside each cash operation card.
+- Kept popup behavior on click for editable cards.
+- Kept read-only cards for:
+  - S. caisse (compté)
+  - À retirer
+- Preserved the date selector and cash logic.
+- Rebuilt frontend dist files.

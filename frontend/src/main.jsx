@@ -505,15 +505,15 @@ function Operations(){
   }
 
   const cashOperationCards = [
-    {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Total automatique depuis Monnaie stock.", type:"=", editable:false},
-    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 2000 DH.", type:"-", editable:false},
-    {key:"withdrawnCents", title:"Retiré", value:Number(cashCurrent.management.withdrawnCents || 0), description:"Saisir le montant retiré.", type:"-", editable:true},
-    {key:"depositsCents", title:"Dépôts / ajouts", value:Number(cashCurrent.management.depositsCents || 0), description:"Saisir les dépôts ou ajouts.", type:"+", editable:true},
-    {key:"salesCashCents", title:"Tot. vente en espèce", value:Number(cashCurrent.management.salesCashCents || 0), description:"Saisir le total des ventes cash.", type:"+", editable:true},
-    {key:"creditSalesCents", title:"Tot. vente type crédit", value:Number(cashCurrent.management.creditSalesCents || 0), description:"Saisir le total des ventes crédit.", type:"+", editable:true},
-    {key:"atmSalesCents", title:"Tot. vente type ATM", value:Number(cashCurrent.management.atmSalesCents || 0), description:"Saisir le total des ventes ATM.", type:"+", editable:true},
-    {key:"creditSettlementCents", title:"Réglement crédit", value:Number(cashCurrent.management.creditSettlementCents || 0), description:"Saisir le réglement crédit.", type:"=", editable:true},
-    {key:"closingRealCents", title:"C. fermeture (réel)", value:Number(cashCurrent.management.closingRealCents || 0), description:"Saisir la fermeture réelle en caisse.", type:"=", editable:true}
+    {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Total automatique depuis Monnaie stock.", type:"=", editable:false, tone:"blue", cta:"Automatique"},
+    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 2000 DH.", type:"-", editable:false, tone:"neutral", cta:"Automatique"},
+    {key:"withdrawnCents", title:"Retiré", value:Number(cashCurrent.management.withdrawnCents || 0), description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur"},
+    {key:"depositsCents", title:"Dépôts / ajouts", value:Number(cashCurrent.management.depositsCents || 0), description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur"},
+    {key:"salesCashCents", title:"Tot. vente en espèce", value:Number(cashCurrent.management.salesCashCents || 0), description:"Saisir le total des ventes cash.", type:"+", editable:true, tone:"indigo", cta:"Entrer valeur"},
+    {key:"creditSalesCents", title:"Tot. vente type crédit", value:Number(cashCurrent.management.creditSalesCents || 0), description:"Saisir le total des ventes crédit.", type:"+", editable:true, tone:"danger", cta:"Entrer valeur"},
+    {key:"atmSalesCents", title:"Tot. vente type ATM", value:Number(cashCurrent.management.atmSalesCents || 0), description:"Saisir le total des ventes ATM.", type:"+", editable:true, tone:"blue", cta:"Entrer valeur"},
+    {key:"creditSettlementCents", title:"Réglement crédit", value:Number(cashCurrent.management.creditSettlementCents || 0), description:"Saisir le réglement crédit.", type:"=", editable:true, tone:"indigo", cta:"Entrer valeur"},
+    {key:"closingRealCents", title:"C. fermeture (réel)", value:Number(cashCurrent.management.closingRealCents || 0), description:"Saisir la fermeture réelle en caisse.", type:"=", editable:true, tone:"blue", cta:"Entrer valeur"}
   ];
 
   return <section className="operationsPage">
@@ -553,7 +553,7 @@ function Operations(){
     </div>
     </div>
 
-    <div className="cashOpsPanel">
+    <div className="exportsPanel cashOpsPanel">
       <div className="cashOpsHeader">
         <div>
           <h2>Opérations de caisse</h2>
@@ -564,12 +564,13 @@ function Operations(){
           <input type="date" value={cashDate} onChange={e=>setCashDate(e.target.value || todayISO())}/>
         </div>
       </div>
-      <div className="cashOpsGrid">
-        {cashOperationCards.map(card=><button key={card.key} type="button" className={card.editable ? "operationCard cashOperationCard" : "operationCard cashOperationCard cashOperationCardReadOnly"} onClick={()=>card.editable ? setCashOpModal(card) : null}>
+      <div className="exportOperationGrid cashOpsGrid">
+        {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.editable ? setCashOpModal(card) : null}>
           <div className="opIcon"><DashIcon name="cash"/></div>
           <h3>{card.title}</h3>
           <p>{card.description}</p>
-          <div className="cashCardFooter"><em>{card.type}</em><span>{formatDH(card.value)}</span></div>
+          <strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
+          <span>{card.cta}</span>
         </button>)}
       </div>
     </div>
