@@ -565,7 +565,7 @@ function Operations({me}){
     {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 3000 DH, minimum 0.", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"withdrawnCents", title:"Retiré", value:withdrawnCents, description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"depositsCents", title:"Dépôts / ajouts", value:depositsCents, description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
-    {key:"closingRealCents", title:"C. fermeture (réel)", value:closingRealAutoCents, description:"Calcul automatique : S. caisse (compté) de hier.", type:"=", editable:false, tone:"blue", cta:"Automatique", valueLabel:"Valeur calculée"},
+    {key:"closingRealCents", title:"C. fermeture (réel)", value:closingRealAutoCents, description:"Calcul automatique : S. caisse (compté) de demain.", type:"=", editable:false, tone:"blue", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul : max(0, S. caisse comptée - retiré + vente espèce + crédit réglé + dépôt).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"}
   ];
@@ -827,10 +827,10 @@ function getCountedCentsForDate(store, date){
 }
 
 function getClosingRealCentsForDate(store, date){
-  return getCountedCentsForDate(store, shiftISODate(date, -1));
+  return getCountedCentsForDate(store, shiftISODate(date, 1));
 }
 
-function getPreviousClosingRealCents(store, date){
+function getNextDayCountedAsClosingRealCents(store, date){
   return getClosingRealCentsForDate(store, date);
 }
 

@@ -1,0 +1,8 @@
+V65 - C. fermeture réel from tomorrow counted cash
+
+Changes:
+- Updated C. fermeture (réel) formula.
+- New rule: C. fermeture (réel) = S. caisse (compté) de demain.
+- The Operations card description now shows "de demain".
+- Cash Register history, exports and Dashboard calculations use tomorrow's counted cash for C. fermeture (réel).
+- Rebuilt frontend dist files.
