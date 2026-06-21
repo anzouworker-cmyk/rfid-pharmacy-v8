@@ -4149,3 +4149,10 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   justify-content:flex-end!important;
   margin-top:8px!important;
 }
+
+.cashOpsDateBox input:disabled{
+  background:#f8fafc!important;
+  color:#64748b!important;
+  cursor:not-allowed!important;
+  opacity:1!important;
+}

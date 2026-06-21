@@ -1,0 +1,7 @@
+V59 - Admin-only cash date selector
+
+Changes:
+- The cash date selector in the Operations page can now be changed only by platform admin users.
+- Non-admin users can see the selected/default cash date, but the date input is disabled.
+- Added disabled styling and tooltip for the restricted date selector.
+- Rebuilt frontend dist files.

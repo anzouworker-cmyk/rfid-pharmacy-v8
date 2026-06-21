@@ -28,6 +28,7 @@ const LS_PRODUCTS="rfid_v7_products";
 const LS_ASSOC="rfid_v7_associations";
 const LS_DETECTED_EPCS="rfid_v7_detected_epcs";
 const LS_CASH_REGISTER="smart_inventory_cash_register_v1";
+const LS_CASH_SETTINGS="smart_inventory_cash_settings_v1";
 
 function saveLS(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
 function loadLS(k,def){ try{return JSON.parse(localStorage.getItem(k)||"")}catch{return def} }
@@ -347,7 +348,7 @@ function App(){
       </header>
 
       <main className="whiteContent">
-        {tab==="operations" && <Operations/>}
+        {tab==="operations" && <Operations me={me}/>}
         {tab==="dashboard" && <Dashboard setTab={setTab}/>}
         {tab==="ai" && <AIAssistant/>}
         {tab==="association" && <Association/>}
@@ -363,7 +364,7 @@ function App(){
 }
 
 
-function Operations(){
+function Operations({me}){
   const {products,associations,detectedEpcs,setProducts,setAssociations,setDetectedEpcs}=useLocalStore();
   const [scanModal,setScanModal]=useState(null);
   const [barcode,setBarcode]=useState("");
@@ -372,9 +373,12 @@ function Operations(){
   const [msg,setMsg]=useState("");
   const [cashDate,setCashDate]=useState(()=>todayISO());
   const [cashStore,setCashStore]=useState(()=>loadLS(LS_CASH_REGISTER,{}));
+  const [cashSettings,setCashSettings]=useState(()=>({ ...defaultCashSettings(), ...(loadLS(LS_CASH_SETTINGS,{}) || {}) }));
   const [cashOpModal,setCashOpModal]=useState(null);
   const [expenseModalOpen,setExpenseModalOpen]=useState(false);
   const [expenseDraft,setExpenseDraft]=useState(()=>createExpenseRow());
+  const canChangeCashDate = me?.role==="platform_admin";
+  const reserveCents = Number(cashSettings.reserveCents || 0);
 
   function importProducts(file){
     if(!file) return;
@@ -492,7 +496,7 @@ function Operations(){
   }),[cashStore,cashDate]);
 
   const cashCountedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(cashCurrent.quantities[d.cents] || 0) * d.cents),0);
-  const cashToWithdrawCents = Math.max(0, cashCountedCents - 200000);
+  const cashToWithdrawCents = Math.max(0, cashCountedCents - reserveCents);
 
   function saveCashDay(day){
     const updated={...cashStore,[cashDate]:day};
@@ -510,6 +514,12 @@ function Operations(){
     const qty=Math.max(0, parseInt(value || 0, 10) || 0);
     const quantities={...cashCurrent.quantities,[cents]:qty};
     saveCashDay({...cashCurrent, quantities});
+  }
+
+  function updateCashSetting(key,value){
+    const updated={...cashSettings,[key]:parseMoneyToCents(value)};
+    setCashSettings(updated);
+    saveLS(LS_CASH_SETTINGS,updated);
   }
 
   function openExpenseModal(){
@@ -537,7 +547,7 @@ function Operations(){
 
   const cashOperationCards = [
     {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Cliquer pour compter la caisse avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse"},
-    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 2000 DH.", type:"-", editable:false, tone:"neutral", cta:"Automatique"},
+    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:`Calcul automatique : S. caisse (compté) - ${formatDH(reserveCents)}.`, type:"-", editable:canChangeCashDate, tone:"neutral", cta:canChangeCashDate ? "Configurer montant" : "Automatique"},
     {key:"withdrawnCents", title:"Retiré", value:Number(cashCurrent.management.withdrawnCents || 0), description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur"},
     {key:"depositsCents", title:"Dépôts / ajouts", value:Number(cashCurrent.management.depositsCents || 0), description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur"},
     {key:"salesCashCents", title:"Tot. vente en espèce", value:Number(cashCurrent.management.salesCashCents || 0), description:"Saisir le total des ventes cash.", type:"+", editable:true, tone:"indigo", cta:"Entrer valeur"},
@@ -592,8 +602,14 @@ function Operations(){
           <p className="notice">Ces opérations ont été déplacées ici. Cliquez sur une carte pour saisir ou modifier la valeur.</p>
         </div>
         <div className="cashOpsDateBox">
-          <span>Date de caisse</span>
-          <input type="date" value={cashDate} onChange={e=>setCashDate(e.target.value || todayISO())}/>
+          <span>Date de caisse {canChangeCashDate ? "" : "(admin seulement)"}</span>
+          <input
+            type="date"
+            value={cashDate}
+            disabled={!canChangeCashDate}
+            title={canChangeCashDate ? "Changer la date de caisse" : "Seul un administrateur peut changer cette date"}
+            onChange={e=>canChangeCashDate && setCashDate(e.target.value || todayISO())}
+          />
         </div>
       </div>
       <div className="exportOperationGrid cashOpsGrid">
@@ -667,6 +683,13 @@ function Operations(){
           <div className="cashModalTotalBar">
             <span>Total compté</span>
             <strong>{formatDH(cashCountedCents)}</strong>
+          </div>
+        </> : cashOpModal.key==="toWithdraw" ? <>
+          <div className="foundProduct"><b>Montant minimum à garder en caisse</b><small>Modifiable par l’admin seulement.</small></div>
+          <input autoFocus value={moneyInputValue(reserveCents)} onChange={e=>updateCashSetting("reserveCents",e.target.value)} placeholder="0"/>
+          <div className="cashModalTotalBar">
+            <span>À retirer calculé</span>
+            <strong>{formatDH(cashToWithdrawCents)}</strong>
           </div>
         </> : <input autoFocus value={moneyInputValue(cashCurrent.management[cashOpModal.key] || 0)} onChange={e=>updateCashOperation(cashOpModal.key,e.target.value)} placeholder="0"/>}
         <button className="primaryBtn" onClick={()=>setCashOpModal(null)}>Fermer</button>
@@ -783,6 +806,10 @@ function defaultCashDay(){
   };
 }
 
+function defaultCashSettings(){
+  return { reserveCents: 200000 };
+}
+
 function CashRegister(){
   const [active,setActive]=useState("exchange");
   const [cashDate,setCashDate]=useState(()=>todayISO());
@@ -791,7 +818,9 @@ function CashRegister(){
   const [expensesMonth,setExpensesMonth]=useState(()=>todayMonthISO());
   const [expensesPage,setExpensesPage]=useState(0);
   const [store,setStore]=useState(()=>loadLS(LS_CASH_REGISTER,{}));
-  const [msg,setMsg]=useState("");
+  const [cashSettings] = useState(()=>({ ...defaultCashSettings(), ...(loadLS(LS_CASH_SETTINGS,{}) || {}) }));
+  const [msg,setMsg] = useState("");
+  const reserveCents = Number(cashSettings.reserveCents || 0);
 
   const current = useMemo(()=>({
     ...defaultCashDay(),
@@ -852,7 +881,7 @@ function CashRegister(){
     });
     const m=current.management;
     const sCaisseCompteeCents = countedCents;
-    const autoToWithdrawCents = Math.max(0, sCaisseCompteeCents - 200000);
+    const autoToWithdrawCents = Math.max(0, sCaisseCompteeCents - reserveCents);
     const totalSalesCents = Number(m.salesCashCents || 0) + Number(m.creditSalesCents || 0) + Number(m.atmSalesCents || 0);
     const closingCalculatedCents = sCaisseCompteeCents - Number(m.withdrawnCents || 0) + Number(m.depositsCents || 0) + Number(m.salesCashCents || 0) - expensesCents;
     const shortageCents = Math.max(0, closingCalculatedCents - Number(m.closingRealCents || 0));
@@ -878,7 +907,7 @@ function CashRegister(){
   const countedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(current.quantities[d.cents] || 0) * d.cents),0);
   const expensesCents = current.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
   const sCaisseCompteeCents = countedCents;
-  const autoToWithdrawCents = Math.max(0, sCaisseCompteeCents - 200000);
+  const autoToWithdrawCents = Math.max(0, sCaisseCompteeCents - reserveCents);
   const totalSalesCents = Number(current.management.salesCashCents || 0) + Number(current.management.creditSalesCents || 0) + Number(current.management.atmSalesCents || 0);
   const closingCalculatedCents = sCaisseCompteeCents - Number(current.management.withdrawnCents || 0) + Number(current.management.depositsCents || 0) + Number(current.management.salesCashCents || 0) - expensesCents;
   const closingRealCents = Number(current.management.closingRealCents || 0);
@@ -894,7 +923,7 @@ function CashRegister(){
       const quantities = {...((day?.quantities) || {})};
       const daySCaisseCompteeCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(quantities[d.cents] || 0) * d.cents),0);
       const dayExpenses = (Array.isArray(day?.expenses) ? day.expenses : []).map(normalizeExpenseRow).reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
-      const dayToWithdrawCents = Math.max(0, daySCaisseCompteeCents - 200000);
+      const dayToWithdrawCents = Math.max(0, daySCaisseCompteeCents - reserveCents);
       const dayTotalSales = Number(management.salesCashCents || 0) + Number(management.creditSalesCents || 0) + Number(management.atmSalesCents || 0);
       const dayClosingCalculated = daySCaisseCompteeCents - Number(management.withdrawnCents || 0) + Number(management.depositsCents || 0) + Number(management.salesCashCents || 0) - dayExpenses;
       const dayClosingReal = Number(management.closingRealCents || 0);
@@ -1106,11 +1135,11 @@ function CashRegister(){
 }
 
 
-function buildCashDayMetrics(date, dayData){
+function buildCashDayMetrics(date, dayData, reserveCents=200000){
   const day = { ...defaultCashDay(), ...(dayData || {}), management:{...defaultCashDay().management, ...((dayData || {}).management || {})}, quantities:{...((dayData || {}).quantities || {})}, expenses:Array.isArray((dayData || {}).expenses) ? (dayData || {}).expenses.map(normalizeExpenseRow) : [] };
   const countedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(day.quantities[d.cents] || 0) * d.cents),0);
   const expensesCents = day.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
-  const autoToWithdrawCents = Math.max(0, countedCents - 200000);
+  const autoToWithdrawCents = Math.max(0, countedCents - reserveCents);
   const totalSalesCents = Number(day.management.salesCashCents || 0) + Number(day.management.creditSalesCents || 0) + Number(day.management.atmSalesCents || 0);
   const closingCalculatedCents = countedCents - Number(day.management.withdrawnCents || 0) + Number(day.management.depositsCents || 0) + Number(day.management.salesCashCents || 0) - expensesCents;
   const closingRealCents = Number(day.management.closingRealCents || 0);
@@ -1173,6 +1202,8 @@ function CashAdminCard({title, children, meta, right}){
 
 function CashDashboardAdmin(){
   const [store] = useState(()=>loadLS(LS_CASH_REGISTER,{}));
+  const [cashSettings] = useState(()=>({ ...defaultCashSettings(), ...(loadLS(LS_CASH_SETTINGS,{}) || {}) }));
+  const reserveCents = Number(cashSettings.reserveCents || 0);
   const allDates = useMemo(()=>Object.keys(store).sort(),[store]);
   const latestDate = allDates.length ? allDates[allDates.length-1] : todayISO();
   const [selectedDate,setSelectedDate] = useState(latestDate);
@@ -1216,16 +1247,16 @@ function CashDashboardAdmin(){
     }));
   },[allDates.length, latestDate, store]);
 
-  const selectedMetrics = useMemo(()=>buildCashDayMetrics(selectedDate, store[selectedDate]),[selectedDate,store]);
+  const selectedMetrics = useMemo(()=>buildCashDayMetrics(selectedDate, store[selectedDate], reserveCents),[selectedDate,store,reserveCents]);
   const resultMetrics = useMemo(()=>({
-    totalSales: buildCashDayMetrics(resultsDates.totalSales, store[resultsDates.totalSales]),
-    closingCalculated: buildCashDayMetrics(resultsDates.closingCalculated, store[resultsDates.closingCalculated]),
-    closingReal: buildCashDayMetrics(resultsDates.closingReal, store[resultsDates.closingReal]),
-    gap: buildCashDayMetrics(resultsDates.gap, store[resultsDates.gap])
-  }),[resultsDates, store]);
+    totalSales: buildCashDayMetrics(resultsDates.totalSales, store[resultsDates.totalSales], reserveCents),
+    closingCalculated: buildCashDayMetrics(resultsDates.closingCalculated, store[resultsDates.closingCalculated], reserveCents),
+    closingReal: buildCashDayMetrics(resultsDates.closingReal, store[resultsDates.closingReal], reserveCents),
+    gap: buildCashDayMetrics(resultsDates.gap, store[resultsDates.gap], reserveCents)
+  }),[resultsDates, store, reserveCents]);
   const monthMetrics = useMemo(()=>Object.entries(store)
     .filter(([date])=>date.startsWith(selectedMonth))
-    .map(([date,day])=>buildCashDayMetrics(date, day))
+    .map(([date,day])=>buildCashDayMetrics(date, day, reserveCents))
     .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth]);
 
   const monthlyShortageCents = monthMetrics.reduce((sum,x)=>sum + x.shortageCents,0);

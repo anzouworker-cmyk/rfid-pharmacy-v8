@@ -1,0 +1,11 @@
+V60 - Admin-configurable cash reserve amount
+
+Changes:
+- Replaced the fixed 2000 DH rule with an admin-configurable reserve amount.
+- Added cash settings storage for the reserve amount kept in caisse.
+- The "À retirer" card now calculates automatically using:
+  S. caisse (compté) - montant minimum à garder en caisse.
+- Only admin users can open the "À retirer" card and change this reserve amount.
+- Non-admin users still see the card and computed value, but cannot modify the reserve.
+- Updated cash calculations across Operations, Cash Register history, exports, and Dashboard to use the configured reserve amount.
+- Rebuilt frontend dist files.
