@@ -1,0 +1,7 @@
+V53 - Cash dashboard cleanup
+
+Changes:
+- Removed the "Résultats de caisse" section title bar from Dashboard Caisse.
+- Removed the repeated date shown on each cash result card in that section.
+- Kept only the result cards themselves for a cleaner layout.
+- Rebuilt frontend dist files.

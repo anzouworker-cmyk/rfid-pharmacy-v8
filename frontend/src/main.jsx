@@ -1214,33 +1214,28 @@ function CashDashboardAdmin(){
       </CashAdminCard>
     </div>
 
-    <div className="cashAdminSectionTitle">
-      <h2>Résultats de caisse</h2>
-      <span>{selectedDate}</span>
-    </div>
-
     <div className="cashAdminGrid cashAdminGridResults">
-      <CashAdminCard title="Tot. vente" meta={<span>{selectedDate}</span>} right="=">
+      <CashAdminCard title="Tot. vente" meta={null} right="=">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.totalSalesCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="C. fermeture (calculé)" meta={<span>{selectedDate}</span>} right="=">
+      <CashAdminCard title="C. fermeture (calculé)" meta={null} right="=">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.closingCalculatedCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="C. fermeture (réel)" meta={<span>{selectedDate}</span>} right="=">
+      <CashAdminCard title="C. fermeture (réel)" meta={null} right="=">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.closingRealCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Montant manquant" meta={<span>{selectedDate}</span>} right="-">
+      <CashAdminCard title="Montant manquant" meta={null} right="-">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.shortageCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Montant surplus" meta={<span>{selectedDate}</span>} right="+">
+      <CashAdminCard title="Montant surplus" meta={null} right="+">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Écart cash comptée vs calculée" meta={<span>{selectedDate}</span>} right="Δ">
+      <CashAdminCard title="Écart cash comptée vs calculée" meta={null} right="Δ">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.gapCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
     </div>
