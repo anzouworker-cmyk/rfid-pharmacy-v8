@@ -1,0 +1,8 @@
+V67 - Nouvelle solde caisse simple formula
+
+Changes:
+- Updated the "Nouvelle solde caisse" formula to:
+  Nouvelle solde caisse = S. caisse (compté) - Retiré + Dépôt.
+- Updated the operation card description to match the new formula.
+- The updated formula is used in operations, management history, dashboard, and exports through the shared calculation.
+- Rebuilt frontend dist files.
