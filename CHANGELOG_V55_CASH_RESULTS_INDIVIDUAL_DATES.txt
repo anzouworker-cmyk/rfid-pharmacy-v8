@@ -1,0 +1,13 @@
+V55 - Cash result cards with individual dates
+
+Changes:
+- Updated the result cards in Dashboard Caisse:
+  - Tot. vente
+  - C. fermeture (calculé)
+  - C. fermeture (réel)
+  - Écart cash comptée vs calculée
+- Each of these cards now has its own individual date selector.
+- Each card value now changes independently according to its selected date.
+- Adapted the design of these cards so they match the other dashboard cards better.
+- Adjusted the results grid layout to 4 cards for a cleaner visual structure.
+- Rebuilt frontend dist files.

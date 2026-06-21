@@ -1120,13 +1120,35 @@ function CashDashboardAdmin(){
   const latestDate = allDates.length ? allDates[allDates.length-1] : todayISO();
   const [selectedDate,setSelectedDate] = useState(latestDate);
   const [selectedMonth,setSelectedMonth] = useState(()=>latestDate.slice(0,7));
+  const [resultsDates,setResultsDates] = useState(()=>({
+    totalSales: latestDate,
+    closingCalculated: latestDate,
+    closingReal: latestDate,
+    gap: latestDate
+  }));
 
   useEffect(()=>{
     if(!allDates.length) return;
     if(!store[selectedDate]) setSelectedDate(latestDate);
   },[allDates.length, latestDate]);
 
+  useEffect(()=>{
+    if(!allDates.length) return;
+    setResultsDates(prev=>({
+      totalSales: store[prev.totalSales] ? prev.totalSales : latestDate,
+      closingCalculated: store[prev.closingCalculated] ? prev.closingCalculated : latestDate,
+      closingReal: store[prev.closingReal] ? prev.closingReal : latestDate,
+      gap: store[prev.gap] ? prev.gap : latestDate
+    }));
+  },[allDates.length, latestDate, store]);
+
   const selectedMetrics = useMemo(()=>buildCashDayMetrics(selectedDate, store[selectedDate]),[selectedDate,store]);
+  const resultMetrics = useMemo(()=>({
+    totalSales: buildCashDayMetrics(resultsDates.totalSales, store[resultsDates.totalSales]),
+    closingCalculated: buildCashDayMetrics(resultsDates.closingCalculated, store[resultsDates.closingCalculated]),
+    closingReal: buildCashDayMetrics(resultsDates.closingReal, store[resultsDates.closingReal]),
+    gap: buildCashDayMetrics(resultsDates.gap, store[resultsDates.gap])
+  }),[resultsDates, store]);
   const monthMetrics = useMemo(()=>Object.entries(store)
     .filter(([date])=>date.startsWith(selectedMonth))
     .map(([date,day])=>buildCashDayMetrics(date, day))
@@ -1147,6 +1169,16 @@ function CashDashboardAdmin(){
     const idx = Math.max(0, allDates.indexOf(selectedDate));
     const nextIndex = Math.min(allDates.length - 1, Math.max(0, idx + delta));
     setSelectedDate(allDates[nextIndex]);
+  }
+
+  function updateResultDate(key,value){
+    setResultsDates(prev=>({...prev,[key]: value || latestDate}));
+  }
+
+  function resultDateMeta(key){
+    return <div className="cashAdminInlineDate">
+      <input type="date" value={resultsDates[key]} onChange={e=>updateResultDate(key,e.target.value)} />
+    </div>;
   }
 
   return <section className="cashAdminDashboardPage">
@@ -1215,21 +1247,20 @@ function CashDashboardAdmin(){
     </div>
 
     <div className="cashAdminGrid cashAdminGridResults">
-      <CashAdminCard title="Tot. vente" meta={null} right="=">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.totalSalesCents/100).toFixed(1)}</b></div>
+      <CashAdminCard title="Tot. vente" meta={resultDateMeta("totalSales")} right="=">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.totalSales.totalSalesCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="C. fermeture (calculé)" meta={null} right="=">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.closingCalculatedCents/100).toFixed(1)}</b></div>
+      <CashAdminCard title="C. fermeture (calculé)" meta={resultDateMeta("closingCalculated")} right="=">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingCalculated.closingCalculatedCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="C. fermeture (réel)" meta={null} right="=">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.closingRealCents/100).toFixed(1)}</b></div>
+      <CashAdminCard title="C. fermeture (réel)" meta={resultDateMeta("closingReal")} right="=">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingReal.closingRealCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-
-      <CashAdminCard title="Écart cash comptée vs calculée" meta={null} right="Δ">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.gapCents/100).toFixed(1)}</b></div>
+      <CashAdminCard title="Écart cash comptée vs calculée" meta={resultDateMeta("gap")} right="Δ">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.gap.gapCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
     </div>
 
