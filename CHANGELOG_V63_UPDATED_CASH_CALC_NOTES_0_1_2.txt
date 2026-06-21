@@ -1,0 +1,13 @@
+V63 - Cash calculations updated from notes 0, 1 and 2
+
+Changes:
+- Note 0 implemented:
+  À retirer = Tot. vente en espèce + Règlement de crédit - Dépenses.
+- Note 1 implemented:
+  C. fermeture réel is now a user-entered value.
+- Note 2 implemented:
+  C. fermeture théorique = C. fermeture réel de hier + vente en espèce aujourd'hui + Dépôts / ajouts aujourd'hui + Règlement de crédit aujourd'hui - Dépenses aujourd'hui - Retiré aujourd'hui.
+- Tot. vente en espèce remains calculated automatically:
+  TOTAL DE VENTE PAR JOUR - Tot. vente type crédit - Tot. vente type ATM.
+- Updated the Operations cards, Cash Register history, exports, and Dashboard calculations.
+- Rebuilt frontend dist files.
