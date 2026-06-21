@@ -546,16 +546,16 @@ function Operations({me}){
   }
 
   const cashOperationCards = [
-    {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Cliquer pour compter la caisse avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse"},
-    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:`Calcul automatique : S. caisse (compté) - ${formatDH(reserveCents)}.`, type:"-", editable:canChangeCashDate, tone:"neutral", cta:canChangeCashDate ? "Configurer montant" : "Automatique"},
-    {key:"withdrawnCents", title:"Retiré", value:Number(cashCurrent.management.withdrawnCents || 0), description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur"},
-    {key:"depositsCents", title:"Dépôts / ajouts", value:Number(cashCurrent.management.depositsCents || 0), description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur"},
-    {key:"salesCashCents", title:"Tot. vente en espèce", value:Number(cashCurrent.management.salesCashCents || 0), description:"Saisir le total des ventes cash.", type:"+", editable:true, tone:"indigo", cta:"Entrer valeur"},
-    {key:"creditSalesCents", title:"Tot. vente type crédit", value:Number(cashCurrent.management.creditSalesCents || 0), description:"Saisir le total des ventes crédit.", type:"+", editable:true, tone:"danger", cta:"Entrer valeur"},
-    {key:"atmSalesCents", title:"Tot. vente type ATM", value:Number(cashCurrent.management.atmSalesCents || 0), description:"Saisir le total des ventes ATM.", type:"+", editable:true, tone:"blue", cta:"Entrer valeur"},
-    {key:"creditSettlementCents", title:"Réglement crédit", value:Number(cashCurrent.management.creditSettlementCents || 0), description:"Saisir le réglement crédit.", type:"=", editable:true, tone:"indigo", cta:"Entrer valeur"},
-    {key:"closingRealCents", title:"C. fermeture (réel)", value:Number(cashCurrent.management.closingRealCents || 0), description:"Saisir la fermeture réelle en caisse.", type:"=", editable:true, tone:"blue", cta:"Entrer valeur"},
-    {key:"expenseEntry", title:"Ajouter dépense", value:cashCurrent.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0), description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true}
+    {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Cliquer pour compter la caisse avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
+    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:`Calcul automatique : S. caisse (compté) - ${formatDH(reserveCents)}.`, type:"-", editable:canChangeCashDate, tone:"neutral", cta:canChangeCashDate ? "Configurer montant" : "Automatique", valueLabel:"Valeur calculée"},
+    {key:"withdrawnCents", title:"Retiré", value:Number(cashCurrent.management.withdrawnCents || 0), description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"depositsCents", title:"Dépôts / ajouts", value:Number(cashCurrent.management.depositsCents || 0), description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"salesCashCents", title:"Tot. vente en espèce", value:Number(cashCurrent.management.salesCashCents || 0), description:"Saisir le total des ventes cash.", type:"+", editable:true, tone:"indigo", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"creditSalesCents", title:"Tot. vente type crédit", value:Number(cashCurrent.management.creditSalesCents || 0), description:"Saisir le total des ventes crédit.", type:"+", editable:true, tone:"danger", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"atmSalesCents", title:"Tot. vente type ATM", value:Number(cashCurrent.management.atmSalesCents || 0), description:"Saisir le total des ventes ATM.", type:"+", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"creditSettlementCents", title:"Réglement crédit", value:Number(cashCurrent.management.creditSettlementCents || 0), description:"Saisir le réglement crédit.", type:"=", editable:true, tone:"indigo", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"closingRealCents", title:"C. fermeture (réel)", value:Number(cashCurrent.management.closingRealCents || 0), description:"Saisir la fermeture réelle en caisse.", type:"=", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"expenseEntry", title:"Ajouter dépense", value:cashCurrent.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0), description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"}
   ];
 
   return <section className="operationsPage">
@@ -617,7 +617,7 @@ function Operations({me}){
           <div className="opIcon"><DashIcon name="cash"/></div>
           <h3>{card.title}</h3>
           <p>{card.description}</p>
-          <strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
+          <small className="cashOpValueLabel">{card.valueLabel || "Valeur"}</small><strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
           <span>{card.cta}</span>
         </button>)}
       </div>

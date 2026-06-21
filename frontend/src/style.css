@@ -3947,8 +3947,6 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   color:#071227!important;
   text-align:center!important;
 }
-.cashOperationCard.blue .cashOpCardAmount,
-.cashOperationCard.green .cashOpCardAmount{color:#fff!important;}
 .cashOperationCardReadOnly span:last-child{
   background:#f8fafc!important;
   color:#64748b!important;
@@ -4155,4 +4153,16 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   color:#64748b!important;
   cursor:not-allowed!important;
   opacity:1!important;
+}
+
+.cashOpValueLabel{
+  display:block!important;
+  margin:2px 0 6px!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  line-height:1.2!important;
+  color:#64748b!important;
+  text-align:center!important;
+  text-transform:uppercase!important;
+  letter-spacing:.03em!important;
 }

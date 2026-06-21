@@ -1,0 +1,9 @@
+V61 - Cash operation cards show entered/calculated value labels
+
+Changes:
+- Added a small title label above the amount on each cash operation card.
+- Editable cards now show the label "Valeur entrée".
+- Calculated/read-only cards show labels like "Valeur calculée" or "Valeur comptée".
+- The expense card shows "Total des dépenses".
+- Fixed the amount color so all card values are visible on every card.
+- Rebuilt frontend dist files.
