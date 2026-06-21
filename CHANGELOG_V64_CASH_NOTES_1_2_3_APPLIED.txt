@@ -1,0 +1,12 @@
+V64 - Cash calculations updated according to notes 1, 2 and 3
+
+Changes:
+- Note 1 applied:
+  A retirer = max(0, S. caisse (compte) - 3000 DH).
+- Note 2 applied:
+  C. fermeture (reel) = S. caisse (compte) de hier.
+- Note 3 applied:
+  C. fermeture (theorique) = max(0, S. caisse (compte) - Retire + Totale de vente reel en espece + credit regle + depot).
+- The C. fermeture (reel) operation card is now automatic/read-only.
+- Updated calculations in Operations cards, Cash Register history, CSV export and Dashboard Caisse.
+- Rebuilt frontend dist files.
