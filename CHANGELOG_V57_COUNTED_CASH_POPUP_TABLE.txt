@@ -1,0 +1,12 @@
+V57 - Counted cash popup table
+
+Changes:
+- In the Operations page, clicking the card "S. caisse (compté)" now opens a popup window.
+- The popup contains a small 2-column table:
+  - Quantité
+  - Bill
+- The values entered in this popup are saved in the same cash-register quantities used by the "Monnaie stock" table.
+- This means the popup and the "Monnaie stock" table stay synchronized.
+- Added a total counted amount at the bottom of the popup.
+- The total counted amount is also displayed on the card "S. caisse (compté)".
+- Rebuilt frontend dist files.

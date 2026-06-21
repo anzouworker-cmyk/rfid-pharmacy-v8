@@ -504,8 +504,14 @@ function Operations(){
     setMsg(`Opération de caisse mise à jour pour le ${cashDate}.`);
   }
 
+  function updateCashQuantity(cents,value){
+    const qty=Math.max(0, parseInt(value || 0, 10) || 0);
+    const quantities={...cashCurrent.quantities,[cents]:qty};
+    saveCashDay({...cashCurrent, quantities});
+  }
+
   const cashOperationCards = [
-    {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Total automatique depuis Monnaie stock.", type:"=", editable:false, tone:"blue", cta:"Automatique"},
+    {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Cliquer pour compter la caisse avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse"},
     {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 2000 DH.", type:"-", editable:false, tone:"neutral", cta:"Automatique"},
     {key:"withdrawnCents", title:"Retiré", value:Number(cashCurrent.management.withdrawnCents || 0), description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur"},
     {key:"depositsCents", title:"Dépôts / ajouts", value:Number(cashCurrent.management.depositsCents || 0), description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur"},
@@ -612,12 +618,31 @@ function Operations(){
     </div>}
 
     {cashOpModal && <div className="modalOverlay">
-      <div className="scanModal cashValueModal">
+      <div className={`scanModal cashValueModal ${cashOpModal.key==="counted" ? "cashCountModal" : ""}`}>
         <button className="modalClose" onClick={()=>setCashOpModal(null)}>×</button>
         <h2>{cashOpModal.title}</h2>
         <p>{cashOpModal.description}</p>
         <div className="foundProduct"><b>Date de caisse</b><small>{cashDate}</small></div>
-        <input autoFocus value={moneyInputValue(cashCurrent.management[cashOpModal.key] || 0)} onChange={e=>updateCashOperation(cashOpModal.key,e.target.value)} placeholder="0"/>
+        {cashOpModal.key==="counted" ? <>
+          <div className="cashModalTableWrap">
+            <table className="cashMiniTable">
+              <thead><tr><th>Quantité</th><th>Bill</th></tr></thead>
+              <tbody>
+                {CASH_DENOMINATIONS.map(d=>{
+                  const qty=Number(cashCurrent.quantities[d.cents] || 0);
+                  return <tr key={d.cents}>
+                    <td><input autoFocus={d.cents===CASH_DENOMINATIONS[0].cents} className="qtyInput" type="number" min="0" step="1" value={qty} onChange={e=>updateCashQuantity(d.cents,e.target.value)} /></td>
+                    <td>{d.label}</td>
+                  </tr>;
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="cashModalTotalBar">
+            <span>Total compté</span>
+            <strong>{formatDH(cashCountedCents)}</strong>
+          </div>
+        </> : <input autoFocus value={moneyInputValue(cashCurrent.management[cashOpModal.key] || 0)} onChange={e=>updateCashOperation(cashOpModal.key,e.target.value)} placeholder="0"/>}
         <button className="primaryBtn" onClick={()=>setCashOpModal(null)}>Fermer</button>
       </div>
     </div>}
