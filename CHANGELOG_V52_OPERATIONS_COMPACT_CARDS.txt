@@ -1,0 +1,7 @@
+V52 - Operations page compact card layout
+
+Changes:
+- Fixed the oversized vertical cards in the Operations page.
+- Actions RFID, Opérations de caisse, and Exports sections now use the same compact card height.
+- Opérations de caisse keeps the same style as Exports et sauvegardes locales.
+- Rebuilt frontend dist files.

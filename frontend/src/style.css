@@ -3997,3 +3997,74 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
 @media(max-width:700px){
   .cashOpsGrid{grid-template-columns:1fr!important;}
 }
+
+/* V52 - compact Operations page cards */
+.operationsPage{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:calc(100vh - 104px)!important;
+  gap:18px!important;
+  padding-bottom:10px!important;
+}
+.operationsActionPanel,
+.exportsPanel,
+.cashOpsPanel{
+  flex:none!important;
+  min-height:auto!important;
+}
+.operationsPage .operationGrid.workflowGrid,
+.operationsPage .exportOperationGrid,
+.operationsPage .cashOpsGrid{
+  flex:none!important;
+  align-items:stretch!important;
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:16px!important;
+}
+.operationsPage .operationCard,
+.operationsPage .exportOperationCard,
+.operationsPage .cashOperationCard{
+  height:auto!important;
+  min-height:218px!important;
+  max-height:240px!important;
+  padding:22px 18px!important;
+  justify-content:center!important;
+  align-items:center!important;
+}
+.operationsPage .operationCard .opIcon,
+.operationsPage .exportOperationCard .opIcon,
+.operationsPage .cashOperationCard .opIcon{
+  margin:0 auto 12px!important;
+}
+.operationsPage .operationCard h3,
+.operationsPage .exportOperationCard h3,
+.operationsPage .cashOperationCard h3{
+  min-height:34px!important;
+}
+.operationsPage .operationCard p,
+.operationsPage .exportOperationCard p,
+.operationsPage .cashOperationCard p{
+  min-height:34px!important;
+  margin-bottom:12px!important;
+}
+.cashOpCardAmount{
+  margin:0 0 10px!important;
+}
+@media(max-width:1500px){
+  .operationsPage .operationGrid.workflowGrid,
+  .operationsPage .exportOperationGrid,
+  .operationsPage .cashOpsGrid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:850px){
+  .operationsPage .operationGrid.workflowGrid,
+  .operationsPage .exportOperationGrid,
+  .operationsPage .cashOpsGrid{
+    grid-template-columns:1fr!important;
+  }
+  .operationsPage .operationCard,
+  .operationsPage .exportOperationCard,
+  .operationsPage .cashOperationCard{
+    max-height:none!important;
+  }
+}
