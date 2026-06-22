@@ -1,0 +1,7 @@
+V80 - Fix Cash Register CSV Export
+
+Changes:
+- Fixed the CSV export button in the Cash Register / Gestion de caisse page.
+- The export was failing because the CSV included 'C. fermeture réel de hier' but the variable was not defined in the export function.
+- Added the correct calculation for yesterday's Nouvelle solde caisse inside exportCashCSV.
+- Rebuilt frontend dist files.

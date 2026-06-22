@@ -946,6 +946,7 @@ function CashRegister(){
     const salesCashCents = totalSalesCents - Number(m.creditSalesCents || 0) - Number(m.atmSalesCents || 0);
     const autoToWithdrawCents = Math.max(0, sCaisseCompteeCents - 300000);
     const closingRealCents = getClosingRealCentsForDate(store, cashDate);
+    const previousClosingRealCents = getCalculatedCashBalanceCents((store || {})[shiftISODate(cashDate,-1)]);
     const sameDayClosingRealCents = sCaisseCompteeCents;
     const closingCalculatedCents = getTheoreticalClosingCentsForDate(store, cashDate);
     const shortageCents = Math.max(0, closingCalculatedCents - sameDayClosingRealCents);
