@@ -1,0 +1,20 @@
+V81 - Gestion de caisse aligned with uploaded Excel logic
+
+Source inspected:
+- /mnt/data/caisse_2026-06-22.xlsx
+- Sheet: caisse_2026-06-22
+
+Excel formulas found and applied:
+- Tot. vente en espèce = Total de Vente par jour - Tot. vente type crédit - Tot. vente type ATM
+- À retirer (théorique) = max(0, C. fermeture (compté) - 3000)
+- Nouvelle C. fermeture = C. fermeture (compté) - Retiré (réel)
+- Montant manquant = max(0, C. fermeture (théorique) - C. fermeture (compté))
+- Montant surplus = max(0, C. fermeture (compté) - C. fermeture (théorique))
+- C. fermeture (théorique) = max(0, Nouvelle C. fermeture de hier + Dépôt / ajout du jour + Tot. vente en espèce du jour + Règlement crédit du jour - Dépenses du jour)
+
+UI changes:
+- Rebuilt the Gestion de caisse history table with columns similar to the Excel file:
+  Date, Dépôt / ajout, Dépenses, Total de Vente par jour, Tot. vente en espèce, Tot. vente type crédit, Tot. vente type ATM, Réglement crédit, À retirer (théorique), Retiré (réel), Nouvelle C. fermeture, Montant manquant, Montant surplus, C. fermeture (compté), C. fermeture (théorique)
+- Adapted operation cards to the same labels and logic.
+- Updated dashboard and CSV export to use the same formula helpers.
+- Rebuilt frontend dist files.
