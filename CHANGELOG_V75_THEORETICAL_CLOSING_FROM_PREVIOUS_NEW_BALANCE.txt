@@ -1,0 +1,13 @@
+V75 - Theoretical closing formula update
+
+Changes:
+- Updated C. fermeture (théorique) formula to:
+  max(0, Nouvelle solde caisse de hier + Tot. vente en espèce + Règlement de crédit)
+- Applied the formula in:
+  - Operations card
+  - Cash management history
+  - Cash CSV export
+  - Dashboard Caisse metrics
+- Export now includes "Nouvelle solde caisse de hier" for traceability.
+- Kept Montant manquant/surplus based on the same-day C. fermeture réel comparison.
+- Rebuilt frontend dist files.
