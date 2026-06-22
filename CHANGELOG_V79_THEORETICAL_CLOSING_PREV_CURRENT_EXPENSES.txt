@@ -1,0 +1,16 @@
+V79 - Updated theoretical closing cash formula
+
+Changes:
+- Updated C. fermeture (théorique) to:
+  max(0,
+    Nouvelle caisse de hier
+    + Tot. vente en espèce de hier
+    + Règlement crédit de hier
+    - Dépense hier
+    + Dépôt du jour courant
+    + Tot. vente en espèce du jour courant
+    + Règlement crédit du jour courant
+    - Dépense du jour courant
+  )
+- Applied the formula in Operations cards, Gestion de caisse history, Dashboard Caisse, and CSV export.
+- Rebuilt frontend dist files.
