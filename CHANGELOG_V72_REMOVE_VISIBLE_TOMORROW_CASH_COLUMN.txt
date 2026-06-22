@@ -1,0 +1,7 @@
+V72 - Remove visible S. caisse demain column
+
+Changes:
+- Removed the visible column "S. caisse demain" from the cash management history table.
+- Removed the visible/exported row "S. caisse (compté) de demain" from the cash CSV export.
+- Kept the internal calculation unchanged: tomorrow counted cash is still used internally to calculate Montant manquant and Montant surplus.
+- Rebuilt frontend dist files.

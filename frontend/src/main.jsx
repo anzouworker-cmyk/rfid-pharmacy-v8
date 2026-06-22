@@ -556,7 +556,7 @@ function Operations({me}){
   }
 
   const cashOperationCards = [
-    {key:"counted", title:"S. caisse (compté)", value:cashCountedCents, description:"Cliquer pour compter la caisse avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
+    {key:"counted", title:"C. fermeture (réel)", value:cashCountedCents, description:"Cliquer pour saisir le comptage réel de fermeture avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
     {key:"totalDailySalesCents", title:"TOTAL DE VENTE PAR JOUR", value:totalDailySalesCents, description:"Saisir le montant total des ventes du jour.", type:"=", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"creditSalesCents", title:"Tot. vente type crédit", value:creditSalesCents, description:"Saisir le total des ventes crédit.", type:"-", editable:true, tone:"danger", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"atmSalesCents", title:"Tot. vente type ATM", value:atmSalesCents, description:"Saisir le total des ventes ATM.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
@@ -931,7 +931,6 @@ function CashRegister(){
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Réglement crédit", Quantité:"", Somme:formatDH(m.creditSettlementCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Dépenses enregistrées", Quantité:"", Somme:formatDH(expensesCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Nouvelle solde caisse", Quantité:"", Somme:formatDH(closingRealCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"S. caisse (compté) de demain", Quantité:"", Somme:formatDH(tomorrowCountedCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"C. fermeture (calculé)", Quantité:"", Somme:formatDH(closingCalculatedCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant manquant", Quantité:"", Somme:formatDH(shortageCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant surplus", Quantité:"", Somme:formatDH(surplusCents)});
@@ -1078,7 +1077,7 @@ function CashRegister(){
 
               <div className="cashWideTableWrap">
                 <table className="cashTable managementHistoryTable">
-                  <thead><tr><th>Date</th><th>S. caisse (compté)</th><th>À retirer</th><th>Retiré</th><th>Nouvelle solde caisse</th><th>S. caisse demain</th><th>Tot. vente</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>C. fermeture (calculé)</th><th>Montant manquant</th><th>Montant surplus</th></tr></thead>
+                  <thead><tr><th>Date</th><th>S. caisse (compté)</th><th>À retirer</th><th>Retiré</th><th>Nouvelle solde caisse</th><th>Tot. vente</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>C. fermeture (calculé)</th><th>Montant manquant</th><th>Montant surplus</th></tr></thead>
                   <tbody>
                     {pagedManagementHistory.length ? pagedManagementHistory.map(item=><tr key={item.date}>
                       <td>{item.date}</td>
@@ -1086,7 +1085,6 @@ function CashRegister(){
                       <td>{formatDH(item.toWithdrawCents)}</td>
                       <td>{formatDH(item.withdrawnCents)}</td>
                       <td>{formatDH(item.closingRealCents)}</td>
-                      <td>{formatDH(item.tomorrowCountedCents)}</td>
                       <td>{formatDH(item.totalSalesCents)}</td>
                       <td>{formatDH(item.salesCashCents)}</td>
                       <td>{formatDH(item.creditSalesCents)}</td>
@@ -1095,7 +1093,7 @@ function CashRegister(){
                       <td>{formatDH(item.closingCalculatedCents)}</td>
                       <td>{formatDH(item.shortageCents)}</td>
                       <td>{formatDH(item.surplusCents)}</td>
-                    </tr>) : <tr><td colSpan="14" className="expenseHistoryEmpty">Aucune donnée de gestion de caisse pour ce mois.</td></tr>}
+                    </tr>) : <tr><td colSpan="13" className="expenseHistoryEmpty">Aucune donnée de gestion de caisse pour ce mois.</td></tr>}
                   </tbody>
                 </table>
               </div>

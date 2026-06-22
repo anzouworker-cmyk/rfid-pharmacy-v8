@@ -1,0 +1,7 @@
+V73 - Rename counted cash card
+
+Changes:
+- Renamed the Operations cash card from "S. caisse (compté)" to "C. fermeture (réel)".
+- Updated the card description to indicate it is the real closing count.
+- The card keeps the same counting popup and still syncs with Monnaie stock.
+- Rebuilt frontend dist files.
