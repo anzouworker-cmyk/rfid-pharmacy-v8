@@ -917,10 +917,10 @@ function CashRegister(){
     const salesCashCents = totalSalesCents - Number(m.creditSalesCents || 0) - Number(m.atmSalesCents || 0);
     const autoToWithdrawCents = Math.max(0, sCaisseCompteeCents - 300000);
     const closingRealCents = getClosingRealCentsForDate(store, cashDate);
-    const tomorrowCountedCents = getCountedCentsForDate(store, shiftISODate(cashDate,1));
+    const sameDayClosingRealCents = sCaisseCompteeCents;
     const closingCalculatedCents = Math.max(0, (sCaisseCompteeCents - Number(m.withdrawnCents || 0)) + salesCashCents + Number(m.creditSettlementCents || 0) + Number(m.depositsCents || 0));
-    const shortageCents = Math.max(0, closingCalculatedCents - tomorrowCountedCents);
-    const surplusCents = Math.max(0, tomorrowCountedCents - closingCalculatedCents);
+    const shortageCents = Math.max(0, closingCalculatedCents - sameDayClosingRealCents);
+    const surplusCents = Math.max(0, sameDayClosingRealCents - closingCalculatedCents);
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"S. caisse (compté)", Quantité:"", Somme:formatDH(sCaisseCompteeCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"À retirer", Quantité:"", Somme:formatDH(autoToWithdrawCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Retiré", Quantité:"", Somme:formatDH(m.withdrawnCents)});
@@ -946,12 +946,12 @@ function CashRegister(){
   const salesCashCents = totalSalesCents - Number(current.management.creditSalesCents || 0) - Number(current.management.atmSalesCents || 0);
   const autoToWithdrawCents = Math.max(0, sCaisseCompteeCents - 300000);
   const closingRealCents = getClosingRealCentsForDate(store, cashDate);
-  const tomorrowCountedCents = getCountedCentsForDate(store, shiftISODate(cashDate,1));
+  const sameDayClosingRealCents = sCaisseCompteeCents;
   const closingCalculatedCents = Math.max(0, (sCaisseCompteeCents - Number(current.management.withdrawnCents || 0)) + salesCashCents + Number(current.management.creditSettlementCents || 0) + Number(current.management.depositsCents || 0));
-  const shortageCents = Math.max(0, closingCalculatedCents - tomorrowCountedCents);
-  const surplusCents = Math.max(0, tomorrowCountedCents - closingCalculatedCents);
+  const shortageCents = Math.max(0, closingCalculatedCents - sameDayClosingRealCents);
+  const surplusCents = Math.max(0, sameDayClosingRealCents - closingCalculatedCents);
   const expectedCents = closingCalculatedCents;
-  const gapCents = tomorrowCountedCents - expectedCents;
+  const gapCents = sameDayClosingRealCents - expectedCents;
 
   const managementHistory = useMemo(()=>Object.entries(store)
     .filter(([date])=>date.startsWith(managementMonth))
@@ -964,7 +964,7 @@ function CashRegister(){
       const daySalesCash = dayTotalSales - Number(management.creditSalesCents || 0) - Number(management.atmSalesCents || 0);
       const dayToWithdrawCents = Math.max(0, daySCaisseCompteeCents - 300000);
       const dayClosingReal = getClosingRealCentsForDate(store, date);
-      const dayTomorrowCountedCents = getCountedCentsForDate(store, shiftISODate(date,1));
+      const daySameClosingRealCents = daySCaisseCompteeCents;
       const dayClosingCalculated = Math.max(0, (daySCaisseCompteeCents - Number(management.withdrawnCents || 0)) + daySalesCash + Number(management.creditSettlementCents || 0) + Number(management.depositsCents || 0));
       return {
         date,
@@ -974,15 +974,15 @@ function CashRegister(){
         depositsCents:Number(management.depositsCents || 0),
         expensesCents:dayExpenses,
         closingRealCents:dayClosingReal,
-        tomorrowCountedCents:dayTomorrowCountedCents,
+        sameDayClosingRealCents:daySameClosingRealCents,
         totalSalesCents:dayTotalSales,
         salesCashCents:daySalesCash,
         creditSalesCents:Number(management.creditSalesCents || 0),
         atmSalesCents:Number(management.atmSalesCents || 0),
         creditSettlementCents:Number(management.creditSettlementCents || 0),
         closingCalculatedCents:dayClosingCalculated,
-        shortageCents:Math.max(0, dayClosingCalculated - dayTomorrowCountedCents),
-        surplusCents:Math.max(0, dayTomorrowCountedCents - dayClosingCalculated)
+        shortageCents:Math.max(0, dayClosingCalculated - daySameClosingRealCents),
+        surplusCents:Math.max(0, daySameClosingRealCents - dayClosingCalculated)
       };
     })
     .filter(item=>item.openingCents || item.toWithdrawCents || item.withdrawnCents || item.closingRealCents || item.totalSalesCents || item.salesCashCents || item.creditSalesCents || item.atmSalesCents || item.creditSettlementCents || item.closingCalculatedCents || item.shortageCents || item.surplusCents || item.depositsCents || item.expensesCents)
@@ -1183,12 +1183,12 @@ function buildCashDayMetrics(date, dayData, store={}){
   const salesCashCents = totalSalesCents - Number(day.management.creditSalesCents || 0) - Number(day.management.atmSalesCents || 0);
   const autoToWithdrawCents = Math.max(0, countedCents - 300000);
   const closingRealCents = getClosingRealCentsForDate(store, date);
-  const tomorrowCountedCents = getCountedCentsForDate(store, shiftISODate(date,1));
+  const sameDayClosingRealCents = countedCents;
   const previousClosingRealCents = closingRealCents;
   const closingCalculatedCents = Math.max(0, (countedCents - Number(day.management.withdrawnCents || 0)) + salesCashCents + Number(day.management.creditSettlementCents || 0) + Number(day.management.depositsCents || 0));
-  const shortageCents = Math.max(0, closingCalculatedCents - tomorrowCountedCents);
-  const surplusCents = Math.max(0, tomorrowCountedCents - closingCalculatedCents);
-  const gapCents = tomorrowCountedCents - closingCalculatedCents;
+  const shortageCents = Math.max(0, closingCalculatedCents - sameDayClosingRealCents);
+  const surplusCents = Math.max(0, sameDayClosingRealCents - closingCalculatedCents);
+  const gapCents = sameDayClosingRealCents - closingCalculatedCents;
   const dueBalanceCents = Math.max(0, autoToWithdrawCents - Number(day.management.withdrawnCents || 0));
   const isBalanced = shortageCents===0 && surplusCents===0;
   return {
@@ -1196,7 +1196,7 @@ function buildCashDayMetrics(date, dayData, store={}){
     countedCents,
     expensesCents,
     previousClosingRealCents,
-    tomorrowCountedCents,
+    sameDayClosingRealCents,
     autoToWithdrawCents,
     totalSalesCents,
     closingCalculatedCents,
@@ -1301,9 +1301,9 @@ function CashDashboardAdmin(){
     gap: buildCashDayMetrics(resultsDates.gap, store[resultsDates.gap], store)
   }),[resultsDates, store]);
   const monthMetrics = useMemo(()=>Object.entries(store)
-    .filter(([date])=>date.startsWith(selectedMonth) && date < lastClosedDate)
+    .filter(([date])=>date.startsWith(selectedMonth) && date < dashboardToday)
     .map(([date,day])=>buildCashDayMetrics(date, day, store))
-    .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth,lastClosedDate]);
+    .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth,dashboardToday]);
 
   const monthlyShortageCents = monthMetrics.reduce((sum,x)=>sum + x.shortageCents,0);
   const monthlySurplusCents = monthMetrics.reduce((sum,x)=>sum + x.surplusCents,0);

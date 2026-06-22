@@ -1,0 +1,10 @@
+V74 - Montant manquant/surplus uses same-day C. fermeture réel
+
+Changes:
+- Updated Montant manquant formula:
+  Montant manquant = max(0, C. fermeture théorique - C. fermeture réel de la même journée)
+- Updated Montant surplus formula:
+  Montant surplus = max(0, C. fermeture réel de la même journée - C. fermeture théorique)
+- The dashboard, cash management history, CSV export, shortage, surplus and gap calculations now use the same-day real closing value.
+- Dashboard monthly totals include past days only and exclude the current day.
+- Rebuilt frontend dist files.
