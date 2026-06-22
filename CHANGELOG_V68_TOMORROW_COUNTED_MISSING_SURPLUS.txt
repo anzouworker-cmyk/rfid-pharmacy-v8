@@ -1,0 +1,11 @@
+V68 - Montant manquant/surplus uses tomorrow counted cash
+
+Changes:
+- Updated Montant manquant formula:
+  Montant manquant = max(0, C. fermeture (théorique) - S. caisse (compté) de demain)
+- Updated Montant surplus formula:
+  Montant surplus = max(0, S. caisse (compté) de demain - C. fermeture (théorique))
+- Added S. caisse demain in the cash management history table.
+- Added S. caisse (compté) de demain in cash CSV export.
+- Updated dashboard metrics to use tomorrow counted cash for shortage, surplus and gap.
+- Rebuilt frontend dist files.
