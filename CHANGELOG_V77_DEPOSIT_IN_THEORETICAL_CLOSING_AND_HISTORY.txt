@@ -1,0 +1,9 @@
+V77 - Deposit added to theoretical closing and cash management history
+
+Changes:
+- Updated C. fermeture (théorique) formula to:
+  max(0, C. fermeture de hier + Dépôt du jour courant + Tot. vente en espèce du jour courant + Règlement de crédit du jour courant)
+- Added the column "Dépôt / ajout" to the "Gestion de caisse" history table.
+- Updated Operations card formula display for C. fermeture (théorique).
+- Updated CSV export and Dashboard calculations to include current-day deposit.
+- Rebuilt frontend dist files.
