@@ -1275,11 +1275,11 @@ function CashDashboardAdmin(){
   }
 
   useEffect(()=>{
-    if(selectedDate >= dashboardToday || !dashboardDates.includes(selectedDate)){
+    if(selectedDate >= dashboardToday){
       setSelectedDate(latestDate);
       syncAllResultDates(latestDate);
     }
-  },[dashboardDates.length, latestDate, dashboardToday]);
+  },[selectedDate, latestDate, dashboardToday]);
 
   useEffect(()=>{
     if(!selectedDate) return;
@@ -1288,12 +1288,12 @@ function CashDashboardAdmin(){
 
   useEffect(()=>{
     setResultsDates(prev=>({
-      totalSales: dashboardDates.includes(prev.totalSales) ? prev.totalSales : latestDate,
-      closingCalculated: dashboardDates.includes(prev.closingCalculated) ? prev.closingCalculated : latestDate,
-      closingReal: dashboardDates.includes(prev.closingReal) ? prev.closingReal : latestDate,
-      gap: dashboardDates.includes(prev.gap) ? prev.gap : latestDate
+      totalSales: prev.totalSales && prev.totalSales < dashboardToday ? prev.totalSales : latestDate,
+      closingCalculated: prev.closingCalculated && prev.closingCalculated < dashboardToday ? prev.closingCalculated : latestDate,
+      closingReal: prev.closingReal && prev.closingReal < dashboardToday ? prev.closingReal : latestDate,
+      gap: prev.gap && prev.gap < dashboardToday ? prev.gap : latestDate
     }));
-  },[dashboardDates.length, latestDate, store]);
+  },[latestDate, store, dashboardToday]);
 
   const selectedMetrics = useMemo(()=>buildCashDayMetrics(selectedDate, store[selectedDate], store),[selectedDate,store]);
   const resultMetrics = useMemo(()=>({
@@ -1318,16 +1318,14 @@ function CashDashboardAdmin(){
   const expensesProgress = monthSalesCents>0 ? Math.min(100, (monthlyExpensesCents / monthSalesCents) * 100) : 0;
 
   function shiftSelectedDate(delta){
-    if(!dashboardDates.length) return;
-    const idx = Math.max(0, dashboardDates.indexOf(selectedDate));
-    const nextIndex = Math.min(dashboardDates.length - 1, Math.max(0, idx + delta));
-    const nextDate = dashboardDates[nextIndex];
+    const nextDate = shiftISODate(selectedDate || latestDate, delta);
+    if(nextDate >= dashboardToday) return;
     setSelectedDate(nextDate);
     syncAllResultDates(nextDate);
   }
 
   function updateResultDate(key,value){
-    const nextDate = value && value < dashboardToday && dashboardDates.includes(value) ? value : latestDate;
+    const nextDate = value && value < dashboardToday ? value : latestDate;
     setResultsDates(prev=>({...prev,[key]: nextDate}));
   }
 
@@ -1341,12 +1339,12 @@ function CashDashboardAdmin(){
     <div className="cashAdminDashboardHeader">
       <div>
         <h1>Cash register dashboard</h1>
-        <p>Vue admin pour suivre la gestion de caisse, les écarts, les surplus et les dépenses. Le jour courant est exclu des calculs.</p>
+        <p>Vue admin pour consulter les calculs des jours passés. Le jour courant est exclu des calculs.</p>
       </div>
       <div className="cashAdminToolbar">
         <label>
           <span>Date temps réel</span>
-          <input type="date" value={selectedDate} max={lastClosedDate} onChange={e=>{ const requestedDate = e.target.value || latestDate; const nextDate = requestedDate < dashboardToday && dashboardDates.includes(requestedDate) ? requestedDate : latestDate; setSelectedDate(nextDate); syncAllResultDates(nextDate); }} />
+          <input type="date" value={selectedDate} max={lastClosedDate} onChange={e=>{ const requestedDate = e.target.value || latestDate; const nextDate = requestedDate < dashboardToday ? requestedDate : latestDate; setSelectedDate(nextDate); syncAllResultDates(nextDate); }} />
         </label>
         <label>
           <span>Mois d’analyse</span>
@@ -1393,7 +1391,7 @@ function CashDashboardAdmin(){
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Retiré" meta={<div className="cashAdminDateStepper"><button type="button" onClick={()=>shiftSelectedDate(-1)} disabled={!dashboardDates.length || selectedDate===dashboardDates[0]}>‹</button><span>{selectedDate}</span><button type="button" onClick={()=>shiftSelectedDate(1)} disabled={!dashboardDates.length || selectedDate===dashboardDates[dashboardDates.length-1]}>›</button></div>}>
+      <CashAdminCard title="Retiré" meta={<div className="cashAdminDateStepper"><button type="button" onClick={()=>shiftSelectedDate(-1)}>‹</button><span>{selectedDate}</span><button type="button" onClick={()=>shiftSelectedDate(1)} disabled={selectedDate>=lastClosedDate}>›</button></div>}>
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.withdrawnCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 

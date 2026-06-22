@@ -1,0 +1,9 @@
+V70 - Dashboard consultation for past days
+
+Changes:
+- Cash dashboard can now consult calculations for any past date selected by the admin.
+- Current day remains excluded from dashboard calculations.
+- Removed the restriction that the selected dashboard date must already exist in the stored cash dates.
+- Date inputs for the result cards also allow any past date, not only dates already stored.
+- Retiré card previous/next navigation now moves day by day through past dates.
+- Rebuilt frontend dist files.
