@@ -1,0 +1,9 @@
+V71 - Dashboard totals exclude current-day comparison
+
+Changes:
+- Dashboard Caisse totals now exclude the current day AND the calculation that uses the current day as tomorrow's counted cash.
+- Example: if today is 2026-06-21, the dashboard totals do not include the missing/surplus calculation between 2026-06-20 and 2026-06-21.
+- Past days can still be consulted in the dashboard date selector.
+- Monthly totals only include fully closed calculations where the comparison day is also in the past.
+- Updated dashboard explanatory text and KPI labels.
+- Rebuilt frontend dist files.

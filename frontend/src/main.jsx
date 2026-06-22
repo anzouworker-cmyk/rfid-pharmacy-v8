@@ -1303,9 +1303,9 @@ function CashDashboardAdmin(){
     gap: buildCashDayMetrics(resultsDates.gap, store[resultsDates.gap], store)
   }),[resultsDates, store]);
   const monthMetrics = useMemo(()=>Object.entries(store)
-    .filter(([date])=>date.startsWith(selectedMonth) && date < dashboardToday)
+    .filter(([date])=>date.startsWith(selectedMonth) && date < lastClosedDate)
     .map(([date,day])=>buildCashDayMetrics(date, day, store))
-    .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth,dashboardToday]);
+    .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth,lastClosedDate]);
 
   const monthlyShortageCents = monthMetrics.reduce((sum,x)=>sum + x.shortageCents,0);
   const monthlySurplusCents = monthMetrics.reduce((sum,x)=>sum + x.surplusCents,0);
@@ -1339,7 +1339,7 @@ function CashDashboardAdmin(){
     <div className="cashAdminDashboardHeader">
       <div>
         <h1>Cash register dashboard</h1>
-        <p>Vue admin pour consulter les calculs des jours passés. Le jour courant est exclu des calculs.</p>
+        <p>Vue admin pour consulter les jours passés. Les totaux excluent le jour courant et la comparaison avec le jour courant.</p>
       </div>
       <div className="cashAdminToolbar">
         <label>
@@ -1354,7 +1354,7 @@ function CashDashboardAdmin(){
     </div>
 
     <div className="cashAdminGrid cashAdminGridTop">
-      <CashAdminCard title="Balance due progress" meta={<span>{monthMetrics.length} jour(s) fermé(s)</span>}>
+      <CashAdminCard title="Balance due progress" meta={<span>{monthMetrics.length} calcul(s) clôturé(s)</span>}>
         <CashProgressRing value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
       </CashAdminCard>
 
@@ -1365,11 +1365,11 @@ function CashDashboardAdmin(){
         </div>
       </CashAdminCard>
 
-      <CashAdminCard title="Tot. montant manquant" meta={<span>à partir de {formatMonthLabel(selectedMonth)}</span>} right="📅">
+      <CashAdminCard title="Tot. montant manquant" meta={<span>calculs clôturés · {formatMonthLabel(selectedMonth)}</span>} right="📅">
         <div className="cashAdminMainValue"><small>DH</small><b>{(monthlyShortageCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Tot. montant surplus" meta={<span>à partir de {formatMonthLabel(selectedMonth)}</span>} right="📅">
+      <CashAdminCard title="Tot. montant surplus" meta={<span>calculs clôturés · {formatMonthLabel(selectedMonth)}</span>} right="📅">
         <div className="cashAdminMainValue"><small>DH</small><b>{(monthlySurplusCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
