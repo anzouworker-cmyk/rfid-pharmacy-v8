@@ -1,0 +1,6 @@
+V83 - Dashboard caisse : dates enregistrées uniquement
+
+- Remplacé le calendrier natif du dashboard caisse par une liste déroulante des dates enregistrées.
+- Les sélecteurs "Date temps réel" et les dates des cartes de résultat affichent maintenant uniquement les dates où une opération de caisse existe.
+- Supprimé la logique visuelle ambiguë du calendrier min/max qui affichait des dates intermédiaires non enregistrées ou grisées.
+- Les calculs mensuels continuent d'inclure toutes les dates enregistrées du mois sélectionné avec opérations.

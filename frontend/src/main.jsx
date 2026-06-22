@@ -1324,6 +1324,7 @@ function CashDashboardAdmin(){
   const dashboardToday = todayISO();
   const allDates = useMemo(()=>Object.keys(store).sort(),[store]);
   const dashboardDates = useMemo(()=>allDates.filter(date=>hasCashDayActivity(store[date])),[allDates,store]);
+  const selectableDashboardDates = useMemo(()=>dashboardDates.length ? dashboardDates : [dashboardToday],[dashboardDates,dashboardToday]);
   const latestDate = dashboardDates.length ? dashboardDates[dashboardDates.length-1] : dashboardToday;
   const earliestDate = dashboardDates.length ? dashboardDates[0] : dashboardToday;
   const [selectedDate,setSelectedDate] = useState(latestDate);
@@ -1345,11 +1346,11 @@ function CashDashboardAdmin(){
   }
 
   useEffect(()=>{
-    if(!selectedDate || !dashboardDates.includes(selectedDate)){
+    if(!selectedDate){
       setSelectedDate(latestDate);
       syncAllResultDates(latestDate);
     }
-  },[selectedDate, latestDate, dashboardDates]);
+  },[selectedDate, latestDate]);
 
   useEffect(()=>{
     if(!selectedDate) return;
@@ -1387,24 +1388,80 @@ function CashDashboardAdmin(){
   const monthSalesCents = monthMetrics.reduce((sum,x)=>sum + x.totalSalesCents,0);
   const expensesProgress = monthSalesCents>0 ? Math.min(100, (monthlyExpensesCents / monthSalesCents) * 100) : 0;
 
+  function closestRegisteredDate(date){
+    if(!dashboardDates.length) return date || dashboardToday;
+    if(dashboardDates.includes(date)) return date;
+    if(!date) return latestDate;
+    const target = new Date(`${date}T00:00:00`).getTime();
+    if(Number.isNaN(target)) return latestDate;
+    return dashboardDates.reduce((best,current)=>{
+      const bestDiff = Math.abs(new Date(`${best}T00:00:00`).getTime() - target);
+      const currentDiff = Math.abs(new Date(`${current}T00:00:00`).getTime() - target);
+      return currentDiff < bestDiff ? current : best;
+    }, dashboardDates[0]);
+  }
+
+  function shiftDateValue(date, delta){
+    if(!dashboardDates.length) return date || dashboardToday;
+    const current = date || latestDate;
+    const exactIndex = dashboardDates.indexOf(current);
+    let nextIndex = exactIndex;
+    if(exactIndex >= 0){
+      nextIndex = exactIndex + delta;
+    }else if(delta > 0){
+      const afterIndex = dashboardDates.findIndex(d=>d > current);
+      nextIndex = afterIndex >= 0 ? afterIndex : dashboardDates.length - 1;
+    }else{
+      nextIndex = dashboardDates.map((d,i)=>d < current ? i : -1).filter(i=>i>=0).pop();
+      if(nextIndex === undefined) nextIndex = 0;
+    }
+    nextIndex = Math.max(0, Math.min(dashboardDates.length - 1, nextIndex));
+    return dashboardDates[nextIndex];
+  }
+
+  function selectMainDate(date){
+    const nextDate = closestRegisteredDate(date);
+    setSelectedDate(nextDate);
+    syncAllResultDates(nextDate);
+  }
+
   function shiftSelectedDate(delta){
-    if(!dashboardDates.length) return;
-    const currentIndex = dashboardDates.indexOf(selectedDate);
-    const safeIndex = currentIndex >= 0 ? currentIndex : dashboardDates.length - 1;
-    const nextIndex = Math.max(0, Math.min(dashboardDates.length - 1, safeIndex + delta));
-    const nextDate = dashboardDates[nextIndex];
+    const nextDate = shiftDateValue(selectedDate, delta);
     setSelectedDate(nextDate);
     syncAllResultDates(nextDate);
   }
 
   function updateResultDate(key,value){
-    const nextDate = value || latestDate;
+    const nextDate = closestRegisteredDate(value || latestDate);
     setResultsDates(prev=>({...prev,[key]: nextDate}));
+  }
+
+  function shiftResultDate(key,delta){
+    const nextDate = shiftDateValue(resultsDates[key] || latestDate, delta);
+    setResultsDates(prev=>({...prev,[key]: nextDate}));
+  }
+
+  function DateOperationPicker({value,onChange,onShift,compact=false,ariaLabel="Date enregistrée"}){
+    const activeDate = closestRegisteredDate(value || latestDate);
+    const prevDisabled = !dashboardDates.length || activeDate <= earliestDate;
+    const nextDisabled = !dashboardDates.length || activeDate >= latestDate;
+    return <div className={compact ? "cashAdminDatePicker cashAdminDatePickerCompact" : "cashAdminDatePicker"}>
+      <button type="button" onClick={()=>onShift ? onShift(-1) : onChange(shiftDateValue(activeDate,-1))} disabled={prevDisabled} aria-label="Date enregistrée précédente">‹</button>
+      <input
+        type="date"
+        value={activeDate}
+        onChange={e=>onChange(e.target.value)}
+        disabled={!dashboardDates.length}
+        aria-label={ariaLabel}
+        title="Cliquer pour ouvrir le calendrier. Les flèches passent entre les dates enregistrées."
+      />
+      <button type="button" onClick={()=>onShift ? onShift(1) : onChange(shiftDateValue(activeDate,1))} disabled={nextDisabled} aria-label="Date enregistrée suivante">›</button>
+    </div>;
   }
 
   function resultDateMeta(key){
     return <div className="cashAdminInlineDate">
-      <input type="date" value={resultsDates[key]} min={earliestDate} max={latestDate} onChange={e=>updateResultDate(key,e.target.value)} />
+      <DateOperationPicker compact value={resultsDates[key]} onChange={date=>updateResultDate(key,date)} onShift={delta=>shiftResultDate(key,delta)} ariaLabel={`Date enregistrée pour ${key}`} />
     </div>;
   }
 
@@ -1412,12 +1469,12 @@ function CashDashboardAdmin(){
     <div className="cashAdminDashboardHeader">
       <div>
         <h1>Cash register dashboard</h1>
-        <p>Vue admin pour consulter toutes les dates enregistrées où des opérations de caisse existent, y compris le jour courant.</p>
+        <p>Vue admin pour consulter les dates enregistrées où des opérations de caisse existent, avec calendrier et flèches de navigation.</p>
       </div>
       <div className="cashAdminToolbar">
         <label>
           <span>Date temps réel</span>
-          <input type="date" value={selectedDate} min={earliestDate} max={latestDate} onChange={e=>{ const nextDate = e.target.value || latestDate; setSelectedDate(nextDate); syncAllResultDates(nextDate); }} />
+          <DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date temps réel enregistrée" />
         </label>
         <label>
           <span>Mois d’analyse</span>

@@ -3704,6 +3704,9 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   gap:6px!important;
   min-width:180px!important;
 }
+.cashAdminToolbar label:first-child{
+  min-width:230px!important;
+}
 .cashAdminToolbar span{
   font-size:12px!important;
   font-weight:700!important;
@@ -4071,7 +4074,8 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .cashAdminGridResults{grid-template-columns:1fr!important;}
   .cashAdminGridResults .cashAdminCard{border-right:0!important;border-top:1px solid #dce4f1!important;}
   .cashAdminGridResults .cashAdminCard:first-child{border-top:0!important;}
-  .cashAdminInlineDate input{width:100%!important;}
+  .cashAdminInlineDate .cashAdminDatePicker{width:100%!important;}
+  .cashAdminInlineDate .cashAdminDatePicker input{width:100%!important;min-width:0!important;}
 }
 
 .cashCountModal{
@@ -4165,4 +4169,61 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   text-align:center!important;
   text-transform:uppercase!important;
   letter-spacing:.03em!important;
+}
+
+/* V84 cash dashboard: calendar date input + arrows between saved operation dates */
+.cashAdminDatePicker{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+}
+.cashAdminDatePicker input{
+  min-height:38px!important;
+  border:1px solid #dce4f1!important;
+  border-radius:8px!important;
+  padding:8px 10px!important;
+  margin:0!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  font-weight:800!important;
+  min-width:150px!important;
+}
+.cashAdminDatePicker button{
+  width:34px!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:0!important;
+  border-radius:8px!important;
+  border:1px solid #dce4f1!important;
+  background:#fff!important;
+  color:#334155!important;
+  font-size:22px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  box-shadow:none!important;
+}
+.cashAdminDatePicker button:hover:not(:disabled){
+  background:#f8fafc!important;
+}
+.cashAdminDatePicker button:disabled,
+.cashAdminDatePicker input:disabled{
+  opacity:.55!important;
+  cursor:not-allowed!important;
+}
+.cashAdminDatePickerCompact{
+  gap:4px!important;
+}
+.cashAdminDatePickerCompact input{
+  min-height:32px!important;
+  padding:6px 8px!important;
+  font-size:12px!important;
+  color:#64748b!important;
+  min-width:126px!important;
+  max-width:132px!important;
+}
+.cashAdminDatePickerCompact button{
+  width:28px!important;
+  height:32px!important;
+  min-height:32px!important;
+  font-size:18px!important;
 }
