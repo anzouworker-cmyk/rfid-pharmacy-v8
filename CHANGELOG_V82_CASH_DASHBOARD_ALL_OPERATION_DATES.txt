@@ -1,0 +1,7 @@
+V82 - Dashboard caisse: toutes les dates d'opérations
+
+- Le dashboard caisse admin n'exclut plus automatiquement le jour courant.
+- Les totaux mensuels incluent toutes les dates enregistrées du mois où au moins une opération de caisse existe.
+- Les sélecteurs de date utilisent maintenant la première et la dernière date enregistrées au lieu de bloquer à hier.
+- Les boutons précédent/suivant naviguent uniquement entre les dates de caisse enregistrées.
+- Les cartes de résultats acceptent les dates enregistrées, y compris aujourd'hui si des opérations ont été saisies.
