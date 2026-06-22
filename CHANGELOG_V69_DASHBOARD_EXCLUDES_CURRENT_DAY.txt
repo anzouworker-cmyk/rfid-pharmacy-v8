@@ -1,0 +1,9 @@
+V69 - Dashboard excludes current day
+
+Changes:
+- Cash dashboard calculations now exclude the current day.
+- Monthly totals, progress, shortages, surplus, expenses and sales totals only use closed days before today.
+- The top dashboard date selector is limited to the last closed day.
+- Result card date selectors are also limited to closed days.
+- Added dashboard note: the current day is excluded from calculations.
+- Rebuilt frontend dist files.

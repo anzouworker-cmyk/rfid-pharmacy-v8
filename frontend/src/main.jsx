@@ -1251,8 +1251,11 @@ function CashDashboardAdmin(){
   const [store] = useState(()=>loadLS(LS_CASH_REGISTER,{}));
   const [cashSettings] = useState(()=>({ ...defaultCashSettings(), ...(loadLS(LS_CASH_SETTINGS,{}) || {}) }));
   const reserveCents = Number(cashSettings.reserveCents || 0);
+  const dashboardToday = todayISO();
+  const lastClosedDate = shiftISODate(dashboardToday,-1);
   const allDates = useMemo(()=>Object.keys(store).sort(),[store]);
-  const latestDate = allDates.length ? allDates[allDates.length-1] : todayISO();
+  const dashboardDates = useMemo(()=>allDates.filter(date=>date < dashboardToday),[allDates,dashboardToday]);
+  const latestDate = dashboardDates.length ? dashboardDates[dashboardDates.length-1] : lastClosedDate;
   const [selectedDate,setSelectedDate] = useState(latestDate);
   const [selectedMonth,setSelectedMonth] = useState(()=>latestDate.slice(0,7));
   const [resultsDates,setResultsDates] = useState(()=>({
@@ -1272,12 +1275,11 @@ function CashDashboardAdmin(){
   }
 
   useEffect(()=>{
-    if(!allDates.length) return;
-    if(!store[selectedDate]){
+    if(selectedDate >= dashboardToday || !dashboardDates.includes(selectedDate)){
       setSelectedDate(latestDate);
       syncAllResultDates(latestDate);
     }
-  },[allDates.length, latestDate]);
+  },[dashboardDates.length, latestDate, dashboardToday]);
 
   useEffect(()=>{
     if(!selectedDate) return;
@@ -1285,14 +1287,13 @@ function CashDashboardAdmin(){
   },[selectedDate]);
 
   useEffect(()=>{
-    if(!allDates.length) return;
     setResultsDates(prev=>({
-      totalSales: store[prev.totalSales] ? prev.totalSales : latestDate,
-      closingCalculated: store[prev.closingCalculated] ? prev.closingCalculated : latestDate,
-      closingReal: store[prev.closingReal] ? prev.closingReal : latestDate,
-      gap: store[prev.gap] ? prev.gap : latestDate
+      totalSales: dashboardDates.includes(prev.totalSales) ? prev.totalSales : latestDate,
+      closingCalculated: dashboardDates.includes(prev.closingCalculated) ? prev.closingCalculated : latestDate,
+      closingReal: dashboardDates.includes(prev.closingReal) ? prev.closingReal : latestDate,
+      gap: dashboardDates.includes(prev.gap) ? prev.gap : latestDate
     }));
-  },[allDates.length, latestDate, store]);
+  },[dashboardDates.length, latestDate, store]);
 
   const selectedMetrics = useMemo(()=>buildCashDayMetrics(selectedDate, store[selectedDate], store),[selectedDate,store]);
   const resultMetrics = useMemo(()=>({
@@ -1302,9 +1303,9 @@ function CashDashboardAdmin(){
     gap: buildCashDayMetrics(resultsDates.gap, store[resultsDates.gap], store)
   }),[resultsDates, store]);
   const monthMetrics = useMemo(()=>Object.entries(store)
-    .filter(([date])=>date.startsWith(selectedMonth))
+    .filter(([date])=>date.startsWith(selectedMonth) && date < dashboardToday)
     .map(([date,day])=>buildCashDayMetrics(date, day, store))
-    .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth]);
+    .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth,dashboardToday]);
 
   const monthlyShortageCents = monthMetrics.reduce((sum,x)=>sum + x.shortageCents,0);
   const monthlySurplusCents = monthMetrics.reduce((sum,x)=>sum + x.surplusCents,0);
@@ -1317,21 +1318,22 @@ function CashDashboardAdmin(){
   const expensesProgress = monthSalesCents>0 ? Math.min(100, (monthlyExpensesCents / monthSalesCents) * 100) : 0;
 
   function shiftSelectedDate(delta){
-    if(!allDates.length) return;
-    const idx = Math.max(0, allDates.indexOf(selectedDate));
-    const nextIndex = Math.min(allDates.length - 1, Math.max(0, idx + delta));
-    const nextDate = allDates[nextIndex];
+    if(!dashboardDates.length) return;
+    const idx = Math.max(0, dashboardDates.indexOf(selectedDate));
+    const nextIndex = Math.min(dashboardDates.length - 1, Math.max(0, idx + delta));
+    const nextDate = dashboardDates[nextIndex];
     setSelectedDate(nextDate);
     syncAllResultDates(nextDate);
   }
 
   function updateResultDate(key,value){
-    setResultsDates(prev=>({...prev,[key]: value || latestDate}));
+    const nextDate = value && value < dashboardToday && dashboardDates.includes(value) ? value : latestDate;
+    setResultsDates(prev=>({...prev,[key]: nextDate}));
   }
 
   function resultDateMeta(key){
     return <div className="cashAdminInlineDate">
-      <input type="date" value={resultsDates[key]} onChange={e=>updateResultDate(key,e.target.value)} />
+      <input type="date" value={resultsDates[key]} max={lastClosedDate} onChange={e=>updateResultDate(key,e.target.value)} />
     </div>;
   }
 
@@ -1339,12 +1341,12 @@ function CashDashboardAdmin(){
     <div className="cashAdminDashboardHeader">
       <div>
         <h1>Cash register dashboard</h1>
-        <p>Vue admin pour suivre la gestion de caisse, les écarts, les surplus et les dépenses.</p>
+        <p>Vue admin pour suivre la gestion de caisse, les écarts, les surplus et les dépenses. Le jour courant est exclu des calculs.</p>
       </div>
       <div className="cashAdminToolbar">
         <label>
           <span>Date temps réel</span>
-          <input type="date" value={selectedDate} onChange={e=>{ const nextDate = e.target.value || latestDate; setSelectedDate(nextDate); syncAllResultDates(nextDate); }} />
+          <input type="date" value={selectedDate} max={lastClosedDate} onChange={e=>{ const requestedDate = e.target.value || latestDate; const nextDate = requestedDate < dashboardToday && dashboardDates.includes(requestedDate) ? requestedDate : latestDate; setSelectedDate(nextDate); syncAllResultDates(nextDate); }} />
         </label>
         <label>
           <span>Mois d’analyse</span>
@@ -1354,7 +1356,7 @@ function CashDashboardAdmin(){
     </div>
 
     <div className="cashAdminGrid cashAdminGridTop">
-      <CashAdminCard title="Balance due progress" meta={<span>{monthMetrics.length} jour(s)</span>}>
+      <CashAdminCard title="Balance due progress" meta={<span>{monthMetrics.length} jour(s) fermé(s)</span>}>
         <CashProgressRing value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
       </CashAdminCard>
 
@@ -1391,7 +1393,7 @@ function CashDashboardAdmin(){
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Retiré" meta={<div className="cashAdminDateStepper"><button type="button" onClick={()=>shiftSelectedDate(-1)} disabled={!allDates.length || selectedDate===allDates[0]}>‹</button><span>{selectedDate}</span><button type="button" onClick={()=>shiftSelectedDate(1)} disabled={!allDates.length || selectedDate===allDates[allDates.length-1]}>›</button></div>}>
+      <CashAdminCard title="Retiré" meta={<div className="cashAdminDateStepper"><button type="button" onClick={()=>shiftSelectedDate(-1)} disabled={!dashboardDates.length || selectedDate===dashboardDates[0]}>‹</button><span>{selectedDate}</span><button type="button" onClick={()=>shiftSelectedDate(1)} disabled={!dashboardDates.length || selectedDate===dashboardDates[dashboardDates.length-1]}>›</button></div>}>
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.withdrawnCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
