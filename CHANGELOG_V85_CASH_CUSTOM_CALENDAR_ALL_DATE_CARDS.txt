@@ -1,0 +1,8 @@
+V85 - Cash dashboard custom operation-date calendar
+
+- Replaced native HTML date input on the admin cash dashboard with a custom calendar popover.
+- The calendar now shows only dates that have recorded cash operations.
+- Added previous/next arrows while keeping calendar click behaviour.
+- Applied the same date picker behaviour to the cards that use individual dates.
+- Real time CR balance, Balance due, Montant manquant, Montant surplus and Retiré now use the same recorded-date picker.
+- Result cards keep compact arrows plus custom calendar selection.

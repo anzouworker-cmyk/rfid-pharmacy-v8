@@ -3365,6 +3365,9 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   grid-template-columns:minmax(0,1fr) 150px!important;
   align-items:start!important;
 }
+.cashMainGridSingle{
+  grid-template-columns:minmax(0,1fr)!important;
+}
 .cashTableWrap{
   min-width:0!important;
   padding:0!important;
@@ -4045,15 +4048,8 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   align-items:center!important;
   gap:8px!important;
 }
-.cashAdminInlineDate input{
-  min-height:32px!important;
-  border:1px solid #dce4f1!important;
-  border-radius:8px!important;
-  padding:6px 8px!important;
-  margin:0!important;
-  font-size:12px!important;
-  color:#64748b!important;
-  background:#fff!important;
+.cashAdminInlineDate .cashAdminDatePicker{
+  width:100%!important;
 }
 .cashAdminGridResults .cashAdminCardMeta{
   width:100%!important;
@@ -4075,7 +4071,7 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .cashAdminGridResults .cashAdminCard{border-right:0!important;border-top:1px solid #dce4f1!important;}
   .cashAdminGridResults .cashAdminCard:first-child{border-top:0!important;}
   .cashAdminInlineDate .cashAdminDatePicker{width:100%!important;}
-  .cashAdminInlineDate .cashAdminDatePicker input{width:100%!important;min-width:0!important;}
+  .cashAdminInlineDate .cashAdminDatePicker .cashAdminDatePickerDisplay{width:100%!important;min-width:0!important;}
 }
 
 .cashCountModal{
@@ -4171,24 +4167,14 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   letter-spacing:.03em!important;
 }
 
-/* V84 cash dashboard: calendar date input + arrows between saved operation dates */
+/* V85 cash dashboard: custom calendar for recorded operation dates only */
 .cashAdminDatePicker{
+  position:relative!important;
   display:flex!important;
   align-items:center!important;
   gap:6px!important;
 }
-.cashAdminDatePicker input{
-  min-height:38px!important;
-  border:1px solid #dce4f1!important;
-  border-radius:8px!important;
-  padding:8px 10px!important;
-  margin:0!important;
-  background:#fff!important;
-  color:#0f172a!important;
-  font-weight:800!important;
-  min-width:150px!important;
-}
-.cashAdminDatePicker button{
+.cashAdminDatePicker > button{
   width:34px!important;
   height:38px!important;
   min-height:38px!important;
@@ -4202,28 +4188,214 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   line-height:1!important;
   box-shadow:none!important;
 }
-.cashAdminDatePicker button:hover:not(:disabled){
+.cashAdminDatePicker > button:hover:not(:disabled),
+.cashAdminDatePickerDisplay:hover:not(:disabled){
   background:#f8fafc!important;
 }
-.cashAdminDatePicker button:disabled,
-.cashAdminDatePicker input:disabled{
+.cashAdminDatePicker > button:disabled,
+.cashAdminDatePickerDisplay:disabled{
   opacity:.55!important;
   cursor:not-allowed!important;
+}
+.cashAdminDatePickerDisplay{
+  min-height:38px!important;
+  min-width:150px!important;
+  margin:0!important;
+  padding:8px 10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  border:1px solid #dce4f1!important;
+  border-radius:8px!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  font-weight:800!important;
+  font-size:14px!important;
+  box-shadow:none!important;
+}
+.cashAdminDatePickerDisplay span:first-child{
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.cashAdminDatePickerIcon{
+  font-size:15px!important;
+  line-height:1!important;
+}
+.cashAdminCalendarPopover{
+  position:absolute!important;
+  top:calc(100% + 8px)!important;
+  left:40px!important;
+  z-index:40!important;
+  width:286px!important;
+  padding:12px!important;
+  border:1px solid #dce4f1!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  box-shadow:0 18px 50px rgba(15,23,42,.14)!important;
+}
+.cashAdminDatePickerCompact .cashAdminCalendarPopover{
+  left:32px!important;
+}
+.cashAdminCalendarHeader{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  margin-bottom:10px!important;
+}
+.cashAdminCalendarHeader button{
+  width:28px!important;
+  height:28px!important;
+  min-height:28px!important;
+  font-size:18px!important;
+  border-radius:8px!important;
+}
+.cashAdminCalendarHeader strong{
+  font-size:14px!important;
+  color:#0f172a!important;
+  font-weight:800!important;
+  text-transform:capitalize!important;
+}
+.cashAdminCalendarWeekdays,
+.cashAdminCalendarGrid{
+  display:grid!important;
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+  gap:6px!important;
+}
+.cashAdminCalendarWeekdays{
+  margin-bottom:8px!important;
+}
+.cashAdminCalendarWeekdays span{
+  text-align:center!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  color:#94a3b8!important;
+}
+.cashAdminCalendarBlank,
+.cashAdminCalendarEmpty,
+.cashAdminCalendarDay{
+  width:100%!important;
+  aspect-ratio:1 / 1!important;
+  border-radius:10px!important;
+}
+.cashAdminCalendarBlank,
+.cashAdminCalendarEmpty{
+  display:block!important;
+}
+.cashAdminCalendarDay{
+  border:1px solid #dce4f1!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  font-size:13px!important;
+  font-weight:800!important;
+}
+.cashAdminCalendarDay:hover{
+  background:#f8fafc!important;
+}
+.cashAdminCalendarDay.isActive{
+  background:#2563eb!important;
+  border-color:#2563eb!important;
+  color:#fff!important;
+}
+.cashAdminCalendarHint{
+  margin-top:10px!important;
+  font-size:11px!important;
+  color:#64748b!important;
+  text-align:center!important;
 }
 .cashAdminDatePickerCompact{
   gap:4px!important;
 }
-.cashAdminDatePickerCompact input{
-  min-height:32px!important;
-  padding:6px 8px!important;
-  font-size:12px!important;
-  color:#64748b!important;
-  min-width:126px!important;
-  max-width:132px!important;
-}
-.cashAdminDatePickerCompact button{
+.cashAdminDatePickerCompact > button{
   width:28px!important;
   height:32px!important;
   min-height:32px!important;
   font-size:18px!important;
+}
+.cashAdminDatePickerCompact .cashAdminDatePickerDisplay{
+  min-height:32px!important;
+  min-width:126px!important;
+  max-width:152px!important;
+  padding:6px 8px!important;
+  font-size:12px!important;
+  color:#64748b!important;
+}
+@media(max-width:700px){
+  .cashAdminCalendarPopover{
+    left:0!important;
+    width:min(286px, calc(100vw - 48px))!important;
+  }
+}
+
+/* V87 - remove explanatory text from cash operation cards */
+.cashOperationCard h3{
+  min-height:auto!important;
+  margin-bottom:14px!important;
+}
+.cashOperationCard .cashOpValueLabel{
+  margin-top:0!important;
+}
+
+/* V88 - professional shortage/surplus cards in cash operations */
+.cashOperationCardHighlight{
+  position:relative!important;
+  overflow:hidden!important;
+}
+.cashOperationCardHighlight:before{
+  width:4px!important;
+}
+.cashOperationCardHighlight .opIcon{
+  width:54px!important;
+  height:54px!important;
+  border-radius:14px!important;
+}
+.cashOperationCardHighlight h3{
+  font-size:16px!important;
+  font-weight:800!important;
+}
+.cashOperationCardHighlight .cashOpValueLabel{
+  font-size:12px!important;
+  letter-spacing:.06em!important;
+}
+.cashOperationCardHighlight .cashOpCardAmount{
+  font-size:28px!important;
+  font-weight:900!important;
+}
+.cashOperationCardHighlight span:last-child{
+  min-width:122px!important;
+  font-weight:800!important;
+}
+.operationsPage .cashOperationCardShortage:before{
+  background:#dc2626!important;
+}
+.operationsPage .cashOperationCardShortage .opIcon{
+  background:#fff1f2!important;
+  color:#dc2626!important;
+}
+.operationsPage .cashOperationCardShortage{
+  background:linear-gradient(180deg,#fff 0%,#fff7f7 100%)!important;
+  border-color:#fecaca!important;
+}
+.operationsPage .cashOperationCardShortage span:last-child{
+  background:#fff1f2!important;
+  color:#b91c1c!important;
+  border-color:#fecaca!important;
+}
+.operationsPage .cashOperationCardSurplus:before{
+  background:#16a34a!important;
+}
+.operationsPage .cashOperationCardSurplus .opIcon{
+  background:#ecfdf3!important;
+  color:#16a34a!important;
+}
+.operationsPage .cashOperationCardSurplus{
+  background:linear-gradient(180deg,#fff 0%,#f6fff9 100%)!important;
+  border-color:#bbf7d0!important;
+}
+.operationsPage .cashOperationCardSurplus span:last-child{
+  background:#ecfdf3!important;
+  color:#15803d!important;
+  border-color:#bbf7d0!important;
 }

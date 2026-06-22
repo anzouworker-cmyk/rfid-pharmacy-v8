@@ -1,0 +1,8 @@
+V86 - Cash tables simplified
+
+- Removed the top daily date bar from the Gestion de caisse and Dépenses tabs.
+- Kept the daily date bar only for the Monnaie stock tab.
+- Removed the right-side total panel from Gestion de caisse and Dépenses.
+- Kept the right-side total panel only for Monnaie stock.
+- Removed the text "Cash comptée dans la caisse" from the right-side total panel.
+- Removed the empty right-side column / vertical separator on cash tabs other than Monnaie stock.

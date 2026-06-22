@@ -507,6 +507,7 @@ function Operations({me}){
   const newCashBalanceCents = getClosingRealCentsForDate(cashStore, cashDate);
   const cashToWithdrawCents = Math.max(0, cashCountedCents - 300000);
   const closingTheoreticalCents = getTheoreticalClosingCentsForDate(cashStore, cashDate);
+  const currentCashMetrics = useMemo(()=>buildCashDayMetrics(cashDate, cashCurrent, cashStore),[cashDate,cashCurrent,cashStore]);
 
   function saveCashDay(day){
     const updated={...cashStore,[cashDate]:day};
@@ -567,7 +568,9 @@ function Operations({me}){
     {key:"depositsCents", title:"Dépôts / ajouts", value:depositsCents, description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"closingRealCents", title:"Nouvelle C. fermeture", value:newCashBalanceCents, description:"Calcul Excel : C. fermeture (compté) - Retiré (réel).", type:"=", editable:false, tone:"blue", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul Excel : max(0, Nouvelle C. fermeture de hier + Dépôt/ajout + Tot. vente en espèce + Règlement crédit - Dépenses).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
-    {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"}
+    {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"},
+    {key:"shortageCents", title:"Montant manquant", value:currentCashMetrics.shortageCents, type:"=", editable:false, tone:"shortage", cta:currentCashMetrics.shortageCents>0 ? "À vérifier" : "Équilibré", valueLabel:"Écart du jour", icon:"warning", cardClass:"cashOperationCardHighlight cashOperationCardShortage"},
+    {key:"surplusCents", title:"Montant surplus", value:currentCashMetrics.surplusCents, type:"=", editable:false, tone:"surplus", cta:currentCashMetrics.surplusCents>0 ? "Excédent" : "Équilibré", valueLabel:"Écart du jour", icon:"check", cardClass:"cashOperationCardHighlight cashOperationCardSurplus"}
   ];
   return <section className="operationsPage">
     <h1>Opérations</h1>
@@ -624,10 +627,9 @@ function Operations({me}){
         </div>
       </div>
       <div className="exportOperationGrid cashOpsGrid">
-        {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.isExpense ? openExpenseModal() : (card.editable ? setCashOpModal(card) : null)}>
-          <div className="opIcon"><DashIcon name="cash"/></div>
+        {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.cardClass || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.isExpense ? openExpenseModal() : (card.editable ? setCashOpModal(card) : null)}>
+          <div className="opIcon"><DashIcon name={card.icon || "cash"}/></div>
           <h3>{card.title}</h3>
-          <p>{card.description}</p>
           <small className="cashOpValueLabel">{card.valueLabel || "Valeur"}</small><strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
           <span>{card.cta}</span>
         </button>)}
@@ -1077,14 +1079,14 @@ function CashRegister(){
         <button type="button" className={active==="expenses" ? "active" : ""} onClick={()=>setActive("expenses")}>Dépenses</button>
       </div>
 
-      <div className="cashDateBar">
+      {active==="exchange" && <div className="cashDateBar">
         <button type="button" onClick={()=>setCashDate(shiftISODate(cashDate,-1))}>‹</button>
         <input type="date" value={cashDate} onChange={e=>setCashDate(e.target.value || todayISO())}/>
         <button type="button" onClick={()=>setCashDate(shiftISODate(cashDate,1))}>›</button>
         <button type="button" onClick={()=>setCashDate(todayISO())}>Aujourd’hui</button>
-      </div>
+      </div>}
 
-      <div className="cashMainGrid">
+      <div className={active==="exchange" ? "cashMainGrid" : "cashMainGrid cashMainGridSingle"}>
         <div className="cashTableWrap">
           {active==="exchange" && <>
             <h2>Monnaie stock</h2>
@@ -1203,16 +1205,15 @@ function CashRegister(){
           </>}
         </div>
 
-        <aside className="cashTotalCard">
+        {active==="exchange" && <aside className="cashTotalCard">
           <span>Total</span>
           <b>{formatDH(countedCents)}</b>
-          <small>Cash comptée dans la caisse</small>
           <div className="cashSummaryList">
             <div><em>Total attendu</em><strong>{formatDH(expectedCents)}</strong></div>
             <div><em>Dépenses</em><strong>{formatDH(expensesCents)}</strong></div>
             <div className={gapCents===0 ? "ok" : "warn"}><em>Écart</em><strong>{formatDH(gapCents)}</strong></div>
           </div>
-        </aside>
+        </aside>}
       </div>
     </div>
     {msg && <p className="success cashMsg">{msg}</p>}
@@ -1324,7 +1325,7 @@ function CashDashboardAdmin(){
   const dashboardToday = todayISO();
   const allDates = useMemo(()=>Object.keys(store).sort(),[store]);
   const dashboardDates = useMemo(()=>allDates.filter(date=>hasCashDayActivity(store[date])),[allDates,store]);
-  const selectableDashboardDates = useMemo(()=>dashboardDates.length ? dashboardDates : [dashboardToday],[dashboardDates,dashboardToday]);
+  const dashboardMonths = useMemo(()=>Array.from(new Set(dashboardDates.map(date=>date.slice(0,7)))).sort(),[dashboardDates]);
   const latestDate = dashboardDates.length ? dashboardDates[dashboardDates.length-1] : dashboardToday;
   const earliestDate = dashboardDates.length ? dashboardDates[0] : dashboardToday;
   const [selectedDate,setSelectedDate] = useState(latestDate);
@@ -1445,23 +1446,124 @@ function CashDashboardAdmin(){
     const activeDate = closestRegisteredDate(value || latestDate);
     const prevDisabled = !dashboardDates.length || activeDate <= earliestDate;
     const nextDisabled = !dashboardDates.length || activeDate >= latestDate;
-    return <div className={compact ? "cashAdminDatePicker cashAdminDatePickerCompact" : "cashAdminDatePicker"}>
+    const [isOpen,setIsOpen] = useState(false);
+    const [viewMonth,setViewMonth] = useState(()=>activeDate.slice(0,7));
+    const pickerRef = useRef(null);
+    const monthChoices = dashboardMonths.length ? dashboardMonths : [activeDate.slice(0,7)];
+    const viewMonthIndex = Math.max(0, monthChoices.indexOf(viewMonth));
+    const canPrevMonth = viewMonthIndex > 0;
+    const canNextMonth = viewMonthIndex < monthChoices.length - 1;
+    const activeMonth = activeDate.slice(0,7);
+    const availableDatesInView = dashboardDates.filter(date=>date.startsWith(viewMonth));
+    const availableDatesSet = new Set(availableDatesInView);
+
+    useEffect(()=>{
+      setViewMonth(activeMonth);
+    },[activeMonth]);
+
+    useEffect(()=>{
+      function handleOutsideClick(event){
+        if(pickerRef.current && !pickerRef.current.contains(event.target)) setIsOpen(false);
+      }
+      function handleEscape(event){
+        if(event.key === "Escape") setIsOpen(false);
+      }
+      document.addEventListener("mousedown", handleOutsideClick);
+      document.addEventListener("keydown", handleEscape);
+      return ()=>{
+        document.removeEventListener("mousedown", handleOutsideClick);
+        document.removeEventListener("keydown", handleEscape);
+      };
+    },[]);
+
+    function openPicker(){
+      setViewMonth(activeMonth);
+      setIsOpen(true);
+    }
+
+    function changeMonth(delta){
+      const nextIndex = Math.max(0, Math.min(monthChoices.length - 1, viewMonthIndex + delta));
+      setViewMonth(monthChoices[nextIndex]);
+    }
+
+    function buildCalendarCells(){
+      const [year, month] = viewMonth.split("-").map(Number);
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const cells = [];
+      for(let i=0;i<firstDay;i++) cells.push({type:"blank", key:`blank-${i}`});
+      for(let day=1; day<=daysInMonth; day++){
+        const isoDate = `${viewMonth}-${String(day).padStart(2,"0")}`;
+        cells.push({
+          type: availableDatesSet.has(isoDate) ? "date" : "empty",
+          key: isoDate,
+          day,
+          isoDate,
+          active: isoDate === activeDate
+        });
+      }
+      while(cells.length % 7 !== 0) cells.push({type:"blank", key:`tail-${cells.length}`});
+      return cells;
+    }
+
+    const calendarCells = buildCalendarCells();
+
+    return <div className={compact ? "cashAdminDatePicker cashAdminDatePickerCompact" : "cashAdminDatePicker"} ref={pickerRef}>
       <button type="button" onClick={()=>onShift ? onShift(-1) : onChange(shiftDateValue(activeDate,-1))} disabled={prevDisabled} aria-label="Date enregistrée précédente">‹</button>
-      <input
-        type="date"
-        value={activeDate}
-        onChange={e=>onChange(e.target.value)}
+      <button
+        type="button"
+        className="cashAdminDatePickerDisplay"
+        onClick={()=>isOpen ? setIsOpen(false) : openPicker()}
         disabled={!dashboardDates.length}
         aria-label={ariaLabel}
-        title="Cliquer pour ouvrir le calendrier. Les flèches passent entre les dates enregistrées."
-      />
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        title="Cliquer pour ouvrir le calendrier des dates enregistrées."
+      >
+        <span>{activeDate}</span>
+        <span className="cashAdminDatePickerIcon">📅</span>
+      </button>
       <button type="button" onClick={()=>onShift ? onShift(1) : onChange(shiftDateValue(activeDate,1))} disabled={nextDisabled} aria-label="Date enregistrée suivante">›</button>
+      {isOpen && <div className="cashAdminCalendarPopover" role="dialog" aria-label="Calendrier des dates enregistrées">
+        <div className="cashAdminCalendarHeader">
+          <button type="button" onClick={()=>changeMonth(-1)} disabled={!canPrevMonth} aria-label="Mois précédent">‹</button>
+          <strong>{formatMonthLabel(viewMonth)}</strong>
+          <button type="button" onClick={()=>changeMonth(1)} disabled={!canNextMonth} aria-label="Mois suivant">›</button>
+        </div>
+        <div className="cashAdminCalendarWeekdays">
+          {["Su","Mo","Tu","We","Th","Fr","Sa"].map(day=><span key={day}>{day}</span>)}
+        </div>
+        <div className="cashAdminCalendarGrid">
+          {calendarCells.map(cell=>{
+            if(cell.type === "blank") return <span key={cell.key} className="cashAdminCalendarBlank" />;
+            if(cell.type === "empty") return <span key={cell.key} className="cashAdminCalendarEmpty" aria-hidden="true" />;
+            return <button
+              type="button"
+              key={cell.key}
+              className={cell.active ? "cashAdminCalendarDay isActive" : "cashAdminCalendarDay"}
+              onClick={()=>{
+                onChange(cell.isoDate);
+                setIsOpen(false);
+              }}
+            >
+              {cell.day}
+            </button>;
+          })}
+        </div>
+        <div className="cashAdminCalendarHint">Seules les dates avec opérations enregistrées sont affichées.</div>
+      </div>}
     </div>;
   }
 
   function resultDateMeta(key){
     return <div className="cashAdminInlineDate">
       <DateOperationPicker compact value={resultsDates[key]} onChange={date=>updateResultDate(key,date)} onShift={delta=>shiftResultDate(key,delta)} ariaLabel={`Date enregistrée pour ${key}`} />
+    </div>;
+  }
+
+  function selectedDateMeta(label){
+    return <div className="cashAdminInlineDate">
+      <DateOperationPicker compact value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel={label} />
     </div>;
   }
 
@@ -1488,7 +1590,7 @@ function CashDashboardAdmin(){
         <CashProgressRing value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
       </CashAdminCard>
 
-      <CashAdminCard title="Real time CR balance" meta={<span>{selectedDate}</span>} right="SD">
+      <CashAdminCard title="Real time CR balance" meta={selectedDateMeta("Date temps réel enregistrée pour Real time CR balance")} right="SD">
         <div className="cashAdminBigMetric">
           <small>DH</small>
           <b>{((selectedMetrics.countedCents || 0) / 100).toFixed(1)}</b>
@@ -1509,19 +1611,19 @@ function CashDashboardAdmin(){
     </div>
 
     <div className="cashAdminGrid cashAdminGridBottom">
-      <CashAdminCard title="Balance due" meta={<span>{selectedDate}</span>} right="SD">
+      <CashAdminCard title="Balance due" meta={selectedDateMeta("Date enregistrée pour Balance due")} right="SD">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.dueBalanceCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Montant manquant" meta={<span>{selectedDate}</span>} right="SD">
+      <CashAdminCard title="Montant manquant" meta={selectedDateMeta("Date enregistrée pour Montant manquant")} right="SD">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.shortageCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Montant surplus" meta={<span>{selectedDate}</span>} right="SD">
+      <CashAdminCard title="Montant surplus" meta={selectedDateMeta("Date enregistrée pour Montant surplus")} right="SD">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Retiré" meta={<div className="cashAdminDateStepper"><button type="button" onClick={()=>shiftSelectedDate(-1)} disabled={!dashboardDates.length || selectedDate<=earliestDate}>‹</button><span>{selectedDate}</span><button type="button" onClick={()=>shiftSelectedDate(1)} disabled={!dashboardDates.length || selectedDate>=latestDate}>›</button></div>}>
+      <CashAdminCard title="Retiré" meta={selectedDateMeta("Date enregistrée pour Retiré")}>
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.withdrawnCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 

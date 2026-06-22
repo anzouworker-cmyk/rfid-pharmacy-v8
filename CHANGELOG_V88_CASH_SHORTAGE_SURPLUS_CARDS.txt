@@ -1,0 +1,11 @@
+V88 - Cash operations page: Montant manquant / Montant surplus cards
+
+- Added two professional summary cards in the cash operations section:
+  - Montant manquant
+  - Montant surplus
+- Both cards use the current selected cash date.
+- Cards are read-only and automatically calculated from the same-day cash comparison logic.
+- Added highlighted visual styling:
+  - red warning style for Montant manquant
+  - green success style for Montant surplus
+- Kept the simplified card layout without explanatory paragraphs.
