@@ -1,0 +1,9 @@
+V76 - C. fermeture théorique from previous real closing
+
+Changes:
+- Updated C. fermeture (théorique) formula to:
+  max(0, C. fermeture réel de hier + Tot. vente en espèce du jour courant + Règlement de crédit du jour courant)
+- Uses yesterday's real closing cash value (the counted closing amount) as the starting value.
+- Updated Operations card description and value.
+- Updated cash register history, CSV export, and Dashboard Caisse calculations.
+- Rebuilt frontend dist files.
