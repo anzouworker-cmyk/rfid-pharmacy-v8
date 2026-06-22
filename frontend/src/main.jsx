@@ -992,7 +992,21 @@ function CashRegister(){
         surplusCents:Math.max(0, daySameClosingRealCents - dayClosingCalculated)
       };
     })
-    .filter(item=>item.openingCents || item.toWithdrawCents || item.withdrawnCents || item.closingRealCents || item.totalSalesCents || item.salesCashCents || item.creditSalesCents || item.atmSalesCents || item.creditSettlementCents || item.closingCalculatedCents || item.shortageCents || item.surplusCents || item.depositsCents || item.expensesCents)
+    .filter(item=>[
+      item.openingCents,
+      item.toWithdrawCents,
+      item.withdrawnCents,
+      item.depositsCents,
+      item.closingRealCents,
+      item.totalSalesCents,
+      item.salesCashCents,
+      item.creditSalesCents,
+      item.atmSalesCents,
+      item.creditSettlementCents,
+      item.closingCalculatedCents,
+      item.shortageCents,
+      item.surplusCents
+    ].some(value=>Math.abs(Number(value) || 0) > 0))
     .sort((a,b)=>b.date.localeCompare(a.date)), [store,managementMonth]);
 
   const managementRowsPerPage = 5;
@@ -1101,7 +1115,7 @@ function CashRegister(){
                       <td>{formatDH(item.closingCalculatedCents)}</td>
                       <td>{formatDH(item.shortageCents)}</td>
                       <td>{formatDH(item.surplusCents)}</td>
-                    </tr>) : <tr><td colSpan="14" className="expenseHistoryEmpty">Aucune donnée de gestion de caisse pour ce mois.</td></tr>}
+                    </tr>) : <tr><td colSpan="14" className="expenseHistoryEmpty">Aucune valeur différente de 0 dans l’historique de gestion de caisse pour ce mois.</td></tr>}
                   </tbody>
                 </table>
               </div>

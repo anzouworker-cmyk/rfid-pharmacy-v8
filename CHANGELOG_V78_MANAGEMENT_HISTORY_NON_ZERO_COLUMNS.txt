@@ -1,0 +1,8 @@
+V78 - Gestion de caisse history shows rows only when a table value is non-zero
+
+Changes:
+- Updated the Gestion de caisse history table filter.
+- A date appears in the history only if at least one visible table column has a value different from 0.
+- Checked columns include: C. fermeture (réel), À retirer, Retiré, Dépôt / ajout, Nouvelle solde caisse, sales totals, C. fermeture (théorique), Montant manquant, and Montant surplus.
+- Empty state text updated to explain the rule.
+- Rebuilt frontend dist files.
