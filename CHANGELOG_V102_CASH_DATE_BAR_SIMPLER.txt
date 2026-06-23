@@ -1,0 +1,6 @@
+V102 - Simplified redesign of the cash date bar
+
+- Redesigned the date section in Monnaie d’échange to make it simpler and cleaner.
+- Added a compact "Date de caisse" label.
+- Grouped the previous button, date field, next button, and "Aujourd’hui" button into one compact inline control.
+- Removed the overly spread-out layout.

@@ -1120,10 +1120,13 @@ function CashRegister(){
       </div>
 
       {active==="exchange" && <div className="cashDateBar">
-        <button type="button" onClick={()=>setCashDate(shiftISODate(cashDate,-1))}>‹</button>
-        <input type="date" value={cashDate} onChange={e=>setCashDate(e.target.value || todayISO())}/>
-        <button type="button" onClick={()=>setCashDate(shiftISODate(cashDate,1))}>›</button>
-        <button type="button" onClick={()=>setCashDate(todayISO())}>Aujourd’hui</button>
+        <div className="cashDateBarGroup">
+          <span>Date de caisse</span>
+          <button type="button" onClick={()=>setCashDate(shiftISODate(cashDate,-1))}>‹</button>
+          <input type="date" value={cashDate} onChange={e=>setCashDate(e.target.value || todayISO())}/>
+          <button type="button" onClick={()=>setCashDate(shiftISODate(cashDate,1))}>›</button>
+          <button type="button" className="cashDateTodayBtn" onClick={()=>setCashDate(todayISO())}>Aujourd’hui</button>
+        </div>
       </div>}
 
       <div className={active==="exchange" ? "cashMainGrid" : "cashMainGrid cashMainGridSingle"}>
@@ -1203,7 +1206,6 @@ function CashRegister(){
             <section className="cashExpensesSection cashExpenseHistorySection">
               <div className="cashSectionHeading">
                 <h2>Dépenses</h2>
-                <p>La saisie des dépenses se fait maintenant depuis la page Opérations avec une carte dédiée.</p>
               </div>
 
               <div className="expenseHistoryTopbar">

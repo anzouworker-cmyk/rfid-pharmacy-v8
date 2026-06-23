@@ -5089,3 +5089,107 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
     width:100%!important;
   }
 }
+
+/* V100 - redesign Date temps réel to match Date de caisse style */
+.cashAdminToolbarSingle{
+  width:auto!important;
+  justify-content:flex-end!important;
+}
+.cashAdminPrimaryDateControl{
+  min-width:0!important;
+  width:auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  gap:6px!important;
+}
+.cashAdminPrimaryDateControl span{
+  font-size:12px!important;
+  font-weight:700!important;
+  color:#64748b!important;
+  letter-spacing:0!important;
+}
+.cashAdminPrimaryDateControl .cashAdminDatePicker{
+  width:auto!important;
+  gap:8px!important;
+}
+.cashAdminPrimaryDateControl .cashAdminDatePicker > button{
+  width:38px!important;
+  height:38px!important;
+  min-height:38px!important;
+  border:1px solid #dce4f1!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  font-size:20px!important;
+}
+.cashAdminPrimaryDateControl .cashAdminDatePickerDisplay{
+  min-height:38px!important;
+  min-width:150px!important;
+  padding:8px 10px!important;
+  border:1px solid #dce4f1!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  font-size:14px!important;
+  font-weight:700!important;
+  box-shadow:none!important;
+}
+.cashAdminPrimaryDateControl .cashAdminDatePickerIcon{
+  font-size:14px!important;
+}
+.cashAdminPrimaryDateControl .cashAdminCalendarPopover{
+  left:46px!important;
+  top:calc(100% + 6px)!important;
+}
+@media(max-width:900px){
+  .cashAdminToolbarSingle{
+    width:100%!important;
+    justify-content:flex-start!important;
+  }
+  .cashAdminPrimaryDateControl .cashAdminDatePicker{
+    width:100%!important;
+  }
+  .cashAdminPrimaryDateControl .cashAdminDatePickerDisplay{
+    flex:1 1 auto!important;
+    min-width:0!important;
+  }
+}
+
+/* V102 - simpler redesign for cash date bar */
+.cashDateBar{
+  justify-content:flex-start!important;
+  padding:10px 14px!important;
+}
+.cashDateBarGroup{
+  display:flex!important;
+  align-items:center!important;
+  flex-wrap:wrap!important;
+  gap:10px!important;
+}
+.cashDateBarGroup span{
+  font-size:12px!important;
+  font-weight:800!important;
+  color:#64748b!important;
+  margin-right:2px!important;
+}
+.cashDateBar input{
+  width:160px!important;
+}
+.cashDateBar button,
+.cashDateBar .cashDateTodayBtn{
+  min-height:38px!important;
+}
+.cashDateTodayBtn{
+  padding:0 14px!important;
+}
+@media(max-width:1000px){
+  .cashDateBar{
+    display:flex!important;
+  }
+  .cashDateBarGroup{
+    width:100%!important;
+  }
+}

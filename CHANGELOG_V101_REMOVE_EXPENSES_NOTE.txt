@@ -1,0 +1,5 @@
+V101 - Remove expenses note
+
+- Removed the explanatory sentence in the Dépenses section:
+  "La saisie des dépenses se fait maintenant depuis la page Opérations avec une carte dédiée."
+- Kept the Dépenses title and the rest of the table unchanged.

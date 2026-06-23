@@ -1,0 +1,6 @@
+V100 - Redesign of "Date temps réel"
+
+- Redesigned the "Date temps réel" control on the cash dashboard.
+- Updated its visual style to match the "Date de caisse" look more closely.
+- Kept the recorded-date navigation arrows and custom calendar behavior.
+- Simplified the wrapper so it looks cleaner and more consistent with the rest of the app.
