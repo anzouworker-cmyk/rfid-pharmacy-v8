@@ -5742,3 +5742,9 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .expenseHistoryTopbar{flex-direction:column!important;align-items:stretch!important;}
   .expenseMonthBar{flex-wrap:wrap!important;}
 }
+
+
+/* V108 - remove management KPI cards */
+.cashManagementHistorySection .cashWideTableWrap{
+  margin-top:0!important;
+}
