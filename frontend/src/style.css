@@ -4740,3 +4740,80 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .cashSectionHeading{display:block!important;}
   .expenseMonthBar{justify-content:flex-start!important;margin-top:10px!important;}
 }
+
+/* V93 - user page visibility permissions */
+.platformPage{
+  max-width:1600px!important;
+  margin:0 auto!important;
+}
+.platformPage .card,
+.myUsersPage .card{
+  border:1px solid #d9e0eb!important;
+  border-radius:18px!important;
+  box-shadow:0 8px 24px rgba(15,23,42,.04)!important;
+  background:#fff!important;
+}
+.platformPage .card input,
+.myUsersPage .card input{
+  border:1px solid #d9e0eb!important;
+  border-radius:12px!important;
+  min-height:42px!important;
+  padding:0 12px!important;
+  margin:6px 8px 6px 0!important;
+}
+.pagePermissionBox{
+  margin:12px 0!important;
+  padding:12px!important;
+  border:1px solid #e5edf7!important;
+  border-radius:14px!important;
+  background:#f8fafc!important;
+}
+.pagePermissionBox strong{
+  display:block!important;
+  margin-bottom:10px!important;
+  color:#0f172a!important;
+}
+.pagePermissionGrid,
+.pagePermissionMiniGrid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+.pagePermissionGrid label,
+.pagePermissionMiniGrid label,
+.checkLine{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  color:#334155!important;
+  font-size:13px!important;
+  font-weight:700!important;
+}
+.pagePermissionGrid input,
+.pagePermissionMiniGrid input,
+.checkLine input{
+  width:16px!important;
+  height:16px!important;
+  min-height:16px!important;
+  margin:0!important;
+}
+.pagePermissionMiniGrid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  min-width:260px!important;
+}
+.checkLine.compact{
+  min-width:110px!important;
+}
+.myUsersPage table,
+.platformPage table{
+  margin-top:14px!important;
+  border:1px solid #d9e0eb!important;
+  border-radius:18px!important;
+  box-shadow:0 8px 24px rgba(15,23,42,.04)!important;
+}
+@media(max-width:900px){
+  .pagePermissionGrid,
+  .pagePermissionMiniGrid{
+    grid-template-columns:1fr!important;
+  }
+}

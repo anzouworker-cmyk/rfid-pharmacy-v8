@@ -29,6 +29,28 @@ const LS_ASSOC="rfid_v7_associations";
 const LS_DETECTED_EPCS="rfid_v7_detected_epcs";
 const LS_CASH_REGISTER="smart_inventory_cash_register_v1";
 const LS_CASH_SETTINGS="smart_inventory_cash_settings_v1";
+const APP_USER_PAGES = [
+  {id:"dashboard", label:"Dashboard", icon:"dashboard"},
+  {id:"operations", label:"Opérations", icon:"operations"},
+  {id:"association", label:"Associations RFID", icon:"association"},
+  {id:"inventory", label:"Inventaire RFID", icon:"inventory"},
+  {id:"cash", label:"Caisse", icon:"cash"},
+  {id:"ai", label:"Assistant IA", icon:"ai"}
+];
+const APP_ADMIN_PAGES = [
+  {id:"cashAdmin", label:"Dashboard Caisse", icon:"cash"},
+  {id:"platform", label:"Clients SaaS", icon:"platform"},
+  {id:"dashboardAdmin", label:"Publicités", icon:"dashboardAdmin"}
+];
+function defaultUserPages(){ return APP_USER_PAGES.map(p=>p.id); }
+function cleanPageList(pages, allowed=defaultUserPages()){
+  const allowedSet = new Set(allowed);
+  const next = [];
+  (Array.isArray(pages) ? pages : []).forEach(p=>{
+    if(allowedSet.has(p) && !next.includes(p)) next.push(p);
+  });
+  return next.length ? next : [...allowed];
+}
 
 function saveLS(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
 function loadLS(k,def){ try{return JSON.parse(localStorage.getItem(k)||"")}catch{return def} }
@@ -276,6 +298,12 @@ function App(){
   const auth={headers:{Authorization:`Bearer ${token}`}};
 
   useEffect(()=>{ if(token) axios.get(`${API}/me`,auth).then(r=>setMe(r.data)).catch(()=>logout()) },[token]);
+  useEffect(()=>{
+    if(!me) return;
+    const allowed = me.role==="platform_admin" ? [...defaultUserPages(), ...APP_ADMIN_PAGES.map(p=>p.id)] : cleanPageList(me.page_permissions || defaultUserPages());
+    const fullAllowed = me.can_manage_users && me.role!=="platform_admin" ? [...allowed,"users"] : allowed;
+    if(fullAllowed.length && !fullAllowed.includes(tab)) setTab(fullAllowed[0]);
+  },[me?.username, me?.role, me?.can_manage_users, JSON.stringify(me?.page_permissions || []), tab]);
 
   function logout(){ localStorage.removeItem("token"); setToken(""); setMe(null); }
   function toggleSidebar(){
@@ -298,24 +326,19 @@ function App(){
     tab==="cash" ? "Caisse" :
     tab==="cashAdmin" ? "Dashboard Caisse" :
     tab==="ai" ? "Assistant IA" :
+    tab==="users" ? "Utilisateurs" :
     tab==="platform" ? "Clients SaaS" :
     tab==="dashboardAdmin" ? "Publicités" : "Smart Inventory";
 
 
-  const menu=[
-    {id:"dashboard",label:"Dashboard",icon:"dashboard"},
-    {id:"operations",label:"Opérations",icon:"operations"},
-    {id:"association",label:"Associations RFID",icon:"association"},
-    {id:"inventory",label:"Inventaire RFID",icon:"inventory"},
-    {id:"cash",label:"Caisse",icon:"cash"},
-    {id:"ai",label:"Assistant IA",icon:"ai"},
-  ];
-  if(me?.role==="platform_admin"){
-    menu.push({id:"cashAdmin",label:"Dashboard Caisse",icon:"cash"});
-    menu.push({id:"platform",label:"Clients SaaS",icon:"platform"});
-    menu.push({id:"dashboardAdmin",label:"Publicités",icon:"dashboardAdmin"});
+  const userAllowedPages = me?.role==="platform_admin" ? defaultUserPages() : cleanPageList(me?.page_permissions || defaultUserPages());
+  const menu = APP_USER_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p}));
+  if(me?.can_manage_users && me?.role!=="platform_admin"){
+    menu.push({id:"users",label:"Utilisateurs",icon:"platform"});
   }
-
+  if(me?.role==="platform_admin"){
+    menu.push(...APP_ADMIN_PAGES.map(p=>({...p})));
+  }
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
       <div className="whiteBrand">
@@ -354,6 +377,7 @@ function App(){
         {tab==="association" && <Association/>}
         {tab==="inventory" && <Inventory/>}
         {tab==="cash" && <CashRegister/>}
+        {tab==="users" && <MyUsers auth={auth} me={me}/>} 
         {tab==="cashAdmin" && <CashDashboardAdmin/>}
         {tab==="platform" && <Platform auth={auth}/>}
         {tab==="dashboardAdmin" && <DashboardAdmin auth={auth}/>}
@@ -2251,6 +2275,132 @@ function LocalData(){
 }
 
 
+function MyUsers({auth,me}){
+  const allowedPages = cleanPageList(me?.page_permissions || defaultUserPages());
+  const visiblePageOptions = APP_USER_PAGES.filter(p=>allowedPages.includes(p.id));
+  const [users,setUsers]=useState([]);
+  const [username,setUsername]=useState("");
+  const [password,setPassword]=useState("");
+  const [fullName,setFullName]=useState("");
+  const [pages,setPages]=useState(()=>visiblePageOptions.map(p=>p.id));
+  const [msg,setMsg]=useState("");
+
+  async function load(){
+    try{
+      const r=await axios.get(`${API}/users/my-users`,auth);
+      setUsers(r.data);
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur chargement utilisateurs");
+    }
+  }
+  useEffect(()=>{ load(); },[]);
+  useEffect(()=>{
+    setPages(prev=>cleanPageList(prev, visiblePageOptions.map(p=>p.id)));
+  },[me?.username]);
+
+  function togglePage(pageId){
+    setPages(prev=>prev.includes(pageId) ? prev.filter(x=>x!==pageId) : [...prev,pageId]);
+  }
+
+  async function createUser(){
+    try{
+      await axios.post(`${API}/users/create`,{username,password,full_name:fullName,page_permissions:pages},auth);
+      setUsername(""); setPassword(""); setFullName(""); setPages(visiblePageOptions.map(p=>p.id));
+      setMsg("Utilisateur créé.");
+      await load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur création utilisateur");
+    }
+  }
+
+  async function updatePages(user,nextPages){
+    try{
+      await axios.post(`${API}/users/page-permissions/${encodeURIComponent(user.username)}`,{page_permissions:nextPages,can_manage_users:false},auth);
+      setMsg(`Pages mises à jour pour ${user.username}.`);
+      await load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur mise à jour pages");
+    }
+  }
+
+  async function setActive(user,active){
+    try{
+      await axios.post(`${API}/users/set-active/${encodeURIComponent(user.username)}?active=${active}`,{},auth);
+      setMsg(active ? "Utilisateur activé." : "Utilisateur désactivé.");
+      await load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur changement statut");
+    }
+  }
+
+  async function changePassword(user){
+    const p=prompt(`Nouveau mot de passe pour ${user.username}:`);
+    if(!p) return;
+    try{
+      await axios.post(`${API}/users/change-password/${encodeURIComponent(user.username)}`,{password:p},auth);
+      setMsg("Mot de passe modifié.");
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur mot de passe");
+    }
+  }
+
+  async function deleteUser(user){
+    if(!confirm(`Supprimer l’utilisateur ${user.username} ?`)) return;
+    try{
+      await axios.delete(`${API}/users/delete/${encodeURIComponent(user.username)}`,auth);
+      setMsg("Utilisateur supprimé.");
+      await load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur suppression utilisateur");
+    }
+  }
+
+  return <section className="platformPage myUsersPage">
+    <div className="card userAccessCard">
+      <h3>Créer un utilisateur pour ce compte</h3>
+      <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
+      <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
+      <input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)}/>
+      <div className="pagePermissionBox">
+        <strong>Pages visibles</strong>
+        <div className="pagePermissionGrid">
+          {visiblePageOptions.map(page=><label key={page.id}>
+            <input type="checkbox" checked={pages.includes(page.id)} onChange={()=>togglePage(page.id)}/>
+            <span>{page.label}</span>
+          </label>)}
+        </div>
+      </div>
+      <button onClick={createUser}>Créer utilisateur</button>
+    </div>
+
+    <p className={msg.includes("Erreur") || msg.includes("not") ? "err" : "success"}>{msg}</p>
+
+    <table>
+      <thead><tr><th>Utilisateur</th><th>Nom</th><th>Pages visibles</th><th>Mot de passe</th><th>Statut</th><th>Delete</th></tr></thead>
+      <tbody>
+        {users.length ? users.map(u=>{
+          const currentPages=cleanPageList(u.page_permissions || [], allowedPages);
+          return <tr key={u.username}>
+            <td>{u.username}</td>
+            <td>{u.full_name}</td>
+            <td><div className="pagePermissionMiniGrid">{visiblePageOptions.map(page=>{
+              const checked=currentPages.includes(page.id);
+              return <label key={page.id}><input type="checkbox" checked={checked} onChange={e=>{
+                const next=e.target.checked ? [...currentPages,page.id] : currentPages.filter(x=>x!==page.id);
+                updatePages(u,next);
+              }}/><span>{page.label}</span></label>
+            })}</div></td>
+            <td><button onClick={()=>changePassword(u)}>Changer mot de passe</button></td>
+            <td><button onClick={()=>setActive(u,!u.active)}>{u.active ? "Désactiver" : "Activer"}</button></td>
+            <td><button className="dangerBtn" onClick={()=>deleteUser(u)}>Delete</button></td>
+          </tr>
+        }) : <tr><td colSpan="6" className="expenseHistoryEmpty">Aucun utilisateur créé pour ce compte.</td></tr>}
+      </tbody>
+    </table>
+  </section>;
+}
+
+
 function Platform({auth}){
   const [clients,setClients]=useState([]);
   const [username,setUsername]=useState("");
@@ -2258,6 +2408,8 @@ function Platform({auth}){
   const [pharmacy,setPharmacy]=useState("");
   const [days,setDays]=useState(30);
   const [aiPremium,setAiPremium]=useState(false);
+  const [pagePermissions,setPagePermissions]=useState(()=>defaultUserPages());
+  const [canManageUsers,setCanManageUsers]=useState(true);
   const [msg,setMsg]=useState("");
 
   async function load(){
@@ -2272,8 +2424,8 @@ function Platform({auth}){
 
   async function create(){
     try{
-      await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days),ai_premium:aiPremium},auth);
-      setUsername(""); setPassword(""); setPharmacy(""); setDays(30); setAiPremium(false);
+      await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days),ai_premium:aiPremium,page_permissions:pagePermissions,can_manage_users:canManageUsers},auth);
+      setUsername(""); setPassword(""); setPharmacy(""); setDays(30); setAiPremium(false); setPagePermissions(defaultUserPages()); setCanManageUsers(true);
       setMsg("Client créé.");
       await load();
     }catch(e){
@@ -2336,7 +2488,24 @@ function Platform({auth}){
     }
   }
 
-return <section>
+  function toggleCreatePage(pageId){
+    setPagePermissions(prev=>prev.includes(pageId) ? prev.filter(x=>x!==pageId) : [...prev,pageId]);
+  }
+
+  async function updateClientAccess(client,nextPages,nextCanManage){
+    try{
+      await axios.post(`${API}/platform/client-page-permissions/${encodeURIComponent(client.username)}`,{
+        page_permissions: nextPages,
+        can_manage_users: nextCanManage
+      },auth);
+      setMsg(`Accès mis à jour pour ${client.username}.`);
+      await load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur mise à jour accès pages");
+    }
+  }
+
+return <section className="platformPage">
     
 
     <div className="card">
@@ -2346,6 +2515,16 @@ return <section>
       <input placeholder="nom pharmacie" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/>
       <input placeholder="jours" value={days} onChange={e=>setDays(e.target.value)}/>
       <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
+      <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Peut créer ses propres utilisateurs</label>
+      <div className="pagePermissionBox">
+        <strong>Pages visibles pour ce client</strong>
+        <div className="pagePermissionGrid">
+          {APP_USER_PAGES.map(page=><label key={page.id}>
+            <input type="checkbox" checked={pagePermissions.includes(page.id)} onChange={()=>toggleCreatePage(page.id)}/>
+            <span>{page.label}</span>
+          </label>)}
+        </div>
+      </div>
       <button onClick={create}>Créer client</button>
     </div>
 
@@ -2361,6 +2540,8 @@ return <section>
           <th>Expire</th>
           <th>Mot de passe</th>
           <th>Premium AI</th>
+          <th>Pages visibles</th>
+          <th>Gestion users</th>
           <th>Statut</th>
           <th>Delete</th>
         </tr>
@@ -2380,6 +2561,15 @@ return <section>
             </td>
             <td><button onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
             <td>{isAdmin ? "Oui" : <button onClick={()=>toggleAiPremium(c.username,!c.ai_premium)}>{c.ai_premium ? "AI activé" : "AI désactivé"}</button>}</td>
+            <td>{isAdmin ? "Toutes" : <div className="pagePermissionMiniGrid">{APP_USER_PAGES.map(page=>{
+              const currentPages=cleanPageList(c.page_permissions || []);
+              const checked=currentPages.includes(page.id);
+              return <label key={page.id}><input type="checkbox" checked={checked} onChange={e=>{
+                const next=e.target.checked ? [...currentPages,page.id] : currentPages.filter(x=>x!==page.id);
+                updateClientAccess(c,next,c.can_manage_users);
+              }}/><span>{page.label}</span></label>
+            })}</div>}</td>
+            <td>{isAdmin ? "Oui" : <label className="checkLine compact"><input type="checkbox" checked={!!c.can_manage_users} onChange={e=>updateClientAccess(c,cleanPageList(c.page_permissions || []),e.target.checked)}/> Autorisé</label>}</td>
             <td>{isAdmin ? "" : <button onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "Désactiver" : "Activer"}</button>}</td>
             <td>{isAdmin ? "" : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
           </tr>

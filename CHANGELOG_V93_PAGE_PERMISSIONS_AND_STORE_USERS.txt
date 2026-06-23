@@ -1,0 +1,11 @@
+V93 - Page permissions and store user accounts
+
+- Added page visibility permissions for client accounts.
+- Platform admin can now choose visible pages with checkboxes when creating a client.
+- Platform admin can update visible pages for existing clients with checkboxes.
+- Platform admin can allow or block each client from creating its own user accounts.
+- Added a new Utilisateurs page for authorized client accounts.
+- Authorized clients can create their own store users.
+- Store users can have their own visible page permissions.
+- Hidden pages disappear from the sidebar menu for the connected user.
+- Backend stores page_permissions and can_manage_users per account with automatic database migrations.

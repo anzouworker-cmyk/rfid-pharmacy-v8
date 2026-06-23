@@ -5,7 +5,7 @@ import os
 import json
 import uuid
 import mimetypes
-from typing import Optional
+from typing import Optional, List
 from pathlib import Path
 from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -85,6 +85,9 @@ class Account(Base):
     expires_at = Column(DateTime, nullable=False)
     active = Column(Boolean, default=True)
     ai_premium = Column(Boolean, default=False)
+    parent_username = Column(String, nullable=True)
+    page_permissions = Column(Text, default="")
+    can_manage_users = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -103,6 +106,40 @@ class DashboardContent(Base):
     active = Column(Boolean, default=True)
     ai_premium = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+CLIENT_PAGE_IDS = ["dashboard", "operations", "association", "inventory", "cash", "ai"]
+ADMIN_PAGE_IDS = CLIENT_PAGE_IDS + ["cashAdmin", "platform", "dashboardAdmin"]
+
+
+def normalize_page_permissions(pages=None):
+    if not pages:
+        return list(CLIENT_PAGE_IDS)
+    cleaned = []
+    for page in pages:
+        p = str(page or "").strip()
+        if p in CLIENT_PAGE_IDS and p not in cleaned:
+            cleaned.append(p)
+    return cleaned or list(CLIENT_PAGE_IDS)
+
+
+def serialize_pages(pages=None):
+    return json.dumps(normalize_page_permissions(pages), ensure_ascii=False)
+
+
+def account_pages(acc: Account):
+    if getattr(acc, "role", "") == "platform_admin":
+        return list(ADMIN_PAGE_IDS)
+    raw = getattr(acc, "page_permissions", "") or ""
+    try:
+        data = json.loads(raw) if raw else []
+    except Exception:
+        data = []
+    pages = normalize_page_permissions(data)
+    if not getattr(acc, "ai_premium", False) and "ai" in pages:
+        # Le menu peut cacher l'IA si l'admin retire cette page; Premium AI reste géré séparément.
+        pass
+    return pages
 
 Base.metadata.create_all(engine)
 
@@ -146,12 +183,26 @@ class ClientIn(BaseModel):
     pharmacy_name: str
     days: int = 30
     ai_premium: bool = False
+    page_permissions: List[str] = []
+    can_manage_users: bool = False
 
 class PasswordIn(BaseModel):
     password: str
 
 class ExpiryIn(BaseModel):
     expires_at: str
+
+
+class PagePermissionsIn(BaseModel):
+    page_permissions: List[str] = []
+    can_manage_users: bool = False
+
+
+class StoreUserIn(BaseModel):
+    username: str
+    password: str
+    full_name: str = ""
+    page_permissions: List[str] = []
 
 
 class DashboardContentIn(BaseModel):
@@ -183,6 +234,9 @@ def ensure_schema():
 
     migrations = [
         ("accounts", "ai_premium", "ALTER TABLE accounts ADD COLUMN ai_premium BOOLEAN DEFAULT FALSE"),
+        ("accounts", "parent_username", "ALTER TABLE accounts ADD COLUMN parent_username VARCHAR"),
+        ("accounts", "page_permissions", "ALTER TABLE accounts ADD COLUMN page_permissions TEXT DEFAULT ''"),
+        ("accounts", "can_manage_users", "ALTER TABLE accounts ADD COLUMN can_manage_users BOOLEAN DEFAULT FALSE"),
         ("dashboard_content", "ai_premium", "ALTER TABLE dashboard_content ADD COLUMN ai_premium BOOLEAN DEFAULT FALSE"),
         ("dashboard_content", "image_url", "ALTER TABLE dashboard_content ADD COLUMN image_url VARCHAR DEFAULT ''"),
         ("dashboard_content", "extra_config", "ALTER TABLE dashboard_content ADD COLUMN extra_config VARCHAR DEFAULT 'contain'"),
@@ -225,6 +279,9 @@ def ensure_demo():
             demo.expires_at = datetime.utcnow() + timedelta(days=365)
             demo.active = True
             demo.ai_premium = False
+            demo.parent_username = None
+            demo.page_permissions = serialize_pages(CLIENT_PAGE_IDS)
+            demo.can_manage_users = True
 
         admin = s.get(Account, admin_username)
         if not admin:
@@ -235,6 +292,9 @@ def ensure_demo():
             admin.pharmacy_name = "admin"
             admin.role = "platform_admin"
             admin.ai_premium = True
+            admin.parent_username = None
+            admin.page_permissions = json.dumps(ADMIN_PAGE_IDS, ensure_ascii=False)
+            admin.can_manage_users = True
             admin.subscription_status = "active"
             admin.expires_at = datetime.utcnow() + timedelta(days=3650)
             admin.active = True
@@ -301,6 +361,9 @@ async def login(request: Request, s: Session = Depends(db)):
         "pharmacy_name": acc.pharmacy_name,
         "role": acc.role,
         "ai_premium": getattr(acc, "ai_premium", False),
+        "parent_username": getattr(acc, "parent_username", None),
+        "page_permissions": account_pages(acc),
+        "can_manage_users": bool(getattr(acc, "can_manage_users", False)),
         "expires_at": None if acc.role == "platform_admin" else acc.expires_at.isoformat()
     }
 
@@ -312,6 +375,9 @@ def me(acc: Account = Depends(current_user)):
         "role": acc.role,
         "subscription_status": acc.subscription_status,
         "ai_premium": getattr(acc, "ai_premium", False),
+        "parent_username": getattr(acc, "parent_username", None),
+        "page_permissions": account_pages(acc),
+        "can_manage_users": bool(getattr(acc, "can_manage_users", False)),
         "expires_at": None if acc.role == "platform_admin" else acc.expires_at.isoformat()
     }
 
@@ -325,7 +391,11 @@ def create_client(data: ClientIn, acc: Account = Depends(current_user), s: Sessi
         username=data.username,
         password_hash=hpw(data.password),
         pharmacy_name=data.pharmacy_name,
+        role="client",
         ai_premium=data.ai_premium,
+        parent_username=None,
+        page_permissions=serialize_pages(data.page_permissions),
+        can_manage_users=bool(data.can_manage_users),
         subscription_status="active",
         expires_at=datetime.utcnow() + timedelta(days=data.days)
     ))
@@ -344,7 +414,10 @@ def clients(acc: Account = Depends(current_user), s: Session = Depends(db)):
             "subscription_status": "admin" if x.role == "platform_admin" else x.subscription_status,
             "expires_at": None if x.role == "platform_admin" else x.expires_at.isoformat(),
             "active": x.active,
-            "ai_premium": getattr(x, "ai_premium", False)
+            "ai_premium": getattr(x, "ai_premium", False),
+            "parent_username": getattr(x, "parent_username", None),
+            "page_permissions": account_pages(x),
+            "can_manage_users": bool(getattr(x, "can_manage_users", False))
         }
         for x in s.query(Account).order_by(Account.created_at.desc()).all()
     ]
@@ -714,6 +787,130 @@ def client_ai_premium(username: str, enabled: bool, acc: Account = Depends(curre
     obj.ai_premium = enabled
     s.commit()
     return {"ok": True, "username": username, "ai_premium": obj.ai_premium}
+
+
+@app.post("/platform/client-page-permissions/{username}")
+def client_page_permissions(username: str, data: PagePermissionsIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+    if obj.role == "platform_admin":
+        raise HTTPException(400, "Admin pages cannot be changed")
+    obj.page_permissions = serialize_pages(data.page_permissions)
+    obj.can_manage_users = bool(data.can_manage_users)
+    s.commit()
+    return {"ok": True, "username": username, "page_permissions": account_pages(obj), "can_manage_users": obj.can_manage_users}
+
+
+def owner_username(acc: Account):
+    return getattr(acc, "parent_username", None) or acc.username
+
+
+def require_user_manager(acc: Account):
+    if acc.role == "platform_admin" or not bool(getattr(acc, "can_manage_users", False)):
+        raise HTTPException(403, "Gestion utilisateurs non autorisée")
+
+
+@app.get("/users/my-users")
+def my_users(acc: Account = Depends(current_user), s: Session = Depends(db)):
+    require_user_manager(acc)
+    owner = owner_username(acc)
+    rows = s.query(Account).filter(Account.parent_username == owner).order_by(Account.created_at.desc()).all()
+    return [
+        {
+            "username": x.username,
+            "full_name": x.pharmacy_name,
+            "active": x.active,
+            "page_permissions": account_pages(x),
+            "created_at": x.created_at.isoformat() if x.created_at else "",
+        }
+        for x in rows
+    ]
+
+
+@app.post("/users/create")
+def create_store_user(data: StoreUserIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    require_user_manager(acc)
+    username = data.username.strip()
+    if not username or not data.password:
+        raise HTTPException(400, "username and password required")
+    if len(data.password) < 4:
+        raise HTTPException(400, "Password too short")
+    if s.get(Account, username):
+        raise HTTPException(400, "Username exists")
+    allowed = set(account_pages(acc))
+    requested = [p for p in normalize_page_permissions(data.page_permissions) if p in allowed]
+    if not requested:
+        requested = list(allowed) or normalize_page_permissions([])
+    owner = owner_username(acc)
+    s.add(Account(
+        username=username,
+        password_hash=hpw(data.password),
+        pharmacy_name=data.full_name or username,
+        role="client_user",
+        parent_username=owner,
+        page_permissions=json.dumps(requested, ensure_ascii=False),
+        can_manage_users=False,
+        ai_premium=bool(getattr(acc, "ai_premium", False)),
+        subscription_status="active",
+        expires_at=acc.expires_at,
+        active=True,
+    ))
+    s.commit()
+    return {"ok": True}
+
+
+@app.post("/users/page-permissions/{username}")
+def update_store_user_pages(username: str, data: PagePermissionsIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    require_user_manager(acc)
+    owner = owner_username(acc)
+    obj = s.get(Account, username)
+    if not obj or obj.parent_username != owner:
+        raise HTTPException(404, "User not found")
+    allowed = set(account_pages(acc))
+    obj.page_permissions = json.dumps([p for p in normalize_page_permissions(data.page_permissions) if p in allowed], ensure_ascii=False)
+    s.commit()
+    return {"ok": True, "page_permissions": account_pages(obj)}
+
+
+@app.post("/users/set-active/{username}")
+def set_store_user_active(username: str, active: bool, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    require_user_manager(acc)
+    owner = owner_username(acc)
+    obj = s.get(Account, username)
+    if not obj or obj.parent_username != owner:
+        raise HTTPException(404, "User not found")
+    obj.active = active
+    s.commit()
+    return {"ok": True, "active": obj.active}
+
+
+@app.post("/users/change-password/{username}")
+def change_store_user_password(username: str, data: PasswordIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    require_user_manager(acc)
+    owner = owner_username(acc)
+    obj = s.get(Account, username)
+    if not obj or obj.parent_username != owner:
+        raise HTTPException(404, "User not found")
+    if not data.password or len(data.password) < 4:
+        raise HTTPException(400, "Password too short")
+    obj.password_hash = hpw(data.password)
+    s.commit()
+    return {"ok": True}
+
+
+@app.delete("/users/delete/{username}")
+def delete_store_user(username: str, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    require_user_manager(acc)
+    owner = owner_username(acc)
+    obj = s.get(Account, username)
+    if not obj or obj.parent_username != owner:
+        raise HTTPException(404, "User not found")
+    s.delete(obj)
+    s.commit()
+    return {"ok": True}
 
 
 @app.post("/platform/upload-ad-image")
