@@ -1,0 +1,13 @@
+V110 - Clean professional frontend redesign
+
+- Rebuilt the redesign from V108 instead of V109.
+- Removed the overly flashy/global V109 look.
+- Applied a cleaner B2B SaaS style:
+  - dark professional sidebar
+  - compact spacing
+  - smaller border radius
+  - sober colors
+  - lighter shadows
+  - enterprise-style tables
+  - cleaner cards and buttons
+- Kept application logic, API calls, permissions, and cash calculations unchanged.
