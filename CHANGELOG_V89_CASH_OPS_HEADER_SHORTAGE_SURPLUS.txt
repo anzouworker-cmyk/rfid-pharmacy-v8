@@ -1,0 +1,8 @@
+V89 - Cash operations header indicators
+
+- Removed the two separate cards for Montant manquant and Montant surplus from the cash operations grid.
+- Reused the free space in the cash operations header to display those two values.
+- Added two compact professional indicators in the header area:
+  - Montant manquant
+  - Montant surplus
+- Indicators update automatically for the selected cash date.

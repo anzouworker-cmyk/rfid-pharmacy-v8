@@ -4399,3 +4399,86 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   color:#15803d!important;
   border-color:#bbf7d0!important;
 }
+
+/* V89 - move shortage/surplus values into cash ops header */
+.cashOpsIntro{
+  display:grid!important;
+  gap:10px!important;
+  flex:1 1 680px!important;
+}
+.cashOpsIndicators{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:12px!important;
+}
+.cashOpsIndicator{
+  min-width:230px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:12px 14px!important;
+  border-radius:12px!important;
+  border:1px solid #dce4f1!important;
+  background:#fff!important;
+}
+.cashOpsIndicatorIcon{
+  width:44px!important;
+  height:44px!important;
+  flex:0 0 44px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:12px!important;
+}
+.cashOpsIndicatorIcon svg{
+  width:22px!important;
+  height:22px!important;
+}
+.cashOpsIndicatorContent{
+  display:grid!important;
+  gap:2px!important;
+}
+.cashOpsIndicatorContent span{
+  font-size:12px!important;
+  font-weight:800!important;
+  color:#64748b!important;
+  text-transform:uppercase!important;
+  letter-spacing:.04em!important;
+}
+.cashOpsIndicatorContent strong{
+  font-size:26px!important;
+  line-height:1.1!important;
+  font-weight:900!important;
+  color:#071227!important;
+}
+.cashOpsIndicatorContent small{
+  font-size:12px!important;
+  font-weight:700!important;
+}
+.cashOpsIndicatorShortage{
+  border-color:#fecaca!important;
+  background:linear-gradient(180deg,#fff 0%,#fff7f7 100%)!important;
+}
+.cashOpsIndicatorShortage .cashOpsIndicatorIcon{
+  background:#fff1f2!important;
+  color:#dc2626!important;
+}
+.cashOpsIndicatorShortage .cashOpsIndicatorContent small{
+  color:#b91c1c!important;
+}
+.cashOpsIndicatorSurplus{
+  border-color:#bbf7d0!important;
+  background:linear-gradient(180deg,#fff 0%,#f6fff9 100%)!important;
+}
+.cashOpsIndicatorSurplus .cashOpsIndicatorIcon{
+  background:#ecfdf3!important;
+  color:#16a34a!important;
+}
+.cashOpsIndicatorSurplus .cashOpsIndicatorContent small{
+  color:#15803d!important;
+}
+@media(max-width:900px){
+  .cashOpsIndicator{
+    min-width:unset!important;
+    width:100%!important;
+  }
+}

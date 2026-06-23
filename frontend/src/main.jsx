@@ -568,9 +568,7 @@ function Operations({me}){
     {key:"depositsCents", title:"Dépôts / ajouts", value:depositsCents, description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"closingRealCents", title:"Nouvelle C. fermeture", value:newCashBalanceCents, description:"Calcul Excel : C. fermeture (compté) - Retiré (réel).", type:"=", editable:false, tone:"blue", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul Excel : max(0, Nouvelle C. fermeture de hier + Dépôt/ajout + Tot. vente en espèce + Règlement crédit - Dépenses).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
-    {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"},
-    {key:"shortageCents", title:"Montant manquant", value:currentCashMetrics.shortageCents, type:"=", editable:false, tone:"shortage", cta:currentCashMetrics.shortageCents>0 ? "À vérifier" : "Équilibré", valueLabel:"Écart du jour", icon:"warning", cardClass:"cashOperationCardHighlight cashOperationCardShortage"},
-    {key:"surplusCents", title:"Montant surplus", value:currentCashMetrics.surplusCents, type:"=", editable:false, tone:"surplus", cta:currentCashMetrics.surplusCents>0 ? "Excédent" : "Équilibré", valueLabel:"Écart du jour", icon:"check", cardClass:"cashOperationCardHighlight cashOperationCardSurplus"}
+    {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"}
   ];
   return <section className="operationsPage">
     <h1>Opérations</h1>
@@ -611,9 +609,27 @@ function Operations({me}){
 
     <div className="exportsPanel cashOpsPanel">
       <div className="cashOpsHeader">
-        <div>
+        <div className="cashOpsIntro">
           <h2>Opérations de caisse</h2>
           <p className="notice">Ces opérations ont été déplacées ici. Cliquez sur une carte pour saisir ou modifier la valeur.</p>
+          <div className="cashOpsIndicators">
+            <div className="cashOpsIndicator cashOpsIndicatorShortage">
+              <div className="cashOpsIndicatorIcon"><DashIcon name="warning"/></div>
+              <div className="cashOpsIndicatorContent">
+                <span>Montant manquant</span>
+                <strong>{formatDH(currentCashMetrics.shortageCents)}</strong>
+                <small>{currentCashMetrics.shortageCents>0 ? "À vérifier" : "Équilibré"}</small>
+              </div>
+            </div>
+            <div className="cashOpsIndicator cashOpsIndicatorSurplus">
+              <div className="cashOpsIndicatorIcon"><DashIcon name="check"/></div>
+              <div className="cashOpsIndicatorContent">
+                <span>Montant surplus</span>
+                <strong>{formatDH(currentCashMetrics.surplusCents)}</strong>
+                <small>{currentCashMetrics.surplusCents>0 ? "Excédent" : "Équilibré"}</small>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="cashOpsDateBox">
           <span>Date de caisse {canChangeCashDate ? "" : "(admin seulement)"}</span>
