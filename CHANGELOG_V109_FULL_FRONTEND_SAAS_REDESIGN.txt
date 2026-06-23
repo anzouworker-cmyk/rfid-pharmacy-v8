@@ -1,0 +1,7 @@
+V109 - Full frontend SaaS redesign
+
+- Added a global modern SaaS design layer across the frontend.
+- Improved sidebar, topbar, content spacing, cards, buttons, tables, modals, forms, badges, dashboard sections, operations cards, cash pages, admin pages, and AI chat styling.
+- Kept existing React logic, API calls, permissions, and cash calculations unchanged.
+- Preserved the previous cash module changes from V108.
+- Build verified with npm run build.

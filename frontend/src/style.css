@@ -5748,3 +5748,564 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
 .cashManagementHistorySection .cashWideTableWrap{
   margin-top:0!important;
 }
+
+
+/* V109 - Full frontend SaaS redesign layer */
+:root{
+  --si-bg:#f5f7fb;
+  --si-surface:#ffffff;
+  --si-surface-2:#f8fafc;
+  --si-text:#111827;
+  --si-muted:#64748b;
+  --si-line:#dbe4ef;
+  --si-line-soft:#edf2f7;
+  --si-primary:#0f4c81;
+  --si-primary-2:#1264a3;
+  --si-primary-soft:#e8f3ff;
+  --si-success:#16a34a;
+  --si-success-soft:#eaf8ef;
+  --si-danger:#dc2626;
+  --si-danger-soft:#fff1f2;
+  --si-warning:#d97706;
+  --si-warning-soft:#fff7ed;
+  --si-radius:18px;
+  --si-radius-lg:24px;
+  --si-shadow:0 14px 34px rgba(15,23,42,.06);
+  --si-shadow-soft:0 8px 22px rgba(15,23,42,.045);
+}
+
+/* Global foundation */
+html,body,#root{
+  background:var(--si-bg)!important;
+}
+body{
+  color:var(--si-text)!important;
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif!important;
+}
+*{
+  box-sizing:border-box;
+}
+button,input,select,textarea{
+  font-family:inherit!important;
+}
+button{
+  transition:background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease!important;
+}
+button:not(:disabled):hover{
+  transform:translateY(-1px);
+}
+button:disabled{
+  cursor:not-allowed!important;
+}
+
+/* Shell / sidebar */
+.white{
+  min-height:100vh!important;
+  background:var(--si-bg)!important;
+}
+.whiteSidebar,
+.sidebar{
+  background:#ffffff!important;
+  border-right:1px solid var(--si-line)!important;
+  box-shadow:12px 0 34px rgba(15,23,42,.04)!important;
+}
+.whiteBrand{
+  border-bottom:1px solid var(--si-line-soft)!important;
+  padding:22px 18px!important;
+}
+.sidebarBrandLogo,
+.smartSidebarLogoIcon{
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+  box-shadow:0 12px 26px rgba(15,76,129,.24)!important;
+}
+.smartSidebarLogoText,
+.whiteBrand strong{
+  letter-spacing:-.025em!important;
+}
+.whiteNav{
+  padding:14px 12px!important;
+  gap:6px!important;
+}
+.whiteNav button,
+.whiteLogout{
+  border-radius:14px!important;
+  color:#526276!important;
+  font-weight:800!important;
+  min-height:48px!important;
+  padding:0 14px!important;
+  border:1px solid transparent!important;
+}
+.whiteNav button:hover,
+.whiteLogout:hover{
+  background:#f6f9fc!important;
+  border-color:#e4ecf5!important;
+  color:var(--si-primary)!important;
+}
+.whiteNav button.active,
+.whiteNav button[aria-current="page"]{
+  background:var(--si-primary-soft)!important;
+  color:var(--si-primary)!important;
+  border-color:#cfe5fb!important;
+  box-shadow:0 8px 20px rgba(15,76,129,.08)!important;
+}
+.navIconTile{
+  border-radius:12px!important;
+  background:#f8fafc!important;
+}
+.whiteNav button.active .navIconTile{
+  background:#fff!important;
+  color:var(--si-primary)!important;
+}
+
+/* Topbar */
+.whiteMain{
+  background:var(--si-bg)!important;
+}
+.whiteTopbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:25!important;
+  background:rgba(255,255,255,.88)!important;
+  backdrop-filter:blur(14px)!important;
+  border-bottom:1px solid var(--si-line)!important;
+  box-shadow:0 10px 28px rgba(15,23,42,.04)!important;
+}
+.topPageTitle{
+  font-weight:900!important;
+  letter-spacing:-.03em!important;
+  color:#0f172a!important;
+}
+.whiteAccount{
+  border:1px solid var(--si-line)!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  box-shadow:0 8px 20px rgba(15,23,42,.04)!important;
+}
+.whiteAvatar{
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+}
+.whiteContent{
+  padding:28px!important;
+  max-width:1680px!important;
+  margin:0 auto!important;
+  width:100%!important;
+}
+
+/* Shared page sections */
+.operationsPage,
+.tableOnlyPage,
+.cashRegisterPage,
+.platformPage,
+.dashboardAdminPage,
+.cashDashboardAdminPage,
+.aiAgentPage,
+.exportsPage{
+  max-width:1600px!important;
+  margin:0 auto!important;
+}
+.operationsActionPanel,
+.exportsPanel,
+.figmaPanel,
+.cashRegisterPanel,
+.platformPanel,
+.card,
+.fileCard,
+.tableCard,
+.reportCard,
+.scanModal,
+.pagePermissionBox,
+.cashAdminPanel,
+.cashAdminStatCard,
+.cashAdminChartPanel{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:var(--si-radius-lg)!important;
+  box-shadow:var(--si-shadow)!important;
+}
+.notice,
+.mutedText{
+  color:var(--si-muted)!important;
+  line-height:1.55!important;
+}
+
+/* Buttons */
+.primaryBtn,
+.platformAddStoreBtn,
+.reportCard button,
+.fileCardOp,
+.exportOperationCard span,
+.operationCard span,
+.cashResetBtn,
+.cashTodayBtn,
+.cashDateTodayBtn,
+.loginCard button,
+.scanModal button[type="submit"],
+.platformModalActions button:last-child{
+  border:1px solid transparent!important;
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+  border-radius:14px!important;
+  font-weight:900!important;
+  box-shadow:0 12px 24px rgba(15,76,129,.18)!important;
+}
+.primaryBtn:hover,
+.platformAddStoreBtn:hover,
+.reportCard button:hover{
+  box-shadow:0 16px 34px rgba(15,76,129,.24)!important;
+}
+.dangerBtn,
+.dangerOp span,
+.cashResetBtn{
+  background:linear-gradient(135deg,#dc2626,#ef4444)!important;
+  color:#fff!important;
+  box-shadow:0 12px 24px rgba(220,38,38,.16)!important;
+}
+
+/* Forms */
+input,select,textarea{
+  border:1px solid #d5dfeb!important;
+  background:#fff!important;
+  border-radius:14px!important;
+  color:#14213d!important;
+  outline:none!important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#93c5fd!important;
+  box-shadow:0 0 0 4px rgba(59,130,246,.14)!important;
+}
+
+/* Tables */
+table{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+}
+.tableWrap,
+.cashWideTableWrap,
+.cashModalTableWrap{
+  border-radius:22px!important;
+  border:1px solid var(--si-line)!important;
+  overflow:auto!important;
+  background:#fff!important;
+  box-shadow:var(--si-shadow-soft)!important;
+}
+.productTable,
+.associationTable,
+.inventoryTable,
+.cashTable,
+.platformTable,
+.usersTable,
+.adAdminTable{
+  width:100%!important;
+  background:#fff!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+}
+.productTable th,
+.associationTable th,
+.inventoryTable th,
+.cashTable th,
+.platformTable th,
+.usersTable th,
+.adAdminTable th{
+  background:#f8fafc!important;
+  color:#5b6b80!important;
+  text-transform:uppercase!important;
+  letter-spacing:.045em!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  padding:15px 18px!important;
+  border-bottom:1px solid var(--si-line)!important;
+}
+.productTable td,
+.associationTable td,
+.inventoryTable td,
+.cashTable td,
+.platformTable td,
+.usersTable td,
+.adAdminTable td{
+  padding:15px 18px!important;
+  border-bottom:1px solid var(--si-line-soft)!important;
+  color:#172033!important;
+  font-weight:650!important;
+}
+.productTable tbody tr:hover td,
+.associationTable tbody tr:hover td,
+.inventoryTable tbody tr:hover td,
+.cashTable tbody tr:hover td,
+.platformTable tbody tr:hover td,
+.usersTable tbody tr:hover td{
+  background:#fbfdff!important;
+}
+
+/* Badges / status */
+.statusBadge,
+.badge,
+.roleBadge{
+  border-radius:999px!important;
+  padding:7px 11px!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  border:1px solid transparent!important;
+}
+.statusBadge.present,
+.statusBadge.success,
+.badge.success{
+  background:var(--si-success-soft)!important;
+  color:#15803d!important;
+  border-color:#bbf7d0!important;
+}
+.statusBadge.missing,
+.statusBadge.danger,
+.badge.danger{
+  background:var(--si-danger-soft)!important;
+  color:#b91c1c!important;
+  border-color:#fecdd3!important;
+}
+.statusBadge.unlinked,
+.statusBadge.warning,
+.badge.warning{
+  background:var(--si-warning-soft)!important;
+  color:#b45309!important;
+  border-color:#fed7aa!important;
+}
+
+/* Dashboard cards */
+.figmaDashboard,
+.dashboardPage{
+  background:transparent!important;
+}
+.figmaHero,
+.dashboardHero,
+.cashAdminHeader,
+.platformHeaderBar,
+.tableToolbar,
+.cashRegisterHeader{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:28px!important;
+  padding:24px!important;
+  box-shadow:var(--si-shadow)!important;
+}
+.figmaHero h1,
+.dashboardHero h1,
+.cashRegisterHeader h1,
+.platformHeaderBar h2,
+.cashAdminHeader h1{
+  color:#0f172a!important;
+  letter-spacing:-.04em!important;
+}
+.figmaIntro,
+.dashboardHero p,
+.cashRegisterHeader p,
+.platformHeaderBar p,
+.cashAdminHeader p{
+  color:var(--si-muted)!important;
+}
+.figmaStatsGrid,
+.statusSummary,
+.cashAdminGrid,
+.aiContextGrid{
+  gap:18px!important;
+}
+.statCard,
+.figmaStatCard,
+.cashAdminKpi,
+.cashOpsIndicator,
+.aiContextStat{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:22px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+  padding:20px!important;
+}
+.statCard span,
+.figmaStatCard span,
+.cashAdminKpi span,
+.aiContextStat span{
+  color:var(--si-muted)!important;
+  font-weight:800!important;
+}
+.statCard b,
+.figmaStatCard b,
+.cashAdminKpi strong,
+.aiContextStat strong{
+  color:#101828!important;
+  letter-spacing:-.03em!important;
+}
+
+/* Operations / exports cards */
+.operationGrid,
+.workflowGrid,
+.exportOperationGrid{
+  gap:18px!important;
+}
+.operationCard,
+.exportOperationCard{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:24px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+  min-height:190px!important;
+  padding:22px!important;
+}
+.operationCard:hover,
+.exportOperationCard:hover,
+.reportCard:hover{
+  border-color:#bcd7f0!important;
+  box-shadow:0 18px 42px rgba(15,76,129,.10)!important;
+}
+.opIcon{
+  background:var(--si-primary-soft)!important;
+  color:var(--si-primary)!important;
+  border:1px solid #cfe5fb!important;
+  border-radius:18px!important;
+  width:54px!important;
+  height:54px!important;
+}
+.operationCard h3,
+.exportOperationCard h3{
+  color:#10233f!important;
+  font-size:18px!important;
+  letter-spacing:-.02em!important;
+}
+.operationCard p,
+.exportOperationCard p{
+  color:var(--si-muted)!important;
+  line-height:1.5!important;
+}
+
+/* Cash operations specific */
+.cashOpsHeader{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:24px!important;
+  padding:20px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+}
+.cashOpsIntro h2{
+  color:#10233f!important;
+  letter-spacing:-.03em!important;
+}
+.cashOpsDateBox{
+  background:#f8fafc!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:18px!important;
+}
+.cashOpsIndicatorShortage{
+  background:var(--si-danger-soft)!important;
+  border-color:#fecdd3!important;
+}
+.cashOpsIndicatorSurplus{
+  background:var(--si-success-soft)!important;
+  border-color:#bbf7d0!important;
+}
+
+/* Modals */
+.modalOverlay{
+  background:rgba(15,23,42,.52)!important;
+  backdrop-filter:blur(6px)!important;
+}
+.scanModal,
+.platformStoreModal{
+  border-radius:28px!important;
+  border:1px solid rgba(255,255,255,.7)!important;
+  box-shadow:0 28px 70px rgba(15,23,42,.28)!important;
+}
+.modalClose{
+  border-radius:14px!important;
+  background:#f8fafc!important;
+  border:1px solid var(--si-line)!important;
+}
+.scanModal h2,
+.platformStoreModal h2{
+  letter-spacing:-.035em!important;
+  color:#111827!important;
+}
+
+/* AI chat */
+.aiAgentShell,
+.aiChatPanel{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:26px!important;
+  box-shadow:var(--si-shadow)!important;
+}
+.aiBubble{
+  border-radius:20px!important;
+  border:1px solid var(--si-line-soft)!important;
+}
+.aiBubble.assistant{
+  background:#f8fbff!important;
+}
+.aiBubble.user{
+  background:var(--si-primary)!important;
+  color:#fff!important;
+}
+
+/* Platform / permissions */
+.platformCreateGrid,
+.platformCreateChecks,
+.pagePermissionGrid,
+.pagePermissionMiniGrid{
+  gap:12px!important;
+}
+.checkLine,
+.pagePermissionItem{
+  border:1px solid var(--si-line)!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  padding:12px 14px!important;
+}
+.checkLine:hover,
+.pagePermissionItem:hover{
+  border-color:#bcd7f0!important;
+  background:#f8fbff!important;
+}
+
+/* Responsive polish */
+@media (max-width: 980px){
+  .whiteContent{
+    padding:18px!important;
+  }
+  .figmaHero,
+  .dashboardHero,
+  .cashRegisterHeader,
+  .platformHeaderBar,
+  .cashAdminHeader{
+    padding:18px!important;
+    border-radius:22px!important;
+  }
+  .operationGrid,
+  .workflowGrid,
+  .exportOperationGrid,
+  .figmaStatsGrid,
+  .statusSummary,
+  .cashAdminGrid,
+  .aiContextGrid{
+    grid-template-columns:1fr!important;
+  }
+  .cashOpsHeader{
+    grid-template-columns:1fr!important;
+  }
+  .whiteTopbar{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+}
+
+@media (max-width: 720px){
+  .whiteContent{
+    padding:14px!important;
+  }
+  .topPageTitle{
+    font-size:20px!important;
+  }
+  .operationCard,
+  .exportOperationCard,
+  .statCard,
+  .figmaStatCard{
+    border-radius:18px!important;
+  }
+}
