@@ -1,0 +1,6 @@
+V91 - Reposition shortage/surplus indicators in cash operations header
+
+- Adjusted the header layout of the cash operations section.
+- Moved the "Montant manquant" and "Montant surplus" indicators to sit under the section intro area, matching the requested layout more closely.
+- Kept the date selector aligned on the right.
+- Preserved responsive behavior for smaller screens.

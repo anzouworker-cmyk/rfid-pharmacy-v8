@@ -1,0 +1,13 @@
+V92 - Redesign cash tables to match Associations RFID style
+
+- Redesigned the cash tables page to be visually coherent with the Associations RFID page.
+- Centered the page in a table-style layout with a cleaner header.
+- Restyled the cash tabs as modern pill buttons.
+- Restyled the date bar and section headers to match the clean toolbar style.
+- Restyled all cash tables with:
+  - rounded white cards
+  - light borders
+  - consistent header row styling
+  - softer spacing and inputs
+- Updated the right-side total card to match the same table/card language.
+- Kept all existing formulas and functionality unchanged.
