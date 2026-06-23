@@ -1,0 +1,7 @@
+V104 - Cash operations header anomaly fix
+
+- Detected the design anomaly in the Opérations de caisse header: the shortage/surplus indicators were embedded inside the intro block, creating awkward empty space and an unbalanced header.
+- Moved Montant manquant and Montant surplus into their own header area.
+- Rebuilt the header as a clean 3-zone layout: intro text, indicators, and date field.
+- Reduced empty whitespace before the operation cards grid.
+- Kept responsive behavior on smaller screens.

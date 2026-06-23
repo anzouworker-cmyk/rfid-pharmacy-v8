@@ -1,0 +1,4 @@
+V103 - Remove Dépenses top bar
+
+- Removed the extra top bar that displayed only "Dépenses" in the Dépenses tab.
+- Kept the expenses history section and table unchanged.

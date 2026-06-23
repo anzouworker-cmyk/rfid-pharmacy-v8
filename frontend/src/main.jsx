@@ -32,8 +32,8 @@ const LS_CASH_SETTINGS="smart_inventory_cash_settings_v1";
 const APP_USER_PAGES = [
   {id:"dashboard", label:"Dashboard", icon:"dashboard"},
   {id:"operations", label:"Opérations", icon:"operations"},
-  {id:"association", label:"Associations RFID", icon:"association"},
-  {id:"inventory", label:"Inventaire RFID", icon:"inventory"},
+  {id:"association", label:"Associations", icon:"association"},
+  {id:"inventory", label:"Inventaire", icon:"inventory"},
   {id:"cash", label:"Caisse", icon:"cash"},
   {id:"ai", label:"Assistant IA", icon:"ai"}
 ];
@@ -321,8 +321,8 @@ function App(){
   const pageTitle =
     tab==="operations" ? "Opérations" :
     tab==="dashboard" ? "Dashboard" :
-    tab==="association" ? "Associations RFID" :
-    tab==="inventory" ? "Inventaire RFID réel" :
+    tab==="association" ? "Associations" :
+    tab==="inventory" ? "Inventaire réel" :
     tab==="cash" ? "Caisse" :
     tab==="cashAdmin" ? "Dashboard Caisse" :
     tab==="ai" ? "Assistant IA" :
@@ -429,11 +429,11 @@ function Operations({me}){
         Produit:r.Produit||r.produit||"",
         "Code barre 1":r["Code barre 1"]||"",
         "Code barre 2":r["Code barre 2"]||"",
-        EPC:norm(r.EPC||r.epc||r.Tag||""),
+        Identifiant:norm(r.EPC||r.epc||r.Tag||""),
         Date:r.Date||new Date().toISOString()
       })).filter(x=>x.EPC);
       setAssociations([...associations,...rows]);
-      setMsg(`${rows.length} associations RFID importées.`);
+      setMsg(`${rows.length} associations importées.`);
     }});
   }
 
@@ -449,17 +449,17 @@ function Operations({me}){
 
   function associateEpc(){
     if(!selectedProduct){ setMsg("Scannez d'abord un code-barres produit."); return; }
-    if(!epc.trim()){ setMsg("Saisir EPC RFID."); return; }
+    if(!epc.trim()){ setMsg("Saisir un identifiant."); return; }
     const item={
       PID:selectedProduct.PID,
       Produit:selectedProduct.Produit,
       "Code barre 1":selectedProduct["Code barre 1"],
       "Code barre 2":selectedProduct["Code barre 2"],
-      EPC:norm(epc),
+      Identifiant:norm(epc),
       Date:new Date().toISOString()
     };
     setAssociations([...associations,item]);
-    setMsg(`EPC associé à ${selectedProduct.Produit}.`);
+    setMsg(`Identifiant associé à ${selectedProduct.Produit}.`);
     setEpc("");
   }
 
@@ -469,31 +469,31 @@ function Operations({me}){
       const rows=extractDetectedEpcs(res.data);
       setDetectedEpcs(rows);
       downloadJSON(`epc_detectes_${new Date().toISOString().slice(0,10)}.json`,{epcs:rows,date:new Date().toISOString()});
-      setMsg(`${rows.length} EPC détectés importés et enregistrés pour comparer le stock.`);
+      setMsg(`${rows.length} Identifiants détectés importés et enregistrés pour comparer le stock.`);
     }});
   }
 
   function clearAssociations(){
-    if(confirm("Supprimer toutes les associations RFID locales ?")){
+    if(confirm("Supprimer toutes les associations locales ?")){
       setAssociations([]);
-      setMsg("Toutes les associations RFID ont été supprimées.");
+      setMsg("Toutes les associations ont été supprimées.");
     }
   }
 
   function exportProducts(){ exportCSV("produits_locaux.csv",products,Object.keys(products[0]||{})); }
-  function exportAssociations(){ exportCSV("associations_rfid.csv",associations,Object.keys(associations[0]||{})); }
+  function exportAssociations(){ exportCSV("associations.csv",associations,Object.keys(associations[0]||{})); }
   function exportProductsWithoutRfid(){
     const associatedPids=new Set(associations.map(a=>String(a.PID)));
-    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Non associé"}));
-    exportCSV("produits_sans_rfid.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]);
+    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut":"Non associé"}));
+    exportCSV("produits_sans_association.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut"]);
   }
   function exportCoverageReport(){
     const associatedPids=new Set(associations.map(a=>String(a.PID)));
     const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
     const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
     const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
-    const rows=[{"Produits locaux":products.length,"Produits avec RFID":productsWithRfid,"Produits sans RFID":productsWithoutRfid,"Associations RFID":associations.length,"Couverture RFID":coverage+"%","Date rapport":new Date().toISOString()}];
-    exportCSV("rapport_couverture_rfid.csv",rows,Object.keys(rows[0]));
+    const rows=[{"Produits locaux":products.length,"Produits associés":productsWithRfid,"Produits sans association":productsWithoutRfid,"Associations":associations.length,"Taux de couverture":coverage+"%","Date rapport":new Date().toISOString()}];
+    exportCSV("rapport_couverture.csv",rows,Object.keys(rows[0]));
   }
   function backupProject(){
     downloadJSON(`pharmainventory_backup_${new Date().toISOString().slice(0,10)}.json`,{products,associations,detectedEpcs,backup_date:new Date().toISOString()});
@@ -596,11 +596,11 @@ function Operations({me}){
   ];
   return <section className="operationsPage">
     <h1>Opérations</h1>
-    <p>Import, scan, associations, EPC détectés, exports et sauvegardes locales.</p>
+    <p>Import, scan, associations, identifiants détectés, exports et sauvegardes locales.</p>
 
     <div className="operationsActionPanel">
-      <h2>Actions RFID</h2>
-      <p className="notice">Lancez les opérations principales de gestion RFID.</p>
+      <h2>Actions inventaire</h2>
+      <p className="notice">Lancez les opérations principales de gestion d’inventaire.</p>
       <div className="operationGrid workflowGrid">
       <label className="operationCard white fileCardOp">
         <div className="opIcon"><DashIcon name="upload"/></div><h3>Importer CSV pharmacie</h3><p>Importer le catalogue produits.</p><span>Choisir CSV</span>
@@ -608,7 +608,7 @@ function Operations({me}){
       </label>
 
       <label className="operationCard white fileCardOp">
-        <div className="opIcon"><DashIcon name="link"/></div><h3>Importer associations RFID</h3><p>Importer les associations Produit ↔ EPC.</p><span>Choisir CSV</span>
+        <div className="opIcon"><DashIcon name="link"/></div><h3>Importer associations</h3><p>Importer les associations Produit ↔ identifiant.</p><span>Choisir CSV</span>
         <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
       </label>
 
@@ -617,16 +617,16 @@ function Operations({me}){
       </button>
 
       <button className="operationCard green" onClick={openEpc}>
-        <div className="opIcon"><DashIcon name="rfid"/></div><h3>Scanner EPC RFID</h3><p>Ouvrir une fenêtre pour saisir le tag EPC.</p><span>Scanner</span>
+        <div className="opIcon"><DashIcon name="rfid"/></div><h3>Scanner identifiant</h3><p>Ouvrir une fenêtre pour saisir un identifiant.</p><span>Scanner</span>
       </button>
 
       <label className="operationCard white fileCardOp">
-        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Importer EPC détectés</h3><p>Importer un CSV/TXT EPC détectés.</p><span>Choisir fichier</span>
+        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Importer identifiants détectés</h3><p>Importer un CSV/TXT d’identifiants détectés.</p><span>Choisir fichier</span>
         <input type="file" accept=".csv,.txt" onChange={e=>importDetectedEpc(e.target.files[0])}/>
       </label>
 
       <button className="operationCard dangerOp" onClick={clearAssociations}>
-        <div className="opIcon"><DashIcon name="trash"/></div><h3>Vider toutes associations</h3><p>Supprimer toutes les associations RFID locales.</p><span>Vider</span>
+        <div className="opIcon"><DashIcon name="trash"/></div><h3>Vider toutes associations</h3><p>Supprimer toutes les associations locales.</p><span>Vider</span>
       </button>
     </div>
     </div>
@@ -636,22 +636,22 @@ function Operations({me}){
         <div className="cashOpsIntro">
           <h2>Opérations de caisse</h2>
           <p className="notice">Ces opérations ont été déplacées ici. Cliquez sur une carte pour saisir ou modifier la valeur.</p>
-          <div className="cashOpsIndicators">
-            <div className="cashOpsIndicator cashOpsIndicatorShortage">
-              <div className="cashOpsIndicatorIcon"><DashIcon name="warning"/></div>
-              <div className="cashOpsIndicatorContent">
-                <span>Montant manquant</span>
-                <strong>{formatDH(currentCashMetrics.shortageCents)}</strong>
-                <small>{currentCashMetrics.shortageCents>0 ? "À vérifier" : "Équilibré"}</small>
-              </div>
+        </div>
+        <div className="cashOpsIndicators">
+          <div className="cashOpsIndicator cashOpsIndicatorShortage">
+            <div className="cashOpsIndicatorIcon"><DashIcon name="warning"/></div>
+            <div className="cashOpsIndicatorContent">
+              <span>Montant manquant</span>
+              <strong>{formatDH(currentCashMetrics.shortageCents)}</strong>
+              <small>{currentCashMetrics.shortageCents>0 ? "À vérifier" : "Équilibré"}</small>
             </div>
-            <div className="cashOpsIndicator cashOpsIndicatorSurplus">
-              <div className="cashOpsIndicatorIcon"><DashIcon name="check"/></div>
-              <div className="cashOpsIndicatorContent">
-                <span>Montant surplus</span>
-                <strong>{formatDH(currentCashMetrics.surplusCents)}</strong>
-                <small>{currentCashMetrics.surplusCents>0 ? "Excédent" : "Équilibré"}</small>
-              </div>
+          </div>
+          <div className="cashOpsIndicator cashOpsIndicatorSurplus">
+            <div className="cashOpsIndicatorIcon"><DashIcon name="check"/></div>
+            <div className="cashOpsIndicatorContent">
+              <span>Montant surplus</span>
+              <strong>{formatDH(currentCashMetrics.surplusCents)}</strong>
+              <small>{currentCashMetrics.surplusCents>0 ? "Excédent" : "Équilibré"}</small>
             </div>
           </div>
         </div>
@@ -678,12 +678,12 @@ function Operations({me}){
 
     <div className="exportsPanel">
       <h2>Exports et sauvegardes locales</h2>
-      <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales.</p>
+      <p className="notice">Exportez vos tableaux, rapports d’inventaire et sauvegardes locales.</p>
       <div className="exportOperationGrid">
         <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon"><DashIcon name="box"/></div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
-        <button className="exportOperationCard" onClick={exportAssociations}><div className="opIcon"><DashIcon name="link"/></div><h3>Associations RFID</h3><p>Exporter les produits liés aux EPC RFID.</p><span>Exporter</span></button>
-        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}><div className="opIcon"><DashIcon name="tag"/></div><h3>Produits sans RFID</h3><p>Exporter les articles à associer.</p><span>Exporter</span></button>
-        <button className="exportOperationCard blue" onClick={exportCoverageReport}><div className="opIcon"><DashIcon name="chart"/></div><h3>Couverture RFID</h3><p>Exporter les KPI de couverture.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportAssociations}><div className="opIcon"><DashIcon name="link"/></div><h3>Associations</h3><p>Exporter les produits liés aux identifiants.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}><div className="opIcon"><DashIcon name="tag"/></div><h3>Produits sans association</h3><p>Exporter les articles à associer.</p><span>Exporter</span></button>
+        <button className="exportOperationCard blue" onClick={exportCoverageReport}><div className="opIcon"><DashIcon name="chart"/></div><h3>Taux de couverture</h3><p>Exporter les KPI de couverture.</p><span>Exporter</span></button>
         <button className="exportOperationCard green" onClick={backupProject}><div className="opIcon"><DashIcon name="save"/></div><h3>Sauvegarde projet</h3><p>Créer un backup JSON complet.</p><span>Backup</span></button>
         <label className="exportOperationCard fileCard"><div className="opIcon"><DashIcon name="restore"/></div><h3>Restaurer projet</h3><p>Importer un backup JSON local.</p><span>Choisir fichier</span><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></label>
       </div>
@@ -703,11 +703,11 @@ function Operations({me}){
         </>}
 
         {scanModal==="epc" && <>
-          <h2>Scanner EPC RFID</h2>
-          <p>Saisissez ou scannez l’EPC RFID à associer au produit sélectionné.</p>
+          <h2>Scanner identifiant</h2>
+          <p>Saisissez ou scannez l’identifiant à associer au produit sélectionné.</p>
           {selectedProduct ? <div className="foundProduct"><b>{selectedProduct.Produit}</b><small>PID: {selectedProduct.PID}</small></div> : <p className="err">Aucun produit sélectionné. Scannez d’abord le code-barres.</p>}
-          <input autoFocus value={epc} onChange={e=>setEpc(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")associateEpc()}} placeholder="EPC RFID"/>
-          <button className="primaryBtn" onClick={associateEpc}>Associer EPC</button>
+          <input autoFocus value={epc} onChange={e=>setEpc(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")associateEpc()}} placeholder="Identifiant"/>
+          <button className="primaryBtn" onClick={associateEpc}>Associer identifiant</button>
         </>}
       </div>
     </div>}
@@ -1204,10 +1204,6 @@ function CashRegister(){
           </>}
           {active==="expenses" && <>
             <section className="cashExpensesSection cashExpenseHistorySection">
-              <div className="cashSectionHeading">
-                <h2>Dépenses</h2>
-              </div>
-
               <div className="expenseHistoryTopbar">
                 <h2>Expenses history</h2>
                 <div className="expenseMonthBar">
@@ -1763,7 +1759,7 @@ function findProduct(products,value){
 function AIAssistant(){
   const {products,associations,detectedEpcs}=useLocalStore();
   const [messages,setMessages]=useState(()=>[
-    {role:"assistant",content:"Bonjour, je suis votre agent RFID. Je peux lister les produits manquants, filtrer par zone/catégorie/nom, générer un plan d’action, créer un rapport CSV/PDF, détecter les doublons EPC et expliquer pourquoi un produit est Présent, Manquant ou Non associé."}
+    {role:"assistant",content:"Bonjour, je suis votre agent inventaire. Je peux lister les produits manquants, filtrer par zone/catégorie/nom, générer un plan d’action, créer un rapport CSV/PDF, détecter les doublons d’identifiants et expliquer pourquoi un produit est Présent, Manquant ou Non associé."}
   ]);
   const [input,setInput]=useState("");
   const [loading,setLoading]=useState(false);
@@ -1795,9 +1791,9 @@ function AIAssistant(){
         Stock:p.Stock || p.stock || "",
         "Code barre 1":p["Code barre 1"] || p.barcode || p.UPC || "",
         "Code barre 2":p["Code barre 2"] || "",
-        "EPC associé":epcs.join(", "),
-        "EPC détecté":detectedForProduct.join(", "),
-        "Statut RFID":status,
+        "Identifiant associé":epcs.join(", "),
+        "Identifiant détecté":detectedForProduct.join(", "),
+        "Statut":status,
         _epcs:epcs,
         _detectedForProduct:detectedForProduct
       };
@@ -1809,9 +1805,9 @@ function AIAssistant(){
   },[products,associations,detectedEpcs]);
 
   const rows=agentData.rows;
-  const presentRows=rows.filter(r=>r["Statut RFID"]==="Présent");
-  const missingRows=rows.filter(r=>r["Statut RFID"]==="Manquant");
-  const noAssociationRows=rows.filter(r=>r["Statut RFID"]==="Non associé");
+  const presentRows=rows.filter(r=>r["Statut"]==="Présent");
+  const missingRows=rows.filter(r=>r["Statut"]==="Manquant");
+  const noAssociationRows=rows.filter(r=>r["Statut"]==="Non associé");
   const productsWithRfid=rows.filter(r=>r._epcs.length>0).length;
   const productsWithoutRfid=noAssociationRows.length;
   const presentCount=presentRows.length;
@@ -1828,7 +1824,7 @@ function AIAssistant(){
   }
 
   function rowLine(r,i){
-    return `${i+1}. PID ${r.PID || "-"} — ${r.Produit || "Sans nom"} | Zone: ${r.Zone || "-"} | Catégorie: ${r.Catégorie || "-"} | Statut: ${r["Statut RFID"]} | EPC: ${r["EPC associé"] || "-"}`;
+    return `${i+1}. PID ${r.PID || "-"} — ${r.Produit || "Sans nom"} | Zone: ${r.Zone || "-"} | Catégorie: ${r.Catégorie || "-"} | Statut: ${r["Statut"]} | Identifiant: ${r["Identifiant associé"] || "-"}`;
   }
 
   function filterRows(baseRows,q){
@@ -1878,38 +1874,38 @@ function AIAssistant(){
 
   function explainProduct(r){
     if(!r) return "Je n’ai pas trouvé le produit demandé. Indiquez le PID, le code-barres ou une partie du nom du produit.";
-    if(r["Statut RFID"]==="Présent"){
-      return `Produit trouvé : ${r.Produit || "Sans nom"} (PID ${r.PID || "-"}).\nStatut : Présent.\nRaison : ce produit possède au moins un EPC associé (${r["EPC associé"]}) et au moins un de ces EPC est présent dans le CSV des EPC détectés (${r["EPC détecté"]}).`;
+    if(r["Statut"]==="Présent"){
+      return `Produit trouvé : ${r.Produit || "Sans nom"} (PID ${r.PID || "-"}).\nStatut : Présent.\nRaison : ce produit possède au moins un identifiant associé (${r["Identifiant associé"]}) et au moins un de ces identifiants est présent dans le CSV des identifiants détectés (${r["Identifiant détecté"]}).`;
     }
-    if(r["Statut RFID"]==="Manquant"){
-      return `Produit trouvé : ${r.Produit || "Sans nom"} (PID ${r.PID || "-"}).\nStatut : Manquant.\nRaison : ce produit possède un EPC associé (${r["EPC associé"]}), mais aucun de ses EPC n’existe dans le dernier CSV des EPC détectés. Il est donc attendu dans le stock, mais non lu par le lecteur RFID.`;
+    if(r["Statut"]==="Manquant"){
+      return `Produit trouvé : ${r.Produit || "Sans nom"} (PID ${r.PID || "-"}).\nStatut : Manquant.\nRaison : ce produit possède un identifiant associé (${r["Identifiant associé"]}), mais aucun de ses identifiants n’existe dans le dernier CSV des identifiants détectés. Il est donc attendu dans le stock, mais non détecté lors du scan.`;
     }
-    return `Produit trouvé : ${r.Produit || "Sans nom"} (PID ${r.PID || "-"}).\nStatut : Non associé.\nRaison : aucun EPC n’est lié à ce produit dans le tableau des associations. Il faut d’abord associer un tag EPC au produit avant de pouvoir savoir s’il est présent ou manquant.`;
+    return `Produit trouvé : ${r.Produit || "Sans nom"} (PID ${r.PID || "-"}).\nStatut : Non associé.\nRaison : aucun Identifiant n’est lié à ce produit dans le tableau des associations. Il faut d’abord associer un tag Identifiant au produit avant de pouvoir savoir s’il est présent ou manquant.`;
   }
 
   function buildActionPlan(){
     const steps=[];
-    if((detectedEpcs||[]).length===0) steps.push("1. Importer le dernier CSV des EPC détectés pour calculer le stock réel.");
-    if(missingCount>0) steps.push(`${steps.length+1}. Traiter les produits manquants : vérifier physiquement les rayons et refaire un scan RFID ciblé.`);
-    if(noAssociationCount>0) steps.push(`${steps.length+1}. Associer les produits non associés à un EPC avant le prochain inventaire.`);
-    if(agentData.duplicateEpcs.length>0) steps.push(`${steps.length+1}. Corriger les doublons EPC : un même EPC ne doit pas être lié à plusieurs produits.`);
+    if((detectedEpcs||[]).length===0) steps.push("1. Importer le dernier CSV des identifiants détectés pour calculer le stock réel.");
+    if(missingCount>0) steps.push(`${steps.length+1}. Traiter les produits manquants : vérifier physiquement les rayons et refaire un scan ciblé.`);
+    if(noAssociationCount>0) steps.push(`${steps.length+1}. Associer les produits non associés à un Identifiant avant le prochain inventaire.`);
+    if(agentData.duplicateEpcs.length>0) steps.push(`${steps.length+1}. Corriger les doublons d’identifiants : un même Identifiant ne doit pas être lié à plusieurs produits.`);
     steps.push(`${steps.length+1}. Exporter un rapport CSV/PDF après correction pour garder une preuve d’inventaire.`);
-    return `Plan d’action recommandé :\n${steps.join("\n")}\n\nRésumé actuel : ${products.length} produits, ${presentCount} présents, ${missingCount} manquants, ${noAssociationCount} non associés, ${agentData.duplicateEpcs.length} doublon(s) EPC.`;
+    return `Plan d’action recommandé :\n${steps.join("\n")}\n\nRésumé actuel : ${products.length} produits, ${presentCount} présents, ${missingCount} manquants, ${noAssociationCount} non associés, ${agentData.duplicateEpcs.length} doublon(s) identifiant.`;
   }
 
   function duplicateReport(){
-    if(agentData.duplicateEpcs.length===0) return "Aucun doublon EPC détecté dans le tableau des associations.";
+    if(agentData.duplicateEpcs.length===0) return "Aucun doublon Identifiant détecté dans le tableau des associations.";
     const lines=agentData.duplicateEpcs.slice(0,30).map((d,i)=>{
       const linked=d.items.map(a=>`PID ${a.PID || "-"} ${a.Produit || ""}`.trim()).join(" | ");
-      return `${i+1}. EPC ${d.epc} utilisé ${d.items.length} fois : ${linked}`;
+      return `${i+1}. Identifiant ${d.epc} utilisé ${d.items.length} fois : ${linked}`;
     });
-    return `Doublons EPC détectés : ${agentData.duplicateEpcs.length}\n${lines.join("\n")}${agentData.duplicateEpcs.length>30 ? "\n... liste limitée aux 30 premiers doublons." : ""}`;
+    return `Doublons d’identifiants détectés : ${agentData.duplicateEpcs.length}\n${lines.join("\n")}${agentData.duplicateEpcs.length>30 ? "\n... liste limitée aux 30 premiers doublons." : ""}`;
   }
 
   function exportRowsToCSV(q){
     const intent=chooseRowsByIntent(q);
     const {filtered,applied}=filterRows(intent.base,q);
-    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associé","EPC détecté","Statut RFID"];
+    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Identifiant associé","Identifiant détecté","Statut"];
     const suffix=intent.label.replaceAll(" ","_").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
     exportCSV(`rapport_${suffix}.csv`,filtered,cols);
     return `CSV généré : ${filtered.length} ${intent.label}${applied.length ? ` (${applied.join(", ")})` : ""}.`;
@@ -1925,7 +1921,7 @@ function AIAssistant(){
       `Presents: ${presentCount}`,
       `Manquants: ${missingCount}`,
       `Non associes: ${noAssociationCount}`,
-      `EPC detectes importes: ${(detectedEpcs||[]).length}`,
+      `Identifiant detectes importes: ${(detectedEpcs||[]).length}`,
       `Filtres: ${applied.length ? applied.join(", ") : "aucun"}`,
       "",
       ...filtered.slice(0,30).map(rowLine)
@@ -1951,7 +1947,7 @@ function AIAssistant(){
       return `${filtered.length} ${intent.label} trouvé(s)${applied.length ? ` avec filtre ${applied.join(", ")}` : ""}.\n\n${lines.join("\n")}${filtered.length>limit ? `\n\nListe limitée aux ${limit} premiers résultats. Demandez un CSV pour exporter toute la liste.` : ""}`;
     }
 
-    return `Résumé RFID actuel :\n• Produits : ${products.length}\n• Présents : ${presentCount}\n• Manquants : ${missingCount}\n• Non associés : ${noAssociationCount}\n• Couverture RFID : ${coverage}%\n• Présence réelle selon EPC détectés : ${stockAccuracy}%\n• Doublons EPC : ${agentData.duplicateEpcs.length}\n\nJe peux aussi répondre à : “montre-moi les 20 produits absents”, “filtre les manquants par zone”, “crée un rapport CSV”, “crée un rapport PDF”, “détecte les doublons EPC”, ou “explique pourquoi PID X est manquant”.`;
+    return `Résumé actuel de l’inventaire :\n• Produits : ${products.length}\n• Présents : ${presentCount}\n• Manquants : ${missingCount}\n• Non associés : ${noAssociationCount}\n• Taux de couverture : ${coverage}%\n• Présence réelle selon identifiants détectés : ${stockAccuracy}%\n• Doublons d’identifiants : ${agentData.duplicateEpcs.length}\n\nJe peux aussi répondre à : “montre-moi les 20 produits absents”, “filtre les manquants par zone”, “crée un rapport CSV”, “crée un rapport PDF”, “détecte les doublons d’identifiants”, ou “explique pourquoi PID X est manquant”.`;
   }
 
   async function sendMessage(text){
@@ -1965,7 +1961,7 @@ function AIAssistant(){
         const answer=buildLocalResponse(q);
         setMessages(prev=>[...prev,{role:"assistant",content:answer}]);
       }catch(e){
-        setMessages(prev=>[...prev,{role:"assistant",content:"Erreur pendant l’analyse locale. Vérifiez que les fichiers produits, associations et EPC détectés sont bien importés."}]);
+        setMessages(prev=>[...prev,{role:"assistant",content:"Erreur pendant l’analyse locale. Vérifiez que les fichiers produits, associations et identifiants détectés sont bien importés."}]);
       }
       setLoading(false);
     },180);
@@ -1975,7 +1971,7 @@ function AIAssistant(){
     "Montre-moi les 20 produits absents",
     "Filtrer les manquants par zone",
     "Génère un plan d’action",
-    "Détecte les doublons EPC",
+    "Détecte les doublons d’identifiants",
     "Créer rapport CSV des manquants",
     "Créer rapport PDF résumé"
   ];
@@ -1984,8 +1980,8 @@ function AIAssistant(){
     <div className="aiChatTop">
       <div>
         <span className="aiChatBadge">Agent local gratuit</span>
-        <h2>Chat inventaire RFID</h2>
-        <p>L’agent analyse le catalogue, les associations et le CSV des EPC détectés. Il peut lister, filtrer, expliquer et exporter les données.</p>
+        <h2>Chat inventaire</h2>
+        <p>L’agent analyse le catalogue, les associations et le CSV des identifiants détectés. Il peut lister, filtrer, expliquer et exporter les données.</p>
       </div>
       <div className="aiChatScore">
         <b>{stockAccuracy}%</b>
@@ -1997,10 +1993,10 @@ function AIAssistant(){
       <div className="aiChatPanel">
         <div className="aiMessages">
           {messages.map((m,i)=><div key={i} className={m.role==="user" ? "aiBubble user" : "aiBubble assistant"}>
-            <span>{m.role==="user" ? "Vous" : "Agent RFID"}</span>
+            <span>{m.role==="user" ? "Vous" : "Agent inventaire"}</span>
             <p>{m.content}</p>
           </div>)}
-          {loading && <div className="aiBubble assistant typing"><span>Agent RFID</span><p>Analyse en cours...</p></div>}
+          {loading && <div className="aiBubble assistant typing"><span>Agent inventaire</span><p>Analyse en cours...</p></div>}
           <div ref={messagesEndRef}/>
         </div>
 
@@ -2017,16 +2013,16 @@ function AIAssistant(){
       <aside className="aiContextPanel">
         <h3>Contexte actuel</h3>
         <div className="aiContextStat"><span>Produits</span><b>{products.length}</b></div>
-        <div className="aiContextStat"><span>Associations EPC</span><b>{associations.length}</b></div>
-        <div className="aiContextStat"><span>EPC détectés importés</span><b>{(detectedEpcs||[]).length}</b></div>
+        <div className="aiContextStat"><span>Associations identifiant</span><b>{associations.length}</b></div>
+        <div className="aiContextStat"><span>Identifiants détectés importés</span><b>{(detectedEpcs||[]).length}</b></div>
         <div className="aiContextStat"><span>Présents</span><b>{presentCount}</b></div>
         <div className="aiContextStat"><span>Manquants</span><b>{missingCount}</b></div>
         <div className="aiContextStat"><span>Non associés</span><b>{noAssociationCount}</b></div>
-        <div className="aiContextStat"><span>Doublons EPC</span><b>{agentData.duplicateEpcs.length}</b></div>
+        <div className="aiContextStat"><span>Doublons identifiant</span><b>{agentData.duplicateEpcs.length}</b></div>
         <div className="aiSideActions">
           <button type="button" onClick={()=>sendMessage("Créer rapport CSV des manquants")}>CSV manquants</button>
           <button type="button" onClick={()=>sendMessage("Créer rapport PDF résumé")}>PDF résumé</button>
-          <button type="button" onClick={()=>sendMessage("Détecte les doublons EPC")}>Doublons EPC</button>
+          <button type="button" onClick={()=>sendMessage("Détecte les doublons d’identifiants")}>Doublons identifiant</button>
         </div>
       </aside>
     </div>
@@ -2046,7 +2042,7 @@ function Association(){
   });
 
   return <section className="tableOnlyPage">
-    <p className="notice">Tableau de consultation des associations Produit ↔ EPC RFID enregistrées localement.</p>
+    <p className="notice">Tableau de consultation des associations Produit ↔ identifiant enregistrées localement.</p>
 
     <div className="tableToolbar">
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans les associations..."/>
@@ -2076,7 +2072,7 @@ function Inventory(){
   });
   const detectedSet = new Set((detectedEpcs||[]).map(norm).filter(Boolean));
 
-  // Statut réel = Catalogue produits + Associations Produit/EPC + CSV des EPC détectés.
+  // Statut réel = Catalogue produits + Associations Produit/Identifiant + CSV des identifiants détectés.
   // Les associations seules ne rendent plus un produit "Présent".
   function getStatus(p){
     const epcs=associatedByPid.get(String(p.PID)) || [];
@@ -2095,14 +2091,14 @@ function Inventory(){
       Stock:p.Stock || "",
       "Code barre 1":p["Code barre 1"] || "",
       "Code barre 2":p["Code barre 2"] || "",
-      "EPC associé":epcs.join(", "),
-      "Statut RFID": status,
+      "Identifiant associé":epcs.join(", "),
+      "Statut": status,
       _rowClass: status==="Présent" ? "rowPresent" : status==="Manquant" ? "rowMissing" : "rowUnassociated"
     };
   }).filter(r=>{
     const s = Object.values(r).join(" ").toLowerCase();
     const matchText = s.includes(q.toLowerCase());
-    const matchStatus = statusFilter==="all" || r["Statut RFID"]===statusFilter;
+    const matchStatus = statusFilter==="all" || r["Statut"]===statusFilter;
     return matchText && matchStatus;
   });
 
@@ -2112,7 +2108,7 @@ function Inventory(){
   const unassociatedCount=products.filter(p=>getStatus(p)==="Non associé").length;
 
   return <section className="tableOnlyPage inventoryStatusPage">
-    <p className="notice">Stock calculé avec le catalogue produits + les associations Produit/EPC + le dernier CSV des EPC détectés importé.</p>
+    <p className="notice">Stock calculé avec le catalogue produits + les associations Produit/Identifiant + le dernier CSV des identifiants détectés importé.</p>
 
     <div className="statusSummaryGrid">
       <div className="statusSummary present"><b>{presentCount}</b><span>Présents</span></div>
@@ -2129,13 +2125,13 @@ function Inventory(){
         <option value="Manquant">Manquant</option>
         <option value="Non associé">Non associé</option>
       </select>
-      <span>{rows.length} produit(s) · {detectedSet.size} EPC détecté(s)</span>
+      <span>{rows.length} produit(s) · {detectedSet.size} Identifiant détecté(s)</span>
     </div>
 
     <div className="smartTableWrap">
       <table className="smartTable statusTable">
         <thead>
-          <tr>{["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associé","Statut RFID"].map(c=><th key={c}>{c}</th>)}</tr>
+          <tr>{["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Identifiant associé","Statut"].map(c=><th key={c}>{c}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((r,i)=><tr key={i} className={r._rowClass}>
@@ -2146,8 +2142,8 @@ function Inventory(){
             <td>{r.Stock}</td>
             <td>{r["Code barre 1"]}</td>
             <td>{r["Code barre 2"]}</td>
-            <td>{r["EPC associé"]}</td>
-            <td><span className={`statusBadge ${r._rowClass}`}>{r["Statut RFID"]}</span></td>
+            <td>{r["Identifiant associé"]}</td>
+            <td><span className={`statusBadge ${r._rowClass}`}>{r["Statut"]}</span></td>
           </tr>)}
         </tbody>
       </table>
@@ -2186,7 +2182,7 @@ function LocalData(){
       setProducts(data.products);
       setAssociations(data.associations);
       if(Array.isArray(data.detectedEpcs)) setDetectedEpcs(data.detectedEpcs);
-      setMsg(`Projet restauré: ${data.products.length} produits, ${data.associations.length} associations, ${Array.isArray(data.detectedEpcs) ? data.detectedEpcs.length : 0} EPC détectés.`);
+      setMsg(`Projet restauré: ${data.products.length} produits, ${data.associations.length} associations, ${Array.isArray(data.detectedEpcs) ? data.detectedEpcs.length : 0} identifiants détectés.`);
     }catch(e){
       setMsg("Erreur lecture JSON: fichier invalide.");
     }
@@ -2197,14 +2193,14 @@ function LocalData(){
   }
 
   function exportAssociations(){
-    exportCSV("associations_rfid.csv",associations,Object.keys(associations[0]||{}));
+    exportCSV("associations.csv",associations,Object.keys(associations[0]||{}));
   }
 
   function exportProductsWithoutRfid(){
     const associatedPids=new Set(associations.map(a=>String(a.PID)));
-    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Sans RFID"}));
-    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"];
-    exportCSV("produits_sans_rfid.csv",rows,cols);
+    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut":"Sans association"}));
+    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut"];
+    exportCSV("produits_sans_association.csv",rows,cols);
   }
 
   function exportCoverageReport(){
@@ -2214,20 +2210,20 @@ function LocalData(){
     const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
     const rows=[{
       "Produits locaux":products.length,
-      "Produits avec RFID":productsWithRfid,
-      "Produits sans RFID":productsWithoutRfid,
-      "Associations RFID":associations.length,
-      "EPC détectés importés":detectedEpcCount,
-      "Couverture RFID":coverage+"%",
+      "Produits associés":productsWithRfid,
+      "Produits sans association":productsWithoutRfid,
+      "Associations":associations.length,
+      "Identifiants détectés importés":detectedEpcCount,
+      "Taux de couverture":coverage+"%",
       "Date rapport":new Date().toISOString()
     }];
-    exportCSV("rapport_couverture_rfid.csv",rows,Object.keys(rows[0]));
+    exportCSV("rapport_couverture.csv",rows,Object.keys(rows[0]));
   }
 
   function exportDuplicateEpcReport(){
     const counts={};
     associations.forEach(a=>{const e=norm(a.EPC); if(e) counts[e]=(counts[e]||0)+1;});
-    const rows=associations.filter(a=>counts[norm(a.EPC)]>1).map(a=>({...a,"Anomalie":"Doublon EPC"}));
+    const rows=associations.filter(a=>counts[norm(a.EPC)]>1).map(a=>({...a,"Anomalie":"Doublon identifiant"}));
     const cols=["PID","Produit","Code barre 1","Code barre 2","EPC","Date","Anomalie"];
     exportCSV("rapport_doublons_epc.csv",rows,cols);
   }
@@ -2236,29 +2232,29 @@ function LocalData(){
     const associatedPids=new Set(associations.map(a=>String(a.PID)));
     const rows=products.map(p=>{
       const linked=associations.filter(a=>String(a.PID)===String(p.PID)).map(a=>a.EPC).join(", ");
-      return {...p,"EPC associés":linked,"Statut RFID":linked?"Associé":"Sans RFID"};
+      return {...p,"Identifiants associés":linked,"Statut":linked?"Associé":"Sans association"};
     });
-    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","EPC associés","Statut RFID"];
+    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Identifiants associés","Statut"];
     exportCSV("audit_complet_pharmainventory.csv",rows,cols);
   }
 
   return <section>
     
-    <p className="notice">Exportez vos tableaux, rapports RFID et sauvegardes locales.</p>
+    <p className="notice">Exportez vos tableaux, rapports d’inventaire et sauvegardes locales.</p>
 
     <div className="statsGrid">
       <div className="statCard"><span>Produits</span><b>{products.length}</b><small>catalogue local</small></div>
-      <div className="statCard"><span>Associations RFID</span><b>{associations.length}</b><small>EPC liés</small></div>
+      <div className="statCard"><span>Associations</span><b>{associations.length}</b><small>Liens enregistrés</small></div>
       
     </div>
 
     <div className="reportCards exportGrid">
       <div className="reportCard"><span>📦</span><div><b>Produits locaux</b><small>Catalogue importé complet</small></div><button onClick={exportProducts}>Exporter</button></div>
-      <div className="reportCard"><span>🔗</span><div><b>Associations RFID</b><small>PID, produits et EPC liés</small></div><button onClick={exportAssociations}>Exporter</button></div>
-      <div className="reportCard"><span>🏷️</span><div><b>Produits sans RFID</b><small>Articles à associer</small></div><button onClick={exportProductsWithoutRfid}>Exporter</button></div>
-      <div className="reportCard"><span>📊</span><div><b>Couverture RFID</b><small>KPI de couverture</small></div><button onClick={exportCoverageReport}>Exporter</button></div>
-      <div className="reportCard"><span>🔁</span><div><b>Doublons EPC</b><small>Anomalies EPC répétées</small></div><button onClick={exportDuplicateEpcReport}>Exporter</button></div>
-      <div className="reportCard"><span>✅</span><div><b>Audit complet</b><small>Produits + statut RFID</small></div><button onClick={exportFullAudit}>Exporter</button></div>
+      <div className="reportCard"><span>🔗</span><div><b>Associations</b><small>PID, produits et Liens enregistrés</small></div><button onClick={exportAssociations}>Exporter</button></div>
+      <div className="reportCard"><span>🏷️</span><div><b>Produits sans association</b><small>Articles à lier</small></div><button onClick={exportProductsWithoutRfid}>Exporter</button></div>
+      <div className="reportCard"><span>📊</span><div><b>Taux de couverture</b><small>KPI de couverture</small></div><button onClick={exportCoverageReport}>Exporter</button></div>
+      <div className="reportCard"><span>🔁</span><div><b>Doublons identifiant</b><small>Anomalies Identifiant répétées</small></div><button onClick={exportDuplicateEpcReport}>Exporter</button></div>
+      <div className="reportCard"><span>✅</span><div><b>Audit complet</b><small>Produits + statut</small></div><button onClick={exportFullAudit}>Exporter</button></div>
       <div className="reportCard"><span>💾</span><div><b>Sauvegarder projet</b><small>Backup JSON complet</small></div><button onClick={saveProject}>Backup</button></div>
       <div className="reportCard"><span>📥</span><div><b>Restaurer projet</b><small>Importer un backup JSON</small></div><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></div>
     </div>
@@ -2658,29 +2654,29 @@ function Dashboard({setTab}){
       "Produits catalogués":products.length,
       "Produits tagués":productsWithRfid,
       "Produits sans tag":productsWithoutRfid,
-      "Associations RFID":associations.length,
-      "EPC détectés importés":detectedEpcCount,
-      "Couverture RFID":coverage+"%",
-      "Doublons EPC":duplicateEpcs,
+      "Associations":associations.length,
+      "Identifiants détectés importés":detectedEpcCount,
+      "Taux de couverture":coverage+"%",
+      "Doublons identifiant":duplicateEpcs,
       "Date rapport":new Date().toISOString()
     }];
-    exportCSV("rapport_dashboard_rfid.csv",rows,Object.keys(rows[0]));
+    exportCSV("rapport_dashboard.csv",rows,Object.keys(rows[0]));
   }
 
   function exportProductsWithoutRfid(){
-    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut RFID":"Sans tag"}));
-    exportCSV("produits_sans_tag.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut RFID"]);
+    const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut":"Sans association"}));
+    exportCSV("produits_sans_tag.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut"]);
   }
 
   const alerts=[];
-  if(productsWithoutRfid>0) alerts.push({type:"warning",icon:"warning",title:`${productsWithoutRfid} produits sans tag RFID`,text:"Aucun tag détecté pour ces produits."});
-  if(duplicateEpcs>0) alerts.push({type:"danger",icon:"warning",title:`${duplicateEpcs} doublon(s) EPC détecté(s)`,text:"Vérifier les associations RFID en double."});
-  if(detectedEpcCount===0) alerts.push({type:"info",icon:"rfid",title:"0 scan RFID détecté",text:"Importez le CSV des EPC détectés pour calculer le stock réel."});
-  if(coverage<100) alerts.push({type:"warning",icon:"warning",title:"Aucun tag détecté pour ces produits.",text:"À taguer en priorité pour améliorer votre suivi."});
-  if(alerts.length===0) alerts.push({type:"success",icon:"check",title:"Aucune alerte prioritaire",text:"Les données RFID sont stables."});
+  if(productsWithoutRfid>0) alerts.push({type:"warning",icon:"warning",title:`${productsWithoutRfid} produits sans association`,text:"Aucune association détectée pour ces produits."});
+  if(duplicateEpcs>0) alerts.push({type:"danger",icon:"warning",title:`${duplicateEpcs} doublon(s) Identifiant détecté(s)`,text:"Vérifier les associations en double."});
+  if(detectedEpcCount===0) alerts.push({type:"info",icon:"rfid",title:"0 scan détecté",text:"Importez le CSV des identifiants détectés pour calculer le stock réel."});
+  if(coverage<100) alerts.push({type:"warning",icon:"warning",title:"Aucune association détectée pour ces produits.",text:"À taguer en priorité pour améliorer votre suivi."});
+  if(alerts.length===0) alerts.push({type:"success",icon:"check",title:"Aucune alerte prioritaire",text:"Les données sont stables."});
 
   const reports=[
-    {label:"Couverture RFID",sub:"CSV",icon:"doc",action:exportDashboardReport,type:"blue"},
+    {label:"Taux de couverture",sub:"CSV",icon:"doc",action:exportDashboardReport,type:"blue"},
     {label:"Produits avec tag",sub:"CSV",icon:"tag",action:exportDashboardReport,type:"green"},
     {label:"Produits sans tag",sub:"CSV",icon:"warning",action:exportProductsWithoutRfid,type:"orange"},
     {label:"Historique scans",sub:"CSV",icon:"clock",action:()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{})),type:"purple"},
@@ -2688,8 +2684,8 @@ function Dashboard({setTab}){
 
   const kpis=[
     {label:"Produits enregistrés",value:products.length,sub:products.length ? "Catalogue importé" : "Aucun catalogue importé",icon:"box",tone:"blue",action:()=>setTab("operations")},
-    {label:"Produits tagués",value:productsWithRfid,sub:productsWithRfid ? "Avec association RFID" : "Aucun tag détecté",icon:"tag",tone:"green",action:()=>setTab("association")},
-    {label:"Transactions RFID",value:detectedEpcCount,sub:detectedEpcCount ? "EPC détectés importés" : "Aucune transaction",icon:"rfid",tone:"purple",action:()=>setTab("inventory")},
+    {label:"Produits tagués",value:productsWithRfid,sub:productsWithRfid ? "Avec association" : "Aucun tag détecté",icon:"tag",tone:"green",action:()=>setTab("association")},
+    {label:"Transactions",value:detectedEpcCount,sub:detectedEpcCount ? "Identifiants détectés importés" : "Aucune transaction",icon:"rfid",tone:"purple",action:()=>setTab("inventory")},
     {label:"Produits sans tag",value:productsWithoutRfid,sub:productsWithoutRfid ? "À taguer en priorité" : "Synchronisés",icon:"warning",tone:"orange",action:()=>setTab("operations")},
   ];
 
@@ -2698,7 +2694,7 @@ function Dashboard({setTab}){
   const defaultAdSrc=defaultAds[defaultAdIndex % defaultAds.length];
 
   return <section className="figmaDashboard">
-    <p className="figmaIntro">Suivi en temps réel de la couverture RFID et de l’activité de votre pharmacie.</p>
+    <p className="figmaIntro">Suivi en temps réel de la couverture et de l’activité de votre pharmacie.</p>
 
     <div className="figmaKpiGrid">
       {kpis.map(k=><button key={k.label} className="figmaKpiCard" onClick={k.action} type="button">
@@ -2714,11 +2710,11 @@ function Dashboard({setTab}){
     <div className="figmaMiddleGrid">
       <div className="figmaPanel figmaCoveragePanel">
         <div className="figmaPanelTitle">
-          <h2>Couverture RFID</h2>
+          <h2>Taux de couverture</h2>
         </div>
 
         <div className="figmaCoverageContent">
-          <div className="figmaGauge" aria-label={`Couverture RFID ${coverage}%`}>
+          <div className="figmaGauge" aria-label={`Taux de couverture ${coverage}%`}>
             <svg width="188" height="188" viewBox="0 0 188 188">
               <circle cx="94" cy="94" r={radius} fill="none" stroke="#eef2f7" strokeWidth="20"/>
               {coverage>0 && <circle cx="94" cy="94" r={radius} fill="none" stroke="var(--primary)" strokeWidth="20" strokeDasharray={`${dash} ${circumference}`} strokeLinecap="round" transform="rotate(-90 94 94)"/>}
@@ -2727,7 +2723,7 @@ function Dashboard({setTab}){
           </div>
 
           <div className="figmaCoverageText">
-            <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture RFID progresse." : "Votre couverture RFID doit être améliorée."}</h3>
+            <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture progresse." : "Votre couverture doit être améliorée."}</h3>
             <p>Vous avez étiqueté {coverage}% de vos produits en pharmacie.</p>
             <p>Commencez ou continuez l’étiquetage pour améliorer votre suivi d’inventaire.</p>
             <button type="button" onClick={()=>setTab("operations")}><DashIcon name="tag"/>Accéder à l'avancement</button>

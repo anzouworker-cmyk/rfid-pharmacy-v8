@@ -46,7 +46,7 @@ engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread":
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-app = FastAPI(title="RFID Pharmacy Web SaaS Licence API")
+app = FastAPI(title="Smart Inventory Pharmacy Web SaaS Licence API")
 
 # Storage local pour les images publicitaires quand Cloudinary n'est pas configuré.
 # IMPORTANT: le mount doit être fait après la création de `app`.
@@ -722,25 +722,25 @@ def ai_analyze(data: AIAnalyzeIn, acc: Account = Depends(current_user)):
     fallback = {
         "score": max(0, min(100, int(data.coverage))),
         "niveau": "Analyse locale",
-        "resume": f"Couverture RFID {data.coverage}%. {data.products_without_rfid} produits restent sans RFID.",
+        "resume": f"Taux de couverture {data.coverage}%. {data.products_without_rfid} produits restent sans association.",
         "recommandations": [
             "Associer les produits à forte rotation en priorité.",
             "Sauvegarder le projet JSON après chaque session.",
-            "Importer les EPC détectés avant chaque analyse d’inventaire.",
-            "Viser progressivement 95% de couverture RFID."
+            "Importer les identifiants détectés avant chaque analyse d’inventaire.",
+            "Viser progressivement 95% de taux de couverture."
         ],
         "alertes": [
-            "Les produits sans RFID ne seront pas détectés automatiquement.",
+            "Les produits sans association ne seront pas détectés automatiquement.",
             "Les données locales doivent être sauvegardées régulièrement."
         ],
-        "prochaine_action": "Continuer l’association RFID des produits sans tag."
+        "prochaine_action": "Continuer l’association des produits non liés."
     }
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         return {"mode": "local-fallback", "analysis": fallback}
 
     prompt = f"""
-Tu es un assistant professionnel pour une application SaaS RFID destinée aux pharmacies.
+Tu es un assistant professionnel pour une application SaaS de gestion d’inventaire destinée aux pharmacies.
 Réponds uniquement en JSON valide.
 Données:
 produits={data.products_count}
@@ -752,7 +752,7 @@ epc_detectes={data.detected_epc_count}
 presents={data.present_count}
 manquants={data.missing_count}
 sans_association={data.no_association_count}
-question={data.question or "Analyse automatiquement la situation RFID."}
+question={data.question or "Analyse automatiquement la situation d’inventaire."}
 Format JSON:
 score, niveau, resume, recommandations, alertes, prochaine_action
 """

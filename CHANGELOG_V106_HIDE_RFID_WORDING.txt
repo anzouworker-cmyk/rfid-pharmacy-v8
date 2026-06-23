@@ -1,0 +1,11 @@
+V106 - Hide RFID wording in the interface
+
+- Replaced visible occurrences of the word "RFID" in the interface with more neutral wording.
+- Updated menu labels, page titles, operation cards, reports, exports, dashboard labels, and AI assistant text.
+- Used generic wording such as:
+  - Associations
+  - Inventaire
+  - Taux de couverture
+  - Produits sans association
+  - identifiant / identifiants détectés
+- Updated backend fallback/AI wording to match the new neutral language.

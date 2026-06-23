@@ -1,0 +1,5 @@
+V105 - Place Montant manquant / Montant surplus between title and cash date
+
+- Adjusted the cash operations header layout so the two indicator cards sit clearly between the title block and the Date de caisse field.
+- Reduced the title block max width so the middle indicators have dedicated space.
+- Preserved responsive behavior by stacking indicators below on narrower screens.

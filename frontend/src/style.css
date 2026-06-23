@@ -5193,3 +5193,132 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
     width:100%!important;
   }
 }
+
+
+/* V104 - fix cash operations header anomaly */
+.cashOpsHeader{
+  display:grid!important;
+  grid-template-columns:minmax(340px,1fr) auto 180px!important;
+  align-items:start!important;
+  column-gap:18px!important;
+  row-gap:10px!important;
+  margin-bottom:12px!important;
+}
+.cashOpsIntro{
+  width:auto!important;
+  max-width:640px!important;
+  display:block!important;
+}
+.cashOpsHeader h2{
+  margin:0 0 6px!important;
+}
+.cashOpsHeader .notice{
+  max-width:620px!important;
+  margin:0!important;
+}
+.cashOpsIndicators{
+  width:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:10px!important;
+  margin-top:0!important;
+  align-self:center!important;
+}
+.cashOpsIndicator{
+  min-width:214px!important;
+  padding:10px 12px!important;
+}
+.cashOpsIndicatorIcon{
+  width:42px!important;
+  height:42px!important;
+  flex-basis:42px!important;
+}
+.cashOpsIndicatorContent strong{
+  font-size:24px!important;
+}
+.cashOpsDateBox{
+  width:180px!important;
+  justify-self:end!important;
+  align-self:start!important;
+  margin-left:0!important;
+}
+.cashOpsGrid{
+  margin-top:0!important;
+}
+@media(max-width:1350px){
+  .cashOpsHeader{
+    grid-template-columns:1fr 180px!important;
+  }
+  .cashOpsIndicators{
+    grid-column:1 / -1!important;
+    align-self:start!important;
+  }
+}
+@media(max-width:900px){
+  .cashOpsHeader{
+    grid-template-columns:1fr!important;
+  }
+  .cashOpsDateBox{
+    width:100%!important;
+    max-width:220px!important;
+    justify-self:start!important;
+  }
+  .cashOpsIndicators{
+    width:100%!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+  }
+  .cashOpsIndicator{
+    width:100%!important;
+    min-width:0!important;
+  }
+}
+
+/* V105 - place shortage/surplus cards clearly between title and cash date */
+.cashOpsHeader{
+  display:grid!important;
+  grid-template-columns:minmax(300px, 420px) auto 180px!important;
+  align-items:center!important;
+  column-gap:16px!important;
+  row-gap:10px!important;
+}
+.cashOpsIntro{
+  max-width:420px!important;
+}
+.cashOpsIndicators{
+  justify-self:start!important;
+  align-self:center!important;
+  flex-wrap:nowrap!important;
+}
+.cashOpsDateBox{
+  justify-self:end!important;
+  align-self:start!important;
+}
+@media(max-width:1420px){
+  .cashOpsHeader{
+    grid-template-columns:minmax(260px, 1fr) auto 180px!important;
+  }
+  .cashOpsIndicators{
+    flex-wrap:wrap!important;
+  }
+}
+@media(max-width:1180px){
+  .cashOpsHeader{
+    grid-template-columns:1fr 180px!important;
+    align-items:start!important;
+  }
+  .cashOpsIndicators{
+    grid-column:1 / -1!important;
+    justify-self:start!important;
+    margin-top:4px!important;
+  }
+}
+@media(max-width:900px){
+  .cashOpsHeader{
+    grid-template-columns:1fr!important;
+  }
+  .cashOpsDateBox{
+    justify-self:start!important;
+  }
+}
