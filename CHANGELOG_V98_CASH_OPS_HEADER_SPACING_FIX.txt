@@ -1,0 +1,6 @@
+V98 - Cash operations header spacing fix
+
+- Reduced the excessive empty space in the cash operations header.
+- Tightened spacing between the title, description, shortage/surplus indicators, and the operation cards grid.
+- Slightly reduced indicator padding and header gaps for a more compact professional layout.
+- Kept the cash date box aligned on the right.

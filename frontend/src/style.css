@@ -5003,3 +5003,89 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
     grid-template-columns:1fr!important;
   }
 }
+
+/* V98 - tighten cash operations header spacing */
+.cashOpsPanel{
+  padding:20px 22px!important;
+}
+.cashOpsHeader{
+  margin-bottom:10px!important;
+  column-gap:18px!important;
+  row-gap:8px!important;
+}
+.cashOpsIntro{
+  gap:6px!important;
+}
+.cashOpsHeader h2{
+  margin:0 0 4px!important;
+}
+.cashOpsHeader .notice{
+  margin:0!important;
+}
+.cashOpsIndicators{
+  margin-top:2px!important;
+  gap:10px!important;
+}
+.cashOpsIndicator{
+  padding:10px 14px!important;
+}
+.cashOpsDateBox{
+  gap:4px!important;
+}
+.cashOpsGrid{
+  margin-top:2px!important;
+}
+@media(max-width:1100px){
+  .cashOpsHeader{
+    margin-bottom:8px!important;
+  }
+}
+
+/* V99 - remove month analysis control and improve Date temps réel design */
+.cashAdminToolbarSingle{
+  width:100%!important;
+  justify-content:flex-end!important;
+}
+.cashAdminPrimaryDateControl{
+  min-width:320px!important;
+  padding:12px 14px!important;
+  border:1px solid #dce4f1!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:0 8px 24px rgba(15,23,42,.04)!important;
+}
+.cashAdminPrimaryDateControl span{
+  font-size:12px!important;
+  font-weight:800!important;
+  color:#64748b!important;
+  letter-spacing:.02em!important;
+}
+.cashAdminPrimaryDateControl .cashAdminDatePicker{
+  width:100%!important;
+}
+.cashAdminPrimaryDateControl .cashAdminDatePickerDisplay{
+  min-height:44px!important;
+  min-width:0!important;
+  flex:1 1 auto!important;
+  border-radius:12px!important;
+  font-size:15px!important;
+  padding:10px 12px!important;
+}
+.cashAdminPrimaryDateControl .cashAdminDatePicker > button{
+  width:38px!important;
+  height:44px!important;
+  min-height:44px!important;
+  border-radius:12px!important;
+}
+.cashAdminPrimaryDateControl .cashAdminCalendarPopover{
+  left:0!important;
+}
+@media(max-width:900px){
+  .cashAdminToolbarSingle{
+    justify-content:flex-start!important;
+  }
+  .cashAdminPrimaryDateControl{
+    min-width:min(100%, 360px)!important;
+    width:100%!important;
+  }
+}

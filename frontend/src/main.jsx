@@ -1369,7 +1369,7 @@ function CashDashboardAdmin(){
   const latestDate = dashboardDates.length ? dashboardDates[dashboardDates.length-1] : dashboardToday;
   const earliestDate = dashboardDates.length ? dashboardDates[0] : dashboardToday;
   const [selectedDate,setSelectedDate] = useState(latestDate);
-  const [selectedMonth,setSelectedMonth] = useState(()=>latestDate.slice(0,7));
+  const selectedMonth = selectedDate.slice(0,7);
   const [resultsDates,setResultsDates] = useState(()=>({
     totalSales: latestDate,
     closingCalculated: latestDate,
@@ -1613,14 +1613,10 @@ function CashDashboardAdmin(){
         <h1>Cash register dashboard</h1>
         <p>Vue admin pour consulter les dates enregistrées où des opérations de caisse existent, avec calendrier et flèches de navigation.</p>
       </div>
-      <div className="cashAdminToolbar">
-        <label>
+      <div className="cashAdminToolbar cashAdminToolbarSingle">
+        <label className="cashAdminPrimaryDateControl">
           <span>Date temps réel</span>
           <DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date temps réel enregistrée" />
-        </label>
-        <label>
-          <span>Mois d’analyse</span>
-          <input type="month" value={selectedMonth} onChange={e=>setSelectedMonth(e.target.value || todayMonthISO())} />
         </label>
       </div>
     </div>

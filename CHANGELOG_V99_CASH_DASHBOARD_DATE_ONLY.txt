@@ -1,0 +1,6 @@
+V99 - Cash dashboard uses Date temps réel only
+
+- Removed the "Mois d’analyse" control from the cash dashboard header.
+- The dashboard now uses only "Date temps réel" as the main control.
+- Monthly summaries are now driven automatically by the month of the selected real-time date.
+- Improved the visual design of the "Date temps réel" control with a cleaner card-style layout.
