@@ -1,8 +1,0 @@
-V108 - Remove cash management KPI cards
-
-- Removed the three KPI cards in Gestion de caisse:
-  - Solde actuel
-  - Total retraits (réel)
-  - Jours actifs
-- Kept the history table and period filter unchanged.
-- Removed leftover spacing before the table.

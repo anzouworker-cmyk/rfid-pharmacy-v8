@@ -1208,6 +1208,21 @@ function CashRegister(){
                 </div>
               </div>
 
+              <div className="cashHistoryStats">
+                <div className="cashHistoryStatCard">
+                  <div className="cashHistoryStatIcon"><DashIcon name="cash"/></div>
+                  <div><span>Solde actuel</span><strong>{formatDH(managementCurrentBalanceCents)}</strong><small>{managementMonth}</small></div>
+                </div>
+                <div className="cashHistoryStatCard">
+                  <div className="cashHistoryStatIcon"><DashIcon name="download"/></div>
+                  <div><span>Total retraits (réel)</span><strong>{formatDH(managementTotalWithdrawnCents)}</strong><small>Ce mois</small></div>
+                </div>
+                <div className="cashHistoryStatCard">
+                  <div className="cashHistoryStatIcon"><DashIcon name="clock"/></div>
+                  <div><span>Jours actifs</span><strong>{managementActiveDays} / {managementMonthDays}</strong><small>{managementMonth}</small></div>
+                </div>
+              </div>
+
               <div className="cashWideTableWrap">
                 <table className="cashTable managementHistoryTable">
                   <thead><tr><th>Date</th><th>Dépôt / ajout</th><th>Dépenses</th><th>Total de Vente par jour</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>À retirer (théorique)</th><th>Retiré (réel)</th><th>Nouvelle C. fermeture</th><th>Montant manquant</th><th>Montant surplus</th><th>C. fermeture (compté)</th><th>C. fermeture (théorique)</th></tr></thead>
