@@ -1,0 +1,16 @@
+V107 - Redesign des tableaux de caisse
+
+Améliorations principales :
+- Refonte visuelle du module Caisse avec un style plus moderne et plus professionnel.
+- Onglet Monnaie d’échange redesigné :
+  - séparation visuelle entre Billets et Pièces,
+  - colonnes Dénomination / Quantité / Sous-total,
+  - récapitulatif de caisse redesigné à droite.
+- Onglet Gestion de caisse redesigné :
+  - titre et bloc d’information améliorés,
+  - cartes KPI (solde actuel, total retraits, jours actifs),
+  - tableau historique restylé.
+- Onglet Dépenses redesigné :
+  - tableau restylé,
+  - cartes récapitulatives à droite (total du mois, nombre de dépenses, dernière mise à jour).
+- Harmonisation générale des bordures, espacements, cartes, boutons et filtres de date.

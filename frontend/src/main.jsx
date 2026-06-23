@@ -1021,6 +1021,8 @@ function CashRegister(){
   const surplusCents = Math.max(0, sameDayClosingRealCents - closingCalculatedCents);
   const expectedCents = closingCalculatedCents;
   const gapCents = sameDayClosingRealCents - expectedCents;
+  const billDenominations = CASH_DENOMINATIONS.filter(d=>d.cents >= 2000);
+  const coinDenominations = CASH_DENOMINATIONS.filter(d=>d.cents < 2000);
 
   const managementHistory = useMemo(()=>Object.entries(store)
     .filter(([date])=>date.startsWith(managementMonth))
@@ -1092,6 +1094,14 @@ function CashRegister(){
   const currentExpensePage = Math.min(expensesPage, expensePageCount - 1);
   const pagedExpenseHistory = expenseHistory.slice(currentExpensePage * expenseRowsPerPage, (currentExpensePage + 1) * expenseRowsPerPage);
 
+  const managementMonthDays = new Date(Number((managementMonth || todayMonthISO()).slice(0,4)), Number((managementMonth || todayMonthISO()).slice(5,7)), 0).getDate();
+  const managementCurrentBalanceCents = managementHistory[0]?.closingRealCents || 0;
+  const managementTotalWithdrawnCents = managementHistory.reduce((sum,item)=>sum + (Number(item.withdrawnCents) || 0),0);
+  const managementActiveDays = managementHistory.length;
+  const expenseMonthTotalCents = expenseHistory.reduce((sum,item)=>sum + (Number(item.amountCents) || 0),0);
+  const expenseValidatedCount = expenseHistory.length;
+  const expenseLastEntry = expenseHistory[0] || null;
+
   useEffect(()=>{
     setManagementPage(0);
   },[managementMonth]);
@@ -1131,36 +1141,85 @@ function CashRegister(){
 
       <div className={active==="exchange" ? "cashMainGrid" : "cashMainGrid cashMainGridSingle"}>
         <div className="cashTableWrap">
-          {active==="exchange" && <>
-            <h2>Monnaie stock</h2>
-            <table className="cashTable">
-              <thead><tr><th>Quantité</th><th>Bill</th><th>Somme</th></tr></thead>
-              <tbody>
-                {CASH_DENOMINATIONS.map(d=>{
-                  const qty=Number(current.quantities[d.cents] || 0);
-                  return <tr key={d.cents}>
-                    <td><input className="qtyInput" type="number" min="0" step="1" value={qty} onChange={e=>updateQuantity(d.cents,e.target.value)}/></td>
-                    <td>{d.label}</td>
-                    <td>{formatDH(qty * d.cents)}</td>
-                  </tr>
-                })}
-              </tbody>
-            </table>
-          </>}
+          {active==="exchange" && <div className="cashExchangeSections">
+            <section className="cashExchangeSection">
+              <div className="cashSectionTitleRow">
+                <div className="cashSectionTitleIcon"><DashIcon name="cash"/></div>
+                <div>
+                  <h2>Billets</h2>
+                  <p>Comptage des billets enregistrés dans la caisse.</p>
+                </div>
+              </div>
+              <table className="cashTable cashCountTable">
+                <thead><tr><th>Dénomination</th><th>Quantité</th><th>Sous-total</th></tr></thead>
+                <tbody>
+                  {billDenominations.map(d=>{
+                    const qty=Number(current.quantities[d.cents] || 0);
+                    return <tr key={d.cents}>
+                      <td>{d.label}</td>
+                      <td><input className="qtyInput" type="number" min="0" step="1" value={qty} onChange={e=>updateQuantity(d.cents,e.target.value)}/></td>
+                      <td>{formatDH(qty * d.cents)}</td>
+                    </tr>
+                  })}
+                </tbody>
+              </table>
+            </section>
+
+            <section className="cashExchangeSection">
+              <div className="cashSectionTitleRow">
+                <div className="cashSectionTitleIcon"><DashIcon name="clock"/></div>
+                <div>
+                  <h2>Pièces</h2>
+                  <p>Comptage des pièces disponibles dans la caisse.</p>
+                </div>
+              </div>
+              <table className="cashTable cashCountTable">
+                <thead><tr><th>Dénomination</th><th>Quantité</th><th>Sous-total</th></tr></thead>
+                <tbody>
+                  {coinDenominations.map(d=>{
+                    const qty=Number(current.quantities[d.cents] || 0);
+                    return <tr key={d.cents}>
+                      <td>{d.label}</td>
+                      <td><input className="qtyInput" type="number" min="0" step="1" value={qty} onChange={e=>updateQuantity(d.cents,e.target.value)}/></td>
+                      <td>{formatDH(qty * d.cents)}</td>
+                    </tr>
+                  })}
+                </tbody>
+              </table>
+            </section>
+          </div>}
 
                     {active==="management" && <>
             <section className="cashManagementSection cashManagementHistorySection">
-              <div className="cashSectionHeading">
-                <h2>Cash register history</h2>
-                <p>Les opérations sont maintenant sur la page Opérations et les résultats restent sur le Dashboard Caisse.</p>
+              <div className="cashSectionHeading cashSectionHeadingHistory">
+                <div>
+                  <h2>Historique de caisse</h2>
+                  <p>Consultez l’historique quotidien de votre caisse. Les montants sont calculés automatiquement à partir des opérations enregistrées.</p>
+                </div>
               </div>
+              <div className="cashInfoBanner"><DashIcon name="doc"/><span>Affichage mensuel de la gestion de caisse avec calcul automatique des indicateurs.</span></div>
               <div className="expenseHistoryTopbar">
-                <div></div>
+                <div className="cashHistoryToolbarTitle">Période</div>
                 <div className="expenseMonthBar">
                   <button type="button" onClick={()=>setManagementMonth(shiftISOMonth(managementMonth,-1))}>‹</button>
                   <div className="expenseMonthValue">{formatMonthLabel(managementMonth)}</div>
                   <button type="button" onClick={()=>setManagementMonth(shiftISOMonth(managementMonth,1))}>›</button>
                   <input type="month" value={managementMonth} onChange={e=>setManagementMonth(e.target.value || todayMonthISO())}/>
+                </div>
+              </div>
+
+              <div className="cashHistoryStats">
+                <div className="cashHistoryStatCard">
+                  <div className="cashHistoryStatIcon"><DashIcon name="cash"/></div>
+                  <div><span>Solde actuel</span><strong>{formatDH(managementCurrentBalanceCents)}</strong><small>{managementMonth}</small></div>
+                </div>
+                <div className="cashHistoryStatCard">
+                  <div className="cashHistoryStatIcon"><DashIcon name="download"/></div>
+                  <div><span>Total retraits (réel)</span><strong>{formatDH(managementTotalWithdrawnCents)}</strong><small>Ce mois</small></div>
+                </div>
+                <div className="cashHistoryStatCard">
+                  <div className="cashHistoryStatIcon"><DashIcon name="clock"/></div>
+                  <div><span>Jours actifs</span><strong>{managementActiveDays} / {managementMonthDays}</strong><small>{managementMonth}</small></div>
                 </div>
               </div>
 
@@ -1190,9 +1249,9 @@ function CashRegister(){
               </div>
 
               <div className="expenseHistoryFooter">
-                <span>Rows per page:</span>
+                <span>Lignes par page :</span>
                 <strong>{managementRowsPerPage}</strong>
-                <span>{managementHistory.length ? `${currentManagementPage * managementRowsPerPage + 1}-${Math.min((currentManagementPage + 1) * managementRowsPerPage, managementHistory.length)} of ${managementHistory.length}` : "0-0 of 0"}</span>
+                <span>{managementHistory.length ? `${currentManagementPage * managementRowsPerPage + 1}-${Math.min((currentManagementPage + 1) * managementRowsPerPage, managementHistory.length)} sur ${managementHistory.length}` : "0-0 sur 0"}</span>
                 <div className="expensePagerButtons">
                   <button type="button" disabled={currentManagementPage===0} onClick={()=>setManagementPage(0)}>«</button>
                   <button type="button" disabled={currentManagementPage===0} onClick={()=>setManagementPage(p=>Math.max(0,p-1))}>‹</button>
@@ -1204,8 +1263,11 @@ function CashRegister(){
           </>}
           {active==="expenses" && <>
             <section className="cashExpensesSection cashExpenseHistorySection">
-              <div className="expenseHistoryTopbar">
-                <h2>Expenses history</h2>
+              <div className="expenseHistoryTopbar cashExpensesTopbar">
+                <div>
+                  <h2>Historique des dépenses</h2>
+                  <p>Suivi des dépenses enregistrées par mois.</p>
+                </div>
                 <div className="expenseMonthBar">
                   <button type="button" onClick={()=>setExpensesMonth(shiftISOMonth(expensesMonth,-1))}>‹</button>
                   <div className="expenseMonthValue">{formatMonthLabel(expensesMonth)}</div>
@@ -1214,8 +1276,10 @@ function CashRegister(){
                 </div>
               </div>
 
-              <table className="cashTable expenseHistoryTable">
-                <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Type</th><th>Employé id</th><th>Facture id</th></tr></thead>
+              <div className="cashExpensesLayout">
+                <div>
+                  <table className="cashTable expenseHistoryTable">
+                <thead><tr><th>Date</th><th>Description</th><th>Montant</th><th>Type</th><th>Employé</th><th>Facture</th></tr></thead>
                 <tbody>
                   {pagedExpenseHistory.length ? pagedExpenseHistory.map(item=><tr key={`${item.date}-${item.id}`}>
                     <td>{item.date}</td>
@@ -1226,12 +1290,31 @@ function CashRegister(){
                     <td>{item.invoiceId || "nan"}</td>
                   </tr>) : <tr><td colSpan="6" className="expenseHistoryEmpty">Aucune dépense enregistrée pour ce mois.</td></tr>}
                 </tbody>
-              </table>
+                  </table>
+                </div>
+                <aside className="cashExpensesAside">
+                  <div className="cashExpenseAsideCard">
+                    <span>Total du mois</span>
+                    <strong>{formatDH(expenseMonthTotalCents)}</strong>
+                    <small>Toutes dépenses confondues</small>
+                  </div>
+                  <div className="cashExpenseAsideCard">
+                    <span>Nombre de dépenses</span>
+                    <strong>{expenseValidatedCount}</strong>
+                    <small>Dépenses enregistrées</small>
+                  </div>
+                  <div className="cashExpenseAsideCard">
+                    <span>Dernière mise à jour</span>
+                    <strong>{expenseLastEntry ? expenseLastEntry.date : "-"}</strong>
+                    <small>{expenseLastEntry?.label || "Aucune dépense"}</small>
+                  </div>
+                </aside>
+              </div>
 
               <div className="expenseHistoryFooter">
-                <span>Rows per page:</span>
+                <span>Lignes par page :</span>
                 <strong>{expenseRowsPerPage}</strong>
-                <span>{expenseHistory.length ? `${currentExpensePage * expenseRowsPerPage + 1}-${Math.min((currentExpensePage + 1) * expenseRowsPerPage, expenseHistory.length)} of ${expenseHistory.length}` : "0-0 of 0"}</span>
+                <span>{expenseHistory.length ? `${currentExpensePage * expenseRowsPerPage + 1}-${Math.min((currentExpensePage + 1) * expenseRowsPerPage, expenseHistory.length)} sur ${expenseHistory.length}` : "0-0 sur 0"}</span>
                 <div className="expensePagerButtons">
                   <button type="button" disabled={currentExpensePage===0} onClick={()=>setExpensesPage(0)}>«</button>
                   <button type="button" disabled={currentExpensePage===0} onClick={()=>setExpensesPage(p=>Math.max(0,p-1))}>‹</button>
@@ -1243,13 +1326,40 @@ function CashRegister(){
           </>}
         </div>
 
-        {active==="exchange" && <aside className="cashTotalCard">
-          <span>Total</span>
-          <b>{formatDH(countedCents)}</b>
-          <div className="cashSummaryList">
-            <div><em>Total attendu</em><strong>{formatDH(expectedCents)}</strong></div>
-            <div><em>Dépenses</em><strong>{formatDH(expensesCents)}</strong></div>
-            <div className={gapCents===0 ? "ok" : "warn"}><em>Écart</em><strong>{formatDH(gapCents)}</strong></div>
+        {active==="exchange" && <aside className="cashTotalCard cashRecapCard">
+          <div className="cashRecapHeader">
+            <span>Récapitulatif</span>
+            <div className="cashRecapIcon"><DashIcon name="cash"/></div>
+          </div>
+          <div className="cashRecapBody">
+            <div className="cashRecapRow">
+              <div>
+                <em>Total caisse</em>
+                <small>Somme des billets et pièces</small>
+              </div>
+              <strong>{formatDH(countedCents)}</strong>
+            </div>
+            <div className="cashRecapRow">
+              <div>
+                <em>Total attendu</em>
+                <small>Montant de référence</small>
+              </div>
+              <strong>{formatDH(expectedCents)}</strong>
+            </div>
+            <div className="cashRecapRow">
+              <div>
+                <em>Dépenses</em>
+                <small>Total des dépenses enregistrées</small>
+              </div>
+              <strong>{formatDH(expensesCents)}</strong>
+            </div>
+            <div className={`cashRecapGapCard ${gapCents>=0 ? "ok" : "warn"}`}>
+              <div>
+                <em>Écart</em>
+                <small>{gapCents>=0 ? "Excédent de caisse" : "Montant à vérifier"}</small>
+              </div>
+              <strong>{formatDH(gapCents)}</strong>
+            </div>
           </div>
         </aside>}
       </div>
