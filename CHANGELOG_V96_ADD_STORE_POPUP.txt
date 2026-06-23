@@ -1,0 +1,14 @@
+V96 - Add Store popup for platform page
+
+- Replaced the always-visible "Créer un client pharmacie" section with a cleaner header and an "Ajouter Store" button.
+- Clicking "Ajouter Store" now opens a popup window/modal.
+- The popup contains the full client/store creation form:
+  - username
+  - password
+  - nom pharmacie
+  - jours
+  - Premium AI Assistant
+  - Peut créer ses propres utilisateurs
+  - pages visibles
+- The popup can be closed with the X button, Annuler button, or clicking outside.
+- On successful creation, the popup closes automatically.

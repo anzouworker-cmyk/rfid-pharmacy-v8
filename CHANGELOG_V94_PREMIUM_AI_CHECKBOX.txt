@@ -1,0 +1,5 @@
+V94 - Premium AI column uses checkbox
+
+- Replaced the Premium AI text/button display in the clients table with a checkbox control.
+- Admin row now shows a checked disabled checkbox.
+- Client rows now use a checkbox to enable/disable Premium AI directly.

@@ -4817,3 +4817,144 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
     grid-template-columns:1fr!important;
   }
 }
+
+/* V95 - keep shortage/surplus indicators clearly left under the intro text */
+.cashOpsHeader{
+  grid-template-columns:minmax(0,1fr) 180px!important;
+  column-gap:22px!important;
+  row-gap:12px!important;
+  align-items:start!important;
+}
+.cashOpsIntro{
+  max-width:none!important;
+  width:100%!important;
+  justify-items:start!important;
+  align-content:start!important;
+}
+.cashOpsHeader .notice{
+  max-width:620px!important;
+}
+.cashOpsIndicators{
+  width:fit-content!important;
+  max-width:100%!important;
+  justify-content:flex-start!important;
+  align-items:stretch!important;
+  margin-top:8px!important;
+}
+.cashOpsIndicator{
+  min-width:238px!important;
+}
+.cashOpsDateBox{
+  width:180px!important;
+  margin-left:auto!important;
+}
+@media(max-width:1100px){
+  .cashOpsHeader{
+    grid-template-columns:1fr!important;
+  }
+  .cashOpsDateBox{
+    width:100%!important;
+    max-width:220px!important;
+    margin-left:0!important;
+  }
+  .cashOpsIndicators{
+    width:100%!important;
+  }
+}
+
+/* V96 - Add Store button + popup window for client creation */
+.platformHeaderBar{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  margin-bottom:10px!important;
+}
+.platformHeaderBar h2{
+  margin:0 0 6px!important;
+  font-size:28px!important;
+  font-weight:900!important;
+  color:#0f172a!important;
+}
+.platformHeaderBar p{
+  margin:0!important;
+  color:#64748b!important;
+  font-size:14px!important;
+}
+.platformAddStoreBtn{
+  min-height:44px!important;
+  padding:0 18px!important;
+  border-radius:12px!important;
+  border:1px solid #bfdbfe!important;
+  background:#eff6ff!important;
+  color:#1d4ed8!important;
+  font-weight:800!important;
+  box-shadow:none!important;
+}
+.platformStoreModal{
+  width:min(860px,92vw)!important;
+  max-height:min(88vh,900px)!important;
+  overflow:auto!important;
+  gap:16px!important;
+  border-radius:22px!important;
+}
+.platformStoreModal h2{
+  margin:0!important;
+  font-size:28px!important;
+  font-weight:900!important;
+  color:#0f172a!important;
+}
+.platformStoreModal p{
+  margin:0!important;
+  color:#64748b!important;
+}
+.platformCreateGrid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+.platformStoreModal input{
+  width:100%!important;
+  margin:0!important;
+}
+.platformCreateChecks{
+  display:grid!important;
+  gap:10px!important;
+}
+.platformStoreModal .pagePermissionBox{
+  margin:0!important;
+}
+.platformStoreModal .pagePermissionGrid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+.platformModalActions{
+  display:flex!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+}
+.platformModalCancel,
+.platformModalCreate{
+  min-height:42px!important;
+  padding:0 16px!important;
+  border-radius:12px!important;
+  font-weight:800!important;
+  box-shadow:none!important;
+}
+.platformModalCancel{
+  border:1px solid #d9e0eb!important;
+  background:#fff!important;
+  color:#334155!important;
+}
+.platformModalCreate{
+  border:1px solid #bfdbfe!important;
+  background:#eff6ff!important;
+  color:#1d4ed8!important;
+}
+@media(max-width:900px){
+  .platformHeaderBar{display:block!important;}
+  .platformAddStoreBtn{margin-top:12px!important;}
+  .platformCreateGrid,
+  .platformStoreModal .pagePermissionGrid{grid-template-columns:1fr!important;}
+  .platformModalActions{justify-content:stretch!important;flex-direction:column!important;}
+}

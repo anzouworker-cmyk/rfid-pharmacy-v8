@@ -1,0 +1,6 @@
+V95 - Cash operation shortage/surplus indicators left aligned
+
+- Adjusted the cash operations header layout.
+- Moved "Montant manquant" and "Montant surplus" to sit more clearly under the intro text on the left side.
+- Reduced the visual effect of being too centered at the top.
+- Kept the cash date box aligned on the right.

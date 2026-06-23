@@ -2411,6 +2411,7 @@ function Platform({auth}){
   const [pagePermissions,setPagePermissions]=useState(()=>defaultUserPages());
   const [canManageUsers,setCanManageUsers]=useState(true);
   const [msg,setMsg]=useState("");
+  const [showCreateModal,setShowCreateModal]=useState(false);
 
   async function load(){
     try{
@@ -2426,6 +2427,7 @@ function Platform({auth}){
     try{
       await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days),ai_premium:aiPremium,page_permissions:pagePermissions,can_manage_users:canManageUsers},auth);
       setUsername(""); setPassword(""); setPharmacy(""); setDays(30); setAiPremium(false); setPagePermissions(defaultUserPages()); setCanManageUsers(true);
+      setShowCreateModal(false);
       setMsg("Client créé.");
       await load();
     }catch(e){
@@ -2506,27 +2508,44 @@ function Platform({auth}){
   }
 
 return <section className="platformPage">
-    
+    <div className="platformHeaderBar">
+      <div>
+        <h2>Stores / clients pharmacie</h2>
+        <p>Gérez les comptes clients, leurs accès et leurs permissions.</p>
+      </div>
+      <button type="button" className="platformAddStoreBtn" onClick={()=>setShowCreateModal(true)}>Ajouter Store</button>
+    </div>
 
-    <div className="card">
-      <h3>Créer un client pharmacie</h3>
-      <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
-      <input placeholder="password" value={password} onChange={e=>setPassword(e.target.value)}/>
-      <input placeholder="nom pharmacie" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/>
-      <input placeholder="jours" value={days} onChange={e=>setDays(e.target.value)}/>
-      <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
-      <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Peut créer ses propres utilisateurs</label>
-      <div className="pagePermissionBox">
-        <strong>Pages visibles pour ce client</strong>
-        <div className="pagePermissionGrid">
-          {APP_USER_PAGES.map(page=><label key={page.id}>
-            <input type="checkbox" checked={pagePermissions.includes(page.id)} onChange={()=>toggleCreatePage(page.id)}/>
-            <span>{page.label}</span>
-          </label>)}
+    {showCreateModal && <div className="modalOverlay" onClick={()=>setShowCreateModal(false)}>
+      <div className="scanModal platformStoreModal" onClick={e=>e.stopPropagation()}>
+        <button type="button" className="modalClose" onClick={()=>setShowCreateModal(false)}>×</button>
+        <h2>Ajouter Store</h2>
+        <p>Créer un client pharmacie avec ses accès et permissions.</p>
+        <div className="platformCreateGrid">
+          <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
+          <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
+          <input placeholder="nom pharmacie" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/>
+          <input placeholder="jours" value={days} onChange={e=>setDays(e.target.value)}/>
+        </div>
+        <div className="platformCreateChecks">
+          <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
+          <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Peut créer ses propres utilisateurs</label>
+        </div>
+        <div className="pagePermissionBox">
+          <strong>Pages visibles pour ce client</strong>
+          <div className="pagePermissionGrid">
+            {APP_USER_PAGES.map(page=><label key={page.id}>
+              <input type="checkbox" checked={pagePermissions.includes(page.id)} onChange={()=>toggleCreatePage(page.id)}/>
+              <span>{page.label}</span>
+            </label>)}
+          </div>
+        </div>
+        <div className="platformModalActions">
+          <button type="button" className="platformModalCancel" onClick={()=>setShowCreateModal(false)}>Annuler</button>
+          <button type="button" className="platformModalCreate" onClick={create}>Créer client</button>
         </div>
       </div>
-      <button onClick={create}>Créer client</button>
-    </div>
+    </div>}
 
     <p className={msg.includes("Erreur") || msg.includes("not") ? "err" : "success"}>{msg}</p>
 
@@ -2560,7 +2579,10 @@ return <section className="platformPage">
               {!isAdmin && <><br/><button onClick={()=>changeExpiry(c.username, expDate)}>Changer date</button></>}
             </td>
             <td><button onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
-            <td>{isAdmin ? "Oui" : <button onClick={()=>toggleAiPremium(c.username,!c.ai_premium)}>{c.ai_premium ? "AI activé" : "AI désactivé"}</button>}</td>
+            <td>{isAdmin
+              ? <label className="checkLine compact"><input type="checkbox" checked disabled/> Activé</label>
+              : <label className="checkLine compact"><input type="checkbox" checked={!!c.ai_premium} onChange={e=>toggleAiPremium(c.username,e.target.checked)}/> Activé</label>
+            }</td>
             <td>{isAdmin ? "Toutes" : <div className="pagePermissionMiniGrid">{APP_USER_PAGES.map(page=>{
               const currentPages=cleanPageList(c.page_permissions || []);
               const checked=currentPages.includes(page.id);
