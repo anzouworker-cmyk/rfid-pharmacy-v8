@@ -1,0 +1,6 @@
+V109 - User creation popup like admin account
+
+- Removed the always-visible "Créer un utilisateur pour ce compte" form.
+- Added a top header with "Ajouter utilisateur" button.
+- Added a popup/modal window to create users, matching the admin store creation pattern.
+- Kept the existing users table, page permissions, password change, activation, and delete actions.

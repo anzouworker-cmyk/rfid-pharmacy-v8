@@ -5742,3 +5742,39 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .expenseHistoryTopbar{flex-direction:column!important;align-items:stretch!important;}
   .expenseMonthBar{flex-wrap:wrap!important;}
 }
+
+
+/* V108 - remove management KPI cards */
+.cashManagementHistorySection .cashWideTableWrap{
+  margin-top:0!important;
+}
+
+
+/* V109 - user creation moved to popup like admin account */
+.myUsersPage .userAccessCard{
+  display:none!important;
+}
+.userCreateModal{
+  width:min(820px,92vw)!important;
+}
+.userCreateModal .platformCreateGrid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.userCreateModal .pagePermissionGrid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.userCreateModal input:not([type="checkbox"]){
+  width:100%!important;
+}
+.myUsersPage .platformHeaderBar{
+  margin-bottom:16px!important;
+}
+.myUsersPage table{
+  width:100%!important;
+}
+@media(max-width:900px){
+  .userCreateModal .platformCreateGrid,
+  .userCreateModal .pagePermissionGrid{
+    grid-template-columns:1fr!important;
+  }
+}
