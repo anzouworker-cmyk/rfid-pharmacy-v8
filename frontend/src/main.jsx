@@ -557,18 +557,18 @@ function Operations({me}){
   }
 
   const cashOperationCards = [
-    {key:"counted", title:"C. fermeture (compté)", value:cashCountedCents, description:"Saisir le comptage réel de fermeture avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
-    {key:"totalDailySalesCents", title:"TOTAL DE VENTE PAR JOUR", value:totalDailySalesCents, description:"Saisir le montant total des ventes du jour.", type:"=", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"totalDailySalesCents", title:"Total de vente par jour", value:totalDailySalesCents, description:"Saisir le montant total des ventes du jour.", type:"=", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"creditSalesCents", title:"Tot. vente type crédit", value:creditSalesCents, description:"Saisir le total des ventes crédit.", type:"-", editable:true, tone:"danger", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"atmSalesCents", title:"Tot. vente type ATM", value:atmSalesCents, description:"Saisir le total des ventes ATM.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"salesCashCents", title:"Tot. vente en espèce", value:salesCashCalculatedCents, description:"Calcul automatique : total vente par jour - crédit - ATM.", type:"=", editable:false, tone:"indigo", cta:"Automatique", valueLabel:"Valeur calculée"},
+    {key:"depositsCents", title:"Dépôts / ajouts", value:depositsCents, description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"creditSettlementCents", title:"Règlement de crédit", value:creditSettlementCents, description:"Saisir le règlement de crédit.", type:"+", editable:true, tone:"indigo", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"},
     {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 3000 DH, minimum 0.", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"withdrawnCents", title:"Retiré (réel)", value:withdrawnCents, description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
-    {key:"depositsCents", title:"Dépôts / ajouts", value:depositsCents, description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"closingRealCents", title:"Nouvelle C. fermeture", value:newCashBalanceCents, description:"Calcul Excel : C. fermeture (compté) - Retiré (réel).", type:"=", editable:false, tone:"blue", cta:"Automatique", valueLabel:"Valeur calculée"},
-    {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul Excel : max(0, Nouvelle C. fermeture de hier + Dépôt/ajout + Tot. vente en espèce + Règlement crédit - Dépenses).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
-    {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"}
+    {key:"counted", title:"C. fermeture (compté)", value:cashCountedCents, description:"Saisir le comptage réel de fermeture avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
+    {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul Excel : max(0, Nouvelle C. fermeture de hier + Dépôt/ajout + Tot. vente en espèce + Règlement crédit - Dépenses).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"}
   ];
   return <section className="operationsPage">
     <h1>Opérations</h1>
@@ -646,7 +646,7 @@ function Operations({me}){
         {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.cardClass || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.isExpense ? openExpenseModal() : (card.editable ? setCashOpModal(card) : null)}>
           <div className="opIcon"><DashIcon name={card.icon || "cash"}/></div>
           <h3>{card.title}</h3>
-          <small className="cashOpValueLabel">{card.valueLabel || "Valeur"}</small><strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
+          <strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
           <span>{card.cta}</span>
         </button>)}
       </div>

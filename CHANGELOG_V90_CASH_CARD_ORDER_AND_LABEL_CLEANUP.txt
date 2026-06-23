@@ -1,0 +1,6 @@
+V90 - Cash operation cards order and label cleanup
+
+- Removed the small explanatory labels inside the cash operation cards (e.g. "Valeur comptée", "Valeur entrée", "Valeur calculée").
+- Standardized the title style of "Total de vente par jour" so it matches the other cards.
+- Reorganized the card order to match the requested layout in the screenshot.
+- Kept action buttons and values while simplifying the card content.

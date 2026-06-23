@@ -4482,3 +4482,17 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
     width:100%!important;
   }
 }
+
+/* V90 - cash operation cards cleanup and order polish */
+.cashOperationCard h3{
+  text-transform:none!important;
+  letter-spacing:0!important;
+  font-size:15px!important;
+  font-weight:700!important;
+  line-height:1.25!important;
+  min-height:40px!important;
+  margin-bottom:10px!important;
+}
+.cashOperationCard .cashOpCardAmount{
+  margin-top:4px!important;
+}
