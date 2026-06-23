@@ -1,0 +1,6 @@
+V97 - Add Store popup checkbox layout fix
+
+- Fixed checkbox alignment inside the Add Store popup.
+- Prevented text inputs styling from overriding checkbox dimensions.
+- Reorganized Premium AI, user management, and page permission checkboxes into clean card-like rows.
+- Kept the popup window behavior introduced in V96.

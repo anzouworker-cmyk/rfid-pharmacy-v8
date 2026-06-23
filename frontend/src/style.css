@@ -4958,3 +4958,48 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .platformStoreModal .pagePermissionGrid{grid-template-columns:1fr!important;}
   .platformModalActions{justify-content:stretch!important;flex-direction:column!important;}
 }
+
+/* V97 - fix Add Store modal checkbox alignment */
+.platformStoreModal input:not([type="checkbox"]){
+  width:100%!important;
+  margin:0!important;
+}
+.platformStoreModal input[type="checkbox"],
+.platformCreateChecks input[type="checkbox"],
+.platformStoreModal .pagePermissionBox input[type="checkbox"]{
+  width:16px!important;
+  height:16px!important;
+  min-width:16px!important;
+  min-height:16px!important;
+  flex:0 0 16px!important;
+  margin:0!important;
+  padding:0!important;
+}
+.platformCreateChecks{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:center!important;
+  gap:12px!important;
+}
+.platformCreateChecks .checkLine,
+.platformStoreModal .pagePermissionGrid label{
+  justify-content:flex-start!important;
+  text-align:left!important;
+  padding:10px 12px!important;
+  border:1px solid #e5edf7!important;
+  border-radius:12px!important;
+  background:#fff!important;
+}
+.platformStoreModal .pagePermissionGrid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+.platformStoreModal .pagePermissionGrid label span,
+.platformCreateChecks .checkLine{
+  line-height:1.25!important;
+}
+@media(max-width:900px){
+  .platformCreateChecks,
+  .platformStoreModal .pagePermissionGrid{
+    grid-template-columns:1fr!important;
+  }
+}
