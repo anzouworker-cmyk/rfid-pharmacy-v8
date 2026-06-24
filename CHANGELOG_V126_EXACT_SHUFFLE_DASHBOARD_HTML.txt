@@ -1,0 +1,1 @@
+V126: Dashboard updated using the exact Shuffle HTML preview as source reference. Only dashboard rendering changed; homepage, login, operations, caisse, inventory and API logic kept.

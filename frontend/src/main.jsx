@@ -2945,44 +2945,45 @@ return <section className="platformPage">
 
 
 
-function ShuffleDashboardIcon({name, className="h-5 w-5"}){
-  if(name==="brand") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 7.25 12 3l7.5 4.25v9.5L12 21l-7.5-4.25v-9.5Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M4.8 7.4 12 11.5l7.2-4.1M12 21v-9.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>;
-  if(name==="dashboard") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h4A1.5 1.5 0 0 1 11 5.5v4A1.5 1.5 0 0 1 9.5 11h-4A1.5 1.5 0 0 1 4 9.5v-4ZM13 5.5A1.5 1.5 0 0 1 14.5 4h4A1.5 1.5 0 0 1 20 5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4A1.5 1.5 0 0 1 13 9.5v-4ZM4 14.5A1.5 1.5 0 0 1 5.5 13h4a1.5 1.5 0 0 1 1.5 1.5v4A1.5 1.5 0 0 1 9.5 20h-4A1.5 1.5 0 0 1 4 18.5v-4ZM13 14.5a1.5 1.5 0 0 1 1.5-1.5h4a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a1.5 1.5 0 0 1-1.5-1.5v-4Z" stroke="currentColor" strokeWidth="1.5"/></svg>;
-  if(name==="box") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="M8.5 9.25 12 11l3.5-1.75" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>;
-  if(name==="tag") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4h8l4 4v8l-4 4H8l-4-4V8l4-4Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="m9 12 2 2 4-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
-  if(name==="rfid") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9.5c4.7-4 11.3-4 16 0M7.5 13c2.7-2.2 6.3-2.2 9 0M10.5 16.5c.9-.7 2.1-.7 3 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>;
-  if(name==="warning") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.75 21 19H3L12 4.75Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/></svg>;
-  if(name==="doc") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3.75h7l3 3v13.5H7V3.75Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="M10 14h4M10 10h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>;
-  if(name==="clock") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 7v5l3 2M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>;
-  if(name==="spark") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v3M12 17v3M5.6 6.6l2.1 2.1M16.3 15.3l2.1 2.1M4 12h3M17 12h3M5.6 17.4l2.1-2.1M16.3 8.7l2.1-2.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>;
-  if(name==="arrow") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
-  if(name==="logout") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 6H6.5A1.5 1.5 0 0 0 5 7.5v9A1.5 1.5 0 0 0 6.5 18H10M14 8l4 4-4 4M18 12H9" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>;
-  return <ShuffleDashboardIcon name="dashboard" className={className}/>;
+
+const SHUFFLE_DASHBOARD_HTML = "<nav class=\"bg-slate-950 px-4 py-4 text-white sm:px-6 lg:px-8\" data-category=\"custom-components\" data-component-id=\"1270188\" data-custom-component-id=\"1270194\" data-section-id=\"1\" data-share=\"custom-1270194\">\n<div class=\"mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between\">\n<div class=\"flex items-center justify-between gap-4\">\n<a class=\"group inline-flex items-center gap-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-300\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n<span class=\"flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 shadow-lg shadow-indigo-950/30 transition-transform duration-200 group-hover:-rotate-3 group-hover:scale-105\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5 text-white\" data-config-id=\"svg-inline1\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M4.5 7.25 12 3l7.5 4.25v9.5L12 21l-7.5-4.25v-9.5Z\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"1.7\"></path>\n<path d=\"M4.8 7.4 12 11.5l7.2-4.1M12 21v-9.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.7\"></path>\n</svg>\n</span>\n<span class=\"font-heading text-base font-semibold tracking-tight\" data-config-id=\"text6\">Smart Inventory</span>\n</a>\n<button aria-label=\"Ouvrir le menu\" class=\"inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-200 transition hover:bg-white/10 active:scale-95 lg:hidden\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline2\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M5 7h14M5 12h14M5 17h14\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"1.8\"></path>\n</svg>\n</button>\n</div>\n<div class=\"flex gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-white/5 p-2 text-sm text-slate-300\">\n<a class=\"inline-flex shrink-0 items-center gap-2 rounded-2xl bg-white px-4 py-2 font-medium text-slate-950 shadow-sm\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n<svg aria-hidden=\"true\" class=\"h-4 w-4 text-indigo-600\" data-config-id=\"svg-inline3\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M4 5.5A1.5 1.5 0 0 1 5.5 4h4A1.5 1.5 0 0 1 11 5.5v4A1.5 1.5 0 0 1 9.5 11h-4A1.5 1.5 0 0 1 4 9.5v-4ZM13 5.5A1.5 1.5 0 0 1 14.5 4h4A1.5 1.5 0 0 1 20 5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4A1.5 1.5 0 0 1 13 9.5v-4ZM4 14.5A1.5 1.5 0 0 1 5.5 13h4a1.5 1.5 0 0 1 1.5 1.5v4A1.5 1.5 0 0 1 9.5 20h-4A1.5 1.5 0 0 1 4 18.5v-4ZM13 14.5a1.5 1.5 0 0 1 1.5-1.5h4a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a1.5 1.5 0 0 1-1.5-1.5v-4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path>\n</svg>\n              Dashboard\n            </a>\n<a class=\"inline-flex shrink-0 items-center rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white\" data-config-id=\"text13\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Op\u00e9rations</a>\n<a class=\"inline-flex shrink-0 items-center rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white\" data-config-id=\"text14\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Associations</a>\n<a class=\"inline-flex shrink-0 items-center rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white\" data-config-id=\"text15\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Inventaire</a>\n<a class=\"inline-flex shrink-0 items-center rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white\" data-config-id=\"text16\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Caisse</a>\n<a class=\"inline-flex shrink-0 items-center rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white\" data-config-id=\"text17\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Assistant IA</a>\n<a class=\"inline-flex shrink-0 items-center rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white\" data-config-id=\"text18\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Utilisateur</a>\n</div>\n<div class=\"flex items-center justify-between gap-3 rounded-3xl border border-white/10 bg-white/5 px-3 py-2 lg:justify-end\">\n<div class=\"flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 font-heading text-sm font-semibold shadow-lg shadow-indigo-950/30\">AD</div>\n<div class=\"min-w-0\">\n<p class=\"truncate text-sm font-semibold text-white\" data-config-id=\"text19\">Pharmacie D\u00e9mo</p>\n<p class=\"text-xs text-slate-400\" data-config-id=\"text20\">Utilisateur</p>\n</div>\n</div>\n</div>\n</nav>\n<section class=\"relative overflow-hidden bg-slate-100 px-4 py-8 sm:px-6 lg:px-8\" data-category=\"custom-components\" data-component-id=\"1270190\" data-custom-component-id=\"1270196\" data-section-id=\"2\" data-share=\"custom-1270196\">\n<div class=\"pointer-events-none absolute left-0 top-0 h-80 w-80 rounded-full bg-indigo-200/50 blur-3xl\"></div>\n<div class=\"pointer-events-none absolute bottom-12 right-0 h-96 w-96 rounded-full bg-emerald-100/70 blur-3xl\"></div>\n<div class=\"relative mx-auto grid max-w-7xl gap-5 lg:grid-cols-12\">\n<div class=\"lg:col-span-12\">\n<div class=\"rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-xl shadow-slate-200/70 backdrop-blur md:p-6\">\n<div class=\"flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between\">\n<div>\n<div class=\"mb-4 flex flex-wrap items-center gap-2 text-xs text-slate-500\">\n<span class=\"rounded-full bg-slate-950 px-3 py-1.5 font-medium text-white\" data-config-id=\"text46\">app.smart-inventory.io/dashboard</span>\n<span class=\"rounded-full border border-slate-200 bg-white px-3 py-1.5\" data-config-id=\"text47\">Mode stable</span>\n<span class=\"rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700\" data-config-id=\"text48\">Synchronisation active</span>\n</div>\n<h1 class=\"font-heading text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl\">\n<span data-config-id=\"text49\">Dashboard pharmacie</span>\n<span class=\"block text-slate-500\" data-config-id=\"text50\">suivi RFID en temps r\u00e9el.</span>\n</h1>\n<p class=\"mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base\" data-config-id=\"text66\">Suivi en temps r\u00e9el de la couverture et de l'activit\u00e9 de votre pharmacie, avec une lecture claire des produits tagu\u00e9s, des transactions et des alertes \u00e0 traiter.</p>\n</div>\n<div class=\"flex flex-col gap-3 sm:flex-row\">\n<a class=\"inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:scale-95\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n                    Acc\u00e9der \u00e0 l\u2019avancement\n                    <svg aria-hidden=\"true\" class=\"h-4 w-4\" data-config-id=\"svg-inline1\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M5 12h14m-6-6 6 6-6 6\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\"></path>\n</svg>\n</a>\n<a class=\"inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-slate-300 active:scale-95\" data-config-id=\"text64\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Exporter</a>\n</div>\n</div>\n</div>\n</div>\n<div class=\"lg:col-span-3\">\n<div class=\"group h-full rounded-[1.75rem] border border-white/70 bg-white/85 p-5 shadow-lg shadow-slate-200/60 transition hover:-translate-y-1 hover:shadow-xl\">\n<div class=\"mb-6 flex items-center justify-between\">\n<span class=\"flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-100\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline2\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"1.6\"></path>\n<path d=\"M8.5 9.25 12 11l3.5-1.75\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"1.6\"></path>\n</svg>\n</span>\n<span class=\"rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500\" data-config-id=\"text51\">Stock</span>\n</div>\n<p class=\"font-heading text-4xl font-semibold tracking-tight text-slate-950\" data-config-id=\"text67\">0</p>\n<p class=\"mt-1 text-sm font-semibold text-slate-800\" data-config-id=\"text68\">Produits enregistr\u00e9s</p>\n<p class=\"mt-1 text-xs text-slate-500\" data-config-id=\"text69\">Aucun catalogue import\u00e9</p>\n</div>\n</div>\n<div class=\"lg:col-span-3\">\n<div class=\"group h-full rounded-[1.75rem] border border-white/70 bg-white/85 p-5 shadow-lg shadow-slate-200/60 transition hover:-translate-y-1 hover:shadow-xl\">\n<div class=\"mb-6 flex items-center justify-between\">\n<span class=\"flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline3\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M8 4h8l4 4v8l-4 4H8l-4-4V8l4-4Z\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"1.6\"></path>\n<path d=\"m9 12 2 2 4-5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\"></path>\n</svg>\n</span>\n<span class=\"rounded-full bg-emerald-50 px-2.5 py-1 text-xs text-emerald-700\" data-config-id=\"text52\">RFID</span>\n</div>\n<p class=\"font-heading text-4xl font-semibold tracking-tight text-slate-950\" data-config-id=\"text70\">0</p>\n<p class=\"mt-1 text-sm font-semibold text-slate-800\" data-config-id=\"text71\">Produits tagu\u00e9s</p>\n<p class=\"mt-1 text-xs text-slate-500\" data-config-id=\"text72\">Aucun tag d\u00e9tect\u00e9</p>\n</div>\n</div>\n<div class=\"lg:col-span-3\">\n<div class=\"group h-full rounded-[1.75rem] border border-white/70 bg-white/85 p-5 shadow-lg shadow-slate-200/60 transition hover:-translate-y-1 hover:shadow-xl\">\n<div class=\"mb-6 flex items-center justify-between\">\n<span class=\"flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline4\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M4 9.5c4.7-4 11.3-4 16 0M7.5 13c2.7-2.2 6.3-2.2 9 0M10.5 16.5c.9-.7 2.1-.7 3 0\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"1.8\"></path>\n</svg>\n</span>\n<span class=\"rounded-full bg-indigo-50 px-2.5 py-1 text-xs text-indigo-700\" data-config-id=\"text53\">Caisse</span>\n</div>\n<p class=\"font-heading text-4xl font-semibold tracking-tight text-slate-950\" data-config-id=\"text73\">0</p>\n<p class=\"mt-1 text-sm font-semibold text-slate-800\" data-config-id=\"text74\">Transactions</p>\n<p class=\"mt-1 text-xs text-slate-500\" data-config-id=\"text75\">Aucune transaction</p>\n</div>\n</div>\n<div class=\"lg:col-span-3\">\n<div class=\"group h-full rounded-[1.75rem] border border-white/70 bg-white/85 p-5 shadow-lg shadow-slate-200/60 transition hover:-translate-y-1 hover:shadow-xl\">\n<div class=\"mb-6 flex items-center justify-between\">\n<span class=\"flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-100\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline5\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M12 4.75 21 19H3L12 4.75Z\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"1.6\"></path>\n<path d=\"M12 10v4M12 17h.01\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"1.9\"></path>\n</svg>\n</span>\n<span class=\"rounded-full bg-amber-50 px-2.5 py-1 text-xs text-amber-700\" data-config-id=\"text54\">\u00c0 traiter</span>\n</div>\n<p class=\"font-heading text-4xl font-semibold tracking-tight text-slate-950\" data-config-id=\"text76\">0</p>\n<p class=\"mt-1 text-sm font-semibold text-slate-800\" data-config-id=\"text77\">Produits sans tag</p>\n<p class=\"mt-1 text-xs text-slate-500\" data-config-id=\"text78\">Synchronis\u00e9s</p>\n</div>\n</div>\n<div class=\"lg:col-span-7\">\n<div class=\"h-full overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-200/70\">\n<div class=\"flex items-start justify-between gap-4\">\n<div>\n<p class=\"text-sm font-semibold text-slate-950\" data-config-id=\"text79\">Taux de couverture</p>\n<p class=\"mt-1 text-sm text-slate-500\" data-config-id=\"text80\">Mesure la part des produits d\u00e9j\u00e0 reli\u00e9s \u00e0 un tag RFID.</p>\n</div>\n<span class=\"rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-100\" data-config-id=\"text55\">\u00c0 am\u00e9liorer</span>\n</div>\n<div class=\"mt-8 grid gap-8 md:grid-cols-5 md:items-center\">\n<div class=\"md:col-span-2\">\n<div class=\"mx-auto flex h-44 w-44 items-center justify-center rounded-full bg-slate-100 p-3 shadow-inner shadow-slate-300/70\">\n<div class=\"flex h-full w-full items-center justify-center rounded-full bg-white shadow-sm\">\n<span class=\"font-heading text-5xl font-semibold tracking-tight text-slate-950\" data-config-id=\"text56\">0%</span>\n</div>\n</div>\n</div>\n<div class=\"md:col-span-3\">\n<h2 class=\"font-heading text-2xl font-semibold tracking-tight text-slate-950\" data-config-id=\"text14\">Votre couverture doit \u00eatre am\u00e9lior\u00e9e.</h2>\n<p class=\"mt-4 text-sm leading-6 text-slate-600\" data-config-id=\"text81\">Vous avez \u00e9tiquet\u00e9 0% de vos produits en pharmacie. Commencez ou continuez l\u2019\u00e9tiquetage pour am\u00e9liorer votre suivi d\u2019inventaire et fiabiliser les sorties caisse.</p>\n<div class=\"mt-6 flex flex-wrap gap-3\">\n<a class=\"inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:scale-95\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n                      Voir l\u2019avancement\n                      <svg aria-hidden=\"true\" class=\"h-4 w-4\" data-config-id=\"svg-inline6\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M5 12h14m-6-6 6 6-6 6\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\"></path>\n</svg>\n</a>\n<a class=\"inline-flex items-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-slate-300 active:scale-95\" data-config-id=\"text65\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Lancer un scan</a>\n</div>\n</div>\n</div>\n</div>\n</div>\n<div class=\"lg:col-span-5\">\n<div class=\"relative h-full min-h-80 overflow-hidden rounded-[2rem] border border-emerald-100 bg-emerald-950 p-6 text-white shadow-xl shadow-emerald-950/10\">\n<div class=\"absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(110,231,183,0.28),transparent_32%),radial-gradient(circle_at_80%_70%,rgba(99,102,241,0.22),transparent_34%)]\"></div>\n<div class=\"absolute inset-x-6 bottom-6 top-20 rounded-[1.5rem] border border-white/10 bg-white/10 backdrop-blur\"></div>\n<div class=\"relative flex items-start justify-between gap-4\">\n<div>\n<p class=\"text-xs uppercase tracking-[0.25em] text-emerald-200\" data-config-id=\"text82\">Publicit\u00e9</p>\n<h2 class=\"mt-3 font-heading text-2xl font-semibold tracking-tight\" data-config-id=\"text15\">Espace partenaire officine</h2>\n</div>\n<div class=\"flex gap-1.5\">\n<span class=\"h-2 w-2 rounded-full bg-white/40\"></span>\n<span class=\"h-2 w-2 rounded-full bg-emerald-300\"></span>\n</div>\n</div>\n<div class=\"relative mt-16 max-w-sm\">\n<p class=\"text-sm leading-6 text-emerald-50/85\" data-config-id=\"text83\">Un emplacement visuel sobre pour les annonces r\u00e9seau, les rappels de campagne ou les communications internes de la pharmacie.</p>\n</div>\n</div>\n</div>\n<div class=\"lg:col-span-8\">\n<div class=\"rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-200/70\">\n<div class=\"flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between\">\n<div>\n<p class=\"text-sm font-semibold text-slate-950\" data-config-id=\"text84\">Rapports et exports</p>\n<p class=\"mt-1 text-sm text-slate-500\" data-config-id=\"text85\">T\u00e9l\u00e9chargez les \u00e9tats utiles au suivi quotidien.</p>\n</div>\n<span class=\"text-xs text-slate-400\" data-config-id=\"text57\">Exports s\u00e9curis\u00e9s</span>\n</div>\n<div class=\"mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4\">\n<a class=\"group rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-slate-200 active:scale-95\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n<span class=\"flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-100\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline7\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M7 3.75h7l3 3v13.5H7V3.75Z\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"1.6\"></path>\n<path d=\"M10 14h4M10 10h2\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"1.6\"></path>\n</svg>\n</span>\n<p class=\"mt-4 text-sm font-semibold text-slate-900\" data-config-id=\"text86\">Taux de couverture</p>\n<p class=\"mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 group-hover:text-indigo-600\">T\u00e9l\u00e9charger <span data-config-id=\"text58\">\u2193</span></p>\n</a>\n<a class=\"group rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-slate-200 active:scale-95\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n<span class=\"flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline8\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M8 4h8l4 4v8l-4 4H8l-4-4V8l4-4Z\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"1.6\"></path>\n<path d=\"m9 12 2 2 4-5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\"></path>\n</svg>\n</span>\n<p class=\"mt-4 text-sm font-semibold text-slate-900\" data-config-id=\"text87\">Produits avec tag</p>\n<p class=\"mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 group-hover:text-indigo-600\">T\u00e9l\u00e9charger <span data-config-id=\"text59\">\u2193</span></p>\n</a>\n<a class=\"group rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-slate-200 active:scale-95\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n<span class=\"flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-100\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline9\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M12 4.75 21 19H3L12 4.75Z\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"1.6\"></path>\n<path d=\"M12 10v4M12 17h.01\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"1.9\"></path>\n</svg>\n</span>\n<p class=\"mt-4 text-sm font-semibold text-slate-900\" data-config-id=\"text88\">Produits sans tag</p>\n<p class=\"mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 group-hover:text-indigo-600\">T\u00e9l\u00e9charger <span data-config-id=\"text60\">\u2193</span></p>\n</a>\n<a class=\"group rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-slate-200 active:scale-95\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n<span class=\"flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-600 ring-1 ring-violet-100\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline10\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M12 7v5l3 2M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.6\"></path>\n</svg>\n</span>\n<p class=\"mt-4 text-sm font-semibold text-slate-900\" data-config-id=\"text89\">Historique scans</p>\n<p class=\"mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 group-hover:text-indigo-600\">T\u00e9l\u00e9charger <span data-config-id=\"text61\">\u2193</span></p>\n</a>\n</div>\n</div>\n</div>\n<div class=\"lg:col-span-4\">\n<div class=\"h-full rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-200/70\">\n<div class=\"flex items-start justify-between gap-4\">\n<div>\n<p class=\"text-sm font-semibold text-slate-950\" data-config-id=\"text90\">Alertes prioritaires</p>\n<p class=\"mt-1 text-sm text-slate-500\" data-config-id=\"text91\">Points \u00e0 surveiller avant la prochaine session.</p>\n</div>\n<span class=\"flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-500\">\n<svg aria-hidden=\"true\" class=\"h-4 w-4\" data-config-id=\"svg-inline11\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M12 4v3M12 17v3M5.6 6.6l2.1 2.1M16.3 15.3l2.1 2.1M4 12h3M17 12h3M5.6 17.4l2.1-2.1M16.3 8.7l2.1-2.1\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"1.6\"></path>\n</svg>\n</span>\n</div>\n<div class=\"mt-6 space-y-3\">\n<div class=\"rounded-[1.5rem] border border-blue-100 bg-blue-50/70 p-4\">\n<div class=\"flex gap-3\">\n<span class=\"mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-600 ring-1 ring-blue-100\">\n<svg aria-hidden=\"true\" class=\"h-4 w-4\" data-config-id=\"svg-inline12\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M4 9.5c4.7-4 11.3-4 16 0M7.5 13c2.7-2.2 6.3-2.2 9 0M10.5 16.5c.9-.7 2.1-.7 3 0\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"1.8\"></path>\n</svg>\n</span>\n<div>\n<p class=\"text-sm font-semibold text-slate-950\" data-config-id=\"text92\">0 scan d\u00e9tect\u00e9</p>\n<p class=\"mt-1 text-xs leading-5 text-slate-600\" data-config-id=\"text93\">Importez les CSV des instruments d\u00e9tect\u00e9s pour calculer le stock r\u00e9el.</p>\n</div>\n</div>\n</div>\n<div class=\"rounded-[1.5rem] border border-amber-100 bg-amber-50/80 p-4\">\n<div class=\"flex gap-3\">\n<span class=\"mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-amber-600 ring-1 ring-amber-100\">\n<svg aria-hidden=\"true\" class=\"h-4 w-4\" data-config-id=\"svg-inline13\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M12 4.75 21 19H3L12 4.75Z\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"1.6\"></path>\n<path d=\"M12 10v4M12 17h.01\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"1.9\"></path>\n</svg>\n</span>\n<div>\n<p class=\"text-sm font-semibold text-slate-950\" data-config-id=\"text94\">Aucune association d\u00e9tect\u00e9e pour ces produits.</p>\n<p class=\"mt-1 text-xs leading-5 text-slate-600\" data-config-id=\"text95\">Ajoutez un rapport pour am\u00e9liorer votre suivi.</p>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</section>\n<footer class=\"bg-slate-950 px-4 py-8 text-slate-300 sm:px-6 lg:px-8\" data-category=\"custom-components\" data-component-id=\"1270192\" data-custom-component-id=\"1270198\" data-section-id=\"3\" data-share=\"custom-1270198\">\n<div class=\"mx-auto grid max-w-7xl gap-8 lg:grid-cols-12 lg:items-center\">\n<div class=\"lg:col-span-4\">\n<a class=\"inline-flex items-center gap-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-300\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n<span class=\"flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 text-white\">\n<svg aria-hidden=\"true\" class=\"h-5 w-5\" data-config-id=\"svg-inline1\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M4.5 7.25 12 3l7.5 4.25v9.5L12 21l-7.5-4.25v-9.5Z\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"1.7\"></path>\n<path d=\"M4.8 7.4 12 11.5l7.2-4.1M12 21v-9.5\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.7\"></path>\n</svg>\n</span>\n<span class=\"font-heading text-base font-semibold tracking-tight text-white\" data-config-id=\"text4\">Smart Inventory</span>\n</a>\n<p class=\"mt-3 text-sm text-slate-400\" data-config-id=\"text19\">\u00a9 2026 Smart Inventory. Tous droits r\u00e9serv\u00e9s.</p>\n</div>\n<div class=\"lg:col-span-6\">\n<div class=\"flex flex-wrap gap-x-5 gap-y-3 text-sm\">\n<a class=\"transition hover:text-white\" data-config-id=\"text12\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Dashboard</a>\n<a class=\"transition hover:text-white\" data-config-id=\"text13\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Op\u00e9rations</a>\n<a class=\"transition hover:text-white\" data-config-id=\"text14\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Associations</a>\n<a class=\"transition hover:text-white\" data-config-id=\"text15\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Inventaire</a>\n<a class=\"transition hover:text-white\" data-config-id=\"text16\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Caisse</a>\n<a class=\"transition hover:text-white\" data-config-id=\"text17\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Assistant IA</a>\n<a class=\"transition hover:text-white\" data-config-id=\"text18\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">Utilisateur</a>\n</div>\n</div>\n<div class=\"lg:col-span-2 lg:text-right\">\n<a class=\"inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-slate-100 active:scale-95\" href=\"https://static.shuffle.dev/components/preview/8caa6f6e-6b8f-4a63-9a8e-3fde0b47ffb9/assets/public/#\">\n              Log out\n              <svg aria-hidden=\"true\" class=\"h-4 w-4\" data-config-id=\"svg-inline2\" fill=\"none\" viewbox=\"0 0 24 24\">\n<path d=\"M10 6H6.5A1.5 1.5 0 0 0 5 7.5v9A1.5 1.5 0 0 0 6.5 18H10M14 8l4 4-4 4M18 12H9\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.7\"></path>\n</svg>\n</a>\n</div>\n</div>\n</footer>";
+
+function escapeDashboardHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch] || ch));
 }
 
-function useShuffleDashboardCss(){
+function useExactShuffleDashboardCss(){
   useEffect(()=>{
-    const id="shuffle-dashboard-css";
-    let link=document.getElementById(id);
-    if(!link){
-      link=document.createElement("link");
-      link.id=id;
+    const cssId="exact-shuffle-dashboard-css";
+    if(!document.getElementById(cssId)){
+      const link=document.createElement("link");
+      link.id=cssId;
       link.rel="stylesheet";
       link.href="/shuffle-dashboard.css";
       document.head.appendChild(link);
+    }
+    const fontId="exact-shuffle-dashboard-fonts";
+    if(!document.getElementById(fontId)){
+      const font=document.createElement("link");
+      font.id=fontId;
+      font.rel="stylesheet";
+      font.href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,500,600,700,800,900|Space+Grotesk:400,500,600,700,800,900&subset=latin";
+      document.head.appendChild(font);
     }
     const previous=document.body.className;
     document.body.className="antialiased font-body bg-body text-body bg-slate-100 text-slate-950 selection:bg-indigo-200 selection:text-slate-950";
     return ()=>{
       document.body.className=previous;
-      const current=document.getElementById(id);
-      if(current) current.remove();
+      const css=document.getElementById(cssId);
+      if(css) css.remove();
+      const font=document.getElementById(fontId);
+      if(font) font.remove();
     };
   },[]);
 }
 
 function Dashboard({setTab, menu=[], me, logout}){
-  useShuffleDashboardCss();
+  useExactShuffleDashboardCss();
   const {products,associations,detectedEpcs}=useLocalStore();
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
@@ -3015,176 +3016,54 @@ function Dashboard({setTab, menu=[], me, logout}){
     exportCSV("produits_sans_tag.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut"]);
   }
 
-  const alerts=[];
-  if(detectedEpcCount===0) alerts.push({tone:"blue",icon:"rfid",title:"0 scan détecté",text:"Importez les CSV des instruments détectés pour calculer le stock réel."});
-  if(productsWithoutRfid>0 || coverage<100) alerts.push({tone:"amber",icon:"warning",title:productsWithoutRfid>0 ? `${productsWithoutRfid} produits sans association` : "Aucune association détectée pour ces produits.",text:"Ajoutez un rapport pour améliorer votre suivi."});
-  if(duplicateEpcs>0) alerts.push({tone:"rose",icon:"warning",title:`${duplicateEpcs} doublon(s) Identifiant détecté(s)`,text:"Vérifier les associations en double."});
-  if(alerts.length===0) alerts.push({tone:"blue",icon:"tag",title:"Aucune alerte prioritaire",text:"Les données sont stables."});
+  function exportScanHistory(){
+    const rows=associations.length ? associations : [{message:"Aucune donnée d'association"}];
+    exportCSV("historique_scans.csv",rows,Object.keys(rows[0]||{message:""}));
+  }
 
-  const navItems=(menu && menu.length ? menu : APP_USER_PAGES).filter(x=>x.id);
-  const kpis=[
-    {label:"Produits enregistrés",value:products.length,sub:products.length ? "Catalogue importé" : "Aucun catalogue importé",pill:"Stock",icon:"box",iconClass:"bg-blue-50 text-blue-600 ring-blue-100",pillClass:"bg-slate-100 text-slate-500",target:"operations"},
-    {label:"Produits tagués",value:productsWithRfid,sub:productsWithRfid ? "Avec association" : "Aucun tag détecté",pill:"RFID",icon:"tag",iconClass:"bg-emerald-50 text-emerald-600 ring-emerald-100",pillClass:"bg-emerald-50 text-emerald-700",target:"association"},
-    {label:"Transactions",value:detectedEpcCount,sub:detectedEpcCount ? "Identifiants détectés importés" : "Aucune transaction",pill:"Caisse",icon:"rfid",iconClass:"bg-indigo-50 text-indigo-600 ring-indigo-100",pillClass:"bg-indigo-50 text-indigo-700",target:"inventory"},
-    {label:"Produits sans tag",value:productsWithoutRfid,sub:productsWithoutRfid ? "À taguer en priorité" : "Synchronisés",pill:"À traiter",icon:"warning",iconClass:"bg-amber-50 text-amber-600 ring-amber-100",pillClass:"bg-amber-50 text-amber-700",target:"operations"},
-  ];
-  const reports=[
-    {label:"Taux de couverture",icon:"doc",iconClass:"bg-blue-50 text-blue-600 ring-blue-100",action:exportDashboardReport},
-    {label:"Produits avec tag",icon:"tag",iconClass:"bg-emerald-50 text-emerald-600 ring-emerald-100",action:exportDashboardReport},
-    {label:"Produits sans tag",icon:"warning",iconClass:"bg-amber-50 text-amber-600 ring-amber-100",action:exportProductsWithoutRfid},
-    {label:"Historique scans",icon:"clock",iconClass:"bg-violet-50 text-violet-600 ring-violet-100",action:()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{}))},
-  ];
+  const dynamicHtml = useMemo(()=>{
+    let html=SHUFFLE_DASHBOARD_HTML;
+    html=html.replace(/>AD<\/div>/, `>${escapeDashboardHtml(initials)}<\/div>`);
+    html=html.replace(/>Pharmacie Démo<\/p>/, `>${escapeDashboardHtml(accountName)}<\/p>`);
+    html=html.replace(/>Utilisateur<\/p>/, `>${escapeDashboardHtml(roleName)}<\/p>`);
+    html=html.replace(/>0<\/p>\s*<p class="mt-1 text-sm font-semibold text-slate-800">Produits enregistrés<\/p>/, `>${products.length}<\/p><p class="mt-1 text-sm font-semibold text-slate-800">Produits enregistrés<\/p>`);
+    html=html.replace(/>Aucun catalogue importé<\/p>/, `>${products.length ? "Catalogue importé" : "Aucun catalogue importé"}<\/p>`);
+    html=html.replace(/>0<\/p>\s*<p class="mt-1 text-sm font-semibold text-slate-800">Produits tagués<\/p>/, `>${productsWithRfid}<\/p><p class="mt-1 text-sm font-semibold text-slate-800">Produits tagués<\/p>`);
+    html=html.replace(/>Aucun tag détecté<\/p>/, `>${productsWithRfid ? "Avec association" : "Aucun tag détecté"}<\/p>`);
+    html=html.replace(/>0<\/p>\s*<p class="mt-1 text-sm font-semibold text-slate-800">Transactions<\/p>/, `>${detectedEpcCount}<\/p><p class="mt-1 text-sm font-semibold text-slate-800">Transactions<\/p>`);
+    html=html.replace(/>Aucune transaction<\/p>/, `>${detectedEpcCount ? "Identifiants détectés importés" : "Aucune transaction"}<\/p>`);
+    html=html.replace(/>0<\/p>\s*<p class="mt-1 text-sm font-semibold text-slate-800">Produits sans tag<\/p>/, `>${productsWithoutRfid}<\/p><p class="mt-1 text-sm font-semibold text-slate-800">Produits sans tag<\/p>`);
+    html=html.replace(/>Synchronisés<\/p>/, `>${productsWithoutRfid ? "À taguer en priorité" : "Synchronisés"}<\/p>`);
+    html=html.replace(/>0%<\/span>/g, `>${coverage}%<\/span>`);
+    html=html.replace(/Votre couverture doit être améliorée\./, coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture progresse." : "Votre couverture doit être améliorée.");
+    html=html.replace(/Vous avez étiqueté 0% de vos produits en pharmacie\./, `Vous avez étiqueté ${coverage}% de vos produits en pharmacie.`);
+    html=html.replace(/<p class="text-sm font-semibold text-slate-950">0 scan détecté<\/p>/, `<p class="text-sm font-semibold text-slate-950">${detectedEpcCount} scan${detectedEpcCount>1 ? "s" : ""} détecté${detectedEpcCount>1 ? "s" : ""}<\/p>`);
+    html=html.replace(/<p class="text-sm font-semibold text-slate-950">Aucune association détectée pour ces produits\.<\/p>/, `<p class="text-sm font-semibold text-slate-950">${productsWithoutRfid>0 ? productsWithoutRfid+" produits sans association" : "Aucune association détectée pour ces produits."}<\/p>`);
+    return html;
+  },[initials,accountName,roleName,products.length,productsWithRfid,productsWithoutRfid,detectedEpcCount,coverage]);
 
-  return <div className="min-h-screen bg-slate-100 text-slate-950 antialiased font-body">
-    <nav className="bg-slate-950 px-4 py-4 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center justify-between gap-4">
-          <button type="button" onClick={()=>setTab("dashboard")} className="group inline-flex items-center gap-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-300">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 shadow-lg shadow-indigo-950/30 transition-transform duration-200 group-hover:-rotate-3 group-hover:scale-105">
-              <ShuffleDashboardIcon name="brand" className="h-5 w-5 text-white"/>
-            </span>
-            <span className="font-heading text-base font-semibold tracking-tight">Smart Inventory</span>
-          </button>
-          <button className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-200 transition hover:bg-white/10 active:scale-95 lg:hidden" aria-label="Ouvrir le menu" type="button">
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-          </button>
-        </div>
-        <div className="flex gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-white/5 p-2 text-sm text-slate-300">
-          {navItems.map(item=> item.id==="dashboard" ?
-            <button type="button" key={item.id} onClick={()=>setTab(item.id)} className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-white px-4 py-2 font-medium text-slate-950 shadow-sm"><ShuffleDashboardIcon name="dashboard" className="h-4 w-4 text-indigo-600"/>Dashboard</button> :
-            <button type="button" key={item.id} onClick={()=>setTab(item.id)} className="inline-flex shrink-0 items-center rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white">{item.label}</button>
-          )}
-        </div>
-        <div className="flex items-center justify-between gap-3 rounded-3xl border border-white/10 bg-white/5 px-3 py-2 lg:justify-end">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 font-heading text-sm font-semibold shadow-lg shadow-indigo-950/30">{initials}</div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white">{accountName}</p>
-            <p className="text-xs text-slate-400">{roleName}</p>
-          </div>
-        </div>
-      </div>
-    </nav>
+  function handleDashboardClick(e){
+    const link=e.target.closest("a,button");
+    if(!link) return;
+    e.preventDefault();
+    const txt=(link.textContent||"").replace(/\s+/g," ").trim().toLowerCase();
+    if(txt.includes("log out")) return logout && logout();
+    if(txt.includes("opérations") || txt.includes("avancement") || txt.includes("scan")) return setTab("operations");
+    if(txt.includes("associations")) return setTab("association");
+    if(txt.includes("inventaire")) return setTab("inventory");
+    if(txt === "caisse" || txt.includes("caisse")) return setTab("cash");
+    if(txt.includes("assistant")) return setTab("ai");
+    if(txt.includes("utilisateur")) return setTab("users");
+    if(txt.includes("produits sans tag")) return exportProductsWithoutRfid();
+    if(txt.includes("historique scans")) return exportScanHistory();
+    if(txt.includes("taux de couverture") || txt.includes("produits avec tag") || txt.includes("exporter")) return exportDashboardReport();
+    if(txt.includes("dashboard") || txt.includes("smart inventory")) return setTab("dashboard");
+  }
 
-    <section className="relative overflow-hidden bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="pointer-events-none absolute left-0 top-0 h-80 w-80 rounded-full bg-indigo-200/50 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-12 right-0 h-96 w-96 rounded-full bg-emerald-100/70 blur-3xl" />
-      <div className="relative mx-auto grid max-w-7xl gap-5 lg:grid-cols-12">
-        <div className="lg:col-span-12">
-          <div className="rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-xl shadow-slate-200/70 backdrop-blur md:p-6">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                  <span className="rounded-full bg-slate-950 px-3 py-1.5 font-medium text-white">app.smart-inventory.io/dashboard</span>
-                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">Mode stable</span>
-                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700">Synchronisation active</span>
-                </div>
-                <h1 className="font-heading text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                  <span>Dashboard pharmacie</span>
-                  <span className="block text-slate-500">suivi RFID en temps réel.</span>
-                </h1>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">Suivi en temps réel de la couverture et de l'activité de votre pharmacie, avec une lecture claire des produits tagués, des transactions et des alertes à traiter.</p>
-              </div>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button type="button" onClick={()=>setTab("operations")} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:scale-95">Accéder à l’avancement<ShuffleDashboardIcon name="arrow" className="h-4 w-4"/></button>
-                <button type="button" onClick={exportDashboardReport} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-slate-300 active:scale-95">Exporter</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {kpis.map(k=><div className="lg:col-span-3" key={k.label}>
-          <button type="button" onClick={()=>setTab(k.target)} className="group h-full w-full rounded-[1.75rem] border border-white/70 bg-white/85 p-5 text-left shadow-lg shadow-slate-200/60 transition hover:-translate-y-1 hover:shadow-xl">
-            <div className="mb-6 flex items-center justify-between">
-              <span className={`flex h-11 w-11 items-center justify-center rounded-2xl ${k.iconClass} ring-1`}><ShuffleDashboardIcon name={k.icon}/></span>
-              <span className={`rounded-full px-2.5 py-1 text-xs ${k.pillClass}`}>{k.pill}</span>
-            </div>
-            <p className="font-heading text-4xl font-semibold tracking-tight text-slate-950">{k.value}</p>
-            <p className="mt-1 text-sm font-semibold text-slate-800">{k.label}</p>
-            <p className="mt-1 text-xs text-slate-500">{k.sub}</p>
-          </button>
-        </div>)}
-
-        <div className="lg:col-span-7">
-          <div className="h-full overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-200/70">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold text-slate-950">Taux de couverture</p>
-                <p className="mt-1 text-sm text-slate-500">Mesure la part des produits déjà reliés à un tag RFID.</p>
-              </div>
-              <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-100">À améliorer</span>
-            </div>
-            <div className="mt-8 grid gap-8 md:grid-cols-5 md:items-center">
-              <div className="md:col-span-2">
-                <div className="mx-auto flex h-44 w-44 items-center justify-center rounded-full bg-slate-100 p-3 shadow-inner shadow-slate-300/70">
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-white shadow-sm">
-                    <span className="font-heading text-5xl font-semibold tracking-tight text-slate-950">{coverage}%</span>
-                  </div>
-                </div>
-              </div>
-              <div className="md:col-span-3">
-                <h2 className="font-heading text-2xl font-semibold tracking-tight text-slate-950">{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture progresse." : "Votre couverture doit être améliorée."}</h2>
-                <p className="mt-4 text-sm leading-6 text-slate-600">Vous avez étiqueté {coverage}% de vos produits en pharmacie. Commencez ou continuez l’étiquetage pour améliorer votre suivi d’inventaire et fiabiliser les sorties caisse.</p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <button type="button" onClick={()=>setTab("operations")} className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:scale-95">Voir l’avancement<ShuffleDashboardIcon name="arrow" className="h-4 w-4"/></button>
-                  <button type="button" onClick={()=>setTab("operations")} className="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-slate-300 active:scale-95">Lancer un scan</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-5">
-          <div className="relative h-full min-h-80 overflow-hidden rounded-[2rem] border border-emerald-100 bg-emerald-950 p-6 text-white shadow-xl shadow-emerald-950/10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(110,231,183,0.28),transparent_32%),radial-gradient(circle_at_80%_70%,rgba(99,102,241,0.22),transparent_34%)]" />
-            <div className="absolute inset-x-6 bottom-6 top-20 rounded-[1.5rem] border border-white/10 bg-white/10 backdrop-blur" />
-            <div className="relative flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">Publicité</p>
-                <h2 className="mt-3 font-heading text-2xl font-semibold tracking-tight">Espace partenaire officine</h2>
-              </div>
-              <div className="flex gap-1.5"><span className="h-2 w-2 rounded-full bg-white/40"/><span className="h-2 w-2 rounded-full bg-emerald-300"/></div>
-            </div>
-            <div className="relative mt-16 max-w-sm"><p className="text-sm leading-6 text-emerald-50/85">Un emplacement visuel sobre pour les annonces réseau, les rappels de campagne ou les communications internes de la pharmacie.</p></div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-8">
-          <div className="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-200/70">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-semibold text-slate-950">Rapports et exports</p><p className="mt-1 text-sm text-slate-500">Téléchargez les états utiles au suivi quotidien.</p></div><span className="text-xs text-slate-400">Exports sécurisés</span></div>
-            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              {reports.map(r=><button key={r.label} type="button" onClick={r.action} className="group rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 text-left transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-slate-200 active:scale-95">
-                <span className={`flex h-11 w-11 items-center justify-center rounded-2xl ${r.iconClass} ring-1`}><ShuffleDashboardIcon name={r.icon}/></span>
-                <p className="mt-4 text-sm font-semibold text-slate-900">{r.label}</p>
-                <p className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 group-hover:text-indigo-600">Télécharger <span>↓</span></p>
-              </button>)}
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-4">
-          <div className="h-full rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-200/70">
-            <div className="flex items-start justify-between gap-4"><div><p className="text-sm font-semibold text-slate-950">Alertes prioritaires</p><p className="mt-1 text-sm text-slate-500">Points à surveiller avant la prochaine session.</p></div><span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><ShuffleDashboardIcon name="spark" className="h-4 w-4"/></span></div>
-            <div className="mt-6 space-y-3">
-              {alerts.map((a,i)=>{
-                const cls=a.tone==="amber" ? "border-amber-100 bg-amber-50/80 text-amber-600 ring-amber-100" : a.tone==="rose" ? "border-rose-100 bg-rose-50/80 text-rose-600 ring-rose-100" : "border-blue-100 bg-blue-50/70 text-blue-600 ring-blue-100";
-                const [borderBg, text, ring]=cls.split(' ').length ? [cls.split(' ').slice(0,2).join(' '), cls.split(' ')[2], cls.split(' ')[3]] : ["border-blue-100 bg-blue-50/70","text-blue-600","ring-blue-100"];
-                return <div className={`rounded-[1.5rem] border ${borderBg} p-4`} key={i}><div className="flex gap-3"><span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white ${text} ring-1 ${ring}`}><ShuffleDashboardIcon name={a.icon} className="h-4 w-4"/></span><div><p className="text-sm font-semibold text-slate-950">{a.title}</p><p className="mt-1 text-xs leading-5 text-slate-600">{a.text}</p></div></div></div>;
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer className="bg-slate-950 px-4 py-8 text-slate-300 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-12 lg:items-center">
-        <div className="lg:col-span-4"><button type="button" onClick={()=>setTab("dashboard")} className="inline-flex items-center gap-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-300"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 text-white"><ShuffleDashboardIcon name="brand" className="h-5 w-5"/></span><span className="font-heading text-base font-semibold tracking-tight text-white">Smart Inventory</span></button><p className="mt-3 text-sm text-slate-400">© 2026 Smart Inventory. Tous droits réservés.</p></div>
-        <div className="lg:col-span-6"><div className="flex flex-wrap gap-x-5 gap-y-3 text-sm">{navItems.map(item=><button type="button" key={item.id} onClick={()=>setTab(item.id)} className="transition hover:text-white">{item.label}</button>)}</div></div>
-        <div className="lg:col-span-2 lg:text-right"><button type="button" onClick={logout} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-slate-100 active:scale-95">Log out<ShuffleDashboardIcon name="logout" className="h-4 w-4"/></button></div>
-      </div>
-    </footer>
-  </div>;
+  return <div className="exactShuffleDashboardMount" onClick={handleDashboardClick} dangerouslySetInnerHTML={{__html:dynamicHtml}} />;
 }
+
+
 
 function DashboardAdmin({auth}){
   const [items,setItems]=useState([]);
