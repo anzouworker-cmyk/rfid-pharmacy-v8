@@ -1892,61 +1892,102 @@ function Login({setToken}){
     setLoading(false);
   }
 
-  const LandingNav=()=> <nav className="shuffleLandingNav shuffleSourceNav">
-    <div className="shuffleSourceNavInner">
-      <a className="shuffleLandingBrand" href="#home" onClick={goLanding} aria-label="Smart Inventory accueil">
-        <span className="shuffleBrandMark"><SidebarBrandIcon/></span>
-        <b>Smart Inventory</b>
+  const LoginNav=()=> <nav className="shuffleExactLoginNav">
+    <div className="shuffleExactLoginNavInner">
+      <a className="shuffleExactLoginBrand" href="#home" onClick={goLanding} aria-label="Smart Inventory accueil">
+        <span className="shuffleExactLoginBrandIcon"><SidebarBrandIcon/></span>
+        <span>Smart Inventory</span>
       </a>
-      <div className="shuffleLandingLinks" aria-label="Navigation page accueil">
-        <a href="#dashboard">Dashboard</a>
-        <a href="#operations-panel" className="active">Opérations</a>
-        <a href="#associations">Associations</a>
-        <a href="#inventaire">Inventaire</a>
-        <a href="#assistant-ai">Assistant AI <em>New</em></a>
+      <div className="shuffleExactLoginLinks" aria-label="Navigation page connexion">
+        <a href="#dashboard" onClick={goLanding}>Dashboard</a>
+        <a href="#operations" onClick={goLanding} className="active">Opérations</a>
+        <a href="#associations" onClick={goLanding}>Associations</a>
+        <a href="#inventaire" onClick={goLanding}>Inventaire</a>
+        <a href="#assistant-ai" onClick={goLanding}>Assistant AI <span>new</span></a>
+        <a href="#login" onClick={e=>e.preventDefault()}>Connexion</a>
       </div>
-      <div className="shuffleLandingActions">
-        <a className="shuffleNavGhost" href="#connexion" onClick={goLogin}>Connexion</a>
-        <a className="shuffleNavCta" href="#essayer" onClick={goLogin}>Essai gratuit</a>
+      <div className="shuffleExactLoginNavCtaWrap">
+        <a href="#essayer" onClick={e=>e.preventDefault()} className="shuffleExactLoginNavCta">Essai gratuit</a>
       </div>
+      <button type="button" className="shuffleExactLoginMobileBtn" aria-label="Ouvrir le menu">
+        <svg fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
     </div>
   </nav>;
 
-  const AuthForm=()=> <form onSubmit={login} className="loginCard shuffleAuthCard">
-    <SmartInventoryLogo className="loginCodeLogo"/>
-    <h2>Connexion</h2>
-    <p>Accédez à votre espace inventaire et caisse.</p>
+  function scrollToAuthForm(e){
+    if(e) e.preventDefault();
+    document.getElementById("shuffle-exact-login-card")?.scrollIntoView({behavior:"smooth", block:"center"});
+  }
 
-    <label>Utilisateur</label>
-    <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur" autoComplete="username"/>
-
-    <label>Mot de passe</label>
-    <input value={p} onChange={e=>setP(e.target.value)} placeholder="Mot de passe" type="password" autoComplete="current-password"/>
-
-    <button type="submit" className="primaryLoginBtn" disabled={loading}>{loading ? "Connexion..." : "Connexion"}</button>
-
-    {err && <p className="err">{err}</p>}
-
-    <div className="loginHelp">
-      <small>Compte démo : demo / demo123</small><br/>
-      <small>Compte admin : admin / admin123</small>
+  const AuthForm=()=> <div className="shuffleExactLoginCardShell">
+    <div className="shuffleExactLoginCardGlow" aria-hidden="true" />
+    <div id="shuffle-exact-login-card" className="shuffleExactLoginCard">
+      <div className="shuffleExactLoginCardIntro">
+        <h2>Connexion</h2>
+        <p>Entrez vos identifiants pour accéder à votre tableau de bord</p>
+      </div>
+      <form onSubmit={login} className="shuffleExactLoginForm">
+        <div>
+          <label>Nom d'utilisateur</label>
+          <input type="text" value={u} onChange={e=>setU(e.target.value)} placeholder="votre@email.com" autoComplete="username" />
+        </div>
+        <div>
+          <label>Mot de passe</label>
+          <input type="password" value={p} onChange={e=>setP(e.target.value)} placeholder="••••••••" autoComplete="current-password" />
+        </div>
+        <div className="shuffleExactLoginOptions">
+          <label className="shuffleExactLoginRemember">
+            <input type="checkbox" />
+            <span>Se souvenir de moi</span>
+          </label>
+          <a href="#mot-de-passe-oublie" onClick={e=>e.preventDefault()}>Mot de passe oublié ?</a>
+        </div>
+        <button type="submit" className="shuffleExactLoginSubmit" disabled={loading}>{loading ? "Connexion..." : "Se connecter"}</button>
+        {err && <p className="shuffleExactLoginErr">{err}</p>}
+      </form>
+      <div className="shuffleExactLoginSignup">
+        <p>Pas encore de compte ? <a href="#essai" onClick={e=>e.preventDefault()}>Essai gratuit</a></p>
+      </div>
     </div>
-  </form>;
+  </div>;
 
   if(screen==="auth"){
-    return <div className="login shufflePreviewLogin shuffleAuthOnlyPage">
-      <LandingNav/>
-      <main className="shuffleAuthRoute">
-        <section className="shuffleAuthRouteCopy">
-          <span className="shuffleHeroBadge"><i></i> Connexion sécurisée</span>
-          <h1>Accédez à votre espace <strong>Smart Inventory</strong></h1>
-          <p>Connectez-vous avec votre nom d'utilisateur et votre mot de passe pour gérer vos opérations de stock, caisse et inventaire.</p>
-          <button type="button" className="shuffleBackHome" onClick={goLanding}>← Retour à l'accueil</button>
-        </section>
-        <section className="shuffleAuthPanel shuffleAuthPanelCentered" aria-label="Connexion Smart Inventory">
-          <AuthForm/>
-        </section>
-      </main>
+    return <div className="login shuffleExactLoginPage">
+      <LoginNav/>
+      <section className="shuffleExactLoginHero" aria-label="Connexion Smart Inventory">
+        <div className="shuffleExactLoginBg" aria-hidden="true" />
+        <div className="shuffleExactLoginOrbRight" aria-hidden="true" />
+        <div className="shuffleExactLoginOrbLeft" aria-hidden="true" />
+        <div className="shuffleExactLoginHeroInner">
+          <div className="shuffleExactLoginCopy">
+            <div className="shuffleExactLoginSecureBadge">
+              <span></span>
+              <b>Connexion sécurisée</b>
+            </div>
+            <h1>
+              <span>Accédez à votre espace </span>
+              <strong>Smart Inventory</strong>
+            </h1>
+            <p>Connectez-vous avec votre nom d'utilisateur et votre mot de passe pour gérer vos opérations de stock, caisse et inventaire.</p>
+            <div className="shuffleExactLoginActions">
+              <a href="#accueil" onClick={goLanding} className="shuffleExactLoginBackBtn">
+                <svg fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                Retour à l'accueil
+              </a>
+              <a href="#login-form" onClick={scrollToAuthForm} className="shuffleExactLoginGhostBtn">
+                Se connecter
+                <svg fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+              </a>
+            </div>
+          </div>
+          <div className="shuffleExactLoginFormColumn">
+            <AuthForm/>
+          </div>
+        </div>
+      </section>
     </div>;
   }
 

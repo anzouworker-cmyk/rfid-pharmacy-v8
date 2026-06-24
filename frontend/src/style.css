@@ -7307,3 +7307,404 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   .shuffleExactSourceHome .shuffleSourceFinalCta a{width:100%!important;}
   .shuffleExactSourceHome .shuffleSourceFooter{padding:40px 16px!important;}
 }
+
+/* V121 - Exact Shuffle connexion page integration only */
+.login.shuffleExactLoginPage{
+  display:block!important;
+  place-items:unset!important;
+  height:auto!important;
+  min-height:100vh!important;
+  padding:0!important;
+  overflow-x:hidden!important;
+  background:#ffffff!important;
+  color:#0f172a!important;
+  font-family:"Plus Jakarta Sans",Inter,Segoe UI,Arial,sans-serif!important;
+}
+.shuffleExactLoginPage *{box-sizing:border-box;}
+.shuffleExactLoginPage a{text-decoration:none!important;}
+.shuffleExactLoginNav{
+  width:100%!important;
+  padding:16px 24px!important;
+  background:rgba(255,255,255,.80)!important;
+  backdrop-filter:blur(16px)!important;
+  border-bottom:1px solid #f1f5f9!important;
+  position:relative!important;
+  z-index:20!important;
+}
+.shuffleExactLoginNavInner{
+  max-width:1280px!important;
+  margin:0 auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:24px!important;
+}
+.shuffleExactLoginBrand{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  color:#0f172a!important;
+  font-size:18px!important;
+  line-height:28px!important;
+  font-family:"Outfit",sans-serif!important;
+  font-weight:800!important;
+  letter-spacing:-.025em!important;
+}
+.shuffleExactLoginBrandIcon{
+  width:36px!important;
+  height:36px!important;
+  border-radius:8px!important;
+  background:#4f46e5!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:#fff!important;
+  box-shadow:0 10px 18px rgba(79,70,229,.22)!important;
+  flex:0 0 auto!important;
+}
+.shuffleExactLoginBrandIcon svg{width:20px!important;height:20px!important;display:block!important;}
+.shuffleExactLoginLinks{
+  display:flex!important;
+  align-items:center!important;
+  gap:32px!important;
+}
+.shuffleExactLoginLinks a{
+  color:#64748b!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  font-weight:600!important;
+  transition:color .16s ease!important;
+  white-space:nowrap!important;
+}
+.shuffleExactLoginLinks a:hover{color:#4f46e5!important;}
+.shuffleExactLoginLinks a.active{
+  color:#0f172a!important;
+  font-weight:700!important;
+  border-bottom:2px solid #4f46e5!important;
+  padding-bottom:2px!important;
+}
+.shuffleExactLoginLinks a span{
+  display:inline-flex!important;
+  align-items:center!important;
+  padding:2px 6px!important;
+  margin-left:6px!important;
+  border-radius:999px!important;
+  background:#e0e7ff!important;
+  color:#4f46e5!important;
+  font-size:10px!important;
+  line-height:12px!important;
+  font-weight:800!important;
+  text-transform:uppercase!important;
+  letter-spacing:.06em!important;
+}
+.shuffleExactLoginNavCtaWrap{display:block!important;}
+.shuffleExactLoginNavCta{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:10px 20px!important;
+  border-radius:8px!important;
+  background:#4f46e5!important;
+  color:#fff!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  font-weight:700!important;
+  box-shadow:0 10px 15px -3px rgba(79,70,229,.20),0 4px 6px -4px rgba(79,70,229,.20)!important;
+  transition:all .16s ease!important;
+}
+.shuffleExactLoginNavCta:hover{background:#4338ca!important;box-shadow:0 20px 25px -5px rgba(79,70,229,.20),0 8px 10px -6px rgba(79,70,229,.20)!important;}
+.shuffleExactLoginMobileBtn{
+  display:none!important;
+  padding:8px!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  color:#334155!important;
+  box-shadow:none!important;
+}
+.shuffleExactLoginMobileBtn svg{width:24px!important;height:24px!important;}
+.shuffleExactLoginHero{
+  position:relative!important;
+  overflow:hidden!important;
+  min-height:calc(100vh - 69px)!important;
+}
+.shuffleExactLoginBg{
+  position:absolute!important;
+  inset:0!important;
+  background:linear-gradient(135deg,rgba(238,242,255,.80),#ffffff 48%,rgba(236,253,245,.40))!important;
+}
+.shuffleExactLoginOrbRight{
+  position:absolute!important;
+  top:80px!important;
+  right:0!important;
+  width:384px!important;
+  height:384px!important;
+  border-radius:999px!important;
+  background:rgba(224,231,255,.30)!important;
+  filter:blur(48px)!important;
+}
+.shuffleExactLoginOrbLeft{
+  position:absolute!important;
+  bottom:0!important;
+  left:25%!important;
+  width:288px!important;
+  height:288px!important;
+  border-radius:999px!important;
+  background:rgba(209,250,229,.20)!important;
+  filter:blur(48px)!important;
+}
+.shuffleExactLoginHeroInner{
+  position:relative!important;
+  max-width:1280px!important;
+  margin:0 auto!important;
+  padding:80px 48px 128px!important;
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:64px!important;
+  align-items:center!important;
+  min-height:calc(100vh - 69px)!important;
+}
+.shuffleExactLoginCopy{grid-column:span 6 / span 6!important;}
+.shuffleExactLoginSecureBadge{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  margin-bottom:32px!important;
+}
+.shuffleExactLoginSecureBadge span{
+  width:10px!important;
+  height:10px!important;
+  border-radius:999px!important;
+  background:#10b981!important;
+  display:inline-block!important;
+  animation:shuffleExactPulse 1.8s cubic-bezier(.4,0,.6,1) infinite!important;
+}
+.shuffleExactLoginSecureBadge b{
+  color:#047857!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  font-weight:600!important;
+  letter-spacing:.025em!important;
+}
+.shuffleExactLoginCopy h1{
+  font-family:"Outfit",sans-serif!important;
+  font-size:clamp(48px,5.35vw,72px)!important;
+  line-height:1.05!important;
+  letter-spacing:-.055em!important;
+  color:#0f172a!important;
+  font-weight:900!important;
+  margin:0 0 24px!important;
+  max-width:650px!important;
+}
+.shuffleExactLoginCopy h1 span{display:inline!important;color:#0f172a!important;}
+.shuffleExactLoginCopy h1 strong{
+  display:inline!important;
+  color:#4f46e5!important;
+  font-weight:900!important;
+}
+.shuffleExactLoginCopy p{
+  font-size:18px!important;
+  line-height:1.72!important;
+  color:#64748b!important;
+  max-width:512px!important;
+  margin:0 0 40px!important;
+}
+.shuffleExactLoginActions{display:flex!important;flex-wrap:wrap!important;gap:16px!important;}
+.shuffleExactLoginBackBtn,
+.shuffleExactLoginGhostBtn{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  padding:14px 28px!important;
+  min-height:52px!important;
+  border-radius:12px!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  font-weight:700!important;
+  transition:all .16s ease!important;
+}
+.shuffleExactLoginBackBtn{
+  background:#4f46e5!important;
+  color:#fff!important;
+  box-shadow:0 20px 25px -5px rgba(199,210,254,.50),0 8px 10px -6px rgba(199,210,254,.50)!important;
+}
+.shuffleExactLoginBackBtn:hover{background:#4338ca!important;box-shadow:0 24px 34px -10px rgba(199,210,254,.70)!important;}
+.shuffleExactLoginGhostBtn{
+  background:#fff!important;
+  color:#334155!important;
+  border:1px solid #e2e8f0!important;
+  box-shadow:0 10px 15px -3px rgba(241,245,249,.50),0 4px 6px -4px rgba(241,245,249,.50)!important;
+}
+.shuffleExactLoginGhostBtn:hover{color:#4f46e5!important;border-color:#a5b4fc!important;box-shadow:0 20px 25px -5px rgba(241,245,249,.65),0 8px 10px -6px rgba(241,245,249,.65)!important;}
+.shuffleExactLoginBackBtn svg,
+.shuffleExactLoginGhostBtn svg{width:16px!important;height:16px!important;}
+.shuffleExactLoginFormColumn{grid-column:span 6 / span 6!important;}
+.shuffleExactLoginCardShell{position:relative!important;width:100%!important;}
+.shuffleExactLoginCardGlow{
+  position:absolute!important;
+  inset:-16px!important;
+  background:linear-gradient(45deg,rgba(199,210,254,.30),transparent,rgba(167,243,208,.20))!important;
+  border-radius:24px!important;
+  filter:blur(32px)!important;
+}
+.login.shuffleExactLoginPage .shuffleExactLoginCard{
+  position:relative!important;
+  background:#fff!important;
+  border-radius:16px!important;
+  box-shadow:0 25px 50px -12px rgba(203,213,225,.60)!important;
+  border:1px solid #f1f5f9!important;
+  padding:40px!important;
+  max-width:none!important;
+  width:100%!important;
+}
+.shuffleExactLoginCardIntro{margin-bottom:32px!important;}
+.login.shuffleExactLoginPage .shuffleExactLoginCardIntro h2{
+  font-family:"Outfit",sans-serif!important;
+  font-size:24px!important;
+  line-height:32px!important;
+  font-weight:800!important;
+  letter-spacing:-.03em!important;
+  color:#0f172a!important;
+  margin:0 0 8px!important;
+  text-align:left!important;
+}
+.shuffleExactLoginCardIntro p{
+  color:#94a3b8!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  margin:0!important;
+}
+.login.shuffleExactLoginPage form.shuffleExactLoginForm{
+  background:transparent!important;
+  padding:0!important;
+  border-radius:0!important;
+  display:grid!important;
+  gap:20px!important;
+  min-width:0!important;
+  width:100%!important;
+  box-shadow:none!important;
+}
+.shuffleExactLoginForm label{
+  display:block!important;
+  margin:0 0 6px!important;
+  color:#334155!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  font-weight:600!important;
+  text-transform:none!important;
+  letter-spacing:0!important;
+}
+.shuffleExactLoginForm input[type="text"],
+.shuffleExactLoginForm input[type="password"]{
+  width:100%!important;
+  height:auto!important;
+  min-height:48px!important;
+  margin:0!important;
+  padding:12px 16px!important;
+  border-radius:12px!important;
+  border:1px solid #e2e8f0!important;
+  background:rgba(248,250,252,.50)!important;
+  color:#0f172a!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  font-family:"Plus Jakarta Sans",Inter,sans-serif!important;
+  transition:all .16s ease!important;
+  outline:none!important;
+}
+.shuffleExactLoginForm input::placeholder{color:#cbd5e1!important;}
+.shuffleExactLoginForm input[type="text"]:focus,
+.shuffleExactLoginForm input[type="password"]:focus{
+  border-color:#818cf8!important;
+  box-shadow:0 0 0 4px rgba(99,102,241,.16)!important;
+  background:#fff!important;
+}
+.shuffleExactLoginOptions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+}
+.shuffleExactLoginRemember{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  cursor:pointer!important;
+  margin:0!important;
+}
+.shuffleExactLoginRemember input[type="checkbox"]{
+  width:16px!important;
+  height:16px!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:4px!important;
+  accent-color:#4f46e5!important;
+}
+.shuffleExactLoginRemember span{
+  color:#64748b!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  font-weight:500!important;
+}
+.shuffleExactLoginOptions > a{
+  color:#4f46e5!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  font-weight:600!important;
+}
+.shuffleExactLoginOptions > a:hover{color:#4338ca!important;}
+.login.shuffleExactLoginPage .shuffleExactLoginSubmit{
+  width:100%!important;
+  min-height:52px!important;
+  margin:0!important;
+  padding:14px 20px!important;
+  border-radius:12px!important;
+  background:#4f46e5!important;
+  color:#fff!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  font-weight:700!important;
+  box-shadow:none!important;
+  transition:all .16s ease!important;
+}
+.login.shuffleExactLoginPage .shuffleExactLoginSubmit:hover{background:#4338ca!important;box-shadow:0 10px 15px -3px rgba(199,210,254,.50),0 4px 6px -4px rgba(199,210,254,.50)!important;}
+.login.shuffleExactLoginPage .shuffleExactLoginSubmit:active{transform:scale(.98)!important;}
+.login.shuffleExactLoginPage .shuffleExactLoginSubmit:disabled{opacity:.72!important;cursor:not-allowed!important;}
+.shuffleExactLoginErr{
+  margin:0!important;
+  color:#dc2626!important;
+  font-size:13px!important;
+  line-height:18px!important;
+  font-weight:700!important;
+}
+.shuffleExactLoginSignup{
+  margin-top:24px!important;
+  text-align:center!important;
+}
+.shuffleExactLoginSignup p{
+  margin:0!important;
+  color:#94a3b8!important;
+  font-size:14px!important;
+  line-height:20px!important;
+}
+.shuffleExactLoginSignup a{color:#4f46e5!important;font-weight:800!important;}
+.shuffleExactLoginSignup a:hover{color:#4338ca!important;}
+@media(max-width:1024px){
+  .shuffleExactLoginNav{padding:16px 24px!important;}
+  .shuffleExactLoginLinks,.shuffleExactLoginNavCtaWrap{display:none!important;}
+  .shuffleExactLoginMobileBtn{display:flex!important;align-items:center!important;justify-content:center!important;}
+  .shuffleExactLoginHeroInner{grid-template-columns:1fr!important;gap:48px!important;padding:56px 24px 86px!important;}
+  .shuffleExactLoginCopy,.shuffleExactLoginFormColumn{grid-column:auto!important;}
+  .shuffleExactLoginCopy h1{font-size:56px!important;}
+  .shuffleExactLoginCopy p{max-width:680px!important;}
+}
+@media(max-width:640px){
+  .shuffleExactLoginNav{padding:14px 18px!important;}
+  .shuffleExactLoginHeroInner{padding:42px 18px 70px!important;}
+  .shuffleExactLoginCopy h1{font-size:42px!important;line-height:1.06!important;}
+  .shuffleExactLoginCopy p{font-size:16px!important;line-height:1.65!important;}
+  .shuffleExactLoginActions{flex-direction:column!important;align-items:stretch!important;}
+  .shuffleExactLoginBackBtn,.shuffleExactLoginGhostBtn{width:100%!important;}
+  .login.shuffleExactLoginPage .shuffleExactLoginCard{padding:28px 22px!important;}
+  .shuffleExactLoginOptions{align-items:flex-start!important;flex-direction:column!important;gap:10px!important;}
+}
