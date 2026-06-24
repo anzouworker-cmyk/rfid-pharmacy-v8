@@ -319,7 +319,7 @@ def health():
     return {
         "ok": True,
         "service": "Smart Inventory API",
-        "version": "V118_VERCEL_VITE_PERMISSION_FIX",
+        "version": "V119_VERCEL_ESBUILD_PERMISSION_FIX",
         "cors_origins": allowed_origins,
         "cors_origin_regex": allow_origin_regex or "",
         "db": db_status,

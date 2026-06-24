@@ -1,0 +1,5 @@
+V119 - Vercel esbuild permission fix
+
+- Fix Vercel Linux build error: @esbuild/linux-x64/bin/esbuild EACCES.
+- prebuild now chmods Vite and esbuild native binaries before vite build.
+- App/frontend logic unchanged.
