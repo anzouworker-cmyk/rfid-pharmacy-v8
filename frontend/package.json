@@ -2,9 +2,8 @@
   "private": true,
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "node ./node_modules/vite/bin/vite.js build",
-    "preview": "vite preview",
-    "prebuild": "chmod +x ./node_modules/.bin/vite ./node_modules/.bin/esbuild ./node_modules/vite/bin/vite.js ./node_modules/@esbuild/*/bin/esbuild 2>/dev/null || true"
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "axios": "1.7.7",
