@@ -1,0 +1,10 @@
+Smart Inventory V113 - Exact Shuffle Operations Panel
+
+- Reworked the authenticated Operations page panel to match the original Shuffle screenshot note 1 more closely.
+- Uses large white browser/app frame, top chrome with app.smartinventory.io/operations and 2026 Stable badge.
+- Inventory actions are now 4 compact cards with outline/white buttons and subtle pastel icons.
+- Cash section title is Opérations de caisse, with shortage/surplus chips aligned to the right.
+- Cash metrics are 6 compact tiles with subtle borders and small Détails buttons.
+- Export section uses 3 horizontal cards with light indigo export buttons and primary backup button.
+- Existing React state, API calls, cash formulas, CSV imports/exports, and modals are preserved.
+- Backend /health version updated to V113_EXACT_SHUFFLE_OPERATIONS_PANEL.

@@ -279,6 +279,9 @@ function DashIcon({name}){
   if(name==="bell") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9a5 5 0 0 0-10 0c0 5-2 6-2 6h14s-2-1-2-6Z" {...common}/><path d="M10 19a2 2 0 0 0 4 0" {...common}/></svg>;
   if(name==="dots") return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>;
 
+  if(name==="file") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7V3Z" {...common}/><path d="M14 3v5h5" {...common}/><path d="M9.5 12h5" {...common}/><path d="M9.5 16h5" {...common}/></svg>;
+  if(name==="sync") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h5" {...common}/><path d="M20 20v-5h-5" {...common}/><path d="M5.6 15.5a7 7 0 0 0 11.9 2.1L20 15" {...common}/><path d="M18.4 8.5A7 7 0 0 0 6.5 6.4L4 9" {...common}/></svg>;
+  if(name==="eye") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" {...common}/><circle cx="12" cy="12" r="3" {...common}/></svg>;
   if(name==="upload") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4" {...common}/><path d="m8 8 4-4 4 4" {...common}/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" {...common}/></svg>;
   if(name==="link") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5a3.5 3.5 0 0 0 5 0l2.8-2.8a3.5 3.5 0 0 0-5-5L12 7" {...common}/><path d="M13.5 10.5a3.5 3.5 0 0 0-5 0l-2.8 2.8a3.5 3.5 0 0 0 5 5L12 17" {...common}/></svg>;
   if(name==="barcode") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12" {...common}/><path d="M7 6v12" {...common}/><path d="M11 6v12" {...common}/><path d="M14 6v12" {...common}/><path d="M18 6v12" {...common}/><path d="M21 6v12" {...common}/></svg>;
@@ -599,98 +602,134 @@ function Operations({me}){
     {key:"counted", title:"C. fermeture (compté)", value:cashCountedCents, description:"Saisir le comptage réel de fermeture avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
     {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul Excel : max(0, Nouvelle C. fermeture de hier + Dépôt/ajout + Tot. vente en espèce + Règlement crédit - Dépenses).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"}
   ];
-  return <section className="operationsPage">
-    <h1>Opérations</h1>
-    <p>Import, scan, associations, identifiants détectés, exports et sauvegardes locales.</p>
-
-    <div className="operationsActionPanel">
-      <h2>Actions inventaire</h2>
-      <p className="notice">Lancez les opérations principales de gestion d’inventaire.</p>
-      <div className="operationGrid workflowGrid">
-      <label className="operationCard white fileCardOp">
-        <div className="opIcon"><DashIcon name="upload"/></div><h3>Importer CSV pharmacie</h3><p>Importer le catalogue produits.</p><span>Choisir CSV</span>
-        <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
-      </label>
-
-      <label className="operationCard white fileCardOp">
-        <div className="opIcon"><DashIcon name="link"/></div><h3>Importer associations</h3><p>Importer les associations Produit ↔ identifiant.</p><span>Choisir CSV</span>
-        <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
-      </label>
-
-      <button className="operationCard blue" onClick={openBarcode}>
-        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Scanner code-barres produit</h3><p>Ouvrir une fenêtre pour saisir le code-barres.</p><span>Scanner</span>
-      </button>
-
-      <button className="operationCard green" onClick={openEpc}>
-        <div className="opIcon"><DashIcon name="rfid"/></div><h3>Scanner identifiant</h3><p>Ouvrir une fenêtre pour saisir un identifiant.</p><span>Scanner</span>
-      </button>
-
-      <label className="operationCard white fileCardOp">
-        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Importer identifiants détectés</h3><p>Importer un CSV/TXT d’identifiants détectés.</p><span>Choisir fichier</span>
-        <input type="file" accept=".csv,.txt" onChange={e=>importDetectedEpc(e.target.files[0])}/>
-      </label>
-
-      <button className="operationCard dangerOp" onClick={clearAssociations}>
-        <div className="opIcon"><DashIcon name="trash"/></div><h3>Vider toutes associations</h3><p>Supprimer toutes les associations locales.</p><span>Vider</span>
-      </button>
-    </div>
-    </div>
-
-    <div className="exportsPanel cashOpsPanel">
-      <div className="cashOpsHeader">
-        <div className="cashOpsIntro">
-          <h2>Opérations de caisse</h2>
-          <p className="notice">Ces opérations ont été déplacées ici. Cliquez sur une carte pour saisir ou modifier la valeur.</p>
+  const cashCardByKey = key => cashOperationCards.find(card => card.key === key);
+  function openCashCard(key){
+    const card = cashCardByKey(key);
+    if(!card) return;
+    if(card.isExpense) openExpenseModal();
+    else setCashOpModal(card);
+  }
+  const netBenefitCents = totalDailySalesCents - expensesCents;
+  const shuffleCashMetrics = [
+    {label:"Retrait par jour", value:cashToWithdrawCents, prefix:"-", action:()=>openCashCard("toWithdraw")},
+    {label:"Versement global", value:depositsCents, prefix:"-", action:()=>openCashCard("depositsCents")},
+    {label:"Retraits Global", value:withdrawnCents, prefix:"-", action:()=>openCashCard("withdrawnCents")},
+    {label:"Bénéfice Net", value:netBenefitCents, prefix:netBenefitCents>=0 ? "+" : "-", action:()=>openCashCard("totalDailySalesCents")},
+    {label:"Règlements reçus", value:creditSettlementCents, prefix:"+", action:()=>openCashCard("creditSettlementCents")},
+    {label:"Règlements à payer", value:creditSalesCents, prefix:"-", action:()=>openCashCard("creditSalesCents")}
+  ];
+  return <section className="operationsPage v113ShuffleOpsPage">
+    <div className="v113ShuffleOperationsFrame">
+      <div className="v113ShuffleBrowserBar">
+        <div className="v113ShuffleBrowserLeft">
+          <span className="v113Dot rose"></span>
+          <span className="v113Dot amber"></span>
+          <span className="v113Dot emerald"></span>
+          <code>app.smartinventory.io/operations</code>
         </div>
-        <div className="cashOpsIndicators">
-          <div className="cashOpsIndicator cashOpsIndicatorShortage">
-            <div className="cashOpsIndicatorIcon"><DashIcon name="warning"/></div>
-            <div className="cashOpsIndicatorContent">
-              <span>Montant manquant</span>
-              <strong>{formatDH(currentCashMetrics.shortageCents)}</strong>
-              <small>{currentCashMetrics.shortageCents>0 ? "À vérifier" : "Équilibré"}</small>
+        <span className="v113StableBadge">2026 Stable</span>
+      </div>
+
+      <div className="v113ShuffleOperationsContent">
+        <section className="v113OpsSection">
+          <header className="v113SectionHeader">
+            <span className="v113HeaderIcon indigo"><DashIcon name="sync"/></span>
+            <div>
+              <h2>Actions Inventaire</h2>
+              <p>Gérez vos importations de stocks et synchronisez vos fichiers en un clic.</p>
+            </div>
+          </header>
+          <div className="v113InventoryGrid">
+            <label className="v113ActionCard v113FileCard">
+              <span className="v113ActionIcon indigo"><DashIcon name="file"/></span>
+              <strong>Importer CSV pharmacie</strong>
+              <small>Mettez à jour le catalogue complet de votre officine.</small>
+              <em>Choisir CSV</em>
+              <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
+            </label>
+
+            <label className="v113ActionCard v113FileCard">
+              <span className="v113ActionIcon emerald"><DashIcon name="link"/></span>
+              <strong>Importer associations</strong>
+              <small>Associez automatiquement vos codes barres et références.</small>
+              <em>Choisir CSV</em>
+              <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
+            </label>
+
+            <button type="button" className="v113ActionCard" onClick={clearAssociations}>
+              <span className="v113ActionIcon rose"><DashIcon name="trash"/></span>
+              <strong>Supprimer stock manquant</strong>
+              <small>Nettoyez votre base de données des entrées obsolètes.</small>
+              <em className="danger">Exécuter</em>
+            </button>
+
+            <button type="button" className="v113ActionCard" onClick={openBarcode}>
+              <span className="v113ActionIcon amber"><DashIcon name="eye"/></span>
+              <strong>Scanner &amp; Vérifier</strong>
+              <small>Contrôle rapide des écarts d'inventaire physiques.</small>
+              <em>Scanner</em>
+            </button>
+          </div>
+        </section>
+
+        <section className="v113OpsSection v113DividedSection">
+          <div className="v113CashHeader">
+            <div className="v113SectionHeader">
+              <span className="v113HeaderIcon indigo"><DashIcon name="cash"/></span>
+              <div>
+                <h2>Opérations de caisse</h2>
+                <p>Suivi des flux financiers entrants et sortants.</p>
+              </div>
+            </div>
+            <div className="v113CashChips">
+              <span className="danger"><i></i>Montant manquant: {formatDH(currentCashMetrics.shortageCents)}</span>
+              <span className="success"><i></i>Montant surplus: {formatDH(currentCashMetrics.surplusCents)}</span>
             </div>
           </div>
-          <div className="cashOpsIndicator cashOpsIndicatorSurplus">
-            <div className="cashOpsIndicatorIcon"><DashIcon name="check"/></div>
-            <div className="cashOpsIndicatorContent">
-              <span>Montant surplus</span>
-              <strong>{formatDH(currentCashMetrics.surplusCents)}</strong>
-              <small>{currentCashMetrics.surplusCents>0 ? "Excédent" : "Équilibré"}</small>
-            </div>
-          </div>
-        </div>
-        <div className="cashOpsDateBox">
-          <span>Date de caisse {canChangeCashDate ? "" : "(admin seulement)"}</span>
-          <input
-            type="date"
-            value={cashDate}
-            disabled={!canChangeCashDate}
-            title={canChangeCashDate ? "Changer la date de caisse" : "Seul un administrateur peut changer cette date"}
-            onChange={e=>canChangeCashDate && setCashDate(e.target.value || todayISO())}
-          />
-        </div>
-      </div>
-      <div className="exportOperationGrid cashOpsGrid">
-        {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.cardClass || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.isExpense ? openExpenseModal() : (card.editable ? setCashOpModal(card) : null)}>
-          <div className="opIcon"><DashIcon name={card.icon || "cash"}/></div>
-          <h3>{card.title}</h3>
-          <strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
-          <span>{card.cta}</span>
-        </button>)}
-      </div>
-    </div>
 
-    <div className="exportsPanel">
-      <h2>Exports et sauvegardes locales</h2>
-      <p className="notice">Exportez vos tableaux, rapports d’inventaire et sauvegardes locales.</p>
-      <div className="exportOperationGrid">
-        <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon"><DashIcon name="box"/></div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
-        <button className="exportOperationCard" onClick={exportAssociations}><div className="opIcon"><DashIcon name="link"/></div><h3>Associations</h3><p>Exporter les produits liés aux identifiants.</p><span>Exporter</span></button>
-        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}><div className="opIcon"><DashIcon name="tag"/></div><h3>Produits sans association</h3><p>Exporter les articles à associer.</p><span>Exporter</span></button>
-        <button className="exportOperationCard blue" onClick={exportCoverageReport}><div className="opIcon"><DashIcon name="chart"/></div><h3>Taux de couverture</h3><p>Exporter les KPI de couverture.</p><span>Exporter</span></button>
-        <button className="exportOperationCard green" onClick={backupProject}><div className="opIcon"><DashIcon name="save"/></div><h3>Sauvegarde projet</h3><p>Créer un backup JSON complet.</p><span>Backup</span></button>
-        <label className="exportOperationCard fileCard"><div className="opIcon"><DashIcon name="restore"/></div><h3>Restaurer projet</h3><p>Importer un backup JSON local.</p><span>Choisir fichier</span><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></label>
+          <div className="v113DateLine">
+            <span>Date de caisse {canChangeCashDate ? "" : "(admin seulement)"}</span>
+            <input
+              type="date"
+              value={cashDate}
+              disabled={!canChangeCashDate}
+              title={canChangeCashDate ? "Changer la date de caisse" : "Seul un administrateur peut changer cette date"}
+              onChange={e=>canChangeCashDate && setCashDate(e.target.value || todayISO())}
+            />
+          </div>
+
+          <div className="v113MetricGrid">
+            {shuffleCashMetrics.map(metric=><div className="v113MetricTile" key={metric.label}>
+              <span>{metric.label}</span>
+              <strong>{metric.prefix} {formatDH(Math.abs(metric.value))}</strong>
+              <button type="button" onClick={metric.action}>Détails</button>
+            </div>)}
+          </div>
+        </section>
+
+        <section className="v113OpsSection v113DividedSection">
+          <header className="v113SectionHeader">
+            <span className="v113HeaderIcon indigo"><DashIcon name="save"/></span>
+            <div>
+              <h2>Exports et Sauvegardes locales</h2>
+              <p>Sécurisez vos données critiques et exportez vos tables au format standard.</p>
+            </div>
+          </header>
+          <div className="v113ExportGrid">
+            <button type="button" className="v113ExportCard" onClick={exportProducts}>
+              <span><strong>Catalogue de produits</strong><small>Export complet de la base articles.</small></span>
+              <em>Exporter</em>
+            </button>
+            <button type="button" className="v113ExportCard" onClick={exportAssociations}>
+              <span><strong>Historique des ventes</strong><small>Exportez toutes les sessions actives.</small></span>
+              <em>Exporter</em>
+            </button>
+            <button type="button" className="v113ExportCard" onClick={backupProject}>
+              <span><strong>Sauvegarde Complète (JSON)</strong><small>Fichier de restauration complet.</small></span>
+              <em className="primary">Créer backup</em>
+            </button>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -773,7 +812,6 @@ function Operations({me}){
       </div>
     </div>}
 
-    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
 
@@ -1355,7 +1393,6 @@ function CashRegister(){
       </div>
     </div>
     {msg && <p className="success cashMsg">{msg}</p>}
-    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
 
@@ -2284,7 +2321,6 @@ function AIAssistant(){
       </aside>
     </div>
 
-    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
 
