@@ -1,0 +1,8 @@
+V122 - Exact Shuffle login HTML reference integration
+
+- Page de connexion uniquement.
+- Design basé sur la référence Shuffle fournie.
+- Même layout: navbar, hero connexion sécurisée, bloc texte, carte formulaire à droite.
+- Champs username/password connectés à la logique d'authentification existante.
+- Aucune modification aux pages internes, API, dashboard, opérations, caisse ou inventaire.
+- Note: le fichier connexion_page_shuffle_html.zip reçu le 2026-06-24 contient seulement un dossier vide; la référence exploitable utilisée est le ZIP source Shuffle connexion_page_shuffle.zip fourni auparavant.
