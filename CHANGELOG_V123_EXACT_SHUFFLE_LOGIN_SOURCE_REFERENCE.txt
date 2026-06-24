@@ -1,0 +1,1 @@
+V123 - Login page updated using html_cnx_shuffle.zip as exact HTML/CSS reference. Only the public login page was changed. Existing authentication/API/dashboard/internal pages remain unchanged.
