@@ -1,0 +1,1 @@
+V116: Rebuilt the public homepage as a React/Vite component using the exact Shuffle source structure. Fixed navbar presence, hero highlighted “Opérations de Stock” text, and kept Connexion/Essai gratuit/Accéder à l’application routing to the username/password login page. Internal app pages and API logic unchanged.

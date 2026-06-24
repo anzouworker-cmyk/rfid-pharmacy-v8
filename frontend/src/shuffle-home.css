@@ -1,0 +1,9 @@
+@tailwind base; @tailwind components; @tailwind utilities; 
+
+/* V116 exact Shuffle homepage safeguards */
+.shuffleHomeReactExact { min-height: 100vh; background: #fafbfe; color: #0f172a; font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif; }
+.shuffleHomeReactExact .font-heading { font-family: "Outfit", ui-sans-serif, system-ui, sans-serif !important; }
+.shuffleHomeReactExact .font-body { font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important; }
+.shuffleHomeReactExact .shuffle-gradient-title { color: #4f46e5 !important; background: linear-gradient(90deg,#4f46e5,#3730a3); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+@supports not (-webkit-background-clip: text) { .shuffleHomeReactExact .shuffle-gradient-title { color:#4f46e5 !important; background:none; } }
+.shuffleHomeReactExact a, .shuffleHomeReactExact button { cursor: pointer; }
