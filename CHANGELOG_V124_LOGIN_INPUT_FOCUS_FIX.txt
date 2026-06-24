@@ -1,0 +1,6 @@
+V124_LOGIN_INPUT_FOCUS_FIX
+
+- Fixed the Shuffle login page input focus bug.
+- The username and password fields no longer lose focus after each typed character.
+- The Shuffle HTML is mounted once and React state is synchronized without rebuilding the input DOM.
+- No changes to dashboard, inventory, cash management, operations, backend logic, or API behavior.
