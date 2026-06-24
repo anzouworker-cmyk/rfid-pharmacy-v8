@@ -1,0 +1,7 @@
+V115_EXACT_SHUFFLE_HOMEPAGE_HTML
+
+- Remplace uniquement la page d’accueil publique par le HTML/CSS exact exporté depuis Shuffle.
+- Le rendu Shuffle est isolé dans un Shadow DOM pour éviter que le CSS global de l’application modifie les espacements, boutons, ombres ou typographies.
+- Connexion, Essai gratuit, Accéder à l’application et CTA d’essai ouvrent toujours la page username/password existante.
+- Les autres liens de navigation restent des ancres internes vers les sections de la landing page.
+- Aucune modification aux pages internes, API calls, dashboard, inventaire, caisse ou permissions.
