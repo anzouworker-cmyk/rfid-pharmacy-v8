@@ -1,0 +1,8 @@
+V111 - Real Shuffle Project Preview integration
+
+- Integrated the uploaded Shuffle Project Preview visual structure into the React login/landing experience.
+- Added preview-inspired sticky navigation, hero section, app browser panel, operations cards, cash status chips and dark AI showcase.
+- Added logged-in app browser chrome label matching the Shuffle operations preview.
+- Finalized indigo/slate SaaS palette, Outfit headings and Plus Jakarta Sans body typography.
+- Preserved existing React routes, API calls, inventory logic, cash logic, permissions and local storage behavior.
+- Updated backend /health version to V111_REAL_SHUFFLE_PREVIEW_INTEGRATION.

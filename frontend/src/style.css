@@ -6797,3 +6797,215 @@ input:focus,select:focus,textarea:focus{
   .topPageTitle{font-size:20px!important;}
   .whiteAccount{padding-right:10px!important;}
 }
+
+
+/* V111 - Real Shuffle preview integration: landing, chrome and final polish */
+:root{
+  --si-primary:#4f46e5!important;
+  --si-primary-2:#4338ca!important;
+  --si-primary-3:#3730a3!important;
+  --si-primary-soft:#eef2ff!important;
+  --si-page:#fafbfe!important;
+  --si-surface:#ffffff!important;
+  --si-dark:#0f172a!important;
+  --si-dark-2:#1e293b!important;
+  --si-text:#0f172a!important;
+  --si-muted:#64748b!important;
+  --si-line:#e2e8f0!important;
+  --si-line-soft:#f1f5f9!important;
+  --si-success:#059669!important;
+  --si-success-soft:#ecfdf5!important;
+  --si-warning:#d97706!important;
+  --si-warning-soft:#fffbeb!important;
+  --si-danger:#e11d48!important;
+  --si-danger-soft:#fff1f2!important;
+  --si-shadow:0 18px 45px rgba(15,23,42,.08)!important;
+  --si-shadow-xl:0 28px 80px rgba(15,23,42,.14)!important;
+}
+html,body,#root{min-height:100%;}
+body{
+  font-family:"Plus Jakarta Sans",Inter,Segoe UI,Arial,sans-serif!important;
+  background:#fafbfe!important;
+  color:#0f172a!important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:geometricPrecision;
+}
+h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage h1,.cashRegisterHeader h1,.platformHeaderBar h2,.cashAdminHeader h1{
+  font-family:"Outfit","Plus Jakarta Sans",sans-serif!important;
+  letter-spacing:-.035em!important;
+}
+
+/* Shuffle static preview transformed into React login/landing */
+.shufflePreviewLogin{
+  min-height:100vh!important;
+  display:block!important;
+  background:
+    radial-gradient(circle at 15% 8%,rgba(79,70,229,.13),transparent 28rem),
+    radial-gradient(circle at 88% 10%,rgba(16,185,129,.11),transparent 24rem),
+    linear-gradient(180deg,#ffffff 0%,#fafbfe 42%,#f8fafc 100%)!important;
+  padding:0!important;
+  overflow-x:hidden;
+}
+.shuffleLandingNav{
+  position:sticky;top:0;z-index:30;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  min-height:76px;padding:16px clamp(18px,4vw,48px);
+  background:rgba(255,255,255,.84);backdrop-filter:blur(16px);
+  border-bottom:1px solid #f1f5f9;
+}
+.shuffleLandingBrand{display:flex;align-items:center;gap:12px;color:#0f172a;white-space:nowrap;}
+.shuffleLandingBrand b{font-family:"Outfit",sans-serif;font-size:20px;letter-spacing:-.035em;}
+.shuffleBrandMark{width:40px;height:40px;border-radius:14px;background:#4f46e5;color:#fff;display:grid;place-items:center;box-shadow:0 12px 24px rgba(79,70,229,.20)}
+.shuffleBrandMark svg{width:21px;height:21px;}
+.shuffleLandingLinks{display:flex;align-items:center;gap:28px;color:#64748b;font-size:14px;font-weight:700;}
+.shuffleLandingLinks span{transition:.18s ease;color:#64748b;}
+.shuffleLandingLinks .active{color:#4f46e5;border-bottom:2px solid #4f46e5;padding-bottom:5px;}
+.shuffleLandingLinks em{font-style:normal;margin-left:5px;padding:2px 7px;border-radius:999px;background:#eef2ff;color:#4338ca;font-size:10px;text-transform:uppercase;letter-spacing:.08em;}
+.shuffleNavCta,.shufflePrimaryAction{
+  text-decoration:none;display:inline-flex;align-items:center;justify-content:center;
+  background:#4f46e5;color:#fff!important;border-radius:14px;font-weight:900;
+  box-shadow:0 16px 34px rgba(79,70,229,.22);transition:.18s ease;
+}
+.shuffleNavCta{padding:10px 16px;font-size:14px;}
+.shuffleNavCta:hover,.shufflePrimaryAction:hover{background:#4338ca;transform:translateY(-1px);}
+.shuffleHeroStage{
+  width:min(1280px,calc(100% - 36px));margin:0 auto;padding:72px 0 56px;
+  display:grid;grid-template-columns:1.05fr .95fr;grid-template-areas:"copy auth" "preview preview";gap:30px;align-items:center;
+}
+.shuffleHeroCopy{grid-area:copy;text-align:left;}
+.shuffleHeroBadge{display:inline-flex;align-items:center;gap:9px;background:#eef2ff;border:1px solid #e0e7ff;color:#4338ca;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:900;margin-bottom:24px;}
+.shuffleHeroBadge i{width:8px;height:8px;border-radius:999px;background:#4f46e5;box-shadow:0 0 0 6px rgba(79,70,229,.10);}
+.shuffleHeroCopy h1{font-size:clamp(42px,6vw,72px);line-height:.98;margin:0;color:#0f172a;font-weight:900;max-width:760px;}
+.shuffleHeroCopy h1 strong{background:linear-gradient(90deg,#4f46e5,#3730a3);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.shuffleHeroCopy p{font-size:18px;line-height:1.75;color:#64748b;max-width:650px;margin:24px 0 0;}
+.shuffleHeroActions{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-top:34px;}
+.shufflePrimaryAction{padding:15px 22px;}
+.shuffleSecondaryAction{display:inline-flex;align-items:center;justify-content:center;padding:14px 20px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;color:#475569;font-weight:800;box-shadow:0 10px 24px rgba(15,23,42,.05)}
+.shuffleAuthPanel{grid-area:auth;display:flex;justify-content:flex-end;}
+.shuffleAuthCard{
+  width:min(430px,100%)!important;margin:0!important;padding:30px!important;
+  border-radius:28px!important;border:1px solid rgba(226,232,240,.95)!important;
+  background:rgba(255,255,255,.95)!important;box-shadow:0 28px 80px rgba(15,23,42,.14)!important;
+}
+.shuffleAuthCard .loginCodeLogo{margin-bottom:18px!important;}
+.shuffleAuthCard h2{font-size:30px!important;margin:0 0 6px!important;color:#0f172a!important;}
+.shuffleAuthCard > p{margin:0 0 22px!important;color:#64748b!important;font-size:14px!important;}
+.shuffleAuthCard label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:900;color:#64748b;margin-top:12px;display:block;}
+.shuffleAuthCard input{width:100%;margin:6px 0 10px!important;border-radius:14px!important;background:#fff!important;border:1px solid #d7deea!important;}
+.shuffleAuthCard .primaryLoginBtn{width:100%;min-height:50px;margin-top:8px!important;background:#4f46e5!important;border-radius:16px!important;box-shadow:0 18px 36px rgba(79,70,229,.22)!important;}
+.shuffleAuthCard .loginHelp{margin-top:18px!important;border-top:1px solid #f1f5f9;padding-top:14px;color:#64748b;text-align:left!important;}
+.shufflePreviewPanel{grid-area:preview;margin-top:12px;background:#fff;border:1px solid rgba(203,213,225,.76);border-radius:28px;overflow:hidden;box-shadow:0 28px 80px rgba(15,23,42,.12);}
+.shuffleBrowserBar{height:58px;display:flex;align-items:center;gap:8px;background:rgba(248,250,252,.92);border-bottom:1px solid #f1f5f9;padding:0 22px;}
+.shuffleDot{width:12px;height:12px;border-radius:999px;display:inline-block;flex:0 0 auto;}
+.shuffleDot.rose{background:#fb7185}.shuffleDot.amber{background:#fbbf24}.shuffleDot.emerald{background:#34d399}
+.shuffleBrowserBar code,.shuffleAppChromeLabel code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#64748b;font-size:12px;font-weight:800;margin-left:10px;}
+.shuffleBrowserBar em,.shuffleAppChromeLabel em{margin-left:auto;font-style:normal;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:#e2e8f0;color:#64748b;border-radius:7px;padding:5px 8px;font-weight:900;}
+.shufflePreviewContent{padding:28px;}
+.shufflePreviewHeader{display:flex;align-items:center;gap:13px;margin-bottom:20px;}
+.shufflePreviewHeader > span{width:36px;height:36px;border-radius:12px;background:#eef2ff;color:#4f46e5;display:grid;place-items:center;}
+.shufflePreviewHeader svg{width:18px;height:18px;}
+.shufflePreviewHeader b{font-family:"Outfit",sans-serif;font-size:19px;color:#0f172a;display:block;}
+.shufflePreviewHeader small{color:#64748b;font-size:12px;font-weight:700;}
+.shuffleMiniGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.shuffleMiniGrid article{padding:18px;border:1px solid #f1f5f9;background:#f8fafc;border-radius:18px;transition:.18s ease;min-height:142px;}
+.shuffleMiniGrid article:hover{background:#fff;border-color:#c7d2fe;box-shadow:0 18px 42px rgba(79,70,229,.10);transform:translateY(-2px);}
+.shuffleMiniGrid article span{width:42px;height:42px;border-radius:14px;background:#eef2ff;color:#4f46e5;display:grid;place-items:center;margin-bottom:15px;}
+.shuffleMiniGrid article svg{width:21px;height:21px;}
+.shuffleMiniGrid article b{display:block;color:#0f172a;font-size:14px;line-height:1.25;margin-bottom:7px;}
+.shuffleMiniGrid article small{color:#64748b;font-weight:700;}
+.shuffleCashStrip{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;}
+.shuffleCashStrip span{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;font-size:12px;font-weight:900;}
+.shuffleCashStrip i{width:7px;height:7px;border-radius:999px;}
+.shuffleCashStrip .danger{background:#fff1f2;color:#9f1239;border:1px solid #fecdd3}.shuffleCashStrip .danger i{background:#fb7185}
+.shuffleCashStrip .success{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}.shuffleCashStrip .success i{background:#34d399}
+.shuffleAiShowcase{width:min(1280px,calc(100% - 36px));margin:0 auto 64px;padding:56px;display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:center;background:#fff;border:1px solid #f1f5f9;border-radius:32px;box-shadow:0 18px 55px rgba(15,23,42,.07);}
+.shuffleAiShowcase > div > span{display:block;color:#4f46e5;font-size:13px;text-transform:uppercase;letter-spacing:.14em;font-weight:900;margin-bottom:14px;}
+.shuffleAiShowcase h2{font-size:clamp(30px,4vw,44px);line-height:1.04;margin:0 0 18px;color:#0f172a;font-weight:900;}
+.shuffleAiShowcase p{color:#64748b;line-height:1.8;margin:0;}
+.shuffleAiShowcase aside{background:#0f172a;color:#fff;border-radius:26px;padding:28px;position:relative;overflow:hidden;box-shadow:0 30px 70px rgba(15,23,42,.26);}
+.shuffleAiShowcase aside::after{content:"";position:absolute;right:-80px;top:-120px;width:260px;height:260px;border-radius:999px;background:radial-gradient(circle,rgba(99,102,241,.30),transparent 70%);}
+.shuffleAiShowcase aside header{display:flex;align-items:center;gap:10px;border-bottom:1px solid #1f2937;padding-bottom:16px;margin-bottom:20px;position:relative;z-index:1;}
+.shuffleAiShowcase aside header i{width:10px;height:10px;border-radius:999px;background:#6366f1;box-shadow:0 0 0 8px rgba(99,102,241,.12);}
+.shuffleAiShowcase aside code{color:#94a3b8;font-size:12px;}
+.shuffleAiShowcase aside header em{margin-left:auto;font-style:normal;color:#a5b4fc;background:#1e293b;border-radius:8px;padding:5px 8px;font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+.shuffleAiShowcase .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#94a3b8;font-size:13px;position:relative;z-index:1;}
+.shuffleAiShowcase .accent{color:#a5b4fc;}
+.shuffleAiShowcase blockquote{margin:16px 0 0;padding:16px;border:1px solid #334155;border-radius:16px;background:rgba(30,41,59,.80);color:#e2e8f0;font-size:13px;line-height:1.6;position:relative;z-index:1;}
+
+/* Logged-in app chrome closer to Shuffle preview */
+.whiteShell{background:#fafbfe!important;}
+.whiteTopbar{
+  background:rgba(255,255,255,.86)!important;
+  backdrop-filter:blur(16px)!important;
+  border-bottom:1px solid #f1f5f9!important;
+  box-shadow:none!important;
+}
+.shuffleAppChromeLabel{display:flex;align-items:center;gap:6px;margin-left:16px;min-width:0;flex:1;max-width:520px;}
+.shuffleAppChromeLabel code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:6px;}
+.shuffleAppChromeLabel em{margin-left:8px;background:#f1f5f9;color:#64748b;white-space:nowrap;}
+.whiteAccount{margin-left:auto!important;}
+.whiteSidebar,.sidebar{
+  background:#fff!important;
+  border-right:1px solid #f1f5f9!important;
+  box-shadow:12px 0 36px rgba(15,23,42,.05)!important;
+}
+.whiteNavItem{
+  color:#64748b!important;
+  border:1px solid transparent!important;
+  border-radius:14px!important;
+}
+.whiteNavItem .navIconTile{background:#f8fafc!important;color:#64748b!important;border:1px solid #f1f5f9!important;}
+.whiteNavItem.active{
+  background:#eef2ff!important;color:#4338ca!important;border-color:#e0e7ff!important;
+  box-shadow:0 12px 26px rgba(79,70,229,.10)!important;
+}
+.whiteNavItem.active .navIconTile{background:#4f46e5!important;border-color:#4f46e5!important;color:#fff!important;box-shadow:0 12px 24px rgba(79,70,229,.20)!important;}
+.whiteNavItem:hover{background:#f8fafc!important;color:#4f46e5!important;border-color:#e2e8f0!important;}
+.whiteLogout{background:#0f172a!important;color:#fff!important;border-radius:14px!important;box-shadow:0 16px 32px rgba(15,23,42,.14)!important;}
+
+.operationsPage,.figmaDashboard,.cashRegisterPage,.cashAdminDashboardPage,.platformPage,.tableOnlyPage,.aiChatPage,.dashboardAdminPage{animation:shuffleFadeUp .22s ease both;}
+@keyframes shuffleFadeUp{from{opacity:.85;transform:translateY(6px)}to{opacity:1;transform:none}}
+.operationsActionPanel,.exportsPanel,.figmaPanel,.cashRegisterPanel,.platformPanel,.cashAdminPanel,.tableCard{
+  border-radius:28px!important;
+  border-color:#e2e8f0!important;
+  box-shadow:0 18px 45px rgba(15,23,42,.07)!important;
+}
+.operationCard,.exportOperationCard,.figmaKpiCard,.figmaReportBtn,.cashOperationCard{
+  border-radius:20px!important;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease!important;
+}
+.operationCard:hover,.exportOperationCard:hover,.figmaKpiCard:hover,.figmaReportBtn:hover,.cashOperationCard:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:0 22px 52px rgba(79,70,229,.12)!important;
+  border-color:#c7d2fe!important;
+}
+.productTable th,.associationTable th,.inventoryTable th,.cashTable th,.platformTable th,.usersTable th,.adAdminTable th{
+  background:#f8fafc!important;color:#64748b!important;font-size:11px!important;letter-spacing:.075em!important;
+}
+.statusBadge,.badge,.roleBadge{box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)!important;}
+.aiContextPanel,.aiChatTop{
+  background:linear-gradient(135deg,#0f172a,#1e1b4b)!important;
+  box-shadow:0 30px 80px rgba(15,23,42,.22)!important;
+}
+
+@media(max-width:1100px){
+  .shuffleLandingLinks{display:none;}
+  .shuffleHeroStage{grid-template-columns:1fr;grid-template-areas:"copy" "auth" "preview";padding-top:44px;}
+  .shuffleAuthPanel{justify-content:flex-start;}
+  .shuffleAiShowcase{grid-template-columns:1fr;padding:32px;}
+  .shuffleMiniGrid{grid-template-columns:repeat(2,1fr);}
+  .shuffleAppChromeLabel{display:none;}
+}
+@media(max-width:700px){
+  .shuffleLandingNav{min-height:64px;padding:12px 16px;}
+  .shuffleNavCta{display:none;}
+  .shuffleHeroStage,.shuffleAiShowcase{width:calc(100% - 24px);}
+  .shuffleHeroCopy h1{font-size:38px;}
+  .shuffleHeroCopy p{font-size:15px;}
+  .shuffleHeroActions{align-items:stretch;}
+  .shufflePrimaryAction,.shuffleSecondaryAction{width:100%;}
+  .shuffleMiniGrid{grid-template-columns:1fr;}
+  .shufflePreviewContent{padding:18px;}
+  .shuffleAiShowcase{padding:24px;margin-bottom:32px;border-radius:24px;}
+  .shuffleAuthCard{padding:22px!important;}
+}

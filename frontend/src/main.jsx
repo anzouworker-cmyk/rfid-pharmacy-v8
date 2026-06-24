@@ -361,6 +361,11 @@ function App(){
       <header className="whiteTopbar">
         <button className="hamburger" onClick={toggleSidebar} aria-label="Menu">☰</button>
         <h1 className="topPageTitle">{pageTitle}</h1>
+        <div className="shuffleAppChromeLabel" aria-hidden="true">
+          <span className="shuffleDot rose"></span><span className="shuffleDot amber"></span><span className="shuffleDot emerald"></span>
+          <code>app.smartinventory.io/{tab}</code>
+          <em>2026 Stable</em>
+        </div>
         <div className="whiteAccount">
           <span className="whiteAvatar" aria-hidden="true">AD</span>
           <div>
@@ -1817,25 +1822,94 @@ function Login({setToken}){
     setLoading(false);
   }
 
-  return <div className="login pharmaLogin">
-    <form onSubmit={login} className="loginCard">
-      <SmartInventoryLogo className="loginCodeLogo"/>
-
-      <label>Utilisateur</label>
-      <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
-
-      <label>Mot de passe</label>
-      <input value={p} onChange={e=>setP(e.target.value)} placeholder="Mot de passe" type="password"/>
-
-      <button type="submit" className="primaryLoginBtn" disabled={loading}>{loading ? "Connexion..." : "Connexion"}</button>
-
-      {err && <p className="err">{err}</p>}
-
-      <div className="loginHelp">
-        <small>Compte démo : demo / demo123</small><br/>
-        <small>Compte admin : admin / admin123</small>
+  return <div className="login shufflePreviewLogin">
+    <nav className="shuffleLandingNav">
+      <div className="shuffleLandingBrand">
+        <span className="shuffleBrandMark"><SidebarBrandIcon/></span>
+        <b>Smart Inventory</b>
       </div>
-    </form>
+      <div className="shuffleLandingLinks" aria-hidden="true">
+        <span>Dashboard</span>
+        <span className="active">Opérations</span>
+        <span>Associations</span>
+        <span>Inventaire</span>
+        <span>Assistant IA <em>New</em></span>
+      </div>
+      <a className="shuffleNavCta" href="#connexion">Connexion</a>
+    </nav>
+
+    <main className="shuffleHeroStage">
+      <section className="shuffleHeroCopy">
+        <span className="shuffleHeroBadge"><i></i> Redéfinir la gestion d'inventaire SaaS</span>
+        <h1>Pilotez vos <strong>Opérations de Stock</strong> et de Caisse en un seul écran</h1>
+        <p>Importez vos catalogues de pharmacie, automatisez les rapprochements de caisse et suivez les écarts avec un tableau de bord moderne, rapide et fiable.</p>
+        <div className="shuffleHeroActions">
+          <a href="#connexion" className="shufflePrimaryAction">Accéder à l'application</a>
+          <span className="shuffleSecondaryAction">Démo interactive</span>
+        </div>
+      </section>
+
+      <section className="shufflePreviewPanel" aria-label="Aperçu opérations Smart Inventory">
+        <div className="shuffleBrowserBar">
+          <span className="shuffleDot rose"></span><span className="shuffleDot amber"></span><span className="shuffleDot emerald"></span>
+          <code>app.smartinventory.io/operations</code>
+          <em>2026 Stable</em>
+        </div>
+        <div className="shufflePreviewContent">
+          <div className="shufflePreviewHeader">
+            <span><DashIcon name="operations"/></span>
+            <div><b>Actions Inventaire</b><small>Gérez vos importations, scans et associations.</small></div>
+          </div>
+          <div className="shuffleMiniGrid">
+            <article><span><DashIcon name="upload"/></span><b>Importer CSV pharmacie</b><small>Catalogue produits</small></article>
+            <article><span><DashIcon name="link"/></span><b>Importer associations</b><small>Produit ↔ identifiant</small></article>
+            <article><span><DashIcon name="barcode"/></span><b>Scanner code-barres</b><small>Saisie rapide</small></article>
+            <article><span><DashIcon name="rfid"/></span><b>Scanner identifiant</b><small>Stock détecté</small></article>
+          </div>
+          <div className="shuffleCashStrip">
+            <span className="danger"><i></i>Montant manquant: 0 DH</span>
+            <span className="success"><i></i>Montant surplus: 0 DH</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="connexion" className="shuffleAuthPanel">
+        <form onSubmit={login} className="loginCard shuffleAuthCard">
+          <SmartInventoryLogo className="loginCodeLogo"/>
+          <h2>Connexion</h2>
+          <p>Accédez à votre espace inventaire et caisse.</p>
+
+          <label>Utilisateur</label>
+          <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
+
+          <label>Mot de passe</label>
+          <input value={p} onChange={e=>setP(e.target.value)} placeholder="Mot de passe" type="password"/>
+
+          <button type="submit" className="primaryLoginBtn" disabled={loading}>{loading ? "Connexion..." : "Connexion"}</button>
+
+          {err && <p className="err">{err}</p>}
+
+          <div className="loginHelp">
+            <small>Compte démo : demo / demo123</small><br/>
+            <small>Compte admin : admin / admin123</small>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <section className="shuffleAiShowcase">
+      <div>
+        <span>Algorithmes intelligents</span>
+        <h2>L'Assistant IA au service de votre rentabilité</h2>
+        <p>Analyse les anomalies de caisse, les produits manquants et les priorités d'association pour accélérer vos décisions.</p>
+      </div>
+      <aside>
+        <header><i></i><code>Assistant IA connecté</code><em>v2.4-stable</em></header>
+        <p className="mono">&gt; Analyse des ventes de la semaine...</p>
+        <p className="mono accent">&gt; [ALERTE] Écart détecté sur une référence prioritaire.</p>
+        <blockquote>Voulez-vous générer un plan d'action pour régulariser l'inventaire ?</blockquote>
+      </aside>
+    </section>
   </div>
 }
 
