@@ -1,0 +1,5 @@
+V125
+- Dashboard principal intégré avec le design source Shuffle fourni (HTML/code frontend).
+- Page dashboard rendue avec navbar sombre, cards, couverture, publicité, exports, alertes et footer du design Shuffle.
+- Actions existantes conservées pour navigation et exports.
+- Pages accueil/login/internes non modifiées hors dashboard.

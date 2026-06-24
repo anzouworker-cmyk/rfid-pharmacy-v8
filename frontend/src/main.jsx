@@ -341,6 +341,11 @@ function App(){
   if(me?.role==="platform_admin"){
     menu.push(...APP_ADMIN_PAGES.map(p=>({...p})));
   }
+
+  if(tab==="dashboard"){
+    return <Dashboard setTab={setTab} menu={menu} me={me} logout={logout}/>;
+  }
+
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
       <div className="whiteBrand">
@@ -2940,55 +2945,56 @@ return <section className="platformPage">
 
 
 
-function Dashboard({setTab}){
-  const {products,associations,detectedEpcs}=useLocalStore();
-  const [dashboardAds,setDashboardAds]=useState([]);
-  const [dashboardAdIndex,setDashboardAdIndex]=useState(0);
-  const [defaultAdIndex,setDefaultAdIndex]=useState(0);
-  const defaultAds=["/default-dashboard-ad.png","/default-ads/ad1.png","/default-ads/ad2.png","/default-ads/ad3.png","/default-ads/ad4.png"];
+function ShuffleDashboardIcon({name, className="h-5 w-5"}){
+  if(name==="brand") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 7.25 12 3l7.5 4.25v9.5L12 21l-7.5-4.25v-9.5Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M4.8 7.4 12 11.5l7.2-4.1M12 21v-9.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+  if(name==="dashboard") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h4A1.5 1.5 0 0 1 11 5.5v4A1.5 1.5 0 0 1 9.5 11h-4A1.5 1.5 0 0 1 4 9.5v-4ZM13 5.5A1.5 1.5 0 0 1 14.5 4h4A1.5 1.5 0 0 1 20 5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4A1.5 1.5 0 0 1 13 9.5v-4ZM4 14.5A1.5 1.5 0 0 1 5.5 13h4a1.5 1.5 0 0 1 1.5 1.5v4A1.5 1.5 0 0 1 9.5 20h-4A1.5 1.5 0 0 1 4 18.5v-4ZM13 14.5a1.5 1.5 0 0 1 1.5-1.5h4a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a1.5 1.5 0 0 1-1.5-1.5v-4Z" stroke="currentColor" strokeWidth="1.5"/></svg>;
+  if(name==="box") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7.5 12 4l7 3.5v9L12 20l-7-3.5v-9Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="M8.5 9.25 12 11l3.5-1.75" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>;
+  if(name==="tag") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4h8l4 4v8l-4 4H8l-4-4V8l4-4Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="m9 12 2 2 4-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+  if(name==="rfid") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9.5c4.7-4 11.3-4 16 0M7.5 13c2.7-2.2 6.3-2.2 9 0M10.5 16.5c.9-.7 2.1-.7 3 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>;
+  if(name==="warning") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.75 21 19H3L12 4.75Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/></svg>;
+  if(name==="doc") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3.75h7l3 3v13.5H7V3.75Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="M10 14h4M10 10h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>;
+  if(name==="clock") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 7v5l3 2M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+  if(name==="spark") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v3M12 17v3M5.6 6.6l2.1 2.1M16.3 15.3l2.1 2.1M4 12h3M17 12h3M5.6 17.4l2.1-2.1M16.3 8.7l2.1-2.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>;
+  if(name==="arrow") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+  if(name==="logout") return <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 6H6.5A1.5 1.5 0 0 0 5 7.5v9A1.5 1.5 0 0 0 6.5 18H10M14 8l4 4-4 4M18 12H9" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+  return <ShuffleDashboardIcon name="dashboard" className={className}/>;
+}
 
+function useShuffleDashboardCss(){
   useEffect(()=>{
-    const token=localStorage.token||"";
-    axios.get(`${API}/dashboard/content`,{headers:{Authorization:`Bearer ${token}`}})
-      .then(r=>{
-        const ads=(r.data||[])
-          .filter(x=>["publicite","publicité","promo","annonce","ad"].includes((x.content_type||"").toLowerCase()))
-          .filter(x=>x.active!==false && x.image_url);
-        setDashboardAds(ads);
-        setDashboardAdIndex(0);
-      })
-      .catch(()=>setDashboardAds([]));
+    const id="shuffle-dashboard-css";
+    let link=document.getElementById(id);
+    if(!link){
+      link=document.createElement("link");
+      link.id=id;
+      link.rel="stylesheet";
+      link.href="/shuffle-dashboard.css";
+      document.head.appendChild(link);
+    }
+    const previous=document.body.className;
+    document.body.className="antialiased font-body bg-body text-body bg-slate-100 text-slate-950 selection:bg-indigo-200 selection:text-slate-950";
+    return ()=>{
+      document.body.className=previous;
+      const current=document.getElementById(id);
+      if(current) current.remove();
+    };
   },[]);
+}
 
-  const activeDashboardAds = useMemo(()=>dashboardAds.filter(x=>x && x.image_url),[dashboardAds]);
-  const currentDashboardAd = activeDashboardAds.length ? activeDashboardAds[dashboardAdIndex % activeDashboardAds.length] : null;
-
-  useEffect(()=>{
-    const total = activeDashboardAds.length || defaultAds.length;
-    if(total <= 1) return;
-    const timer=setInterval(()=>{
-      if(activeDashboardAds.length){
-        setDashboardAdIndex(i=>(i+1)%activeDashboardAds.length);
-      }else{
-        setDefaultAdIndex(i=>(i+1)%defaultAds.length);
-      }
-    },5000);
-    return ()=>clearInterval(timer);
-  },[activeDashboardAds.length]);
-
+function Dashboard({setTab, menu=[], me, logout}){
+  useShuffleDashboardCss();
+  const {products,associations,detectedEpcs}=useLocalStore();
   const associatedPids=new Set(associations.map(a=>String(a.PID)));
   const productsWithRfid=products.filter(p=>associatedPids.has(String(p.PID))).length;
   const productsWithoutRfid=Math.max(products.length-productsWithRfid,0);
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
   const detectedEpcCount=(detectedEpcs||[]).length;
-
   const epcCounts={};
   associations.forEach(a=>{ const e=norm(a.EPC); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
   const duplicateEpcs=Object.values(epcCounts).filter(x=>x>1).length;
-  const todayLabel=new Date().toLocaleDateString("fr-CA",{year:"numeric",month:"short",day:"2-digit"});
-  const radius=70;
-  const circumference=2*Math.PI*radius;
-  const dash=(coverage/100)*circumference;
+  const accountName=me?.pharmacy_name || me?.username || "Pharmacie Démo";
+  const roleName=me?.role==="platform_admin" ? "Administrateur" : "Utilisateur";
+  const initials=String(accountName || "AD").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase() || "AD";
 
   function exportDashboardReport(){
     const rows=[{
@@ -3010,108 +3016,175 @@ function Dashboard({setTab}){
   }
 
   const alerts=[];
-  if(productsWithoutRfid>0) alerts.push({type:"warning",icon:"warning",title:`${productsWithoutRfid} produits sans association`,text:"Aucune association détectée pour ces produits."});
-  if(duplicateEpcs>0) alerts.push({type:"danger",icon:"warning",title:`${duplicateEpcs} doublon(s) Identifiant détecté(s)`,text:"Vérifier les associations en double."});
-  if(detectedEpcCount===0) alerts.push({type:"info",icon:"rfid",title:"0 scan détecté",text:"Importez le CSV des identifiants détectés pour calculer le stock réel."});
-  if(coverage<100) alerts.push({type:"warning",icon:"warning",title:"Aucune association détectée pour ces produits.",text:"À taguer en priorité pour améliorer votre suivi."});
-  if(alerts.length===0) alerts.push({type:"success",icon:"check",title:"Aucune alerte prioritaire",text:"Les données sont stables."});
+  if(detectedEpcCount===0) alerts.push({tone:"blue",icon:"rfid",title:"0 scan détecté",text:"Importez les CSV des instruments détectés pour calculer le stock réel."});
+  if(productsWithoutRfid>0 || coverage<100) alerts.push({tone:"amber",icon:"warning",title:productsWithoutRfid>0 ? `${productsWithoutRfid} produits sans association` : "Aucune association détectée pour ces produits.",text:"Ajoutez un rapport pour améliorer votre suivi."});
+  if(duplicateEpcs>0) alerts.push({tone:"rose",icon:"warning",title:`${duplicateEpcs} doublon(s) Identifiant détecté(s)`,text:"Vérifier les associations en double."});
+  if(alerts.length===0) alerts.push({tone:"blue",icon:"tag",title:"Aucune alerte prioritaire",text:"Les données sont stables."});
 
-  const reports=[
-    {label:"Taux de couverture",sub:"CSV",icon:"doc",action:exportDashboardReport,type:"blue"},
-    {label:"Produits avec tag",sub:"CSV",icon:"tag",action:exportDashboardReport,type:"green"},
-    {label:"Produits sans tag",sub:"CSV",icon:"warning",action:exportProductsWithoutRfid,type:"orange"},
-    {label:"Historique scans",sub:"CSV",icon:"clock",action:()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{})),type:"purple"},
-  ];
-
+  const navItems=(menu && menu.length ? menu : APP_USER_PAGES).filter(x=>x.id);
   const kpis=[
-    {label:"Produits enregistrés",value:products.length,sub:products.length ? "Catalogue importé" : "Aucun catalogue importé",icon:"box",tone:"blue",action:()=>setTab("operations")},
-    {label:"Produits tagués",value:productsWithRfid,sub:productsWithRfid ? "Avec association" : "Aucun tag détecté",icon:"tag",tone:"green",action:()=>setTab("association")},
-    {label:"Transactions",value:detectedEpcCount,sub:detectedEpcCount ? "Identifiants détectés importés" : "Aucune transaction",icon:"rfid",tone:"purple",action:()=>setTab("inventory")},
-    {label:"Produits sans tag",value:productsWithoutRfid,sub:productsWithoutRfid ? "À taguer en priorité" : "Synchronisés",icon:"warning",tone:"orange",action:()=>setTab("operations")},
+    {label:"Produits enregistrés",value:products.length,sub:products.length ? "Catalogue importé" : "Aucun catalogue importé",pill:"Stock",icon:"box",iconClass:"bg-blue-50 text-blue-600 ring-blue-100",pillClass:"bg-slate-100 text-slate-500",target:"operations"},
+    {label:"Produits tagués",value:productsWithRfid,sub:productsWithRfid ? "Avec association" : "Aucun tag détecté",pill:"RFID",icon:"tag",iconClass:"bg-emerald-50 text-emerald-600 ring-emerald-100",pillClass:"bg-emerald-50 text-emerald-700",target:"association"},
+    {label:"Transactions",value:detectedEpcCount,sub:detectedEpcCount ? "Identifiants détectés importés" : "Aucune transaction",pill:"Caisse",icon:"rfid",iconClass:"bg-indigo-50 text-indigo-600 ring-indigo-100",pillClass:"bg-indigo-50 text-indigo-700",target:"inventory"},
+    {label:"Produits sans tag",value:productsWithoutRfid,sub:productsWithoutRfid ? "À taguer en priorité" : "Synchronisés",pill:"À traiter",icon:"warning",iconClass:"bg-amber-50 text-amber-600 ring-amber-100",pillClass:"bg-amber-50 text-amber-700",target:"operations"},
+  ];
+  const reports=[
+    {label:"Taux de couverture",icon:"doc",iconClass:"bg-blue-50 text-blue-600 ring-blue-100",action:exportDashboardReport},
+    {label:"Produits avec tag",icon:"tag",iconClass:"bg-emerald-50 text-emerald-600 ring-emerald-100",action:exportDashboardReport},
+    {label:"Produits sans tag",icon:"warning",iconClass:"bg-amber-50 text-amber-600 ring-amber-100",action:exportProductsWithoutRfid},
+    {label:"Historique scans",icon:"clock",iconClass:"bg-violet-50 text-violet-600 ring-violet-100",action:()=>exportCSV("historique_scans.csv",associations,Object.keys(associations[0]||{}))},
   ];
 
-  const shownAds=currentDashboardAd ? activeDashboardAds : defaultAds;
-  const activeAdIndex=(currentDashboardAd ? dashboardAdIndex : defaultAdIndex) % shownAds.length;
-  const defaultAdSrc=defaultAds[defaultAdIndex % defaultAds.length];
-
-  return <section className="figmaDashboard">
-    <p className="figmaIntro">Suivi en temps réel de la couverture et de l’activité de votre pharmacie.</p>
-
-    <div className="figmaKpiGrid">
-      {kpis.map(k=><button key={k.label} className="figmaKpiCard" onClick={k.action} type="button">
-        <span className={`figmaKpiIcon ${k.tone}`}><DashIcon name={k.icon}/></span>
-        <span className="figmaKpiBody">
-          <b>{k.value}</b>
-          <small>{k.label}</small>
-          <em>{k.sub}</em>
-        </span>
-      </button>)}
-    </div>
-
-    <div className="figmaMiddleGrid">
-      <div className="figmaPanel figmaCoveragePanel">
-        <div className="figmaPanelTitle">
-          <h2>Taux de couverture</h2>
+  return <div className="min-h-screen bg-slate-100 text-slate-950 antialiased font-body">
+    <nav className="bg-slate-950 px-4 py-4 text-white sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center justify-between gap-4">
+          <button type="button" onClick={()=>setTab("dashboard")} className="group inline-flex items-center gap-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 shadow-lg shadow-indigo-950/30 transition-transform duration-200 group-hover:-rotate-3 group-hover:scale-105">
+              <ShuffleDashboardIcon name="brand" className="h-5 w-5 text-white"/>
+            </span>
+            <span className="font-heading text-base font-semibold tracking-tight">Smart Inventory</span>
+          </button>
+          <button className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-200 transition hover:bg-white/10 active:scale-95 lg:hidden" aria-label="Ouvrir le menu" type="button">
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+          </button>
         </div>
-
-        <div className="figmaCoverageContent">
-          <div className="figmaGauge" aria-label={`Taux de couverture ${coverage}%`}>
-            <svg width="188" height="188" viewBox="0 0 188 188">
-              <circle cx="94" cy="94" r={radius} fill="none" stroke="#eef2f7" strokeWidth="20"/>
-              {coverage>0 && <circle cx="94" cy="94" r={radius} fill="none" stroke="var(--primary)" strokeWidth="20" strokeDasharray={`${dash} ${circumference}`} strokeLinecap="round" transform="rotate(-90 94 94)"/>}
-            </svg>
-            <b>{coverage}%</b>
-          </div>
-
-          <div className="figmaCoverageText">
-            <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture progresse." : "Votre couverture doit être améliorée."}</h3>
-            <p>Vous avez étiqueté {coverage}% de vos produits en pharmacie.</p>
-            <p>Commencez ou continuez l’étiquetage pour améliorer votre suivi d’inventaire.</p>
-            <button type="button" onClick={()=>setTab("operations")}><DashIcon name="tag"/>Accéder à l'avancement</button>
+        <div className="flex gap-2 overflow-x-auto rounded-3xl border border-white/10 bg-white/5 p-2 text-sm text-slate-300">
+          {navItems.map(item=> item.id==="dashboard" ?
+            <button type="button" key={item.id} onClick={()=>setTab(item.id)} className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-white px-4 py-2 font-medium text-slate-950 shadow-sm"><ShuffleDashboardIcon name="dashboard" className="h-4 w-4 text-indigo-600"/>Dashboard</button> :
+            <button type="button" key={item.id} onClick={()=>setTab(item.id)} className="inline-flex shrink-0 items-center rounded-2xl px-4 py-2 transition hover:bg-white/10 hover:text-white">{item.label}</button>
+          )}
+        </div>
+        <div className="flex items-center justify-between gap-3 rounded-3xl border border-white/10 bg-white/5 px-3 py-2 lg:justify-end">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 font-heading text-sm font-semibold shadow-lg shadow-indigo-950/30">{initials}</div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-white">{accountName}</p>
+            <p className="text-xs text-slate-400">{roleName}</p>
           </div>
         </div>
       </div>
+    </nav>
 
-      <div className="figmaPanel figmaAdCard">
-        <div className="figmaAdMedia">
-          <div className="figmaDots figmaDotsOverlay">
-            {shownAds.map((ad,i)=><button type="button" key={currentDashboardAd ? (ad.id || i) : ad} className={i===activeAdIndex ? "active" : ""} onClick={()=> currentDashboardAd ? setDashboardAdIndex(i) : setDefaultAdIndex(i)} aria-label={`Afficher image ${i+1}`}></button>)}
+    <section className="relative overflow-hidden bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute left-0 top-0 h-80 w-80 rounded-full bg-indigo-200/50 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-12 right-0 h-96 w-96 rounded-full bg-emerald-100/70 blur-3xl" />
+      <div className="relative mx-auto grid max-w-7xl gap-5 lg:grid-cols-12">
+        <div className="lg:col-span-12">
+          <div className="rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-xl shadow-slate-200/70 backdrop-blur md:p-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <span className="rounded-full bg-slate-950 px-3 py-1.5 font-medium text-white">app.smart-inventory.io/dashboard</span>
+                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">Mode stable</span>
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700">Synchronisation active</span>
+                </div>
+                <h1 className="font-heading text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                  <span>Dashboard pharmacie</span>
+                  <span className="block text-slate-500">suivi RFID en temps réel.</span>
+                </h1>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">Suivi en temps réel de la couverture et de l'activité de votre pharmacie, avec une lecture claire des produits tagués, des transactions et des alertes à traiter.</p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button type="button" onClick={()=>setTab("operations")} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:scale-95">Accéder à l’avancement<ShuffleDashboardIcon name="arrow" className="h-4 w-4"/></button>
+                <button type="button" onClick={exportDashboardReport} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-slate-300 active:scale-95">Exporter</button>
+              </div>
+            </div>
           </div>
-          {currentDashboardAd
-            ? <img key={currentDashboardAd.id || currentDashboardAd.image_url} src={mediaUrl(currentDashboardAd.image_url)} alt="Publicité" className="cover"/>
-            : <img src={defaultAdSrc} alt="Smart Inventory publicité dynamique" className="cover"/>}
+        </div>
+
+        {kpis.map(k=><div className="lg:col-span-3" key={k.label}>
+          <button type="button" onClick={()=>setTab(k.target)} className="group h-full w-full rounded-[1.75rem] border border-white/70 bg-white/85 p-5 text-left shadow-lg shadow-slate-200/60 transition hover:-translate-y-1 hover:shadow-xl">
+            <div className="mb-6 flex items-center justify-between">
+              <span className={`flex h-11 w-11 items-center justify-center rounded-2xl ${k.iconClass} ring-1`}><ShuffleDashboardIcon name={k.icon}/></span>
+              <span className={`rounded-full px-2.5 py-1 text-xs ${k.pillClass}`}>{k.pill}</span>
+            </div>
+            <p className="font-heading text-4xl font-semibold tracking-tight text-slate-950">{k.value}</p>
+            <p className="mt-1 text-sm font-semibold text-slate-800">{k.label}</p>
+            <p className="mt-1 text-xs text-slate-500">{k.sub}</p>
+          </button>
+        </div>)}
+
+        <div className="lg:col-span-7">
+          <div className="h-full overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-200/70">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-950">Taux de couverture</p>
+                <p className="mt-1 text-sm text-slate-500">Mesure la part des produits déjà reliés à un tag RFID.</p>
+              </div>
+              <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-100">À améliorer</span>
+            </div>
+            <div className="mt-8 grid gap-8 md:grid-cols-5 md:items-center">
+              <div className="md:col-span-2">
+                <div className="mx-auto flex h-44 w-44 items-center justify-center rounded-full bg-slate-100 p-3 shadow-inner shadow-slate-300/70">
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-white shadow-sm">
+                    <span className="font-heading text-5xl font-semibold tracking-tight text-slate-950">{coverage}%</span>
+                  </div>
+                </div>
+              </div>
+              <div className="md:col-span-3">
+                <h2 className="font-heading text-2xl font-semibold tracking-tight text-slate-950">{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture progresse." : "Votre couverture doit être améliorée."}</h2>
+                <p className="mt-4 text-sm leading-6 text-slate-600">Vous avez étiqueté {coverage}% de vos produits en pharmacie. Commencez ou continuez l’étiquetage pour améliorer votre suivi d’inventaire et fiabiliser les sorties caisse.</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button type="button" onClick={()=>setTab("operations")} className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-indigo-500 active:scale-95">Voir l’avancement<ShuffleDashboardIcon name="arrow" className="h-4 w-4"/></button>
+                  <button type="button" onClick={()=>setTab("operations")} className="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-slate-300 active:scale-95">Lancer un scan</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-5">
+          <div className="relative h-full min-h-80 overflow-hidden rounded-[2rem] border border-emerald-100 bg-emerald-950 p-6 text-white shadow-xl shadow-emerald-950/10">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(110,231,183,0.28),transparent_32%),radial-gradient(circle_at_80%_70%,rgba(99,102,241,0.22),transparent_34%)]" />
+            <div className="absolute inset-x-6 bottom-6 top-20 rounded-[1.5rem] border border-white/10 bg-white/10 backdrop-blur" />
+            <div className="relative flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-emerald-200">Publicité</p>
+                <h2 className="mt-3 font-heading text-2xl font-semibold tracking-tight">Espace partenaire officine</h2>
+              </div>
+              <div className="flex gap-1.5"><span className="h-2 w-2 rounded-full bg-white/40"/><span className="h-2 w-2 rounded-full bg-emerald-300"/></div>
+            </div>
+            <div className="relative mt-16 max-w-sm"><p className="text-sm leading-6 text-emerald-50/85">Un emplacement visuel sobre pour les annonces réseau, les rappels de campagne ou les communications internes de la pharmacie.</p></div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-8">
+          <div className="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-200/70">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-semibold text-slate-950">Rapports et exports</p><p className="mt-1 text-sm text-slate-500">Téléchargez les états utiles au suivi quotidien.</p></div><span className="text-xs text-slate-400">Exports sécurisés</span></div>
+            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {reports.map(r=><button key={r.label} type="button" onClick={r.action} className="group rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 text-left transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-slate-200 active:scale-95">
+                <span className={`flex h-11 w-11 items-center justify-center rounded-2xl ${r.iconClass} ring-1`}><ShuffleDashboardIcon name={r.icon}/></span>
+                <p className="mt-4 text-sm font-semibold text-slate-900">{r.label}</p>
+                <p className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 group-hover:text-indigo-600">Télécharger <span>↓</span></p>
+              </button>)}
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-4">
+          <div className="h-full rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-xl shadow-slate-200/70">
+            <div className="flex items-start justify-between gap-4"><div><p className="text-sm font-semibold text-slate-950">Alertes prioritaires</p><p className="mt-1 text-sm text-slate-500">Points à surveiller avant la prochaine session.</p></div><span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><ShuffleDashboardIcon name="spark" className="h-4 w-4"/></span></div>
+            <div className="mt-6 space-y-3">
+              {alerts.map((a,i)=>{
+                const cls=a.tone==="amber" ? "border-amber-100 bg-amber-50/80 text-amber-600 ring-amber-100" : a.tone==="rose" ? "border-rose-100 bg-rose-50/80 text-rose-600 ring-rose-100" : "border-blue-100 bg-blue-50/70 text-blue-600 ring-blue-100";
+                const [borderBg, text, ring]=cls.split(' ').length ? [cls.split(' ').slice(0,2).join(' '), cls.split(' ')[2], cls.split(' ')[3]] : ["border-blue-100 bg-blue-50/70","text-blue-600","ring-blue-100"];
+                return <div className={`rounded-[1.5rem] border ${borderBg} p-4`} key={i}><div className="flex gap-3"><span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white ${text} ring-1 ${ring}`}><ShuffleDashboardIcon name={a.icon} className="h-4 w-4"/></span><div><p className="text-sm font-semibold text-slate-950">{a.title}</p><p className="mt-1 text-xs leading-5 text-slate-600">{a.text}</p></div></div></div>;
+              })}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div className="figmaBottomGrid">
-      <div className="figmaPanel figmaReportsPanel">
-        <h2>Rapports et exports</h2>
-        <div className="figmaReportGrid">
-          {reports.map(r=><button type="button" key={r.label} className="figmaReportBtn" onClick={r.action}>
-            <span className={`figmaReportIcon ${r.type}`}><DashIcon name={r.icon}/></span>
-            <b>{r.label}</b>
-            <small>{r.sub}</small>
-            <em><DashIcon name="download"/></em>
-          </button>)}
-        </div>
+    <footer className="bg-slate-950 px-4 py-8 text-slate-300 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-12 lg:items-center">
+        <div className="lg:col-span-4"><button type="button" onClick={()=>setTab("dashboard")} className="inline-flex items-center gap-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-300"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 text-white"><ShuffleDashboardIcon name="brand" className="h-5 w-5"/></span><span className="font-heading text-base font-semibold tracking-tight text-white">Smart Inventory</span></button><p className="mt-3 text-sm text-slate-400">© 2026 Smart Inventory. Tous droits réservés.</p></div>
+        <div className="lg:col-span-6"><div className="flex flex-wrap gap-x-5 gap-y-3 text-sm">{navItems.map(item=><button type="button" key={item.id} onClick={()=>setTab(item.id)} className="transition hover:text-white">{item.label}</button>)}</div></div>
+        <div className="lg:col-span-2 lg:text-right"><button type="button" onClick={logout} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5 hover:bg-slate-100 active:scale-95">Log out<ShuffleDashboardIcon name="logout" className="h-4 w-4"/></button></div>
       </div>
-
-      <div className="figmaPanel figmaAlertsPanel">
-        <div className="figmaAlertHeader"><h2>Alertes prioritaires</h2></div>
-        <div className="figmaAlertList">
-          {alerts.map((a,i)=><div className={`figmaAlert ${a.type}`} key={i}>
-            <span><DashIcon name={a.icon}/></span>
-            <div><b>{a.title}</b><small>{a.text}</small></div>
-          </div>)}
-        </div>
-      </div>
-    </div>
-
-    <div className="figmaDashboardFooter">© 2026 Smart Inventory. Tous droits réservés.</div>
-  </section>
+    </footer>
+  </div>;
 }
-
 
 function DashboardAdmin({auth}){
   const [items,setItems]=useState([]);
