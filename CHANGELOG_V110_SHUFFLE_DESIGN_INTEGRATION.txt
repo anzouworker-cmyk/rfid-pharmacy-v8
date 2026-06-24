@@ -1,0 +1,9 @@
+V110 - Shuffle design.md integration
+
+- Applied the Shuffle design.md visual direction to the React frontend.
+- Updated SaaS palette to indigo/slate with #fafbfe background.
+- Added Outfit headings and Plus Jakarta Sans body typography.
+- Refined sidebar, sticky topbar, cards, metric tiles, tables, modals, buttons and hover states.
+- Added dark slate AI assistant console styling with indigo glow accents.
+- Kept existing React routes, API calls, cash logic, inventory logic and local storage behavior unchanged.
+- Aligned backend /health version to V110_SHUFFLE_DESIGN_INTEGRATION.

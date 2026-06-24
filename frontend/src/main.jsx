@@ -2373,7 +2373,6 @@ function MyUsers({auth,me}){
   const [fullName,setFullName]=useState("");
   const [pages,setPages]=useState(()=>visiblePageOptions.map(p=>p.id));
   const [msg,setMsg]=useState("");
-  const [showCreateModal,setShowCreateModal]=useState(false);
 
   async function load(){
     try{
@@ -2396,7 +2395,6 @@ function MyUsers({auth,me}){
     try{
       await axios.post(`${API}/users/create`,{username,password,full_name:fullName,page_permissions:pages},auth);
       setUsername(""); setPassword(""); setFullName(""); setPages(visiblePageOptions.map(p=>p.id));
-      setShowCreateModal(false);
       setMsg("Utilisateur créé.");
       await load();
     }catch(e){
@@ -2447,42 +2445,22 @@ function MyUsers({auth,me}){
   }
 
   return <section className="platformPage myUsersPage">
-    <div className="platformHeaderBar">
-      <div>
-        <h2>Utilisateurs du compte</h2>
-        <p>Créez et gérez les utilisateurs liés à ce compte avec leurs permissions de pages.</p>
+    <div className="card userAccessCard">
+      <h3>Créer un utilisateur pour ce compte</h3>
+      <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
+      <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
+      <input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)}/>
+      <div className="pagePermissionBox">
+        <strong>Pages visibles</strong>
+        <div className="pagePermissionGrid">
+          {visiblePageOptions.map(page=><label key={page.id}>
+            <input type="checkbox" checked={pages.includes(page.id)} onChange={()=>togglePage(page.id)}/>
+            <span>{page.label}</span>
+          </label>)}
+        </div>
       </div>
-      <button type="button" className="platformAddStoreBtn" onClick={()=>setShowCreateModal(true)}>Ajouter utilisateur</button>
+      <button onClick={createUser}>Créer utilisateur</button>
     </div>
-
-    {showCreateModal && <div className="modalOverlay" onClick={()=>setShowCreateModal(false)}>
-      <div className="scanModal platformStoreModal userCreateModal" onClick={e=>e.stopPropagation()}>
-        <button type="button" className="modalClose" onClick={()=>setShowCreateModal(false)}>×</button>
-        <h2>Créer un utilisateur</h2>
-        <p>Ajouter un utilisateur pour ce compte et choisir les pages visibles.</p>
-
-        <div className="platformCreateGrid">
-          <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
-          <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
-          <input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)}/>
-        </div>
-
-        <div className="pagePermissionBox">
-          <strong>Pages visibles</strong>
-          <div className="pagePermissionGrid">
-            {visiblePageOptions.map(page=><label key={page.id}>
-              <input type="checkbox" checked={pages.includes(page.id)} onChange={()=>togglePage(page.id)}/>
-              <span>{page.label}</span>
-            </label>)}
-          </div>
-        </div>
-
-        <div className="platformModalActions">
-          <button type="button" className="platformModalCancel" onClick={()=>setShowCreateModal(false)}>Annuler</button>
-          <button type="button" className="platformModalCreate" onClick={createUser}>Créer utilisateur</button>
-        </div>
-      </div>
-    </div>}
 
     <p className={msg.includes("Erreur") || msg.includes("not") ? "err" : "success"}>{msg}</p>
 

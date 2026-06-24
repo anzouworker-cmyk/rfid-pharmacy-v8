@@ -1,3 +1,28 @@
+Smart Inventory V110 - Shuffle SaaS Design Integration
+
+Corrections incluses:
+- Application du design Shuffle/design.md sur le frontend React + CSS classique.
+- Palette SaaS indigo/slate: fond #fafbfe, surfaces blanches, états succès/alerte/danger.
+- Typographie modernisée: Outfit pour titres, Plus Jakarta Sans pour contenu.
+- Redesign global: sidebar, topbar sticky, cards, boutons, tableaux, modals, pages opérations/caisse/dashboard/admin.
+- Assistant IA stylé comme panneau SaaS sombre avec accent indigo.
+- Logique métier conservée: routes React, API calls, inventaire, caisse, permissions, exports et localStorage inchangés.
+- Build frontend vérifié avec `npm run build`.
+- /health backend aligné sur V110_SHUFFLE_DESIGN_INTEGRATION.
+
+Déploiement frontend Vercel:
+1. Root directory: smartinv/frontend
+2. Build command: npm run build
+3. Output directory: dist
+4. Variable importante: VITE_API_URL=https://votre-backend-render.onrender.com
+
+Déploiement backend Render:
+1. Root directory: smartinv/backend
+2. Vérifier FRONTEND_ORIGINS avec l'origine exacte Vercel sans slash final.
+3. Vérifier /health après déploiement.
+
+---
+
 Smart Inventory V33.11 - Logo long en React/CSS (sans image)
 
 Corrections incluses:

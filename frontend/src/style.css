@@ -1,4 +1,4 @@
-
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap");
 :root{--primary:#2563eb;--success:#10b981;--danger:#ef4444;--bg:#f8fafc;--panel:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--sidebar:#0f172a}
 *{box-sizing:border-box}body{font-family:Inter,Segoe UI,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text)}button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:#eef2ff;color:#1e3a8a;font-weight:600}button:hover{box-shadow:0 4px 12px rgba(15,23,42,.12)}input,select{padding:11px 12px;margin:4px;border:1px solid var(--border);border-radius:10px;background:white;min-height:42px}h1,h2,h3{margin-top:0}h1{font-size:28px;margin-bottom:6px}p{color:var(--muted)}
 .appShell{display:flex;min-height:100vh}.sidebar{width:280px;background:linear-gradient(180deg,#0f172a,#111827);color:white;padding:22px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}.brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}.brandIcon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#10b981);display:grid;place-items:center;font-weight:800}.brandTitle{font-size:18px;font-weight:800}.brandSub{font-size:12px;color:#cbd5e1}.navMenu{display:grid;gap:8px}.navItem{width:100%;background:transparent;color:#cbd5e1;display:flex;gap:10px;align-items:center;justify-content:flex-start;border-radius:12px}.navItem:hover,.navItem.active{background:rgba(255,255,255,.12);color:white;box-shadow:none}.sidebarFooter{margin-top:auto;display:grid;gap:12px}.pharmacyBadge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px;display:grid;gap:4px}.pharmacyBadge small{color:#cbd5e1}.logoutBtn{background:#ef4444;color:white}
@@ -5750,31 +5750,1050 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
 }
 
 
-/* V109 - user creation moved to popup like admin account */
-.myUsersPage .userAccessCard{
-  display:none!important;
+/* V109 - Full frontend SaaS redesign layer */
+:root{
+  --si-bg:#f5f7fb;
+  --si-surface:#ffffff;
+  --si-surface-2:#f8fafc;
+  --si-text:#111827;
+  --si-muted:#64748b;
+  --si-line:#dbe4ef;
+  --si-line-soft:#edf2f7;
+  --si-primary:#0f4c81;
+  --si-primary-2:#1264a3;
+  --si-primary-soft:#e8f3ff;
+  --si-success:#16a34a;
+  --si-success-soft:#eaf8ef;
+  --si-danger:#dc2626;
+  --si-danger-soft:#fff1f2;
+  --si-warning:#d97706;
+  --si-warning-soft:#fff7ed;
+  --si-radius:18px;
+  --si-radius-lg:24px;
+  --si-shadow:0 14px 34px rgba(15,23,42,.06);
+  --si-shadow-soft:0 8px 22px rgba(15,23,42,.045);
 }
-.userCreateModal{
-  width:min(820px,92vw)!important;
+
+/* Global foundation */
+html,body,#root{
+  background:var(--si-bg)!important;
 }
-.userCreateModal .platformCreateGrid{
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+body{
+  color:var(--si-text)!important;
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif!important;
 }
-.userCreateModal .pagePermissionGrid{
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+*{
+  box-sizing:border-box;
 }
-.userCreateModal input:not([type="checkbox"]){
+button,input,select,textarea{
+  font-family:inherit!important;
+}
+button{
+  transition:background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease!important;
+}
+button:not(:disabled):hover{
+  transform:translateY(-1px);
+}
+button:disabled{
+  cursor:not-allowed!important;
+}
+
+/* Shell / sidebar */
+.white{
+  min-height:100vh!important;
+  background:var(--si-bg)!important;
+}
+.whiteSidebar,
+.sidebar{
+  background:#ffffff!important;
+  border-right:1px solid var(--si-line)!important;
+  box-shadow:12px 0 34px rgba(15,23,42,.04)!important;
+}
+.whiteBrand{
+  border-bottom:1px solid var(--si-line-soft)!important;
+  padding:22px 18px!important;
+}
+.sidebarBrandLogo,
+.smartSidebarLogoIcon{
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+  box-shadow:0 12px 26px rgba(15,76,129,.24)!important;
+}
+.smartSidebarLogoText,
+.whiteBrand strong{
+  letter-spacing:-.025em!important;
+}
+.whiteNav{
+  padding:14px 12px!important;
+  gap:6px!important;
+}
+.whiteNav button,
+.whiteLogout{
+  border-radius:14px!important;
+  color:#526276!important;
+  font-weight:800!important;
+  min-height:48px!important;
+  padding:0 14px!important;
+  border:1px solid transparent!important;
+}
+.whiteNav button:hover,
+.whiteLogout:hover{
+  background:#f6f9fc!important;
+  border-color:#e4ecf5!important;
+  color:var(--si-primary)!important;
+}
+.whiteNav button.active,
+.whiteNav button[aria-current="page"]{
+  background:var(--si-primary-soft)!important;
+  color:var(--si-primary)!important;
+  border-color:#cfe5fb!important;
+  box-shadow:0 8px 20px rgba(15,76,129,.08)!important;
+}
+.navIconTile{
+  border-radius:12px!important;
+  background:#f8fafc!important;
+}
+.whiteNav button.active .navIconTile{
+  background:#fff!important;
+  color:var(--si-primary)!important;
+}
+
+/* Topbar */
+.whiteMain{
+  background:var(--si-bg)!important;
+}
+.whiteTopbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:25!important;
+  background:rgba(255,255,255,.88)!important;
+  backdrop-filter:blur(14px)!important;
+  border-bottom:1px solid var(--si-line)!important;
+  box-shadow:0 10px 28px rgba(15,23,42,.04)!important;
+}
+.topPageTitle{
+  font-weight:900!important;
+  letter-spacing:-.03em!important;
+  color:#0f172a!important;
+}
+.whiteAccount{
+  border:1px solid var(--si-line)!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  box-shadow:0 8px 20px rgba(15,23,42,.04)!important;
+}
+.whiteAvatar{
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+}
+.whiteContent{
+  padding:28px!important;
+  max-width:1680px!important;
+  margin:0 auto!important;
   width:100%!important;
 }
-.myUsersPage .platformHeaderBar{
-  margin-bottom:16px!important;
+
+/* Shared page sections */
+.operationsPage,
+.tableOnlyPage,
+.cashRegisterPage,
+.platformPage,
+.dashboardAdminPage,
+.cashDashboardAdminPage,
+.aiAgentPage,
+.exportsPage{
+  max-width:1600px!important;
+  margin:0 auto!important;
 }
-.myUsersPage table{
+.operationsActionPanel,
+.exportsPanel,
+.figmaPanel,
+.cashRegisterPanel,
+.platformPanel,
+.card,
+.fileCard,
+.tableCard,
+.reportCard,
+.scanModal,
+.pagePermissionBox,
+.cashAdminPanel,
+.cashAdminStatCard,
+.cashAdminChartPanel{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:var(--si-radius-lg)!important;
+  box-shadow:var(--si-shadow)!important;
+}
+.notice,
+.mutedText{
+  color:var(--si-muted)!important;
+  line-height:1.55!important;
+}
+
+/* Buttons */
+.primaryBtn,
+.platformAddStoreBtn,
+.reportCard button,
+.fileCardOp,
+.exportOperationCard span,
+.operationCard span,
+.cashResetBtn,
+.cashTodayBtn,
+.cashDateTodayBtn,
+.loginCard button,
+.scanModal button[type="submit"],
+.platformModalActions button:last-child{
+  border:1px solid transparent!important;
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+  border-radius:14px!important;
+  font-weight:900!important;
+  box-shadow:0 12px 24px rgba(15,76,129,.18)!important;
+}
+.primaryBtn:hover,
+.platformAddStoreBtn:hover,
+.reportCard button:hover{
+  box-shadow:0 16px 34px rgba(15,76,129,.24)!important;
+}
+.dangerBtn,
+.dangerOp span,
+.cashResetBtn{
+  background:linear-gradient(135deg,#dc2626,#ef4444)!important;
+  color:#fff!important;
+  box-shadow:0 12px 24px rgba(220,38,38,.16)!important;
+}
+
+/* Forms */
+input,select,textarea{
+  border:1px solid #d5dfeb!important;
+  background:#fff!important;
+  border-radius:14px!important;
+  color:#14213d!important;
+  outline:none!important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#93c5fd!important;
+  box-shadow:0 0 0 4px rgba(59,130,246,.14)!important;
+}
+
+/* Tables */
+table{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+}
+.tableWrap,
+.cashWideTableWrap,
+.cashModalTableWrap{
+  border-radius:22px!important;
+  border:1px solid var(--si-line)!important;
+  overflow:auto!important;
+  background:#fff!important;
+  box-shadow:var(--si-shadow-soft)!important;
+}
+.productTable,
+.associationTable,
+.inventoryTable,
+.cashTable,
+.platformTable,
+.usersTable,
+.adAdminTable{
   width:100%!important;
+  background:#fff!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
 }
-@media(max-width:900px){
-  .userCreateModal .platformCreateGrid,
-  .userCreateModal .pagePermissionGrid{
+.productTable th,
+.associationTable th,
+.inventoryTable th,
+.cashTable th,
+.platformTable th,
+.usersTable th,
+.adAdminTable th{
+  background:#f8fafc!important;
+  color:#5b6b80!important;
+  text-transform:uppercase!important;
+  letter-spacing:.045em!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  padding:15px 18px!important;
+  border-bottom:1px solid var(--si-line)!important;
+}
+.productTable td,
+.associationTable td,
+.inventoryTable td,
+.cashTable td,
+.platformTable td,
+.usersTable td,
+.adAdminTable td{
+  padding:15px 18px!important;
+  border-bottom:1px solid var(--si-line-soft)!important;
+  color:#172033!important;
+  font-weight:650!important;
+}
+.productTable tbody tr:hover td,
+.associationTable tbody tr:hover td,
+.inventoryTable tbody tr:hover td,
+.cashTable tbody tr:hover td,
+.platformTable tbody tr:hover td,
+.usersTable tbody tr:hover td{
+  background:#fbfdff!important;
+}
+
+/* Badges / status */
+.statusBadge,
+.badge,
+.roleBadge{
+  border-radius:999px!important;
+  padding:7px 11px!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  border:1px solid transparent!important;
+}
+.statusBadge.present,
+.statusBadge.success,
+.badge.success{
+  background:var(--si-success-soft)!important;
+  color:#15803d!important;
+  border-color:#bbf7d0!important;
+}
+.statusBadge.missing,
+.statusBadge.danger,
+.badge.danger{
+  background:var(--si-danger-soft)!important;
+  color:#b91c1c!important;
+  border-color:#fecdd3!important;
+}
+.statusBadge.unlinked,
+.statusBadge.warning,
+.badge.warning{
+  background:var(--si-warning-soft)!important;
+  color:#b45309!important;
+  border-color:#fed7aa!important;
+}
+
+/* Dashboard cards */
+.figmaDashboard,
+.dashboardPage{
+  background:transparent!important;
+}
+.figmaHero,
+.dashboardHero,
+.cashAdminHeader,
+.platformHeaderBar,
+.tableToolbar,
+.cashRegisterHeader{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:28px!important;
+  padding:24px!important;
+  box-shadow:var(--si-shadow)!important;
+}
+.figmaHero h1,
+.dashboardHero h1,
+.cashRegisterHeader h1,
+.platformHeaderBar h2,
+.cashAdminHeader h1{
+  color:#0f172a!important;
+  letter-spacing:-.04em!important;
+}
+.figmaIntro,
+.dashboardHero p,
+.cashRegisterHeader p,
+.platformHeaderBar p,
+.cashAdminHeader p{
+  color:var(--si-muted)!important;
+}
+.figmaStatsGrid,
+.statusSummary,
+.cashAdminGrid,
+.aiContextGrid{
+  gap:18px!important;
+}
+.statCard,
+.figmaStatCard,
+.cashAdminKpi,
+.cashOpsIndicator,
+.aiContextStat{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:22px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+  padding:20px!important;
+}
+.statCard span,
+.figmaStatCard span,
+.cashAdminKpi span,
+.aiContextStat span{
+  color:var(--si-muted)!important;
+  font-weight:800!important;
+}
+.statCard b,
+.figmaStatCard b,
+.cashAdminKpi strong,
+.aiContextStat strong{
+  color:#101828!important;
+  letter-spacing:-.03em!important;
+}
+
+/* Operations / exports cards */
+.operationGrid,
+.workflowGrid,
+.exportOperationGrid{
+  gap:18px!important;
+}
+.operationCard,
+.exportOperationCard{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:24px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+  min-height:190px!important;
+  padding:22px!important;
+}
+.operationCard:hover,
+.exportOperationCard:hover,
+.reportCard:hover{
+  border-color:#bcd7f0!important;
+  box-shadow:0 18px 42px rgba(15,76,129,.10)!important;
+}
+.opIcon{
+  background:var(--si-primary-soft)!important;
+  color:var(--si-primary)!important;
+  border:1px solid #cfe5fb!important;
+  border-radius:18px!important;
+  width:54px!important;
+  height:54px!important;
+}
+.operationCard h3,
+.exportOperationCard h3{
+  color:#10233f!important;
+  font-size:18px!important;
+  letter-spacing:-.02em!important;
+}
+.operationCard p,
+.exportOperationCard p{
+  color:var(--si-muted)!important;
+  line-height:1.5!important;
+}
+
+/* Cash operations specific */
+.cashOpsHeader{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:24px!important;
+  padding:20px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+}
+.cashOpsIntro h2{
+  color:#10233f!important;
+  letter-spacing:-.03em!important;
+}
+.cashOpsDateBox{
+  background:#f8fafc!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:18px!important;
+}
+.cashOpsIndicatorShortage{
+  background:var(--si-danger-soft)!important;
+  border-color:#fecdd3!important;
+}
+.cashOpsIndicatorSurplus{
+  background:var(--si-success-soft)!important;
+  border-color:#bbf7d0!important;
+}
+
+/* Modals */
+.modalOverlay{
+  background:rgba(15,23,42,.52)!important;
+  backdrop-filter:blur(6px)!important;
+}
+.scanModal,
+.platformStoreModal{
+  border-radius:28px!important;
+  border:1px solid rgba(255,255,255,.7)!important;
+  box-shadow:0 28px 70px rgba(15,23,42,.28)!important;
+}
+.modalClose{
+  border-radius:14px!important;
+  background:#f8fafc!important;
+  border:1px solid var(--si-line)!important;
+}
+.scanModal h2,
+.platformStoreModal h2{
+  letter-spacing:-.035em!important;
+  color:#111827!important;
+}
+
+/* AI chat */
+.aiAgentShell,
+.aiChatPanel{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:26px!important;
+  box-shadow:var(--si-shadow)!important;
+}
+.aiBubble{
+  border-radius:20px!important;
+  border:1px solid var(--si-line-soft)!important;
+}
+.aiBubble.assistant{
+  background:#f8fbff!important;
+}
+.aiBubble.user{
+  background:var(--si-primary)!important;
+  color:#fff!important;
+}
+
+/* Platform / permissions */
+.platformCreateGrid,
+.platformCreateChecks,
+.pagePermissionGrid,
+.pagePermissionMiniGrid{
+  gap:12px!important;
+}
+.checkLine,
+.pagePermissionItem{
+  border:1px solid var(--si-line)!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  padding:12px 14px!important;
+}
+.checkLine:hover,
+.pagePermissionItem:hover{
+  border-color:#bcd7f0!important;
+  background:#f8fbff!important;
+}
+
+/* Responsive polish */
+@media (max-width: 980px){
+  .whiteContent{
+    padding:18px!important;
+  }
+  .figmaHero,
+  .dashboardHero,
+  .cashRegisterHeader,
+  .platformHeaderBar,
+  .cashAdminHeader{
+    padding:18px!important;
+    border-radius:22px!important;
+  }
+  .operationGrid,
+  .workflowGrid,
+  .exportOperationGrid,
+  .figmaStatsGrid,
+  .statusSummary,
+  .cashAdminGrid,
+  .aiContextGrid{
     grid-template-columns:1fr!important;
   }
+  .cashOpsHeader{
+    grid-template-columns:1fr!important;
+  }
+  .whiteTopbar{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+}
+
+@media (max-width: 720px){
+  .whiteContent{
+    padding:14px!important;
+  }
+  .topPageTitle{
+    font-size:20px!important;
+  }
+  .operationCard,
+  .exportOperationCard,
+  .statCard,
+  .figmaStatCard{
+    border-radius:18px!important;
+  }
+}
+
+
+/* V110 - Shuffle design.md integration: indigo/slate SaaS UI */
+:root{
+  --si-bg:#fafbfe;
+  --si-surface:#ffffff;
+  --si-surface-2:#f8fafc;
+  --si-text:#0f172a;
+  --si-muted:#64748b;
+  --si-muted-2:#94a3b8;
+  --si-line:#e2e8f0;
+  --si-line-soft:#f1f5f9;
+  --si-primary:#4f46e5;
+  --si-primary-2:#4338ca;
+  --si-primary-3:#3730a3;
+  --si-primary-soft:#eef2ff;
+  --si-primary-soft-2:#e0e7ff;
+  --si-dark:#0f172a;
+  --si-dark-2:#1e293b;
+  --si-success:#059669;
+  --si-success-soft:#ecfdf5;
+  --si-danger:#e11d48;
+  --si-danger-soft:#fff1f2;
+  --si-warning:#d97706;
+  --si-warning-soft:#fffbeb;
+  --si-radius:18px;
+  --si-radius-lg:24px;
+  --si-shadow:0 18px 45px rgba(15,23,42,.07);
+  --si-shadow-soft:0 10px 28px rgba(15,23,42,.055);
+  --si-shadow-hover:0 22px 50px rgba(79,70,229,.13);
+}
+
+html,body,#root{
+  min-height:100%;
+  background:
+    radial-gradient(circle at 12% 4%,rgba(79,70,229,.08),transparent 24rem),
+    radial-gradient(circle at 92% 0%,rgba(16,185,129,.06),transparent 22rem),
+    var(--si-bg)!important;
+}
+body{
+  color:var(--si-text)!important;
+  font-family:"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  letter-spacing:-.01em;
+}
+h1,h2,h3,.topPageTitle,.brandTitle,.smartSidebarLogoText,.whiteBrand strong{
+  font-family:"Outfit","Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;
+}
+p,.notice,.mutedText,small{
+  line-height:1.6!important;
+}
+
+/* App chrome */
+.whiteShell,.white,.whiteMain{
+  background:transparent!important;
+}
+.whiteSidebar,.sidebar{
+  background:rgba(255,255,255,.92)!important;
+  border-right:1px solid var(--si-line)!important;
+  box-shadow:14px 0 38px rgba(15,23,42,.05)!important;
+  backdrop-filter:blur(18px)!important;
+}
+.whiteBrand{
+  padding:24px 18px!important;
+  border-bottom:1px solid var(--si-line-soft)!important;
+}
+.smartSidebarLogoIcon,.sidebarBrandLogo{
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+  border-radius:16px!important;
+  box-shadow:0 14px 30px rgba(79,70,229,.25)!important;
+}
+.smartSidebarLogoSmart,.smartSidebarLogoInventory,.whiteBrand strong{
+  color:#0f172a!important;
+}
+.whiteNav{
+  padding:16px 12px!important;
+  gap:8px!important;
+}
+.whiteNavItem,.whiteLogout,.whiteNav button{
+  border-radius:16px!important;
+  min-height:50px!important;
+  color:#64748b!important;
+  font-weight:800!important;
+  border:1px solid transparent!important;
+  background:transparent!important;
+}
+.whiteNavItem:hover,.whiteLogout:hover,.whiteNav button:hover{
+  background:#f8fafc!important;
+  border-color:var(--si-line)!important;
+  color:var(--si-primary)!important;
+  box-shadow:none!important;
+}
+.whiteNavItem.active,.whiteNav button.active,.whiteNav button[aria-current="page"]{
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+  border-color:transparent!important;
+  box-shadow:0 14px 28px rgba(79,70,229,.20)!important;
+}
+.navIconTile{
+  width:34px!important;
+  height:34px!important;
+  border-radius:13px!important;
+  background:#f1f5f9!important;
+  color:#64748b!important;
+  border:1px solid transparent!important;
+}
+.whiteNavItem.active .navIconTile,.whiteNav button.active .navIconTile{
+  background:rgba(255,255,255,.18)!important;
+  border-color:rgba(255,255,255,.22)!important;
+  color:#fff!important;
+}
+.whiteLogout{
+  color:#e11d48!important;
+}
+.whiteTopbar{
+  background:rgba(255,255,255,.82)!important;
+  border-bottom:1px solid var(--si-line)!important;
+  box-shadow:0 12px 34px rgba(15,23,42,.045)!important;
+  backdrop-filter:blur(18px)!important;
+}
+.topPageTitle{
+  color:#0f172a!important;
+  font-weight:900!important;
+  letter-spacing:-.045em!important;
+}
+.whiteAccount{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:999px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+}
+.whiteAvatar{
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+}
+.whiteContent{
+  padding:30px!important;
+  max-width:1680px!important;
+}
+
+/* Landing/login feel */
+.pharmaLogin,.login{
+  background:
+    radial-gradient(circle at 20% 14%,rgba(79,70,229,.14),transparent 24rem),
+    radial-gradient(circle at 84% 16%,rgba(5,150,105,.12),transparent 22rem),
+    linear-gradient(135deg,#fafbfe,#f8fafc)!important;
+}
+.loginCard,.login form{
+  border:1px solid rgba(226,232,240,.9)!important;
+  border-radius:30px!important;
+  box-shadow:0 28px 70px rgba(15,23,42,.13)!important;
+}
+.loginCard h2,.login h2{
+  font-family:"Outfit","Plus Jakarta Sans",sans-serif!important;
+  color:#0f172a!important;
+  font-size:32px!important;
+  letter-spacing:-.045em!important;
+}
+.loginCard button,.login button{
+  min-height:48px!important;
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+  border-radius:16px!important;
+  box-shadow:0 16px 34px rgba(79,70,229,.24)!important;
+}
+
+/* Shared cards and page headers */
+.operationsActionPanel,.exportsPanel,.figmaPanel,.dashboardHero,.figmaHero,.tableToolbar,.cashRegisterHeader,.cashRegisterPanel,.platformHeaderBar,.platformPanel,.cashAdminHeader,.cashAdminPanel,.dashboardAdminPage .tableCard,.tableCard,.card,.fileCard,.reportCard,.pagePermissionBox,.cashAdminStatCard,.cashAdminChartPanel{
+  background:rgba(255,255,255,.96)!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:26px!important;
+  box-shadow:var(--si-shadow)!important;
+}
+.operationsActionPanel,.exportsPanel,.figmaPanel,.cashRegisterPanel,.platformPanel,.cashAdminPanel{
+  padding:24px!important;
+}
+.operationsPage > h1,.dashboardHero h1,.figmaHero h1,.cashRegisterHeader h1,.platformHeaderBar h2,.cashAdminHeader h1,.operationsActionPanel h2,.exportsPanel h2{
+  color:#0f172a!important;
+  font-weight:900!important;
+  letter-spacing:-.045em!important;
+}
+.operationsPage > p,.dashboardHero p,.figmaIntro,.cashRegisterHeader p,.platformHeaderBar p,.cashAdminHeader p,.operationsActionPanel p,.exportsPanel p{
+  color:var(--si-muted)!important;
+}
+
+/* Buttons */
+button,.primaryBtn,.platformAddStoreBtn,.reportCard button,.fileCardOp,.exportOperationCard span,.operationCard span,.cashTodayBtn,.cashDateTodayBtn,.scanModal button[type="submit"],.platformModalActions button:last-child{
+  border-radius:14px!important;
+}
+.primaryBtn,.platformAddStoreBtn,.reportCard button,.fileCardOp,.exportOperationCard span,.operationCard span,.cashTodayBtn,.cashDateTodayBtn,.loginCard button,.scanModal button[type="submit"],.platformModalActions button:last-child,.aiComposer button,.aiSideActions button{
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  color:#fff!important;
+  border:1px solid transparent!important;
+  font-weight:900!important;
+  box-shadow:0 14px 28px rgba(79,70,229,.20)!important;
+}
+button:not(:disabled):hover,.primaryBtn:hover,.platformAddStoreBtn:hover,.reportCard button:hover,.operationCard:hover span,.exportOperationCard:hover span{
+  transform:translateY(-1px)!important;
+  box-shadow:var(--si-shadow-hover)!important;
+}
+.dangerBtn,.dangerOp span,.cashResetBtn{
+  background:linear-gradient(135deg,#e11d48,#be123c)!important;
+  color:#fff!important;
+  box-shadow:0 14px 28px rgba(225,29,72,.18)!important;
+}
+
+/* Metric tiles */
+.figmaStatsGrid,.statusSummary,.cashAdminGrid,.aiContextGrid,.kpiRow{
+  gap:18px!important;
+}
+.statCard,.figmaStatCard,.cashAdminKpi,.cashOpsIndicator,.aiContextStat,.kpiCard{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:22px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+}
+.statCard:hover,.figmaStatCard:hover,.cashAdminKpi:hover,.kpiCard:hover,.cashOpsIndicator:hover{
+  border-color:#c7d2fe!important;
+  box-shadow:0 18px 42px rgba(79,70,229,.10)!important;
+}
+.statCard span,.figmaStatCard span,.cashAdminKpi span,.cashOpsIndicator span,.kpiCard span{
+  color:#64748b!important;
+  font-size:12px!important;
+  text-transform:uppercase!important;
+  letter-spacing:.055em!important;
+}
+.statCard b,.figmaStatCard b,.cashAdminKpi strong,.cashOpsIndicator strong,.kpiCard b{
+  color:#0f172a!important;
+  letter-spacing:-.04em!important;
+}
+
+/* Operations cards */
+.operationGrid,.workflowGrid,.exportOperationGrid,.cashOpsGrid{
+  gap:18px!important;
+}
+.operationCard,.exportOperationCard{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:24px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+  padding:22px!important;
+  overflow:hidden!important;
+  position:relative!important;
+}
+.operationCard::after,.exportOperationCard::after{
+  content:"";
+  position:absolute;
+  inset:auto -30% -45% auto;
+  width:160px;
+  height:160px;
+  background:radial-gradient(circle,rgba(79,70,229,.10),transparent 68%);
+  pointer-events:none;
+}
+.operationCard:hover,.exportOperationCard:hover,.reportCard:hover{
+  border-color:#c7d2fe!important;
+  box-shadow:0 20px 48px rgba(79,70,229,.12)!important;
+}
+.opIcon{
+  background:var(--si-primary-soft)!important;
+  color:var(--si-primary)!important;
+  border:1px solid #c7d2fe!important;
+  border-radius:18px!important;
+}
+.operationCard.green .opIcon,.exportOperationCard.green .opIcon,.cashOperationCard.green .opIcon{
+  background:var(--si-success-soft)!important;
+  border-color:#a7f3d0!important;
+  color:var(--si-success)!important;
+}
+.operationCard.dangerOp .opIcon,.exportOperationCard.danger .opIcon,.cashOperationCard.danger .opIcon{
+  background:var(--si-danger-soft)!important;
+  border-color:#fecdd3!important;
+  color:var(--si-danger)!important;
+}
+.operationCard h3,.exportOperationCard h3{
+  color:#0f172a!important;
+  font-weight:800!important;
+  letter-spacing:-.025em!important;
+}
+.operationCard p,.exportOperationCard p{
+  color:var(--si-muted)!important;
+}
+.cashOpsHeader{
+  background:linear-gradient(135deg,#fff,#f8fafc)!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:24px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+}
+.cashOpsDateBox{
+  background:#f8fafc!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:18px!important;
+}
+.cashOpsIndicatorShortage{
+  background:#fff1f2!important;
+  border-color:#fecdd3!important;
+}
+.cashOpsIndicatorSurplus{
+  background:#ecfdf5!important;
+  border-color:#a7f3d0!important;
+}
+
+/* Tables */
+.tableWrap,.cashWideTableWrap,.cashModalTableWrap{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:24px!important;
+  box-shadow:var(--si-shadow-soft)!important;
+}
+.productTable th,.associationTable th,.inventoryTable th,.cashTable th,.platformTable th,.usersTable th,.adAdminTable th{
+  background:#f8fafc!important;
+  color:#64748b!important;
+  text-transform:uppercase!important;
+  letter-spacing:.06em!important;
+  font-size:12px!important;
+  font-weight:900!important;
+}
+.productTable td,.associationTable td,.inventoryTable td,.cashTable td,.platformTable td,.usersTable td,.adAdminTable td{
+  color:#172033!important;
+  border-bottom:1px solid var(--si-line-soft)!important;
+}
+.productTable tbody tr:hover td,.associationTable tbody tr:hover td,.inventoryTable tbody tr:hover td,.cashTable tbody tr:hover td,.platformTable tbody tr:hover td,.usersTable tbody tr:hover td{
+  background:#f8fafc!important;
+}
+
+/* Forms and modal chrome */
+input,select,textarea{
+  border:1px solid #d7deea!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  color:#0f172a!important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#818cf8!important;
+  box-shadow:0 0 0 4px rgba(79,70,229,.14)!important;
+}
+.modalOverlay{
+  background:rgba(15,23,42,.55)!important;
+  backdrop-filter:blur(8px)!important;
+}
+.scanModal,.platformStoreModal{
+  border-radius:28px!important;
+  border:1px solid rgba(255,255,255,.8)!important;
+  box-shadow:0 30px 80px rgba(15,23,42,.30)!important;
+}
+.modalClose{
+  border-radius:14px!important;
+  border:1px solid var(--si-line)!important;
+  background:#f8fafc!important;
+}
+
+/* Badges / status */
+.statusBadge,.badge,.roleBadge,.aiChatBadge{
+  border-radius:999px!important;
+  font-weight:900!important;
+}
+.statusBadge.present,.statusBadge.success,.badge.success{
+  background:#ecfdf5!important;
+  color:#047857!important;
+  border-color:#a7f3d0!important;
+}
+.statusBadge.missing,.statusBadge.danger,.badge.danger{
+  background:#fff1f2!important;
+  color:#be123c!important;
+  border-color:#fecdd3!important;
+}
+.statusBadge.unlinked,.statusBadge.warning,.badge.warning{
+  background:#fffbeb!important;
+  color:#b45309!important;
+  border-color:#fde68a!important;
+}
+
+/* AI assistant: dark SaaS console accent */
+.aiChatTop{
+  background:linear-gradient(135deg,#0f172a,#1e1b4b)!important;
+  border:1px solid #334155!important;
+  border-radius:28px!important;
+  box-shadow:0 24px 60px rgba(15,23,42,.24)!important;
+  overflow:hidden!important;
+  position:relative!important;
+}
+.aiChatTop::after{
+  content:"";
+  position:absolute;
+  width:260px;
+  height:260px;
+  right:-90px;
+  top:-120px;
+  background:radial-gradient(circle,rgba(129,140,248,.32),transparent 70%);
+}
+.aiChatTop h2,.aiChatTop p,.aiChatScore b,.aiChatScore span{
+  color:#fff!important;
+}
+.aiChatTop p{
+  color:#cbd5e1!important;
+}
+.aiChatBadge{
+  background:rgba(79,70,229,.18)!important;
+  border-color:rgba(129,140,248,.40)!important;
+  color:#c7d2fe!important;
+}
+.aiChatScore{
+  background:rgba(255,255,255,.08)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  border-radius:20px!important;
+  position:relative!important;
+  z-index:1!important;
+}
+.aiChatPanel{
+  background:#fff!important;
+  border:1px solid var(--si-line)!important;
+  border-radius:26px!important;
+  box-shadow:var(--si-shadow)!important;
+}
+.aiMessages{
+  background:linear-gradient(180deg,#ffffff,#f8fafc)!important;
+}
+.aiBubble.assistant{
+  background:#fff!important;
+  border-color:var(--si-line)!important;
+}
+.aiBubble.user{
+  background:linear-gradient(135deg,var(--si-primary),var(--si-primary-2))!important;
+  border-color:transparent!important;
+}
+.aiQuickChips button{
+  background:#f8fafc!important;
+  color:var(--si-primary)!important;
+  border:1px solid var(--si-line)!important;
+  box-shadow:none!important;
+}
+.aiQuickChips button:hover{
+  background:var(--si-primary-soft)!important;
+  border-color:#c7d2fe!important;
+}
+.aiContextPanel{
+  background:#0f172a!important;
+  border:1px solid #334155!important;
+  border-radius:26px!important;
+  box-shadow:0 26px 70px rgba(15,23,42,.25)!important;
+  color:#fff!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+.aiContextPanel::before{
+  content:"";
+  position:absolute;
+  width:220px;
+  height:220px;
+  right:-70px;
+  top:-80px;
+  background:radial-gradient(circle,rgba(79,70,229,.35),transparent 70%);
+  pointer-events:none;
+}
+.aiContextPanel h3,.aiContextStat b{
+  color:#fff!important;
+  position:relative!important;
+}
+.aiContextStat{
+  background:transparent!important;
+  border:0!important;
+  border-bottom:1px solid #334155!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+  position:relative!important;
+}
+.aiContextStat span{
+  color:#94a3b8!important;
+}
+.aiSideActions button{
+  width:100%!important;
+  margin-top:8px!important;
+}
+
+/* Footer */
+.pageFooterLikeDashboard{
+  color:#94a3b8!important;
+}
+
+@media (max-width: 980px){
+  .whiteContent{padding:18px!important;}
+  .whiteSidebar,.sidebar{box-shadow:none!important;}
+  .aiChatTop,.operationsActionPanel,.exportsPanel,.figmaPanel,.dashboardHero,.cashRegisterHeader,.platformHeaderBar,.cashAdminHeader{border-radius:22px!important;}
+}
+@media (max-width: 720px){
+  .whiteContent{padding:14px!important;}
+  .topPageTitle{font-size:20px!important;}
+  .whiteAccount{padding-right:10px!important;}
 }
