@@ -1,0 +1,7 @@
+V118 - Vercel Vite permission fix
+
+- Fixed Vercel Linux build error: node_modules/.bin/vite Permission denied.
+- Changed frontend build script to call Vite through Node directly: node ./node_modules/vite/bin/vite.js build.
+- Added prebuild chmod fallback for cached node_modules binary shims.
+- Added .gitignore entries to keep node_modules, dist and Vercel cache artifacts out of Git.
+- No UI, route, API, auth, inventory, cash-management or backend logic changes.

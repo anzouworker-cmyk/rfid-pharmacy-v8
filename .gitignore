@@ -1,0 +1,8 @@
+# Dependencies and build artifacts
+node_modules/
+dist/
+.vercel/
+.env
+.env.local
+npm-debug.log*
+.DS_Store
