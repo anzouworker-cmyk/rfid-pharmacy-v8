@@ -1,0 +1,5 @@
+V120 - Homepage hero text visibility fix
+
+- Fixed only the public homepage hero title highlight.
+- Made "Opérations de Stock" visible in the Shuffle-style hero title using indigo text.
+- No changes to internal pages, API logic, dashboard, operations, inventory, cash, auth flow, or deployment configuration.
