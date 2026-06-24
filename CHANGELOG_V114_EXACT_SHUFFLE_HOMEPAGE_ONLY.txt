@@ -1,0 +1,1 @@
+V114 - Corrected scope: only the public home/landing page was changed to match the Shuffle source export. Internal operations page and app logic remain unchanged from V112. Connexion and trial CTAs route to the username/password login page.

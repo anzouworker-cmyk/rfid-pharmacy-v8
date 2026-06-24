@@ -279,9 +279,6 @@ function DashIcon({name}){
   if(name==="bell") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9a5 5 0 0 0-10 0c0 5-2 6-2 6h14s-2-1-2-6Z" {...common}/><path d="M10 19a2 2 0 0 0 4 0" {...common}/></svg>;
   if(name==="dots") return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>;
 
-  if(name==="file") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7V3Z" {...common}/><path d="M14 3v5h5" {...common}/><path d="M9.5 12h5" {...common}/><path d="M9.5 16h5" {...common}/></svg>;
-  if(name==="sync") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h5" {...common}/><path d="M20 20v-5h-5" {...common}/><path d="M5.6 15.5a7 7 0 0 0 11.9 2.1L20 15" {...common}/><path d="M18.4 8.5A7 7 0 0 0 6.5 6.4L4 9" {...common}/></svg>;
-  if(name==="eye") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" {...common}/><circle cx="12" cy="12" r="3" {...common}/></svg>;
   if(name==="upload") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4" {...common}/><path d="m8 8 4-4 4 4" {...common}/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" {...common}/></svg>;
   if(name==="link") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5a3.5 3.5 0 0 0 5 0l2.8-2.8a3.5 3.5 0 0 0-5-5L12 7" {...common}/><path d="M13.5 10.5a3.5 3.5 0 0 0-5 0l-2.8 2.8a3.5 3.5 0 0 0 5 5L12 17" {...common}/></svg>;
   if(name==="barcode") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12" {...common}/><path d="M7 6v12" {...common}/><path d="M11 6v12" {...common}/><path d="M14 6v12" {...common}/><path d="M18 6v12" {...common}/><path d="M21 6v12" {...common}/></svg>;
@@ -290,6 +287,8 @@ function DashIcon({name}){
   if(name==="save") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Z" {...common}/><path d="M8 4v6h8V4" {...common}/><path d="M8 20v-6h8v6" {...common}/></svg>;
   if(name==="restore") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7" {...common}/><path d="M4 5v5h5" {...common}/><path d="M12 8v5l3 2" {...common}/></svg>;
   if(name==="cash") return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="7" width="17" height="11" rx="2" {...common}/><path d="M7 7V5.5h10V7" {...common}/><path d="M7 12h4" {...common}/><path d="M15.5 13.5h1.8" {...common}/></svg>;
+  if(name==="refresh") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h5" {...common}/><path d="M20 20v-5h-5" {...common}/><path d="M5.2 15.2A8 8 0 0 0 18.4 18" {...common}/><path d="M18.8 8.8A8 8 0 0 0 5.6 6" {...common}/></svg>;
+  if(name==="eye") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12C3.8 7.9 7.6 5 12 5s8.2 2.9 9.5 7c-1.3 4.1-5.1 7-9.5 7s-8.2-2.9-9.5-7Z" {...common}/><circle cx="12" cy="12" r="3" {...common}/></svg>;
   return null;
 }
 
@@ -602,134 +601,98 @@ function Operations({me}){
     {key:"counted", title:"C. fermeture (compté)", value:cashCountedCents, description:"Saisir le comptage réel de fermeture avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
     {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul Excel : max(0, Nouvelle C. fermeture de hier + Dépôt/ajout + Tot. vente en espèce + Règlement crédit - Dépenses).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"}
   ];
-  const cashCardByKey = key => cashOperationCards.find(card => card.key === key);
-  function openCashCard(key){
-    const card = cashCardByKey(key);
-    if(!card) return;
-    if(card.isExpense) openExpenseModal();
-    else setCashOpModal(card);
-  }
-  const netBenefitCents = totalDailySalesCents - expensesCents;
-  const shuffleCashMetrics = [
-    {label:"Retrait par jour", value:cashToWithdrawCents, prefix:"-", action:()=>openCashCard("toWithdraw")},
-    {label:"Versement global", value:depositsCents, prefix:"-", action:()=>openCashCard("depositsCents")},
-    {label:"Retraits Global", value:withdrawnCents, prefix:"-", action:()=>openCashCard("withdrawnCents")},
-    {label:"Bénéfice Net", value:netBenefitCents, prefix:netBenefitCents>=0 ? "+" : "-", action:()=>openCashCard("totalDailySalesCents")},
-    {label:"Règlements reçus", value:creditSettlementCents, prefix:"+", action:()=>openCashCard("creditSettlementCents")},
-    {label:"Règlements à payer", value:creditSalesCents, prefix:"-", action:()=>openCashCard("creditSalesCents")}
-  ];
-  return <section className="operationsPage v113ShuffleOpsPage">
-    <div className="v113ShuffleOperationsFrame">
-      <div className="v113ShuffleBrowserBar">
-        <div className="v113ShuffleBrowserLeft">
-          <span className="v113Dot rose"></span>
-          <span className="v113Dot amber"></span>
-          <span className="v113Dot emerald"></span>
-          <code>app.smartinventory.io/operations</code>
+  return <section className="operationsPage">
+    <h1>Opérations</h1>
+    <p>Import, scan, associations, identifiants détectés, exports et sauvegardes locales.</p>
+
+    <div className="operationsActionPanel">
+      <h2>Actions inventaire</h2>
+      <p className="notice">Lancez les opérations principales de gestion d’inventaire.</p>
+      <div className="operationGrid workflowGrid">
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon"><DashIcon name="upload"/></div><h3>Importer CSV pharmacie</h3><p>Importer le catalogue produits.</p><span>Choisir CSV</span>
+        <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
+      </label>
+
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon"><DashIcon name="link"/></div><h3>Importer associations</h3><p>Importer les associations Produit ↔ identifiant.</p><span>Choisir CSV</span>
+        <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
+      </label>
+
+      <button className="operationCard blue" onClick={openBarcode}>
+        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Scanner code-barres produit</h3><p>Ouvrir une fenêtre pour saisir le code-barres.</p><span>Scanner</span>
+      </button>
+
+      <button className="operationCard green" onClick={openEpc}>
+        <div className="opIcon"><DashIcon name="rfid"/></div><h3>Scanner identifiant</h3><p>Ouvrir une fenêtre pour saisir un identifiant.</p><span>Scanner</span>
+      </button>
+
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Importer identifiants détectés</h3><p>Importer un CSV/TXT d’identifiants détectés.</p><span>Choisir fichier</span>
+        <input type="file" accept=".csv,.txt" onChange={e=>importDetectedEpc(e.target.files[0])}/>
+      </label>
+
+      <button className="operationCard dangerOp" onClick={clearAssociations}>
+        <div className="opIcon"><DashIcon name="trash"/></div><h3>Vider toutes associations</h3><p>Supprimer toutes les associations locales.</p><span>Vider</span>
+      </button>
+    </div>
+    </div>
+
+    <div className="exportsPanel cashOpsPanel">
+      <div className="cashOpsHeader">
+        <div className="cashOpsIntro">
+          <h2>Opérations de caisse</h2>
+          <p className="notice">Ces opérations ont été déplacées ici. Cliquez sur une carte pour saisir ou modifier la valeur.</p>
         </div>
-        <span className="v113StableBadge">2026 Stable</span>
+        <div className="cashOpsIndicators">
+          <div className="cashOpsIndicator cashOpsIndicatorShortage">
+            <div className="cashOpsIndicatorIcon"><DashIcon name="warning"/></div>
+            <div className="cashOpsIndicatorContent">
+              <span>Montant manquant</span>
+              <strong>{formatDH(currentCashMetrics.shortageCents)}</strong>
+              <small>{currentCashMetrics.shortageCents>0 ? "À vérifier" : "Équilibré"}</small>
+            </div>
+          </div>
+          <div className="cashOpsIndicator cashOpsIndicatorSurplus">
+            <div className="cashOpsIndicatorIcon"><DashIcon name="check"/></div>
+            <div className="cashOpsIndicatorContent">
+              <span>Montant surplus</span>
+              <strong>{formatDH(currentCashMetrics.surplusCents)}</strong>
+              <small>{currentCashMetrics.surplusCents>0 ? "Excédent" : "Équilibré"}</small>
+            </div>
+          </div>
+        </div>
+        <div className="cashOpsDateBox">
+          <span>Date de caisse {canChangeCashDate ? "" : "(admin seulement)"}</span>
+          <input
+            type="date"
+            value={cashDate}
+            disabled={!canChangeCashDate}
+            title={canChangeCashDate ? "Changer la date de caisse" : "Seul un administrateur peut changer cette date"}
+            onChange={e=>canChangeCashDate && setCashDate(e.target.value || todayISO())}
+          />
+        </div>
       </div>
+      <div className="exportOperationGrid cashOpsGrid">
+        {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.cardClass || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.isExpense ? openExpenseModal() : (card.editable ? setCashOpModal(card) : null)}>
+          <div className="opIcon"><DashIcon name={card.icon || "cash"}/></div>
+          <h3>{card.title}</h3>
+          <strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
+          <span>{card.cta}</span>
+        </button>)}
+      </div>
+    </div>
 
-      <div className="v113ShuffleOperationsContent">
-        <section className="v113OpsSection">
-          <header className="v113SectionHeader">
-            <span className="v113HeaderIcon indigo"><DashIcon name="sync"/></span>
-            <div>
-              <h2>Actions Inventaire</h2>
-              <p>Gérez vos importations de stocks et synchronisez vos fichiers en un clic.</p>
-            </div>
-          </header>
-          <div className="v113InventoryGrid">
-            <label className="v113ActionCard v113FileCard">
-              <span className="v113ActionIcon indigo"><DashIcon name="file"/></span>
-              <strong>Importer CSV pharmacie</strong>
-              <small>Mettez à jour le catalogue complet de votre officine.</small>
-              <em>Choisir CSV</em>
-              <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
-            </label>
-
-            <label className="v113ActionCard v113FileCard">
-              <span className="v113ActionIcon emerald"><DashIcon name="link"/></span>
-              <strong>Importer associations</strong>
-              <small>Associez automatiquement vos codes barres et références.</small>
-              <em>Choisir CSV</em>
-              <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
-            </label>
-
-            <button type="button" className="v113ActionCard" onClick={clearAssociations}>
-              <span className="v113ActionIcon rose"><DashIcon name="trash"/></span>
-              <strong>Supprimer stock manquant</strong>
-              <small>Nettoyez votre base de données des entrées obsolètes.</small>
-              <em className="danger">Exécuter</em>
-            </button>
-
-            <button type="button" className="v113ActionCard" onClick={openBarcode}>
-              <span className="v113ActionIcon amber"><DashIcon name="eye"/></span>
-              <strong>Scanner &amp; Vérifier</strong>
-              <small>Contrôle rapide des écarts d'inventaire physiques.</small>
-              <em>Scanner</em>
-            </button>
-          </div>
-        </section>
-
-        <section className="v113OpsSection v113DividedSection">
-          <div className="v113CashHeader">
-            <div className="v113SectionHeader">
-              <span className="v113HeaderIcon indigo"><DashIcon name="cash"/></span>
-              <div>
-                <h2>Opérations de caisse</h2>
-                <p>Suivi des flux financiers entrants et sortants.</p>
-              </div>
-            </div>
-            <div className="v113CashChips">
-              <span className="danger"><i></i>Montant manquant: {formatDH(currentCashMetrics.shortageCents)}</span>
-              <span className="success"><i></i>Montant surplus: {formatDH(currentCashMetrics.surplusCents)}</span>
-            </div>
-          </div>
-
-          <div className="v113DateLine">
-            <span>Date de caisse {canChangeCashDate ? "" : "(admin seulement)"}</span>
-            <input
-              type="date"
-              value={cashDate}
-              disabled={!canChangeCashDate}
-              title={canChangeCashDate ? "Changer la date de caisse" : "Seul un administrateur peut changer cette date"}
-              onChange={e=>canChangeCashDate && setCashDate(e.target.value || todayISO())}
-            />
-          </div>
-
-          <div className="v113MetricGrid">
-            {shuffleCashMetrics.map(metric=><div className="v113MetricTile" key={metric.label}>
-              <span>{metric.label}</span>
-              <strong>{metric.prefix} {formatDH(Math.abs(metric.value))}</strong>
-              <button type="button" onClick={metric.action}>Détails</button>
-            </div>)}
-          </div>
-        </section>
-
-        <section className="v113OpsSection v113DividedSection">
-          <header className="v113SectionHeader">
-            <span className="v113HeaderIcon indigo"><DashIcon name="save"/></span>
-            <div>
-              <h2>Exports et Sauvegardes locales</h2>
-              <p>Sécurisez vos données critiques et exportez vos tables au format standard.</p>
-            </div>
-          </header>
-          <div className="v113ExportGrid">
-            <button type="button" className="v113ExportCard" onClick={exportProducts}>
-              <span><strong>Catalogue de produits</strong><small>Export complet de la base articles.</small></span>
-              <em>Exporter</em>
-            </button>
-            <button type="button" className="v113ExportCard" onClick={exportAssociations}>
-              <span><strong>Historique des ventes</strong><small>Exportez toutes les sessions actives.</small></span>
-              <em>Exporter</em>
-            </button>
-            <button type="button" className="v113ExportCard" onClick={backupProject}>
-              <span><strong>Sauvegarde Complète (JSON)</strong><small>Fichier de restauration complet.</small></span>
-              <em className="primary">Créer backup</em>
-            </button>
-          </div>
-        </section>
+    <div className="exportsPanel">
+      <h2>Exports et sauvegardes locales</h2>
+      <p className="notice">Exportez vos tableaux, rapports d’inventaire et sauvegardes locales.</p>
+      <div className="exportOperationGrid">
+        <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon"><DashIcon name="box"/></div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportAssociations}><div className="opIcon"><DashIcon name="link"/></div><h3>Associations</h3><p>Exporter les produits liés aux identifiants.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}><div className="opIcon"><DashIcon name="tag"/></div><h3>Produits sans association</h3><p>Exporter les articles à associer.</p><span>Exporter</span></button>
+        <button className="exportOperationCard blue" onClick={exportCoverageReport}><div className="opIcon"><DashIcon name="chart"/></div><h3>Taux de couverture</h3><p>Exporter les KPI de couverture.</p><span>Exporter</span></button>
+        <button className="exportOperationCard green" onClick={backupProject}><div className="opIcon"><DashIcon name="save"/></div><h3>Sauvegarde projet</h3><p>Créer un backup JSON complet.</p><span>Backup</span></button>
+        <label className="exportOperationCard fileCard"><div className="opIcon"><DashIcon name="restore"/></div><h3>Restaurer projet</h3><p>Importer un backup JSON local.</p><span>Choisir fichier</span><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></label>
       </div>
     </div>
 
@@ -812,6 +775,7 @@ function Operations({me}){
       </div>
     </div>}
 
+    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
 
@@ -1393,6 +1357,7 @@ function CashRegister(){
       </div>
     </div>
     {msg && <p className="success cashMsg">{msg}</p>}
+    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
 
@@ -1883,21 +1848,23 @@ function Login({setToken}){
     setLoading(false);
   }
 
-  const LandingNav=()=> <nav className="shuffleLandingNav">
-    <a className="shuffleLandingBrand" href="#home" onClick={goLanding} aria-label="Smart Inventory accueil">
-      <span className="shuffleBrandMark"><SidebarBrandIcon/></span>
-      <b>Smart Inventory</b>
-    </a>
-    <div className="shuffleLandingLinks" aria-hidden="true">
-      <a href="#dashboard">Dashboard</a>
-      <a href="#operations" className="active">Opérations</a>
-      <a href="#associations">Associations</a>
-      <a href="#inventaire">Inventaire</a>
-      <a href="#assistant-ai">Assistant IA <em>New</em></a>
-    </div>
-    <div className="shuffleLandingActions">
-      <a className="shuffleNavGhost" href="#login" onClick={goLogin}>Connexion</a>
-      <a className="shuffleNavCta" href="#login" onClick={goLogin}>Essai gratuit</a>
+  const LandingNav=()=> <nav className="shuffleLandingNav shuffleSourceNav">
+    <div className="shuffleSourceNavInner">
+      <a className="shuffleLandingBrand" href="#home" onClick={goLanding} aria-label="Smart Inventory accueil">
+        <span className="shuffleBrandMark"><SidebarBrandIcon/></span>
+        <b>Smart Inventory</b>
+      </a>
+      <div className="shuffleLandingLinks" aria-label="Navigation page accueil">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#operations-panel" className="active">Opérations</a>
+        <a href="#associations">Associations</a>
+        <a href="#inventaire">Inventaire</a>
+        <a href="#assistant-ai">Assistant AI <em>New</em></a>
+      </div>
+      <div className="shuffleLandingActions">
+        <a className="shuffleNavGhost" href="#connexion" onClick={goLogin}>Connexion</a>
+        <a className="shuffleNavCta" href="#essayer" onClick={goLogin}>Essai gratuit</a>
+      </div>
     </div>
   </nav>;
 
@@ -1939,104 +1906,127 @@ function Login({setToken}){
     </div>;
   }
 
-  return <div className="login shufflePreviewLogin shuffleLandingOnly" id="home">
+  return <div className="login shufflePreviewLogin shuffleLandingOnly shuffleExactSourceHome" id="home">
     <LandingNav/>
 
-    <section className="shuffleExactHero">
+    <section className="shuffleExactHero shuffleSourceHero">
       <div className="shuffleExactHeroInner">
         <span className="shuffleHeroBadge"><i></i> Redéfinir la gestion d'inventaire SaaS</span>
         <h1>Pilotez vos <strong>Opérations de Stock</strong> et de Caisse en un seul écran</h1>
         <p>Importez vos catalogues de pharmacies, automatisez les rapprochements de caisse et synchronisez votre comptabilité avec un tableau de bord ultra-fluide.</p>
         <div className="shuffleHeroActions shuffleHeroActionsCenter">
-          <a href="#login" onClick={goLogin} className="shufflePrimaryAction">Accéder à l'application</a>
-          <span className="shuffleSecondaryAction">Voir la démo interactive</span>
+          <a href="#connexion" onClick={goLogin} className="shufflePrimaryAction shuffleSourcePrimaryAction">Accéder à l'application</a>
+          <a href="#operations-panel" className="shuffleSecondaryAction shuffleSourceSecondaryAction">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Voir la démo interactive
+          </a>
         </div>
       </div>
     </section>
 
-    <section id="operations" className="shuffleOperationsSection">
-      <div className="shuffleOperationsFrame">
-        <div className="shuffleBrowserBar">
-          <span className="shuffleDot rose"></span><span className="shuffleDot amber"></span><span className="shuffleDot emerald"></span>
-          <code>app.smartinventory.io/operations</code>
-          <em>2026 Stable</em>
-        </div>
-        <div className="shuffleOperationsContent">
-          <div className="shufflePreviewHeader">
-            <span><DashIcon name="operations"/></span>
-            <div><b>Actions Inventaire</b><small>Gérez vos importations de stocks et synchronisez vos fichiers en un clic.</small></div>
+    <section id="operations-panel" className="shuffleOperationsSection shuffleSourceOperations">
+      <div className="shuffleSourceContainer">
+        <div className="shuffleOperationsFrame shuffleSourceFrame">
+          <div className="shuffleBrowserBar shuffleSourceBrowserBar">
+            <div className="shuffleBrowserLeft">
+              <div className="shuffleBrowserDots"><span className="shuffleDot rose"></span><span className="shuffleDot amber"></span><span className="shuffleDot emerald"></span></div>
+              <code>app.smartinventory.io/operations</code>
+            </div>
+            <em>2026 Stable</em>
           </div>
-          <div className="shuffleMiniGrid shuffleMiniGridFour">
-            <article><span><DashIcon name="upload"/></span><b>Importer CSV pharmacie</b><small>Mettez à jour le catalogue complet.</small><button>Choisir CSV</button></article>
-            <article><span><DashIcon name="link"/></span><b>Importer associations</b><small>Associez automatiquement vos références.</small><button>Choisir CSV</button></article>
-            <article><span><DashIcon name="trash"/></span><b>Supprimer stock manquant</b><small>Nettoyez les entrées obsolètes.</small><button className="danger">Exécuter</button></article>
-            <article><span><DashIcon name="barcode"/></span><b>Scanner code-barres</b><small>Détection rapide en magasin.</small><button>Scanner</button></article>
-          </div>
+          <div className="shuffleOperationsContent shuffleSourceOperationsContent">
+            <div className="shuffleSourceBlock" id="dashboard">
+              <div className="shufflePreviewHeader shuffleSourceSectionHeader">
+                <span><DashIcon name="refresh"/></span>
+                <div><b>Actions Inventaire</b><small>Gérez vos importations de stocks et synchronisez vos fichiers en un clic.</small></div>
+              </div>
+              <div className="shuffleMiniGrid shuffleMiniGridFour shuffleSourceActionGrid">
+                <article className="indigo"><span><DashIcon name="doc"/></span><div><b>Importer CSV pharmacie</b><small>Mettez à jour le catalogue complet de votre officine.</small></div><button type="button">Choisir CSV</button></article>
+                <article className="emerald"><span><DashIcon name="link"/></span><div><b>Importer associations</b><small>Associez automatiquement vos codes barres et références.</small></div><button type="button">Choisir CSV</button></article>
+                <article className="rose"><span><DashIcon name="trash"/></span><div><b>Supprimer stock manquant</b><small>Nettoyez votre base de données des entrées obsolètes.</small></div><button type="button" className="danger">Exécuter</button></article>
+                <article className="amber"><span><DashIcon name="eye"/></span><div><b>Scanner &amp; Vérifier</b><small>Contrôle rapide des écarts d'inventaire physiques.</small></div><button type="button">Scanner</button></article>
+              </div>
+            </div>
 
-          <div className="shuffleCashPreview" id="dashboard">
-            <div className="shufflePreviewHeader compact">
-              <span><DashIcon name="cash"/></span>
-              <div><b>Rapprochement de caisse</b><small>Résumé quotidien des écarts et validations.</small></div>
+            <div className="shuffleSourceBlock shuffleSourceDivider">
+              <div className="shuffleSourceCashHeaderRow">
+                <div className="shufflePreviewHeader shuffleSourceSectionHeader compact">
+                  <span><DashIcon name="cash"/></span>
+                  <div><b>Opérations de caisse</b><small>Suivi des flux financiers entrants et sortants.</small></div>
+                </div>
+                <div className="shuffleSourceStatusChips">
+                  <span className="danger"><i></i>Montant manquant: 0 DH</span>
+                  <span className="success"><i></i>Montant surplus: 0 DH</span>
+                </div>
+              </div>
+              <div className="shuffleMetricGrid shuffleSourceMetricGrid">
+                <div><small>Retrait par jour</small><b>− DH 0</b><button type="button">Détails</button></div>
+                <div><small>Versement global</small><b>− DH 0</b><button type="button">Détails</button></div>
+                <div><small>Retraits Global</small><b>− DH 0</b><button type="button">Détails</button></div>
+                <div><small>Bénéfice Net</small><b>+ DH 0</b><button type="button">Détails</button></div>
+                <div><small>Règlements reçus</small><b>+ DH 0</b><button type="button">Détails</button></div>
+                <div><small>Règlements à payer</small><b>− DH 0</b><button type="button">Détails</button></div>
+              </div>
             </div>
-            <div className="shuffleMetricGrid">
-              <div><small>Total vente</small><b>DH 0</b><button>Détails</button></div>
-              <div><small>Montant à retirer</small><b>DH 0</b><button>Détails</button></div>
-              <div><small>Montant manquant</small><b className="dangerText">DH 0</b><button>Détails</button></div>
-              <div><small>Montant surplus</small><b className="successText">DH 0</b><button>Détails</button></div>
-            </div>
-            <div className="shuffleCashStrip">
-              <span className="danger"><i></i>Montant manquant : 0 DH</span>
-              <span className="success"><i></i>Montant surplus : 0 DH</span>
-            </div>
-          </div>
 
-          <div className="shuffleExportPreview" id="inventaire">
-            <div className="shufflePreviewHeader compact">
-              <span><DashIcon name="download"/></span>
-              <div><b>Exports et Sauvegardes locales</b><small>Sécurisez vos données critiques et exportez vos tables.</small></div>
-            </div>
-            <div className="shuffleExportGrid">
-              <article><div><b>Catalogue de produits</b><small>Export complet de la base articles.</small></div><button>Exporter</button></article>
-              <article><div><b>Historique des ventes</b><small>Exportez toutes les sessions actives.</small></div><button>Exporter</button></article>
-              <article><div><b>Sauvegarde Complète</b><small>Fichier de restauration complet.</small></div><button className="primary">Créer backup</button></article>
+            <div className="shuffleSourceBlock shuffleSourceDivider" id="inventaire">
+              <div className="shufflePreviewHeader shuffleSourceSectionHeader compact">
+                <span><DashIcon name="download"/></span>
+                <div><b>Exports et Sauvegardes locales</b><small>Sécurisez vos données critiques et exportez vos tables au format standard.</small></div>
+              </div>
+              <div className="shuffleExportGrid shuffleSourceExportGrid">
+                <article><div><b>Catalogue de produits</b><small>Export complet de la base articles.</small></div><button type="button">Exporter</button></article>
+                <article><div><b>Historique des ventes</b><small>Exportez toutes les sessions actives.</small></div><button type="button">Exporter</button></article>
+                <article><div><b>Sauvegarde Complète (JSON)</b><small>Fichier de restauration complet.</small></div><button type="button" className="primary">Créer backup</button></article>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section className="shuffleAiShowcase" id="assistant-ai">
-      <div>
-        <span>Algorithmes intelligents</span>
-        <h2>L'Assistant IA au service de votre rentabilité</h2>
-        <p>Notre assistant intelligent analyse en continu vos historiques de vente pour anticiper les ruptures de stock, suggérer des ajustements et repérer les anomalies de caisse.</p>
-        <ul className="shuffleAiBullets">
-          <li>Détection intelligente d'anomalies de caisse</li>
-          <li>Recommandations prédictives pour vos commandes</li>
-        </ul>
+    <section className="shuffleSourceAiShowcase" id="assistant-ai">
+      <div className="shuffleSourceAiInner">
+        <div className="shuffleSourceAiCopy">
+          <span>Algorithmes intelligents</span>
+          <h2>L'Assistant AI au service de votre rentabilité</h2>
+          <p>Notre assistant intelligent analyse en continu vos historiques de vente pour anticiper les ruptures de stock, suggérer des ajustements de prix automatiques et optimiser vos commandes fournisseurs.</p>
+          <div className="shuffleSourceAiFeatures">
+            <div><span>✓</span><div><b>Détection intelligente d'anomalies de caisse</b><small>Repérez instantanément les écarts injustifiés entre stock réel et virtuel.</small></div></div>
+            <div><span>✓</span><div><b>Recommandations prédictives</b><small>Sachez exactement quels produits commander avant la haute saison.</small></div></div>
+          </div>
+        </div>
+        <aside className="shuffleSourceAiPanel">
+          <div className="shuffleSourceAiGlow"></div>
+          <header><div><i></i><code>Assistant AI connecté</code></div><em>v2.4-stable</em></header>
+          <div className="shuffleSourceAiConsole">
+            <p>&gt; Analyse des ventes de la semaine...</p>
+            <p className="accent">&gt; [ALERTE] Écart de -12 unités détecté sur la référence 'Paracétamol 500mg'.</p>
+            <blockquote>
+              <p>"Il semblerait qu'un lot reçu le 12/03 n'ait pas été scanné à l'entrée. Voulez-vous que je régularise l'association de stock ?"</p>
+              <div><button type="button">Oui, régulariser</button><button type="button">Ignorer</button></div>
+            </blockquote>
+          </div>
+        </aside>
       </div>
-      <aside>
-        <header><i></i><code>Assistant IA connecté</code><em>v2.4-stable</em></header>
-        <p className="mono">&gt; Analyse des ventes de la semaine...</p>
-        <p className="mono accent">&gt; [ALERTE] Écart de stock détecté sur une référence prioritaire.</p>
-        <blockquote>Il semblerait qu'un lot reçu n'ait pas été scanné à l'entrée. Voulez-vous que je régularise l'association de stock ?</blockquote>
-        <div className="shuffleAiButtons"><button>Oui, régulariser</button><button>Ignorer</button></div>
-      </aside>
     </section>
 
-    <section className="shuffleFinalCta">
-      <h2>Prêt à passer à la vitesse supérieure ?</h2>
-      <p>Rejoignez les pharmacies et commerces qui utilisent Smart Inventory pour sécuriser, optimiser et automatiser leur gestion quotidienne.</p>
-      <div><a href="#login" onClick={goLogin}>Commencer l'essai gratuit de 14 jours</a><a href="#login" onClick={goLogin}>Connexion</a></div>
-      <small>Aucune carte de crédit requise. Installation et synchronisation rapide.</small>
+    <section className="shuffleFinalCta shuffleSourceFinalCta">
+      <div className="shuffleSourceCtaInner">
+        <h2>Prêt à passer à la vitesse supérieure ?</h2>
+        <p>Rejoignez les dizaines de pharmacies et commerces qui font confiance à Smart Inventory pour sécuriser, optimiser et automatiser leur gestion quotidienne.</p>
+        <div><a href="#essayer" onClick={goLogin}>Commencer l'essai gratuit de 14 jours</a><a href="#contact">Parler à un expert</a></div>
+        <small>Aucune carte de crédit requise. Installation et synchronisation en moins de 10 minutes.</small>
+      </div>
     </section>
 
-    <footer className="shuffleFooter">
+    <footer className="shuffleFooter shuffleSourceFooter">
       <div className="shuffleLandingBrand"><span className="shuffleBrandMark small"><SidebarBrandIcon/></span><b>Smart Inventory</b></div>
       <nav><a href="#politique">Politique de confidentialité</a><a href="#cgu">Conditions d'utilisation</a><a href="#contact">Contact &amp; Support</a></nav>
       <p>© 2026 Smart Inventory. Tous droits réservés.</p>
     </footer>
   </div>;
+
 }
 
 function findProduct(products,value){
@@ -2321,6 +2311,7 @@ function AIAssistant(){
       </aside>
     </div>
 
+    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>
 }
 
