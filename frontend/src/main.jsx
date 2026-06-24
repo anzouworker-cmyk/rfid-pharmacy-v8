@@ -1794,6 +1794,30 @@ function Login({setToken}){
   const [p,setP]=useState("demo123");
   const [err,setErr]=useState("");
   const [loading,setLoading]=useState(false);
+  const [screen,setScreen]=useState(()=>{
+    if(typeof window === "undefined") return "landing";
+    return ["#login","#connexion"].includes(window.location.hash) ? "auth" : "landing";
+  });
+
+  useEffect(()=>{
+    const sync=()=>setScreen(["#login","#connexion"].includes(window.location.hash) ? "auth" : "landing");
+    window.addEventListener("hashchange",sync);
+    sync();
+    return ()=>window.removeEventListener("hashchange",sync);
+  },[]);
+
+  function goLogin(e){
+    if(e) e.preventDefault();
+    if(window.location.hash!=="#login") window.location.hash="login";
+    setScreen("auth");
+    requestAnimationFrame(()=>window.scrollTo({top:0,behavior:"smooth"}));
+  }
+  function goLanding(e){
+    if(e) e.preventDefault();
+    history.replaceState(null,"",window.location.pathname + window.location.search);
+    setScreen("landing");
+    requestAnimationFrame(()=>window.scrollTo({top:0,behavior:"smooth"}));
+  }
 
   async function login(e){
     e.preventDefault();
@@ -1822,97 +1846,161 @@ function Login({setToken}){
     setLoading(false);
   }
 
-  return <div className="login shufflePreviewLogin">
-    <nav className="shuffleLandingNav">
-      <div className="shuffleLandingBrand">
-        <span className="shuffleBrandMark"><SidebarBrandIcon/></span>
-        <b>Smart Inventory</b>
-      </div>
-      <div className="shuffleLandingLinks" aria-hidden="true">
-        <span>Dashboard</span>
-        <span className="active">Opérations</span>
-        <span>Associations</span>
-        <span>Inventaire</span>
-        <span>Assistant IA <em>New</em></span>
-      </div>
-      <a className="shuffleNavCta" href="#connexion">Connexion</a>
-    </nav>
+  const LandingNav=()=> <nav className="shuffleLandingNav">
+    <a className="shuffleLandingBrand" href="#home" onClick={goLanding} aria-label="Smart Inventory accueil">
+      <span className="shuffleBrandMark"><SidebarBrandIcon/></span>
+      <b>Smart Inventory</b>
+    </a>
+    <div className="shuffleLandingLinks" aria-hidden="true">
+      <a href="#dashboard">Dashboard</a>
+      <a href="#operations" className="active">Opérations</a>
+      <a href="#associations">Associations</a>
+      <a href="#inventaire">Inventaire</a>
+      <a href="#assistant-ai">Assistant IA <em>New</em></a>
+    </div>
+    <div className="shuffleLandingActions">
+      <a className="shuffleNavGhost" href="#login" onClick={goLogin}>Connexion</a>
+      <a className="shuffleNavCta" href="#login" onClick={goLogin}>Essai gratuit</a>
+    </div>
+  </nav>;
 
-    <main className="shuffleHeroStage">
-      <section className="shuffleHeroCopy">
+  const AuthForm=()=> <form onSubmit={login} className="loginCard shuffleAuthCard">
+    <SmartInventoryLogo className="loginCodeLogo"/>
+    <h2>Connexion</h2>
+    <p>Accédez à votre espace inventaire et caisse.</p>
+
+    <label>Utilisateur</label>
+    <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur" autoComplete="username"/>
+
+    <label>Mot de passe</label>
+    <input value={p} onChange={e=>setP(e.target.value)} placeholder="Mot de passe" type="password" autoComplete="current-password"/>
+
+    <button type="submit" className="primaryLoginBtn" disabled={loading}>{loading ? "Connexion..." : "Connexion"}</button>
+
+    {err && <p className="err">{err}</p>}
+
+    <div className="loginHelp">
+      <small>Compte démo : demo / demo123</small><br/>
+      <small>Compte admin : admin / admin123</small>
+    </div>
+  </form>;
+
+  if(screen==="auth"){
+    return <div className="login shufflePreviewLogin shuffleAuthOnlyPage">
+      <LandingNav/>
+      <main className="shuffleAuthRoute">
+        <section className="shuffleAuthRouteCopy">
+          <span className="shuffleHeroBadge"><i></i> Connexion sécurisée</span>
+          <h1>Accédez à votre espace <strong>Smart Inventory</strong></h1>
+          <p>Connectez-vous avec votre nom d'utilisateur et votre mot de passe pour gérer vos opérations de stock, caisse et inventaire.</p>
+          <button type="button" className="shuffleBackHome" onClick={goLanding}>← Retour à l'accueil</button>
+        </section>
+        <section className="shuffleAuthPanel shuffleAuthPanelCentered" aria-label="Connexion Smart Inventory">
+          <AuthForm/>
+        </section>
+      </main>
+    </div>;
+  }
+
+  return <div className="login shufflePreviewLogin shuffleLandingOnly" id="home">
+    <LandingNav/>
+
+    <section className="shuffleExactHero">
+      <div className="shuffleExactHeroInner">
         <span className="shuffleHeroBadge"><i></i> Redéfinir la gestion d'inventaire SaaS</span>
         <h1>Pilotez vos <strong>Opérations de Stock</strong> et de Caisse en un seul écran</h1>
-        <p>Importez vos catalogues de pharmacie, automatisez les rapprochements de caisse et suivez les écarts avec un tableau de bord moderne, rapide et fiable.</p>
-        <div className="shuffleHeroActions">
-          <a href="#connexion" className="shufflePrimaryAction">Accéder à l'application</a>
-          <span className="shuffleSecondaryAction">Démo interactive</span>
+        <p>Importez vos catalogues de pharmacies, automatisez les rapprochements de caisse et synchronisez votre comptabilité avec un tableau de bord ultra-fluide.</p>
+        <div className="shuffleHeroActions shuffleHeroActionsCenter">
+          <a href="#login" onClick={goLogin} className="shufflePrimaryAction">Accéder à l'application</a>
+          <span className="shuffleSecondaryAction">Voir la démo interactive</span>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section className="shufflePreviewPanel" aria-label="Aperçu opérations Smart Inventory">
+    <section id="operations" className="shuffleOperationsSection">
+      <div className="shuffleOperationsFrame">
         <div className="shuffleBrowserBar">
           <span className="shuffleDot rose"></span><span className="shuffleDot amber"></span><span className="shuffleDot emerald"></span>
           <code>app.smartinventory.io/operations</code>
           <em>2026 Stable</em>
         </div>
-        <div className="shufflePreviewContent">
+        <div className="shuffleOperationsContent">
           <div className="shufflePreviewHeader">
             <span><DashIcon name="operations"/></span>
-            <div><b>Actions Inventaire</b><small>Gérez vos importations, scans et associations.</small></div>
+            <div><b>Actions Inventaire</b><small>Gérez vos importations de stocks et synchronisez vos fichiers en un clic.</small></div>
           </div>
-          <div className="shuffleMiniGrid">
-            <article><span><DashIcon name="upload"/></span><b>Importer CSV pharmacie</b><small>Catalogue produits</small></article>
-            <article><span><DashIcon name="link"/></span><b>Importer associations</b><small>Produit ↔ identifiant</small></article>
-            <article><span><DashIcon name="barcode"/></span><b>Scanner code-barres</b><small>Saisie rapide</small></article>
-            <article><span><DashIcon name="rfid"/></span><b>Scanner identifiant</b><small>Stock détecté</small></article>
+          <div className="shuffleMiniGrid shuffleMiniGridFour">
+            <article><span><DashIcon name="upload"/></span><b>Importer CSV pharmacie</b><small>Mettez à jour le catalogue complet.</small><button>Choisir CSV</button></article>
+            <article><span><DashIcon name="link"/></span><b>Importer associations</b><small>Associez automatiquement vos références.</small><button>Choisir CSV</button></article>
+            <article><span><DashIcon name="trash"/></span><b>Supprimer stock manquant</b><small>Nettoyez les entrées obsolètes.</small><button className="danger">Exécuter</button></article>
+            <article><span><DashIcon name="barcode"/></span><b>Scanner code-barres</b><small>Détection rapide en magasin.</small><button>Scanner</button></article>
           </div>
-          <div className="shuffleCashStrip">
-            <span className="danger"><i></i>Montant manquant: 0 DH</span>
-            <span className="success"><i></i>Montant surplus: 0 DH</span>
+
+          <div className="shuffleCashPreview" id="dashboard">
+            <div className="shufflePreviewHeader compact">
+              <span><DashIcon name="cash"/></span>
+              <div><b>Rapprochement de caisse</b><small>Résumé quotidien des écarts et validations.</small></div>
+            </div>
+            <div className="shuffleMetricGrid">
+              <div><small>Total vente</small><b>DH 0</b><button>Détails</button></div>
+              <div><small>Montant à retirer</small><b>DH 0</b><button>Détails</button></div>
+              <div><small>Montant manquant</small><b className="dangerText">DH 0</b><button>Détails</button></div>
+              <div><small>Montant surplus</small><b className="successText">DH 0</b><button>Détails</button></div>
+            </div>
+            <div className="shuffleCashStrip">
+              <span className="danger"><i></i>Montant manquant : 0 DH</span>
+              <span className="success"><i></i>Montant surplus : 0 DH</span>
+            </div>
+          </div>
+
+          <div className="shuffleExportPreview" id="inventaire">
+            <div className="shufflePreviewHeader compact">
+              <span><DashIcon name="download"/></span>
+              <div><b>Exports et Sauvegardes locales</b><small>Sécurisez vos données critiques et exportez vos tables.</small></div>
+            </div>
+            <div className="shuffleExportGrid">
+              <article><div><b>Catalogue de produits</b><small>Export complet de la base articles.</small></div><button>Exporter</button></article>
+              <article><div><b>Historique des ventes</b><small>Exportez toutes les sessions actives.</small></div><button>Exporter</button></article>
+              <article><div><b>Sauvegarde Complète</b><small>Fichier de restauration complet.</small></div><button className="primary">Créer backup</button></article>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section id="connexion" className="shuffleAuthPanel">
-        <form onSubmit={login} className="loginCard shuffleAuthCard">
-          <SmartInventoryLogo className="loginCodeLogo"/>
-          <h2>Connexion</h2>
-          <p>Accédez à votre espace inventaire et caisse.</p>
-
-          <label>Utilisateur</label>
-          <input value={u} onChange={e=>setU(e.target.value)} placeholder="Utilisateur"/>
-
-          <label>Mot de passe</label>
-          <input value={p} onChange={e=>setP(e.target.value)} placeholder="Mot de passe" type="password"/>
-
-          <button type="submit" className="primaryLoginBtn" disabled={loading}>{loading ? "Connexion..." : "Connexion"}</button>
-
-          {err && <p className="err">{err}</p>}
-
-          <div className="loginHelp">
-            <small>Compte démo : demo / demo123</small><br/>
-            <small>Compte admin : admin / admin123</small>
-          </div>
-        </form>
-      </section>
-    </main>
-
-    <section className="shuffleAiShowcase">
+    <section className="shuffleAiShowcase" id="assistant-ai">
       <div>
         <span>Algorithmes intelligents</span>
         <h2>L'Assistant IA au service de votre rentabilité</h2>
-        <p>Analyse les anomalies de caisse, les produits manquants et les priorités d'association pour accélérer vos décisions.</p>
+        <p>Notre assistant intelligent analyse en continu vos historiques de vente pour anticiper les ruptures de stock, suggérer des ajustements et repérer les anomalies de caisse.</p>
+        <ul className="shuffleAiBullets">
+          <li>Détection intelligente d'anomalies de caisse</li>
+          <li>Recommandations prédictives pour vos commandes</li>
+        </ul>
       </div>
       <aside>
         <header><i></i><code>Assistant IA connecté</code><em>v2.4-stable</em></header>
         <p className="mono">&gt; Analyse des ventes de la semaine...</p>
-        <p className="mono accent">&gt; [ALERTE] Écart détecté sur une référence prioritaire.</p>
-        <blockquote>Voulez-vous générer un plan d'action pour régulariser l'inventaire ?</blockquote>
+        <p className="mono accent">&gt; [ALERTE] Écart de stock détecté sur une référence prioritaire.</p>
+        <blockquote>Il semblerait qu'un lot reçu n'ait pas été scanné à l'entrée. Voulez-vous que je régularise l'association de stock ?</blockquote>
+        <div className="shuffleAiButtons"><button>Oui, régulariser</button><button>Ignorer</button></div>
       </aside>
     </section>
-  </div>
-}
 
+    <section className="shuffleFinalCta">
+      <h2>Prêt à passer à la vitesse supérieure ?</h2>
+      <p>Rejoignez les pharmacies et commerces qui utilisent Smart Inventory pour sécuriser, optimiser et automatiser leur gestion quotidienne.</p>
+      <div><a href="#login" onClick={goLogin}>Commencer l'essai gratuit de 14 jours</a><a href="#login" onClick={goLogin}>Connexion</a></div>
+      <small>Aucune carte de crédit requise. Installation et synchronisation rapide.</small>
+    </section>
+
+    <footer className="shuffleFooter">
+      <div className="shuffleLandingBrand"><span className="shuffleBrandMark small"><SidebarBrandIcon/></span><b>Smart Inventory</b></div>
+      <nav><a href="#politique">Politique de confidentialité</a><a href="#cgu">Conditions d'utilisation</a><a href="#contact">Contact &amp; Support</a></nav>
+      <p>© 2026 Smart Inventory. Tous droits réservés.</p>
+    </footer>
+  </div>;
+}
 
 function findProduct(products,value){
   const v=String(value||"").trim();

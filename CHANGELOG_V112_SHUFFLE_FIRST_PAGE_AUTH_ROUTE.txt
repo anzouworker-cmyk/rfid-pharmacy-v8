@@ -1,0 +1,1 @@
+V112 - Première page identique au design Shuffle. Le clic Connexion/Essai gratuit/Accéder à l application navigue vers une page séparée username + password. Aucune logique API/app connectée modifiée.
