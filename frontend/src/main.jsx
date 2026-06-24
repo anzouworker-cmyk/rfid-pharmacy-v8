@@ -1841,6 +1841,15 @@ const SHUFFLE_LOGIN_SOURCE_HTML = "<div class=\"\" id=\"content\">\n<nav class=\
 
 function ShuffleExactLoginHtmlSource({username,password,loading,err,onUsername,onPassword,onSubmit,goLanding}){
   const hostRef = useRef(null);
+  const controlsRef = useRef({});
+  const latestRef = useRef({onUsername,onPassword,onSubmit,goLanding});
+
+  useEffect(()=>{
+    latestRef.current = {onUsername,onPassword,onSubmit,goLanding};
+  },[onUsername,onPassword,onSubmit,goLanding]);
+
+  // Init Shuffle HTML one time only. Do not rebuild the shadow DOM on every keystroke,
+  // otherwise the input is recreated and the cursor loses focus after each letter.
   useEffect(()=>{
     const host = hostRef.current;
     if(!host) return;
@@ -1866,25 +1875,15 @@ function ShuffleExactLoginHtmlSource({username,password,loading,err,onUsername,o
     const forgotLink = Array.from(root.querySelectorAll('a')).find(a => textOf(a).includes("mot de passe oublié"));
     const trialLinks = Array.from(root.querySelectorAll('a')).filter(a => textOf(a).includes("essai gratuit"));
 
-    if(userInput){ userInput.value = username || ""; userInput.name = "username"; userInput.autocomplete = "username"; }
-    if(passInput){ passInput.value = password || ""; passInput.name = "password"; passInput.autocomplete = "current-password"; }
-    if(submitBtn){
-      submitBtn.textContent = loading ? "Connexion..." : "Se connecter";
-      submitBtn.disabled = !!loading;
-      submitBtn.classList.toggle("smart-login-loading", !!loading);
-    }
-    if(err && form && submitBtn){
-      const msg = document.createElement("p");
-      msg.className = "smart-login-error";
-      msg.textContent = err;
-      submitBtn.insertAdjacentElement("afterend", msg);
-    }
+    if(userInput){ userInput.name = "username"; userInput.autocomplete = "username"; }
+    if(passInput){ passInput.name = "password"; passInput.autocomplete = "current-password"; }
+    controlsRef.current = {root,form,userInput,passInput,submitBtn};
 
-    const onUserInput = e => onUsername(e.target.value);
-    const onPassInput = e => onPassword(e.target.value);
+    const onUserInput = e => latestRef.current.onUsername?.(e.target.value);
+    const onPassInput = e => latestRef.current.onPassword?.(e.target.value);
     const onFormSubmit = e => {
       e.preventDefault();
-      onSubmit(userInput?.value || "", passInput?.value || "");
+      latestRef.current.onSubmit?.(userInput?.value || "", passInput?.value || "");
     };
     const onRootClick = e => {
       const path = e.composedPath ? e.composedPath() : [];
@@ -1893,7 +1892,7 @@ function ShuffleExactLoginHtmlSource({username,password,loading,err,onUsername,o
       const label = textOf(link);
       if(link === backLink || ["dashboard","opérations","associations","inventaire"].includes(label) || label.includes("assistant ai")){
         e.preventDefault();
-        goLanding(e);
+        latestRef.current.goLanding?.(e);
         return;
       }
       if(link === heroLoginLink || label === "connexion"){
@@ -1915,8 +1914,33 @@ function ShuffleExactLoginHtmlSource({username,password,loading,err,onUsername,o
       passInput?.removeEventListener("input", onPassInput);
       form?.removeEventListener("submit", onFormSubmit);
       root.removeEventListener("click", onRootClick);
+      controlsRef.current = {};
     };
-  },[username,password,loading,err,onUsername,onPassword,onSubmit,goLanding]);
+  },[]);
+
+  // Sync React state into the already-mounted Shuffle HTML without recreating inputs.
+  useEffect(()=>{
+    const {root,form,userInput,passInput,submitBtn} = controlsRef.current || {};
+    if(!root) return;
+    const active = root.activeElement || document.activeElement;
+    const nextUsername = username || "";
+    const nextPassword = password || "";
+    if(userInput && active !== userInput && userInput.value !== nextUsername) userInput.value = nextUsername;
+    if(passInput && active !== passInput && passInput.value !== nextPassword) passInput.value = nextPassword;
+    if(submitBtn){
+      submitBtn.textContent = loading ? "Connexion..." : "Se connecter";
+      submitBtn.disabled = !!loading;
+      submitBtn.classList.toggle("smart-login-loading", !!loading);
+    }
+    root.querySelectorAll(".smart-login-error").forEach(node=>node.remove());
+    if(err && form && submitBtn){
+      const msg = document.createElement("p");
+      msg.className = "smart-login-error";
+      msg.textContent = err;
+      submitBtn.insertAdjacentElement("afterend", msg);
+    }
+  },[username,password,loading,err]);
+
   return <div ref={hostRef} className="shuffleExactLoginHtmlSourceHost"/>;
 }
 
