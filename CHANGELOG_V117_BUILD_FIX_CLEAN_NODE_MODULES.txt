@@ -1,0 +1,5 @@
+V117_BUILD_FIX_CLEAN_NODE_MODULES
+
+- Fix build package: removed bundled node_modules from ZIP to avoid broken Vite .bin symlink/module resolution after extraction.
+- Keep React/Vite homepage design from V116.
+- Build validated from clean install using npm ci && npm run build.
