@@ -8776,3 +8776,199 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
     border-bottom:1px solid rgba(226,232,240,.8)!important;
   }
 }
+
+/* V138 - Top dashboard menu + left navigation for remaining internal pages.
+   Public home and login pages are untouched because they do not use .shuffleInvPage. */
+.internalTopDashNav{
+  background:#fff;
+  border-bottom:1px solid rgba(226,232,240,.9);
+  box-shadow:0 1px 2px rgba(15,23,42,.04);
+  z-index:60;
+}
+.internalTopDashNavInner{
+  height:64px;
+  padding:0 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+}
+.internalTopDashBrand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  color:#0f172a;
+  padding:0!important;
+  font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif;
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:-.025em;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.internalTopDashBrand span{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  background:#4f46e5;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 8px 18px rgba(79,70,229,.22);
+}
+.internalTopDashBrand .invSvg{width:19px;height:19px;}
+.internalTopDashLinks{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:0;
+}
+.internalTopDashLinks button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:38px;
+  padding:9px 14px;
+  border-radius:11px;
+  background:transparent;
+  border:0;
+  color:#64748b;
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+  transition:all .18s ease;
+  white-space:nowrap;
+}
+.internalTopDashLinks button:hover{
+  color:#4f46e5;
+  background:#eef2ff;
+  box-shadow:none;
+}
+.internalTopDashLinks button.active{
+  color:#fff;
+  background:#4f46e5;
+  box-shadow:0 10px 22px rgba(79,70,229,.24);
+}
+.internalTopDashLinks .invSvg{width:17px;height:17px;}
+.internalTopDashAccount{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
+  flex-shrink:0;
+}
+.internalSideLogout{
+  width:100%;
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px!important;
+  background:#f8fafc!important;
+  border:1px solid #e2e8f0!important;
+  color:#475569!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  padding:10px 12px!important;
+  transition:all .18s ease;
+}
+.internalSideLogout:hover{
+  background:#eef2ff!important;
+  border-color:#c7d2fe!important;
+  color:#4f46e5!important;
+  box-shadow:none!important;
+}
+
+@media (min-width:1025px){
+  .shuffleInvPage.withInternalTopNav{
+    display:grid!important;
+    grid-template-columns:284px minmax(0,1fr)!important;
+    grid-template-rows:64px minmax(0,1fr) auto!important;
+    min-height:100vh!important;
+    background:#f8fafc!important;
+  }
+  .withInternalTopNav .internalTopDashNav{
+    grid-column:1 / -1!important;
+    grid-row:1!important;
+    position:sticky!important;
+    top:0!important;
+    width:100%!important;
+  }
+  .withInternalTopNav .shuffleInvNav.internalSideNav{
+    grid-column:1!important;
+    grid-row:2 / span 2!important;
+    position:sticky!important;
+    top:64px!important;
+    align-self:start!important;
+    width:284px!important;
+    min-height:calc(100vh - 64px)!important;
+    height:calc(100vh - 64px)!important;
+  }
+  .withInternalTopNav .shuffleInvMain,
+  .withInternalTopNav .invChromeMain{
+    grid-column:2!important;
+    grid-row:2!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:32px 36px 44px!important;
+  }
+  .withInternalTopNav .shuffleInvFooter{
+    grid-column:2!important;
+    grid-row:3!important;
+  }
+  .withInternalTopNav .sideNavBottomOnly{
+    display:block!important;
+    grid-template-columns:none!important;
+    width:100%!important;
+    margin-top:auto!important;
+    padding-top:18px!important;
+    border-top:1px solid #eef2f7!important;
+  }
+  .withInternalTopNav .sideNavBottomOnly .shuffleInvMobileBtn{display:none!important;}
+  .withInternalTopNav .internalSideNav .shuffleInvBrand{
+    pointer-events:auto;
+  }
+}
+
+@media (max-width:1024px){
+  .shuffleInvPage.withInternalTopNav{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  .withInternalTopNav .internalTopDashNav{
+    position:sticky;
+    top:0;
+    width:100%;
+  }
+  .internalTopDashNavInner{
+    min-height:64px;
+    height:auto;
+    padding:12px 16px;
+    flex-wrap:wrap;
+  }
+  .internalTopDashLinks{
+    order:3;
+    width:100%;
+    flex-basis:100%;
+    justify-content:flex-start;
+    overflow-x:auto;
+    padding-bottom:2px;
+  }
+  .internalTopDashAccount .shuffleInvStoreBadge{display:none!important;}
+  .withInternalTopNav .shuffleInvNav.internalSideNav{
+    position:relative!important;
+    top:auto!important;
+    width:100%!important;
+    min-height:auto!important;
+    height:auto!important;
+  }
+}

@@ -450,22 +450,42 @@ function inventoryChromeIcon(pageId){
 function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
   const initials = String(me?.username || me?.pharmacy_name || "AD").trim().slice(0,2).toUpperCase() || "AD";
   const nav = Array.isArray(menu) && menu.length ? menu : APP_USER_PAGES;
-  return <div className="shuffleInvPage invChromePage">
-    <nav className="shuffleInvNav">
-      <div className="shuffleInvNavInner">
-        <button type="button" className="shuffleInvBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
-          <span className="shuffleInvBrandIcon"><InvIcon name="cube"/></span>
-          <span>Smart Inventory</span>
+  const topNav = nav.filter(item => item.id === "dashboard" || item.id === "cashAdmin");
+  const sideNav = nav.filter(item => item.id !== "dashboard" && item.id !== "cashAdmin");
+  return <div className="shuffleInvPage invChromePage withInternalTopNav">
+    <header className="internalTopDashNav" aria-label="Navigation dashboard">
+      <div className="internalTopDashNavInner">
+        <button type="button" className="internalTopDashBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
+          <span><InvIcon name="cube"/></span>
+          <b>Smart Inventory</b>
         </button>
-        <div className="shuffleInvLinks">
-          {nav.map(item=><button type="button" key={item.id} className={item.id===tab ? "shuffleInvNavItem active" : "shuffleInvNavItem"} onClick={()=>setTab(item.id)}>
+        <div className="internalTopDashLinks">
+          {topNav.map(item=><button type="button" key={item.id} className={item.id===tab ? "active" : ""} onClick={()=>setTab(item.id)}>
             <InvIcon name={inventoryChromeIcon(item.id)}/>
             <span>{item.label}</span>
           </button>)}
         </div>
-        <div className="shuffleInvRight">
+        <div className="internalTopDashAccount">
           <div className="shuffleInvStoreBadge"><InvIcon name="store"/><span>{me?.pharmacy_name || "Pharmacie Démo"}</span></div>
           <div className="shuffleInvAvatar">{initials}</div>
+        </div>
+      </div>
+    </header>
+
+    <nav className="shuffleInvNav internalSideNav">
+      <div className="shuffleInvNavInner">
+        <button type="button" className="shuffleInvBrand" onClick={()=>setTab("operations")} aria-label="Smart Inventory opérations">
+          <span className="shuffleInvBrandIcon"><InvIcon name="cube"/></span>
+          <span>Menu</span>
+        </button>
+        <div className="shuffleInvLinks">
+          {sideNav.map(item=><button type="button" key={item.id} className={item.id===tab ? "shuffleInvNavItem active" : "shuffleInvNavItem"} onClick={()=>setTab(item.id)}>
+            <InvIcon name={inventoryChromeIcon(item.id)}/>
+            <span>{item.label}</span>
+          </button>)}
+        </div>
+        <div className="shuffleInvRight sideNavBottomOnly">
+          <button type="button" className="internalSideLogout" onClick={logout}>Logout</button>
           <button type="button" className="shuffleInvMobileBtn" aria-label="Menu"><InvIcon name="menu"/></button>
         </div>
       </div>
@@ -2635,32 +2655,51 @@ function Inventory({setTab=()=>{}, me, logout=()=>{}}){
     exportCSV("inventaire_reel.csv", rows, cols);
   }
 
-  const nav = [
-    {id:"dashboard", label:"Dashboard", icon:"home"},
-    {id:"operations", label:"Opérations", icon:"sync"},
-    {id:"association", label:"Associations", icon:"link"},
-    {id:"inventory", label:"Inventaire", icon:"list"},
-    {id:"cash", label:"Caisse", icon:"cash"},
-    {id:"ai", label:"Assistant IA", icon:"lab"},
-    {id:"users", label:"Utilisateurs", icon:"users"}
-  ];
+  const userAllowedPages = me?.role==="platform_admin" ? defaultUserPages() : cleanPageList(me?.page_permissions || defaultUserPages());
+  const nav = APP_USER_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p}));
+  if(me?.can_manage_users && me?.role!=="platform_admin"){
+    nav.push({id:"users",label:"Utilisateurs",icon:"platform"});
+  }
+  if(me?.role==="platform_admin"){
+    nav.push(...APP_ADMIN_PAGES.map(p=>({...p})));
+  }
+  const topNav = nav.filter(item => item.id === "dashboard" || item.id === "cashAdmin");
+  const sideNav = nav.filter(item => item.id !== "dashboard" && item.id !== "cashAdmin");
 
-  return <div className="shuffleInvPage">
-    <nav className="shuffleInvNav">
-      <div className="shuffleInvNavInner">
-        <button type="button" className="shuffleInvBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
-          <span className="shuffleInvBrandIcon"><InvIcon name="cube"/></span>
-          <span>Smart Inventory</span>
+  return <div className="shuffleInvPage withInternalTopNav">
+    <header className="internalTopDashNav" aria-label="Navigation dashboard">
+      <div className="internalTopDashNavInner">
+        <button type="button" className="internalTopDashBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
+          <span><InvIcon name="cube"/></span>
+          <b>Smart Inventory</b>
         </button>
-        <div className="shuffleInvLinks">
-          {nav.map(item=><button type="button" key={item.id} className={item.id==="inventory" ? "shuffleInvNavItem active" : "shuffleInvNavItem"} onClick={()=>setTab(item.id)}>
-            <InvIcon name={item.icon}/>
+        <div className="internalTopDashLinks">
+          {topNav.map(item=><button type="button" key={item.id} className={item.id==="inventory" ? "active" : ""} onClick={()=>setTab(item.id)}>
+            <InvIcon name={inventoryChromeIcon(item.id)}/>
             <span>{item.label}</span>
           </button>)}
         </div>
-        <div className="shuffleInvRight">
+        <div className="internalTopDashAccount">
           <div className="shuffleInvStoreBadge"><InvIcon name="store"/><span>{me?.pharmacy_name || "Pharmacie Démo"}</span></div>
           <div className="shuffleInvAvatar">{initials}</div>
+        </div>
+      </div>
+    </header>
+
+    <nav className="shuffleInvNav internalSideNav">
+      <div className="shuffleInvNavInner">
+        <button type="button" className="shuffleInvBrand" onClick={()=>setTab("operations")} aria-label="Smart Inventory opérations">
+          <span className="shuffleInvBrandIcon"><InvIcon name="cube"/></span>
+          <span>Menu</span>
+        </button>
+        <div className="shuffleInvLinks">
+          {sideNav.map(item=><button type="button" key={item.id} className={item.id==="inventory" ? "shuffleInvNavItem active" : "shuffleInvNavItem"} onClick={()=>setTab(item.id)}>
+            <InvIcon name={inventoryChromeIcon(item.id)}/>
+            <span>{item.label}</span>
+          </button>)}
+        </div>
+        <div className="shuffleInvRight sideNavBottomOnly">
+          <button type="button" className="internalSideLogout" onClick={logout}>Logout</button>
           <button type="button" className="shuffleInvMobileBtn" aria-label="Menu"><InvIcon name="menu"/></button>
         </div>
       </div>

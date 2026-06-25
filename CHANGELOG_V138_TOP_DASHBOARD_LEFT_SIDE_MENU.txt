@@ -1,0 +1,7 @@
+V138 - Repositionnement du menu interne
+
+- Barre supérieure rétablie sur les pages internes.
+- La barre supérieure affiche seulement Dashboard et Dashboard Caisse.
+- Toutes les autres pages restent dans le menu latéral gauche.
+- Accueil et connexion non modifiées.
+- Logique métier/API inchangées.
