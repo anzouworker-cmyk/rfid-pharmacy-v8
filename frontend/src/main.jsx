@@ -449,59 +449,65 @@ function inventoryChromeIcon(pageId){
 
 function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
   const initials = String(me?.username || me?.pharmacy_name || "AD").trim().slice(0,2).toUpperCase() || "AD";
+  const accountName = me?.pharmacy_name || me?.username || "Admin";
+  const roleName = me?.role==="platform_admin" ? "admin@smartinv.com" : "officine@smartinv.com";
   const nav = Array.isArray(menu) && menu.length ? menu : APP_USER_PAGES;
-  const topNav = nav.filter(item => item.id === "dashboard" || item.id === "cashAdmin");
-  const sideNav = nav.filter(item => item.id !== "dashboard" && item.id !== "cashAdmin");
-  return <div className="shuffleInvPage invChromePage withInternalTopNav">
-    <header className="internalTopDashNav" aria-label="Navigation dashboard">
-      <div className="internalTopDashNavInner">
-        <button type="button" className="internalTopDashBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
-          <span><InvIcon name="cube"/></span>
-          <b>Smart Inventory</b>
-        </button>
-        <div className="internalTopDashLinks">
-          {topNav.map(item=><button type="button" key={item.id} className={item.id===tab ? "active" : ""} onClick={()=>setTab(item.id)}>
-            <InvIcon name={inventoryChromeIcon(item.id)}/>
-            <span>{item.label}</span>
-          </button>)}
-        </div>
-        <div className="internalTopDashAccount">
-          <div className="shuffleInvStoreBadge"><InvIcon name="store"/><span>{me?.pharmacy_name || "Pharmacie Démo"}</span></div>
-          <div className="shuffleInvAvatar">{initials}</div>
-        </div>
+  const titleByPage={
+    dashboard:"Dashboard",
+    operations:"Opérations",
+    association:"Associations",
+    inventory:"Inventaires",
+    cash:"Caisses",
+    ai:"Assistant IA",
+    users:"Utilisateurs",
+    cashAdmin:"Dashboard Caisse",
+    platform:"Clients SaaS",
+    dashboardAdmin:"Publicités"
+  };
+  const pageTitle = titleByPage[tab] || "Dashboard";
+  const sidebarItems = nav.map(item=>({
+    ...item,
+    label: item.id==="inventory" ? "Inventaires" : item.id==="cash" ? "Caisses" : item.label,
+    icon: inventoryChromeIcon(item.id)
+  }));
+  return <div className="dashRefShell">
+    <aside className="dashRefSidebar">
+      <button type="button" className="dashRefBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory Dashboard">
+        <span className="dashRefBrandIcon"><InvIcon name="cube"/></span>
+        <b>Smart Inventory</b>
+      </button>
+      <nav className="dashRefSideNav" aria-label="Navigation principale">
+        {sidebarItems.map(item=><button type="button" key={item.id} className={item.id===tab ? "active" : ""} onClick={()=>setTab(item.id)}>
+          <InvIcon name={item.icon}/>
+          <span>{item.label}</span>
+          {item.id==="ai" && <em>NEW</em>}
+        </button>)}
+      </nav>
+      <div className="dashRefSideUser">
+        <span>{initials.slice(0,1)}</span>
+        <div><b>{accountName}</b><small>{roleName}</small></div>
       </div>
-    </header>
-
-    <nav className="shuffleInvNav internalSideNav">
-      <div className="shuffleInvNavInner">
-        <button type="button" className="shuffleInvBrand" onClick={()=>setTab("operations")} aria-label="Smart Inventory opérations">
-          <span className="shuffleInvBrandIcon"><InvIcon name="cube"/></span>
-          <span>Menu</span>
-        </button>
-        <div className="shuffleInvLinks">
-          {sideNav.map(item=><button type="button" key={item.id} className={item.id===tab ? "shuffleInvNavItem active" : "shuffleInvNavItem"} onClick={()=>setTab(item.id)}>
-            <InvIcon name={inventoryChromeIcon(item.id)}/>
-            <span>{item.label}</span>
-          </button>)}
+    </aside>
+    <main className="dashRefMain">
+      <header className="dashRefTopbar">
+        <div className="dashRefBreadcrumb">
+          <button type="button" className="dashRefMobileToggle" aria-label="Menu"><InvIcon name="menu"/></button>
+          <span className="dashRefCrumbActive"><InvIcon name={inventoryChromeIcon(tab)}/>{pageTitle}</span>
+          <span className="dashRefSlash">/</span>
+          <button type="button" className={tab==="cashAdmin" ? "dashRefCrumbText active" : "dashRefCrumbText"} onClick={()=>setTab("cashAdmin")}>Dashboard Caisse</button>
         </div>
-        <div className="shuffleInvRight sideNavBottomOnly">
-          <button type="button" className="internalSideLogout" onClick={logout}>Logout</button>
-          <button type="button" className="shuffleInvMobileBtn" aria-label="Menu"><InvIcon name="menu"/></button>
+        <div className="dashRefTopActions">
+          <button type="button" className="dashRefBell" aria-label="Notifications"><InvIcon name="warning"/><i></i></button>
+          <span className="dashRefAvatar">{initials}</span>
         </div>
-      </div>
-    </nav>
-
-    <main className="shuffleInvMain invChromeMain">
-      {children}
-    </main>
-
-    <footer className="shuffleInvFooter">
-      <div className="shuffleInvFooterInner">
-        <div className="shuffleInvFooterBrand"><span><InvIcon name="cube"/></span><b>Smart Inventory</b></div>
+      </header>
+      <div className="dashRefContent">{children}</div>
+      <footer className="dashRefFooter">
+        <div><span className="dashRefFooterLogo"><InvIcon name="cube"/></span><b>Smart Inventory</b></div>
         <p>© 2026 Smart Inventory. Tous droits réservés.</p>
-        <div><button type="button" onClick={logout}>Logout</button><button type="button">Aide</button></div>
-      </div>
-    </footer>
+        <div><button type="button">Légal</button><button type="button">FAQ</button><button type="button" onClick={logout}>Logout</button></div>
+      </footer>
+    </main>
   </div>;
 }
 
@@ -2688,10 +2694,6 @@ function Inventory({setTab=()=>{}, me, logout=()=>{}}){
 
     <nav className="shuffleInvNav internalSideNav">
       <div className="shuffleInvNavInner">
-        <button type="button" className="shuffleInvBrand" onClick={()=>setTab("operations")} aria-label="Smart Inventory opérations">
-          <span className="shuffleInvBrandIcon"><InvIcon name="cube"/></span>
-          <span>Menu</span>
-        </button>
         <div className="shuffleInvLinks">
           {sideNav.map(item=><button type="button" key={item.id} className={item.id==="inventory" ? "shuffleInvNavItem active" : "shuffleInvNavItem"} onClick={()=>setTab(item.id)}>
             <InvIcon name={inventoryChromeIcon(item.id)}/>
@@ -2700,7 +2702,6 @@ function Inventory({setTab=()=>{}, me, logout=()=>{}}){
         </div>
         <div className="shuffleInvRight sideNavBottomOnly">
           <button type="button" className="internalSideLogout" onClick={logout}>Logout</button>
-          <button type="button" className="shuffleInvMobileBtn" aria-label="Menu"><InvIcon name="menu"/></button>
         </div>
       </div>
     </nav>
@@ -3295,14 +3296,8 @@ function Dashboard({setTab, me, menu=[], logout}){
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
   const detectedEpcCount=(detectedEpcs||[]).length;
   const epcCounts={};
-  associations.forEach(a=>{ const e=norm(a.EPC); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
+  associations.forEach(a=>{ const e=norm(a.EPC || a.Identifiant); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
   const duplicateEpcs=Object.values(epcCounts).filter(x=>x>1).length;
-  const accountName=me?.pharmacy_name || me?.username || "Pharmacie Démo";
-  const roleName=me?.role==="platform_admin" ? "Administrateur" : "Utilisateur";
-  const initials=String(accountName || "AD").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase() || "AD";
-  const radius=70;
-  const circumference=2*Math.PI*radius;
-  const dash=(coverage/100)*circumference;
   const activeDashboardAd=dashboardAds.length ? dashboardAds[dashboardAdIndex % dashboardAds.length] : null;
 
   function exportDashboardReport(){
@@ -3318,173 +3313,99 @@ function Dashboard({setTab, me, menu=[], logout}){
     }];
     exportCSV("rapport_dashboard.csv",rows,Object.keys(rows[0]));
   }
-
   function exportProductsWithoutRfid(){
     const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut":"Sans association"}));
     exportCSV("produits_sans_tag.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut"]);
   }
-
   function exportScanHistory(){
     const rows=associations.length ? associations : [{message:"Aucune donnée d'association"}];
     exportCSV("historique_scans.csv",rows,Object.keys(rows[0]||{message:""}));
   }
 
-  const navItems = [
-    {id:"dashboard", label:"Dashboard"},
-    {id:"operations", label:"Opérations"},
-    {id:"association", label:"Associations"},
-    {id:"inventory", label:"Inventaire"},
-    {id:"cash", label:"Caisse"},
-    {id:"ai", label:"Assistant IA"},
-    {id:"users", label:"Utilisateur"}
-  ].filter(item=> item.id==="dashboard" || !menu.length || menu.some(m=>m.id===item.id));
-
   const kpis=[
-    {label:"Produits enregistrés", value:products.length, sub:products.length ? "Catalogue importé" : "Aucun catalogue importé", tag:"Stock", tone:"blue", icon:"box", action:()=>setTab("operations")},
-    {label:"Produits tagués", value:productsWithRfid, sub:productsWithRfid ? "Avec association" : "Aucun tag détecté", tag:"RFID", tone:"emerald", icon:"tag", action:()=>setTab("association")},
-    {label:"Transactions", value:detectedEpcCount, sub:detectedEpcCount ? "Identifiants détectés importés" : "Aucune transaction", tag:"Caisse", tone:"indigo", icon:"rfid", action:()=>setTab("inventory")},
-    {label:"Produits sans tag", value:productsWithoutRfid, sub:productsWithoutRfid ? "À taguer en priorité" : "Synchronisés", tag:"À traiter", tone:"amber", icon:"warning", action:()=>setTab("operations")}
+    {label:"Produits enregistrés", value:products.length, sub:products.length ? "Catalogue importé" : "Aucun catalogue importé", tag:"Stock", tone:"blue", icon:"cube", action:()=>setTab("operations")},
+    {label:"Produits tagués", value:productsWithRfid, sub:productsWithRfid ? "Associés tag RFID" : "Aucun tag détecté", tag:"RFID", tone:"emerald", icon:"link", action:()=>setTab("association")},
+    {label:"Transactions", value:detectedEpcCount, sub:detectedEpcCount ? "Automatiquement détectées" : "Automatiquement détectées", tag:"Caisse", tone:"sky", icon:"cash", action:()=>setTab("inventory")},
+    {label:"Produits sans tag", value:productsWithoutRfid, sub:productsWithoutRfid ? "Nécessitent association" : "Nécessitent association", tag:"À traiter", tone:"amber", icon:"warning", action:()=>setTab("operations")}
   ];
-
   const reports=[
-    {label:"Taux de couverture", tone:"blue", icon:"doc", action:exportDashboardReport},
-    {label:"Produits avec tag", tone:"emerald", icon:"tag", action:exportDashboardReport},
-    {label:"Produits sans tag", tone:"amber", icon:"warning", action:exportProductsWithoutRfid},
-    {label:"Historique scans", tone:"violet", icon:"clock", action:exportScanHistory}
+    {label:"Taux de couverture", tone:"violet", icon:"grid", action:exportDashboardReport},
+    {label:"Produits avec tag", tone:"sky", icon:"link", action:exportDashboardReport},
+    {label:"Produits sans tag", tone:"emerald", icon:"list", action:exportProductsWithoutRfid},
+    {label:"Historique scans", tone:"amber", icon:"cash", action:exportScanHistory}
+  ];
+  const alerts=[
+    {tone:"red", icon:"warning", title:`${detectedEpcCount} scan détecté`, text:"Importez les CSV des instruments détectés pour calculer le stock réel."},
+    {tone:"amber", icon:"warning", title:productsWithoutRfid>0 ? `${productsWithoutRfid} produits sans association` : "Aucune association détectée pour ces produits", text:"Ajoutez un rapport pour améliorer votre suivi."}
   ];
 
-  const alerts=[];
-  alerts.push({tone:"blue", icon:"rfid", title:`${detectedEpcCount} scan${detectedEpcCount>1 ? "s" : ""} détecté${detectedEpcCount>1 ? "s" : ""}`, text:"Importez les CSV des instruments détectés pour calculer le stock réel."});
-  if(productsWithoutRfid>0){
-    alerts.push({tone:"amber", icon:"warning", title:`${productsWithoutRfid} produits sans association`, text:"Ajoutez un rapport pour améliorer votre suivi."});
-  }else{
-    alerts.push({tone:"amber", icon:"warning", title:"Aucune association détectée pour ces produits.", text:"Ajoutez un rapport pour améliorer votre suivi."});
-  }
-  if(duplicateEpcs>0) alerts.push({tone:"rose", icon:"warning", title:`${duplicateEpcs} doublon(s) identifiant détecté(s)`, text:"Vérifier les associations en double."});
+  return <section className="dashRefDashboard">
+    <div className="dashRefHeroBlock">
+      <div>
+        <div className="dashRefStatusLine">
+          <span className="dark">app.smart-inventory.io/dashboard</span>
+          <span>Mode stable</span>
+          <span className="success">Synchronisation active</span>
+        </div>
+        <h1>Dashboard pharmacie</h1>
+        <h2>suivi RFID en temps réel.</h2>
+        <p>Suivi en temps réel de la couverture de l'activité de votre pharmacie, avec une lecture claire des produits tagués, des transactions et des alertes à traiter.</p>
+      </div>
+      <div className="dashRefHeroActions">
+        <button type="button" className="dashRefPrimary" onClick={()=>setTab("inventory")}>Accéder à l'inventaire</button>
+        <button type="button" className="dashRefSecondary" onClick={exportDashboardReport}>Exporter</button>
+      </div>
+    </div>
 
-  return <div className="shuffleDashExactPage">
-    <nav className="shuffleDashNav">
-      <div className="shuffleDashNavInner">
-        <button type="button" className="shuffleDashBrand" onClick={()=>setTab("dashboard")}>
-          <span className="shuffleDashBrandIcon"><DashIcon name="box"/></span>
-          <span>Smart Inventory</span>
-        </button>
-        <div className="shuffleDashNavLinks">
-          {navItems.map(item=><button key={item.id} type="button" className={item.id==="dashboard" ? "active" : ""} onClick={()=>setTab(item.id)}>
-            {item.id==="dashboard" && <DashIcon name="box"/>}
-            <span>{item.label}</span>
+    <div className="dashRefKpiGrid">
+      {kpis.map(k=><button type="button" key={k.label} className="dashRefKpi" onClick={k.action}>
+        <div><span className={`dashRefIcon ${k.tone}`}><InvIcon name={k.icon}/></span><em>{k.tag}</em></div>
+        <strong>{k.value}</strong>
+        <b>{k.label}</b>
+        <small>{k.sub}</small>
+      </button>)}
+    </div>
+
+    <div className="dashRefTwoColumns">
+      <section className="dashRefCoverageCard">
+        <div className="dashRefSectionHead"><div><b>Taux de couverture</b><span>Pourcentage de produits avec étiquette RFID active sur le total</span></div><em>À améliorer</em></div>
+        <div className="dashRefCoverageBody">
+          <div className="dashRefCircle"><span>{coverage}%</span></div>
+          <div>
+            <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture progresse." : "Votre couverture doit être améliorée."}</h3>
+            <p>Vous avez étiqueté {coverage}% de vos produits en pharmacie. Commencez ou continuez l'étiquetage pour améliorer votre suivi d'inventaire et fiabiliser les sorties de caisse.</p>
+            <div><button type="button" className="dashRefPrimary" onClick={()=>setTab("association")}>Lancer l'association</button><button type="button" className="dashRefSecondary" onClick={()=>setTab("operations")}>Lancer un scan</button></div>
+          </div>
+        </div>
+      </section>
+      <section className="dashRefAdCard">
+        <span>Espace partenaire</span>
+        <h3>Espace partenaire officine</h3>
+        <div className="dashRefPartnerLine"><i><InvIcon name="sync"/></i><b>Prodecys</b></div>
+        {activeDashboardAd?.image_url ? <img src={mediaUrl(activeDashboardAd.image_url)} alt="Publicité"/> : <p>Accédez à vos outils partenaires, gérez vos clients pharmacies et suivez les performances de vos installations RFID.</p>}
+        <button type="button">Accéder à l'espace</button>
+      </section>
+    </div>
+
+    <div className="dashRefBottomGrid">
+      <section className="dashRefReportsBlock">
+        <div className="dashRefSectionHead"><div><b>Rapports et exports</b><span>Vérifiez les données et créez vos outils de gestion</span></div><button type="button">Voir tout</button></div>
+        <div className="dashRefReportGrid">
+          {reports.map(r=><button type="button" key={r.label} onClick={r.action}>
+            <span className={`dashRefIcon ${r.tone}`}><InvIcon name={r.icon}/></span><b>{r.label}</b><small>Télécharger →</small>
           </button>)}
         </div>
-        <div className="shuffleDashAccount">
-          <span>{initials}</span>
-          <div><b>{accountName}</b><small>{roleName}</small></div>
-        </div>
-      </div>
-    </nav>
-
-    <main className="shuffleDashMain">
-      <div className="shuffleDashGlowOne" aria-hidden="true"></div>
-      <div className="shuffleDashGlowTwo" aria-hidden="true"></div>
-      <section className="shuffleDashGrid">
-        <header className="shuffleDashHero shuffleDashSpan12">
-          <div>
-            <div className="shuffleDashPills">
-              <span className="dark">app.smart-inventory.io/dashboard</span>
-              <span>Mode stable</span>
-              <span className="success">Synchronisation active</span>
-            </div>
-            <h1>Dashboard pharmacie <span>suivi RFID en temps réel.</span></h1>
-            <p>Suivi en temps réel de la couverture et de l'activité de votre pharmacie, avec une lecture claire des produits tagués, des transactions et des alertes à traiter.</p>
-          </div>
-          <div className="shuffleDashHeroActions">
-            <button type="button" className="primary" onClick={()=>setTab("operations")}>Accéder à l’avancement <span>→</span></button>
-            <button type="button" className="secondary" onClick={exportDashboardReport}>Exporter</button>
-          </div>
-        </header>
-
-        {kpis.map(k=><button key={k.label} type="button" className="shuffleDashKpi" onClick={k.action}>
-          <div className="shuffleDashKpiTop">
-            <span className={`shuffleDashMiniIcon ${k.tone}`}><DashIcon name={k.icon}/></span>
-            <em className={k.tone}>{k.tag}</em>
-          </div>
-          <strong>{k.value}</strong>
-          <b>{k.label}</b>
-          <small>{k.sub}</small>
-        </button>)}
-
-        <section className="shuffleDashCoverage shuffleDashSpan7">
-          <div className="shuffleDashSectionTitle">
-            <div><b>Taux de couverture</b><span>Mesure la part des produits déjà reliés à un tag RFID.</span></div>
-            <em>À améliorer</em>
-          </div>
-          <div className="shuffleDashCoverageBody">
-            <div className="shuffleDashGauge" aria-label={`Taux de couverture ${coverage}%`}>
-              <svg viewBox="0 0 188 188">
-                <circle cx="94" cy="94" r={radius} fill="none" stroke="#eaf0f7" strokeWidth="20"/>
-                {coverage>0 && <circle cx="94" cy="94" r={radius} fill="none" stroke="#4f46e5" strokeWidth="20" strokeDasharray={`${dash} ${circumference}`} strokeLinecap="round" transform="rotate(-90 94 94)"/>}
-              </svg>
-              <strong>{coverage}%</strong>
-            </div>
-            <div className="shuffleDashCoverageCopy">
-              <h2>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture progresse." : "Votre couverture doit être améliorée."}</h2>
-              <p>Vous avez étiqueté {coverage}% de vos produits en pharmacie. Commencez ou continuez l’étiquetage pour améliorer votre suivi d’inventaire et fiabiliser les sorties caisse.</p>
-              <div>
-                <button type="button" className="primary" onClick={()=>setTab("operations")}>Voir l’avancement <span>→</span></button>
-                <button type="button" className="secondary" onClick={()=>setTab("operations")}>Lancer un scan</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="shuffleDashAd shuffleDashSpan5">
-          <div className="shuffleDashAdGlow"></div>
-          <div className="shuffleDashAdTop"><div><span>PUBLICITÉ</span><h2>Espace partenaire officine</h2></div><i></i><i></i></div>
-          <div className="shuffleDashAdPanel">
-            {activeDashboardAd?.image_url ? <img src={mediaUrl(activeDashboardAd.image_url)} alt="Publicité"/> : <p>Un emplacement visuel sobre pour les annonces réseau, les rappels de campagne ou les communications internes de la pharmacie.</p>}
-          </div>
-        </section>
-
-        <section className="shuffleDashReports shuffleDashSpan8">
-          <div className="shuffleDashSectionTitle">
-            <div><b>Rapports et exports</b><span>Téléchargez les états utiles au suivi quotidien.</span></div>
-            <small>Exports sécurisés</small>
-          </div>
-          <div className="shuffleDashReportGrid">
-            {reports.map(r=><button key={r.label} type="button" onClick={r.action}>
-              <span className={`shuffleDashMiniIcon ${r.tone}`}><DashIcon name={r.icon}/></span>
-              <b>{r.label}</b>
-              <small>Télécharger ↓</small>
-            </button>)}
-          </div>
-        </section>
-
-        <section className="shuffleDashAlerts shuffleDashSpan4">
-          <div className="shuffleDashSectionTitle compact">
-            <div><b>Alertes prioritaires</b><span>Points à surveiller avant la prochaine session.</span></div>
-            <span className="shuffleDashSpinner"><DashIcon name="dots"/></span>
-          </div>
-          <div className="shuffleDashAlertList">
-            {alerts.map((a,i)=><div key={i} className={`shuffleDashAlert ${a.tone}`}>
-              <span className={`shuffleDashMiniIcon ${a.tone}`}><DashIcon name={a.icon}/></span>
-              <div><b>{a.title}</b><small>{a.text}</small></div>
-            </div>)}
-          </div>
-        </section>
       </section>
-    </main>
-
-    <footer className="shuffleDashFooter">
-      <div>
-        <button type="button" className="shuffleDashBrand" onClick={()=>setTab("dashboard")}><span className="shuffleDashBrandIcon"><DashIcon name="box"/></span><span>Smart Inventory</span></button>
-        <p>© 2026 Smart Inventory. Tous droits réservés.</p>
-      </div>
-      <div className="shuffleDashFooterLinks">
-        {navItems.map(item=><button key={item.id} type="button" onClick={()=>setTab(item.id)}>{item.label}</button>)}
-      </div>
-      <button type="button" className="shuffleDashLogout" onClick={logout}>Log out <span>↪</span></button>
-    </footer>
-  </div>
+      <section className="dashRefAlertsBlock">
+        <div className="dashRefSectionHead"><div><b>Alertes prioritaires</b><span>Points à vérifier quand la pharmacie est active</span></div></div>
+        <div className="dashRefAlertsCard">
+          {alerts.map((a,i)=><div className={`dashRefAlert ${a.tone}`} key={i}><span className={`dashRefIcon ${a.tone}`}><InvIcon name={a.icon}/></span><div><b>{a.title}</b><small>{a.text}</small></div></div>)}
+        </div>
+      </section>
+    </div>
+  </section>;
 }
+
 
 function DashboardAdmin({auth}){
   const [items,setItems]=useState([]);

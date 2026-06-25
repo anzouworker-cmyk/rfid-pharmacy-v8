@@ -1,0 +1,6 @@
+V140 - Remove side menu header and adjust avatar
+
+- Removed the left side menu header showing the cube icon and "Menu" text on authenticated/internal pages.
+- Removed hidden mobile menu icon instances from the internal side nav markup.
+- Adjusted the top-right avatar circle so it is fully visible and has consistent sizing/padding.
+- No business logic, API calls, authentication, caisse, inventory, imports or exports were changed.
