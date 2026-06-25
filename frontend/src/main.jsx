@@ -342,6 +342,7 @@ function App(){
     menu.push(...APP_ADMIN_PAGES.map(p=>({...p})));
   }
   if(tab==="dashboard") return <Dashboard setTab={setTab} me={me} menu={menu} logout={logout}/>;
+  if(tab==="operations") return <Operations me={me} setTab={setTab} logout={logout}/>;
 
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
@@ -397,7 +398,7 @@ function App(){
 }
 
 
-function Operations({me}){
+function Operations({me,setTab,logout}){
   const {products,associations,detectedEpcs,setProducts,setAssociations,setDetectedEpcs}=useLocalStore();
   const [scanModal,setScanModal]=useState(null);
   const [barcode,setBarcode]=useState("");
@@ -603,102 +604,157 @@ function Operations({me}){
     {key:"counted", title:"C. fermeture (compté)", value:cashCountedCents, description:"Saisir le comptage réel de fermeture avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
     {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul Excel : max(0, Nouvelle C. fermeture de hier + Dépôt/ajout + Tot. vente en espèce + Règlement crédit - Dépenses).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"}
   ];
-  return <section className="operationsPage">
-    <h1>Opérations</h1>
-    <p>Import, scan, associations, identifiants détectés, exports et sauvegardes locales.</p>
+  const cashCardByKey = Object.fromEntries(cashOperationCards.map(card=>[card.key,card]));
+  function openCashCard(card){
+    if(!card) return;
+    if(card.isExpense) openExpenseModal();
+    else if(card.editable) setCashOpModal(card);
+  }
+  const shuffleCashCards = [
+    {label:"Ticket vente en cours", sign:"~", key:"totalDailySalesCents", tone:"green", link:"Retour valeur"},
+    {label:"Paiement par espèce", sign:"~", key:"salesCashCents", tone:"sky", link:"Retour valeur"},
+    {label:"Paiement par TPE", sign:"~", key:"atmSalesCents", tone:"violet", link:"Consulter historique"},
+    {label:"Ticket autre remise", sign:"=", key:"creditSettlementCents", tone:"amber", link:"Retour valeur"},
+    {label:"Produits chèque", sign:"+", key:"creditSalesCents", tone:"rose", link:"Retour valeur"},
+    {label:"Remboursement espèce", sign:"+", key:"depositsCents", tone:"teal", link:"Retour valeur"},
+    {label:"Approvisionnement", sign:"~", key:"toWithdraw", tone:"indigo", link:"Retour résultats"},
+    {label:"Dépenses caisse", sign:"+", key:"expenseEntry", tone:"fuchsia", link:"Retour valeur"},
+    {label:"Avoirs retournés", sign:"~", key:"withdrawnCents", tone:"orange", link:"Retour valeur"},
+    {label:"Bons de commandes", sign:"=", key:"closingCalculatedCents", tone:"cyan", link:"Retour valeur"},
+    {label:"C encaissements", sign:"=", key:"counted", tone:"lime", link:"Consulter liste"},
+    {label:"C virement bancaire", sign:"+", key:"closingRealCents", tone:"pink", link:"Retour valeur"}
+  ];
 
-    <div className="operationsActionPanel">
-      <h2>Actions inventaire</h2>
-      <p className="notice">Lancez les opérations principales de gestion d’inventaire.</p>
-      <div className="operationGrid workflowGrid">
-      <label className="operationCard white fileCardOp">
-        <div className="opIcon"><DashIcon name="upload"/></div><h3>Importer CSV pharmacie</h3><p>Importer le catalogue produits.</p><span>Choisir CSV</span>
-        <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
-      </label>
-
-      <label className="operationCard white fileCardOp">
-        <div className="opIcon"><DashIcon name="link"/></div><h3>Importer associations</h3><p>Importer les associations Produit ↔ identifiant.</p><span>Choisir CSV</span>
-        <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
-      </label>
-
-      <button className="operationCard blue" onClick={openBarcode}>
-        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Scanner code-barres produit</h3><p>Ouvrir une fenêtre pour saisir le code-barres.</p><span>Scanner</span>
-      </button>
-
-      <button className="operationCard green" onClick={openEpc}>
-        <div className="opIcon"><DashIcon name="rfid"/></div><h3>Scanner identifiant</h3><p>Ouvrir une fenêtre pour saisir un identifiant.</p><span>Scanner</span>
-      </button>
-
-      <label className="operationCard white fileCardOp">
-        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Importer identifiants détectés</h3><p>Importer un CSV/TXT d’identifiants détectés.</p><span>Choisir fichier</span>
-        <input type="file" accept=".csv,.txt" onChange={e=>importDetectedEpc(e.target.files[0])}/>
-      </label>
-
-      <button className="operationCard dangerOp" onClick={clearAssociations}>
-        <div className="opIcon"><DashIcon name="trash"/></div><h3>Vider toutes associations</h3><p>Supprimer toutes les associations locales.</p><span>Vider</span>
-      </button>
-    </div>
-    </div>
-
-    <div className="exportsPanel cashOpsPanel">
-      <div className="cashOpsHeader">
-        <div className="cashOpsIntro">
-          <h2>Opérations de caisse</h2>
-          <p className="notice">Ces opérations ont été déplacées ici. Cliquez sur une carte pour saisir ou modifier la valeur.</p>
+  return <section className="shuffleOpsPage">
+    <nav className="shuffleOpsNav">
+      <div className="shuffleOpsNavInner">
+        <button className="shuffleOpsBrand" type="button" onClick={()=>setTab ? setTab("dashboard") : null}>
+          <div className="shuffleOpsBrandMark"><SidebarBrandIcon className="shuffleOpsBrandSvg"/></div>
+          <span>Smart Inventory</span>
+        </button>
+        <div className="shuffleOpsMenu">
+          <button type="button" className="active" onClick={()=>setTab && setTab("operations")}>Opérations</button>
+          <button type="button" onClick={()=>setTab && setTab("cash")}>Encaissements</button>
+          <button type="button" onClick={()=>setTab && setTab("inventory")}>Inventaire</button>
+          <button type="button" onClick={()=>setTab && setTab("cash")}>Caisse</button>
+          <button type="button" onClick={()=>setTab && setTab("association")}>Associations</button>
+          <button type="button" onClick={()=>setTab && setTab("ai")}>CRM Achats</button>
         </div>
-        <div className="cashOpsIndicators">
-          <div className="cashOpsIndicator cashOpsIndicatorShortage">
-            <div className="cashOpsIndicatorIcon"><DashIcon name="warning"/></div>
-            <div className="cashOpsIndicatorContent">
-              <span>Montant manquant</span>
-              <strong>{formatDH(currentCashMetrics.shortageCents)}</strong>
-              <small>{currentCashMetrics.shortageCents>0 ? "À vérifier" : "Équilibré"}</small>
+        <div className="shuffleOpsUserZone">
+          <button type="button" className="shuffleOpsBell" aria-label="Notifications"><DashIcon name="bell"/></button>
+          <button type="button" className="shuffleOpsAvatar" onClick={logout} title="Log out">PI</button>
+        </div>
+      </div>
+    </nav>
+
+    <main className="shuffleOpsMain">
+      <section className="shuffleOpsSection shuffleOpsActionsSection">
+        <div className="shuffleOpsContainer">
+          <div className="shuffleOpsOverline">Pour aux essentiels et certaines de ces outils et la progression locale</div>
+          <div className="shuffleOpsSectionHead">
+            <h1>Actions Inventaire</h1>
+            <p>Toutes les actions nécessaires pour la gestion de votre inventaire.</p>
+          </div>
+          <div className="shuffleOpsActionGrid">
+            <label className="shuffleOpsActionCard fileCardOp">
+              <div className="shuffleOpsActionTop"><span className="shuffleOpsIconBubble violet"><DashIcon name="upload"/></span><span className="shuffleOpsPill violet">C1</span></div>
+              <h3>Insérer Qt/Inventaire</h3>
+              <p>Insérer le stock/quantité produits...</p>
+              <span className="shuffleOpsTextLink">Charger Liste <b>›</b></span>
+              <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
+            </label>
+            <label className="shuffleOpsActionCard fileCardOp">
+              <div className="shuffleOpsActionTop"><span className="shuffleOpsIconBubble blue"><DashIcon name="refresh"/></span><span className="shuffleOpsPill blue">B1</span></div>
+              <h3>Insérer op associations</h3>
+              <p>Insérer, désassocier le lot/paquet...</p>
+              <span className="shuffleOpsTextLink">Charger Liste <b>›</b></span>
+              <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
+            </label>
+            <button type="button" className="shuffleOpsActionCard" onClick={openBarcode}>
+              <div className="shuffleOpsActionTop"><span className="shuffleOpsIconBubble emerald"><DashIcon name="doc"/></span><span className="shuffleOpsPill emerald">B1</span></div>
+              <h3>Scanner code barre/produit</h3>
+              <p>Rechercher un lot et son historique...</p>
+              <span className="shuffleOpsTextLink">Scanner <b>›</b></span>
+            </button>
+            <button type="button" className="shuffleOpsActionCard" onClick={()=>setMsg("Fonction ticket prête à configurer.")}>
+              <div className="shuffleOpsActionTop"><span className="shuffleOpsIconBubble amber"><DashIcon name="warning"/></span><span className="shuffleOpsPill amber">A2</span></div>
+              <h3>Scanner de ticket</h3>
+              <p>Accéder à la fiche du ticket scanné...</p>
+              <span className="shuffleOpsTextLink">Charger Ticket <b>›</b></span>
+            </button>
+            <label className="shuffleOpsActionCard fileCardOp">
+              <div className="shuffleOpsActionTop"><span className="shuffleOpsIconBubble rose"><DashIcon name="cash"/></span><span className="shuffleOpsPill rose">B1</span></div>
+              <h3>Insérer bloc/bon d'achat</h3>
+              <p>Importer un lot/GTIN à IT rapide...</p>
+              <span className="shuffleOpsTextLink">Charger Bloc <b>›</b></span>
+              <input type="file" accept=".csv,.txt" onChange={e=>importDetectedEpc(e.target.files[0])}/>
+            </label>
+            <button type="button" className="shuffleOpsActionCard" onClick={()=>setMsg(`Produits: ${products.length}. Associations: ${associations.length}. Identifiants détectés: ${detectedEpcs.length}.`)}>
+              <div className="shuffleOpsActionTop"><span className="shuffleOpsIconBubble teal"><DashIcon name="eye"/></span><span className="shuffleOpsPill teal">Voir</span></div>
+              <h3>Observer résultats</h3>
+              <p>Importer les résultats associations...</p>
+              <span className="shuffleOpsTextLink emeraldText">Valider <b>✓</b></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="shuffleOpsSection">
+        <div className="shuffleOpsContainer">
+          <div className="shuffleOpsCashHero">
+            <div>
+              <h2>Opérations de caisse</h2>
+              <p>Gérer les opérations comptables et de caisse en temps réel.</p>
+            </div>
+            <div className="shuffleOpsCashHeroStats">
+              <div className="shuffleOpsCashHeroStat"><p>Solde actuel</p><strong>{formatDH(newCashBalanceCents)}</strong><span>Par caisse</span></div>
+              <div className="shuffleOpsCashHeroStat"><p>Montant espèce</p><strong>{formatDH(salesCashCalculatedCents)}</strong><span>Par caisse</span></div>
+              <label className="shuffleOpsDateInput"><span>Sélectionner date</span><input type="date" value={cashDate} disabled={!canChangeCashDate} onChange={e=>canChangeCashDate && setCashDate(e.target.value || todayISO())}/></label>
             </div>
           </div>
-          <div className="cashOpsIndicator cashOpsIndicatorSurplus">
-            <div className="cashOpsIndicatorIcon"><DashIcon name="check"/></div>
-            <div className="cashOpsIndicatorContent">
-              <span>Montant surplus</span>
-              <strong>{formatDH(currentCashMetrics.surplusCents)}</strong>
-              <small>{currentCashMetrics.surplusCents>0 ? "Excédent" : "Équilibré"}</small>
-            </div>
+          <div className="shuffleOpsCashGrid">
+            {shuffleCashCards.slice(0,6).map(item=>{ const card=cashCardByKey[item.key]; return <button key={item.label} type="button" className="shuffleOpsCashCard" onClick={()=>openCashCard(card)}>
+              <div className={`shuffleOpsCashIcon ${item.tone}`}><DashIcon name="cash"/></div>
+              <p>{item.label}</p>
+              <strong>{item.sign} {formatDH(card?.value || 0)}</strong>
+              <span className={item.link.includes("historique") ? "muted" : item.link.includes("résultats") || item.link.includes("liste") ? "green" : ""}>{item.link}</span>
+            </button>})}
+          </div>
+          <div className="shuffleOpsCashGrid shuffleOpsCashGridSecond">
+            {shuffleCashCards.slice(6).map(item=>{ const card=cashCardByKey[item.key]; return <button key={item.label} type="button" className="shuffleOpsCashCard" onClick={()=>openCashCard(card)}>
+              <div className={`shuffleOpsCashIcon ${item.tone}`}><DashIcon name="cash"/></div>
+              <p>{item.label}</p>
+              <strong>{item.sign} {formatDH(card?.value || 0)}</strong>
+              <span className={item.link.includes("résultats") || item.link.includes("liste") ? "green" : ""}>{item.link}</span>
+            </button>})}
           </div>
         </div>
-        <div className="cashOpsDateBox">
-          <span>Date de caisse {canChangeCashDate ? "" : "(admin seulement)"}</span>
-          <input
-            type="date"
-            value={cashDate}
-            disabled={!canChangeCashDate}
-            title={canChangeCashDate ? "Changer la date de caisse" : "Seul un administrateur peut changer cette date"}
-            onChange={e=>canChangeCashDate && setCashDate(e.target.value || todayISO())}
-          />
+      </section>
+
+      <section className="shuffleOpsSection">
+        <div className="shuffleOpsContainer">
+          <div className="shuffleOpsSectionHead">
+            <h2>Exports et sauvegarde locales</h2>
+            <p>Exporter les données de vos CTRL et générer des rapports détaillés locaux.</p>
+          </div>
+          <div className="shuffleOpsExportGrid">
+            <button className="shuffleOpsExportCard" onClick={exportProducts}><span className="shuffleOpsExportIcon violet"><DashIcon name="doc"/></span><h3>Produits locaux</h3><p>Exporter la liste des produits en local...</p><strong>Export CSV</strong></button>
+            <button className="shuffleOpsExportCard" onClick={exportAssociations}><span className="shuffleOpsExportIcon emerald"><DashIcon name="link"/></span><h3>Associations</h3><p>Exporter les informations et l'index des lots associés...</p><strong className="greenBtn">Export CSV</strong></button>
+            <button className="shuffleOpsExportCard" onClick={exportProductsWithoutRfid}><span className="shuffleOpsExportIcon sky"><DashIcon name="cash"/></span><h3>Produits sans association</h3><p>Exporter la liste de tous les produits non associés...</p><strong className="skyBtn">Export CSV</strong></button>
+            <button className="shuffleOpsExportCard" onClick={exportCoverageReport}><span className="shuffleOpsExportIcon amber"><DashIcon name="chart"/></span><h3>Taux de reconstitution</h3><p>Exporter les taux de CP et d'obtention des résultats simples...</p><strong className="amberBtn">Export CSV</strong></button>
+            <button className="shuffleOpsExportCard" onClick={backupProject}><span className="shuffleOpsExportIcon rose"><DashIcon name="save"/></span><h3>Backup complet</h3><p>Créer une sauvegarde complète de toutes les données...</p><strong className="roseBtn">Charger Backup</strong></button>
+          </div>
+          <label className="shuffleOpsRestoreCard fileCard">
+            <span className="shuffleOpsExportIcon teal"><DashIcon name="restore"/></span>
+            <div><h3>Restaurer projet</h3><p>Importer un backup JSON local.</p></div>
+            <strong>Choisir fichier</strong>
+            <input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/>
+          </label>
         </div>
-      </div>
-      <div className="exportOperationGrid cashOpsGrid">
-        {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.cardClass || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.isExpense ? openExpenseModal() : (card.editable ? setCashOpModal(card) : null)}>
-          <div className="opIcon"><DashIcon name={card.icon || "cash"}/></div>
-          <h3>{card.title}</h3>
-          <strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
-          <span>{card.cta}</span>
-        </button>)}
-      </div>
-    </div>
+      </section>
+    </main>
 
-    <div className="exportsPanel">
-      <h2>Exports et sauvegardes locales</h2>
-      <p className="notice">Exportez vos tableaux, rapports d’inventaire et sauvegardes locales.</p>
-      <div className="exportOperationGrid">
-        <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon"><DashIcon name="box"/></div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
-        <button className="exportOperationCard" onClick={exportAssociations}><div className="opIcon"><DashIcon name="link"/></div><h3>Associations</h3><p>Exporter les produits liés aux identifiants.</p><span>Exporter</span></button>
-        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}><div className="opIcon"><DashIcon name="tag"/></div><h3>Produits sans association</h3><p>Exporter les articles à associer.</p><span>Exporter</span></button>
-        <button className="exportOperationCard blue" onClick={exportCoverageReport}><div className="opIcon"><DashIcon name="chart"/></div><h3>Taux de couverture</h3><p>Exporter les KPI de couverture.</p><span>Exporter</span></button>
-        <button className="exportOperationCard green" onClick={backupProject}><div className="opIcon"><DashIcon name="save"/></div><h3>Sauvegarde projet</h3><p>Créer un backup JSON complet.</p><span>Backup</span></button>
-        <label className="exportOperationCard fileCard"><div className="opIcon"><DashIcon name="restore"/></div><h3>Restaurer projet</h3><p>Importer un backup JSON local.</p><span>Choisir fichier</span><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></label>
-      </div>
-    </div>
-
-    {msg && <p className="success opMessage">{msg}</p>}
+    {msg && <p className="success opMessage shuffleOpsMessage">{msg}</p>}
 
     {scanModal && <div className="modalOverlay">
       <div className="scanModal">

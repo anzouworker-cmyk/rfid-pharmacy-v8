@@ -7800,3 +7800,138 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
 .shuffleDashLogout{justify-self:end!important;border:0!important;background:white!important;color:#020617!important;border-radius:16px!important;padding:10px 16px!important;font-weight:700!important;cursor:pointer!important;}
 @media(max-width:1100px){.shuffleDashNavInner{flex-direction:column!important;align-items:stretch!important}.shuffleDashAccount{align-self:flex-start!important}.shuffleDashSpan7,.shuffleDashSpan5,.shuffleDashSpan8,.shuffleDashSpan4{grid-column:span 12/span 12!important}.shuffleDashKpi{grid-column:span 6/span 6!important}.shuffleDashCoverageBody{grid-template-columns:1fr!important}.shuffleDashFooter{grid-template-columns:1fr!important}.shuffleDashLogout{justify-self:start!important}.shuffleDashHero{align-items:flex-start!important;flex-direction:column!important}}
 @media(max-width:640px){.shuffleDashMain{padding:24px 14px!important}.shuffleDashNav{padding:14px!important}.shuffleDashKpi{grid-column:span 12/span 12!important}.shuffleDashReportGrid{grid-template-columns:1fr!important}.shuffleDashHero h1{font-size:32px!important}.shuffleDashFooter{padding:28px 16px!important}.shuffleDashAd{min-height:320px!important}}
+
+/* V128 - Exact Shuffle operations page integration */
+.shuffleOpsPage{
+  min-height:100vh;
+  background:#f8fafc;
+  color:#0f172a;
+  font-family:'Plus Jakarta Sans','Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+.shuffleOpsPage *{box-sizing:border-box;}
+.shuffleOpsPage button,.shuffleOpsPage label{font-family:inherit;}
+.shuffleOpsNav{background:#fff;border-bottom:1px solid rgba(226,232,240,.8);}
+.shuffleOpsNavInner{max-width:1536px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
+.shuffleOpsBrand{border:0;background:transparent;display:flex;align-items:center;gap:12px;padding:0;cursor:pointer;color:#0f172a;font-weight:800;font-size:18px;letter-spacing:-.025em;}
+.shuffleOpsBrandMark{width:36px;height:36px;border-radius:10px;background:#4f46e5;display:flex;align-items:center;justify-content:center;color:white;}
+.shuffleOpsBrandSvg{width:22px;height:22px;}
+.shuffleOpsMenu{display:flex;align-items:center;gap:32px;font-size:14px;font-weight:600;color:#475569;}
+.shuffleOpsMenu button{border:0;background:transparent;color:#475569;padding:0 0 2px;cursor:pointer;transition:.2s;color:#475569;font-weight:600;}
+.shuffleOpsMenu button:hover{color:#0f172a;}
+.shuffleOpsMenu button.active{color:#4f46e5;border-bottom:2px solid #4f46e5;}
+.shuffleOpsUserZone{display:flex;align-items:center;gap:16px;}
+.shuffleOpsBell{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:0;background:transparent;color:#64748b;cursor:pointer;}
+.shuffleOpsBell svg{width:18px;height:18px;}
+.shuffleOpsAvatar{width:36px;height:36px;border-radius:999px;border:0;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.shuffleOpsMain{padding-bottom:24px;}
+.shuffleOpsSection{padding:40px 24px;}
+.shuffleOpsContainer{max-width:1536px;margin:0 auto;}
+.shuffleOpsOverline{margin-bottom:8px;font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.12em;}
+.shuffleOpsSectionHead{margin-bottom:32px;}
+.shuffleOpsSectionHead h1,.shuffleOpsSectionHead h2{font-family:'Outfit','Plus Jakarta Sans',system-ui,sans-serif;font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-.03em;color:#0f172a;margin:0 0 4px;}
+.shuffleOpsSectionHead p{margin:0;color:#64748b;font-size:14px;}
+.shuffleOpsActionGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;}
+.shuffleOpsActionCard{position:relative;border:1px solid rgba(226,232,240,.8);background:#fff;border-radius:16px;padding:20px;display:block;text-align:left;min-height:190px;width:100%;cursor:pointer;transition:all .3s ease;color:#0f172a;text-decoration:none;}
+.shuffleOpsActionCard:hover{box-shadow:0 10px 30px rgba(79,70,229,.05);border-color:#c7d2fe;transform:translateY(-1px);}
+.shuffleOpsActionCard input,.shuffleOpsRestoreCard input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
+.shuffleOpsActionTop{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.shuffleOpsIconBubble{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+.shuffleOpsIconBubble svg{width:20px;height:20px;}
+.shuffleOpsIconBubble.violet,.shuffleOpsPill.violet{background:#f5f3ff;color:#7c3aed;}
+.shuffleOpsIconBubble.blue,.shuffleOpsPill.blue{background:#eff6ff;color:#2563eb;}
+.shuffleOpsIconBubble.emerald,.shuffleOpsPill.emerald{background:#ecfdf5;color:#059669;}
+.shuffleOpsIconBubble.amber,.shuffleOpsPill.amber{background:#fffbeb;color:#d97706;}
+.shuffleOpsIconBubble.rose,.shuffleOpsPill.rose{background:#fff1f2;color:#e11d48;}
+.shuffleOpsIconBubble.teal,.shuffleOpsPill.teal{background:#f0fdfa;color:#0d9488;}
+.shuffleOpsPill{font-size:12px;font-weight:800;border-radius:999px;padding:2px 8px;line-height:1.3;}
+.shuffleOpsActionCard h3{font-family:'Outfit','Plus Jakarta Sans',system-ui,sans-serif;font-size:14px;line-height:1.4;font-weight:700;color:#0f172a;margin:0 0 4px;}
+.shuffleOpsActionCard p{font-size:12px;line-height:1.65;color:#64748b;margin:0 0 16px;}
+.shuffleOpsTextLink{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;color:#4f46e5;}
+.shuffleOpsTextLink.emeraldText{color:#059669;}
+.shuffleOpsTextLink b{font-size:15px;line-height:0;}
+.shuffleOpsCashHero{border-radius:24px;background:linear-gradient(135deg,#4f46e5,#4338ca,#5b21b6);padding:32px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
+.shuffleOpsCashHero h2{font-family:'Outfit','Plus Jakarta Sans',system-ui,sans-serif;color:#fff;font-size:24px;font-weight:800;margin:0 0 8px;letter-spacing:-.03em;}
+.shuffleOpsCashHero p{font-size:14px;color:#c7d2fe;margin:0;}
+.shuffleOpsCashHeroStats{display:flex;align-items:center;flex-wrap:wrap;gap:16px;}
+.shuffleOpsCashHeroStat{background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:16px 24px;text-align:center;min-width:140px;}
+.shuffleOpsCashHeroStat p{font-size:12px;color:#c7d2fe;margin:0 0 4px;}
+.shuffleOpsCashHeroStat strong{display:block;color:#fff;font-family:'Outfit','Plus Jakarta Sans',system-ui,sans-serif;font-size:24px;font-weight:800;}
+.shuffleOpsCashHeroStat span{display:block;color:#a5b4fc;font-size:12px;margin-top:4px;}
+.shuffleOpsDateInput{display:block;min-width:168px;}
+.shuffleOpsDateInput span{display:block;margin-bottom:4px;color:#c7d2fe;font-size:12px;}
+.shuffleOpsDateInput input{width:100%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);border-radius:12px;color:#fff;padding:10px 14px;font-size:14px;outline:none;}
+.shuffleOpsDateInput input:disabled{opacity:.7;}
+.shuffleOpsCashGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;margin-bottom:16px;}
+.shuffleOpsCashGridSecond{margin-bottom:0;}
+.shuffleOpsCashCard{border:1px solid rgba(226,232,240,.8);background:#fff;border-radius:16px;padding:20px;text-align:left;min-height:150px;transition:box-shadow .25s ease,transform .25s ease;border-color:rgba(226,232,240,.8);cursor:pointer;}
+.shuffleOpsCashCard:hover{box-shadow:0 12px 22px rgba(15,23,42,.07);transform:translateY(-1px);}
+.shuffleOpsCashIcon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.shuffleOpsCashIcon svg{width:17px;height:17px;}
+.shuffleOpsCashIcon.green{background:#f0fdf4;color:#16a34a;}
+.shuffleOpsCashIcon.sky{background:#f0f9ff;color:#0284c7;}
+.shuffleOpsCashIcon.violet{background:#f5f3ff;color:#7c3aed;}
+.shuffleOpsCashIcon.amber{background:#fffbeb;color:#d97706;}
+.shuffleOpsCashIcon.rose{background:#fff1f2;color:#e11d48;}
+.shuffleOpsCashIcon.teal{background:#f0fdfa;color:#0d9488;}
+.shuffleOpsCashIcon.indigo{background:#eef2ff;color:#4f46e5;}
+.shuffleOpsCashIcon.fuchsia{background:#fdf4ff;color:#c026d3;}
+.shuffleOpsCashIcon.orange{background:#fff7ed;color:#ea580c;}
+.shuffleOpsCashIcon.cyan{background:#ecfeff;color:#0891b2;}
+.shuffleOpsCashIcon.lime{background:#f7fee7;color:#65a30d;}
+.shuffleOpsCashIcon.pink{background:#fdf2f8;color:#db2777;}
+.shuffleOpsCashCard p{margin:0 0 4px;font-size:12px;color:#64748b;}
+.shuffleOpsCashCard strong{display:block;margin:0;font-family:'Outfit','Plus Jakarta Sans',system-ui,sans-serif;font-size:20px;line-height:1.25;color:#0f172a;font-weight:800;}
+.shuffleOpsCashCard span{display:inline-block;margin-top:12px;font-size:12px;font-weight:800;color:#4f46e5;}
+.shuffleOpsCashCard span.muted{color:#94a3b8;}
+.shuffleOpsCashCard span.green{color:#059669;}
+.shuffleOpsExportGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px;}
+.shuffleOpsExportCard{border:1px solid rgba(226,232,240,.8);background:#fff;border-radius:16px;padding:24px;text-align:left;display:flex;flex-direction:column;min-height:260px;transition:all .3s ease;cursor:pointer;}
+.shuffleOpsExportCard:hover{box-shadow:0 10px 30px rgba(79,70,229,.05);border-color:#c7d2fe;transform:translateY(-1px);}
+.shuffleOpsExportIcon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.shuffleOpsExportIcon svg{width:24px;height:24px;}
+.shuffleOpsExportIcon.violet{background:linear-gradient(135deg,#ede9fe,#f5f3ff);color:#7c3aed;}
+.shuffleOpsExportIcon.emerald{background:linear-gradient(135deg,#d1fae5,#ecfdf5);color:#059669;}
+.shuffleOpsExportIcon.sky{background:linear-gradient(135deg,#e0f2fe,#f0f9ff);color:#0284c7;}
+.shuffleOpsExportIcon.amber{background:linear-gradient(135deg,#fef3c7,#fffbeb);color:#d97706;}
+.shuffleOpsExportIcon.rose{background:linear-gradient(135deg,#ffe4e6,#fff1f2);color:#e11d48;}
+.shuffleOpsExportIcon.teal{background:linear-gradient(135deg,#ccfbf1,#f0fdfa);color:#0d9488;}
+.shuffleOpsExportCard h3,.shuffleOpsRestoreCard h3{font-family:'Outfit','Plus Jakarta Sans',system-ui,sans-serif;font-size:16px;font-weight:700;color:#0f172a;margin:0 0 8px;}
+.shuffleOpsExportCard p,.shuffleOpsRestoreCard p{font-size:12px;line-height:1.65;color:#64748b;margin:0 0 20px;flex:1;}
+.shuffleOpsExportCard strong{margin-top:auto;width:100%;padding:10px 14px;border-radius:12px;background:#4f46e5;color:#fff;text-align:center;font-size:12px;font-weight:800;}
+.shuffleOpsExportCard strong.greenBtn{background:#059669;}
+.shuffleOpsExportCard strong.skyBtn{background:#0284c7;}
+.shuffleOpsExportCard strong.amberBtn{background:#d97706;}
+.shuffleOpsExportCard strong.roseBtn{background:#e11d48;}
+.shuffleOpsRestoreCard{position:relative;margin-top:20px;border:1px solid rgba(226,232,240,.8);background:#fff;border-radius:16px;padding:20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:.25s ease;}
+.shuffleOpsRestoreCard:hover{box-shadow:0 10px 28px rgba(15,23,42,.06);border-color:#99f6e4;}
+.shuffleOpsRestoreCard .shuffleOpsExportIcon{margin:0;flex:0 0 auto;}
+.shuffleOpsRestoreCard div{flex:1;}
+.shuffleOpsRestoreCard strong{padding:10px 14px;border-radius:12px;background:#0d9488;color:#fff;font-size:12px;font-weight:800;}
+.shuffleOpsMessage{position:fixed;right:20px;bottom:20px;z-index:10000;margin:0;border-radius:14px;box-shadow:0 18px 50px rgba(15,23,42,.14);}
+.shuffleOpsFooter{background:#fff;border-top:1px solid rgba(226,232,240,.8);padding:32px 24px;margin-top:24px;}
+.shuffleOpsFooterInner{max-width:1536px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.shuffleOpsFooterBrand{display:flex;align-items:center;gap:12px;font-weight:800;color:#0f172a;font-size:14px;}
+.shuffleOpsFooterBrand span:first-child{width:28px;height:28px;border-radius:8px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;}
+.shuffleOpsFooterBrand svg{width:16px;height:16px;}
+.shuffleOpsFooter p{margin:0;font-size:12px;color:#94a3b8;}
+.shuffleOpsFooter button{display:flex;align-items:center;gap:8px;border:1px solid #e2e8f0;background:#fff;color:#64748b;border-radius:12px;padding:8px 16px;font-size:12px;cursor:pointer;transition:.2s;}
+.shuffleOpsFooter button:hover{color:#ef4444;border-color:#fecaca;}
+.shuffleOpsFooter button svg{width:16px;height:16px;}
+@media (max-width:1280px){
+  .shuffleOpsActionGrid,.shuffleOpsCashGrid{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .shuffleOpsExportGrid{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media (max-width:900px){
+  .shuffleOpsMenu{display:none;}
+  .shuffleOpsActionGrid,.shuffleOpsCashGrid,.shuffleOpsExportGrid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .shuffleOpsCashHero{align-items:flex-start;flex-direction:column;}
+}
+@media (max-width:640px){
+  .shuffleOpsNavInner{padding:14px 16px;}
+  .shuffleOpsSection{padding:28px 16px;}
+  .shuffleOpsActionGrid,.shuffleOpsCashGrid,.shuffleOpsExportGrid{grid-template-columns:1fr;}
+  .shuffleOpsCashHero{padding:24px;}
+  .shuffleOpsCashHeroStats{width:100%;}
+  .shuffleOpsCashHeroStat,.shuffleOpsDateInput{width:100%;}
+  .shuffleOpsFooterInner{flex-direction:column;align-items:flex-start;}
+}
