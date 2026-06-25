@@ -1,0 +1,1 @@
+V129: Operations page restored to exact Shuffle note 1 panel style. Only operations page JSX/CSS changed; logic and other pages preserved.
