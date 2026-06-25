@@ -2,6 +2,33 @@ import React, {useEffect, useRef, useState} from "react";
 import {createPortal} from "react-dom";
 import {SHUFFLE_OPERATIONS_CSS} from "./shuffleOperationsAssets.js";
 
+const OPS_INTERNAL_LAYOUT_CSS = `
+  :host{display:block;width:100%;min-width:0;}
+  .opsInAppRoot{width:100%;min-width:0;background:#f8fafc;}
+  .opsInAppRoot section{padding-left:0!important;padding-right:0!important;}
+  .opsInAppRoot .max-w-screen-2xl{max-width:none!important;width:100%!important;margin-left:0!important;margin-right:0!important;}
+  .opsInAppRoot .opsActionGrid,
+  .opsInAppRoot .opsCashGrid,
+  .opsInAppRoot .opsExportGrid{width:100%!important;}
+  .opsInAppRoot .opsActionGrid{grid-template-columns:repeat(auto-fit,minmax(270px,1fr))!important;}
+  .opsInAppRoot .opsCashGrid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))!important;}
+  .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))!important;}
+  .opsInAppRoot .opsActionGrid > *,
+  .opsInAppRoot .opsCashGrid > *,
+  .opsInAppRoot .opsExportGrid > *{min-width:0;}
+  .opsInAppRoot .opsActionGrid > *,
+  .opsInAppRoot .opsCashGrid > button{min-height:160px;}
+  .opsInAppRoot .opsCashGrid > button{padding:24px!important;}
+  .opsInAppRoot .opsCashGrid .font-heading.text-xl{font-size:1.55rem!important;line-height:1.9rem!important;}
+  .opsInAppRoot .opsActionGrid h3,
+  .opsInAppRoot .opsExportGrid h3{font-size:0.98rem!important;}
+  @media (max-width:900px){
+    .opsInAppRoot .opsActionGrid,
+    .opsInAppRoot .opsCashGrid,
+    .opsInAppRoot .opsExportGrid{grid-template-columns:1fr!important;}
+  }
+`;
+
 function ShadowOperationsFrame({children}){
   const hostRef = useRef(null);
   const [shadowRoot,setShadowRoot] = useState(null);
@@ -10,7 +37,7 @@ function ShadowOperationsFrame({children}){
     const root = hostRef.current.shadowRoot || hostRef.current.attachShadow({mode:"open"});
     setShadowRoot(root);
   },[]);
-  return <div className="ops-shadow-root-wrap" ref={hostRef}>{shadowRoot && createPortal(<><style>{SHUFFLE_OPERATIONS_CSS}</style>{children}</>, shadowRoot)}</div>;
+  return <div className="ops-shadow-root-wrap" ref={hostRef}>{shadowRoot && createPortal(<><style>{SHUFFLE_OPERATIONS_CSS}</style><style>{OPS_INTERNAL_LAYOUT_CSS}</style>{children}</>, shadowRoot)}</div>;
 }
 
 function CubeIcon({className=""}){
@@ -105,13 +132,13 @@ export default function ShuffleOperationsPage({
   formatValue, headerSolde, headerCash, shortageText, surplusText, inventoryActions, cashMetrics, exportActions, hideChrome=false
 }){
   return <ShadowOperationsFrame>
-    <div className="antialiased font-body bg-body text-body bg-slate-50 text-slate-800 min-h-screen">
+    <div className={`antialiased font-body bg-body text-body bg-slate-50 text-slate-800 min-h-screen ${hideChrome ? "opsInAppRoot" : ""}`}>
       {!hideChrome && <OpsNav setTab={setTab} logout={logout}/>}
       <section className="py-10 px-6">
         <div className="max-w-screen-2xl mx-auto">
           <div className="mb-2"><p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Pour aux essentiels et certaines de ces outils et la progression locale</p></div>
           <div className="mb-8"><h1 className="font-heading text-2xl font-bold text-slate-900 mb-1">Actions Inventaire</h1><p className="text-sm text-slate-500">Toutes les actions nécessaires pour la gestion de votre inventaire.</p></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="opsActionGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {inventoryActions.map(a=><InventoryActionCard key={a.title} {...a}/>) }
           </div>
         </div>
@@ -147,10 +174,10 @@ export default function ShuffleOperationsPage({
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
+          <div className="opsCashGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
             {cashMetrics.slice(0,6).map(m=><CashMetric key={m.label} {...m}/>) }
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="opsCashGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {cashMetrics.slice(6).map(m=><CashMetric key={m.label} {...m}/>) }
           </div>
         </div>
@@ -158,7 +185,7 @@ export default function ShuffleOperationsPage({
       <section className="py-10 px-6">
         <div className="max-w-screen-2xl mx-auto">
           <div className="mb-8"><h2 className="font-heading text-2xl font-bold text-slate-900 mb-2">Exports et sauvegarde locales</h2><p className="text-sm text-slate-500">Exporter les données de vos CTRL et générer des rapports détaillés locaux.</p></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+          <div className="opsExportGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
             {exportActions.map(a=><ExportCard key={a.title} {...a}/>) }
           </div>
         </div>

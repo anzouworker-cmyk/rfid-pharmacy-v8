@@ -1,0 +1,7 @@
+V139 - Operations content scale fix
+
+- Adjusted internal Operations page content width to match other authenticated pages.
+- Removed extra inner horizontal padding when Operations is rendered inside the app shell.
+- Expanded Operations action, cash and export grids using responsive minmax columns.
+- Enlarged cash cards and values for better readability.
+- Home, login, dashboard, inventory, associations, cash logic and API are unchanged.
