@@ -1,0 +1,7 @@
+V135 - Inventory header/footer consistency
+
+- Applied the exact Inventaire page header design to all logged-in pages except Inventaire itself.
+- Applied the exact Inventaire page footer design to all logged-in pages except Inventaire itself.
+- Removed duplicate/older page-specific headers and footers from Dashboard, Operations and Associations when displayed inside the shared chrome.
+- Kept all existing page bodies, business logic, API calls, imports/exports and permissions unchanged.
+- Version health updated to V135_INVENTORY_HEADER_FOOTER_ALL_PAGES.

@@ -8575,3 +8575,40 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   .shuffleUnifiedShell .platformCreateGrid,
   .shuffleUnifiedShell .simpleAdForm{grid-template-columns:1fr!important}
 }
+
+/* V135 - Inventory header/footer applied to all logged-in pages except Inventaire */
+.invChromePage{
+  min-height:100vh;
+  background:#f8fafc;
+  color:#0f172a;
+  display:flex;
+  flex-direction:column;
+}
+.invChromeMain{
+  width:100%;
+  flex:1 0 auto;
+}
+.invChromePage .shuffleDashNav,
+.invChromePage .shuffleDashFooter,
+.invChromePage .shuffleAssocNav,
+.invChromePage .shuffleAssocFooter{
+  display:none!important;
+}
+.invChromePage .shuffleDashExactPage,
+.invChromePage .shuffleAssocPage{
+  min-height:auto!important;
+  background:transparent!important;
+}
+.invChromePage .shuffleDashMain{
+  padding-top:24px!important;
+}
+.invChromePage .shuffleAssocMain{
+  padding-top:32px!important;
+}
+.invChromePage .shuffleDashGlowOne,
+.invChromePage .shuffleDashGlowTwo{
+  pointer-events:none!important;
+}
+.invChromePage .shuffleInvFooter{
+  flex-shrink:0;
+}

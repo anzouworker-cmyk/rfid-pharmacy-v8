@@ -342,16 +342,16 @@ function App(){
   if(me?.role==="platform_admin"){
     menu.push(...APP_ADMIN_PAGES.map(p=>({...p})));
   }
-  if(tab==="dashboard") return <Dashboard setTab={setTab} me={me} menu={menu} logout={logout}/>;
-  if(tab==="operations") return <Operations me={me} setTab={setTab} logout={logout}/>;
-  if(tab==="association") return <Association setTab={setTab} me={me} logout={logout}/>;
+  if(tab==="dashboard") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Dashboard setTab={setTab} me={me} menu={menu} logout={logout}/></InventoryLikePageShell>;
+  if(tab==="operations") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Operations me={me} setTab={setTab} logout={logout} hideChrome={true}/></InventoryLikePageShell>;
+  if(tab==="association") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Association setTab={setTab} me={me} logout={logout}/></InventoryLikePageShell>;
   if(tab==="inventory") return <Inventory setTab={setTab} me={me} logout={logout}/>;
-  if(tab==="cash") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashRegister/></ShuffleUnifiedShell>;
-  if(tab==="ai") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><AIAssistant/></ShuffleUnifiedShell>;
-  if(tab==="users") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><MyUsers auth={auth} me={me}/></ShuffleUnifiedShell>;
-  if(tab==="cashAdmin") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashDashboardAdmin/></ShuffleUnifiedShell>;
-  if(tab==="platform") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Platform auth={auth}/></ShuffleUnifiedShell>;
-  if(tab==="dashboardAdmin") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><DashboardAdmin auth={auth}/></ShuffleUnifiedShell>;
+  if(tab==="cash") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashRegister/></InventoryLikePageShell>;
+  if(tab==="ai") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><AIAssistant/></InventoryLikePageShell>;
+  if(tab==="users") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><MyUsers auth={auth} me={me}/></InventoryLikePageShell>;
+  if(tab==="cashAdmin") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashDashboardAdmin/></InventoryLikePageShell>;
+  if(tab==="platform") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Platform auth={auth}/></InventoryLikePageShell>;
+  if(tab==="dashboardAdmin") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><DashboardAdmin auth={auth}/></InventoryLikePageShell>;
 
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
@@ -431,8 +431,62 @@ function ShuffleUnifiedShell({tab,setTab,menu=[],me,logout,children}){
   </div>;
 }
 
+function inventoryChromeIcon(pageId){
+  const map={
+    dashboard:"home",
+    operations:"sync",
+    association:"link",
+    inventory:"list",
+    cash:"cash",
+    ai:"lab",
+    users:"users",
+    cashAdmin:"cash",
+    platform:"store",
+    dashboardAdmin:"grid"
+  };
+  return map[pageId] || "cube";
+}
 
-function Operations({me,setTab,logout}){
+function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
+  const initials = String(me?.username || me?.pharmacy_name || "AD").trim().slice(0,2).toUpperCase() || "AD";
+  const nav = Array.isArray(menu) && menu.length ? menu : APP_USER_PAGES;
+  return <div className="shuffleInvPage invChromePage">
+    <nav className="shuffleInvNav">
+      <div className="shuffleInvNavInner">
+        <button type="button" className="shuffleInvBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
+          <span className="shuffleInvBrandIcon"><InvIcon name="cube"/></span>
+          <span>Smart Inventory</span>
+        </button>
+        <div className="shuffleInvLinks">
+          {nav.map(item=><button type="button" key={item.id} className={item.id===tab ? "shuffleInvNavItem active" : "shuffleInvNavItem"} onClick={()=>setTab(item.id)}>
+            <InvIcon name={inventoryChromeIcon(item.id)}/>
+            <span>{item.label}</span>
+          </button>)}
+        </div>
+        <div className="shuffleInvRight">
+          <div className="shuffleInvStoreBadge"><InvIcon name="store"/><span>{me?.pharmacy_name || "Pharmacie Démo"}</span></div>
+          <div className="shuffleInvAvatar">{initials}</div>
+          <button type="button" className="shuffleInvMobileBtn" aria-label="Menu"><InvIcon name="menu"/></button>
+        </div>
+      </div>
+    </nav>
+
+    <main className="shuffleInvMain invChromeMain">
+      {children}
+    </main>
+
+    <footer className="shuffleInvFooter">
+      <div className="shuffleInvFooterInner">
+        <div className="shuffleInvFooterBrand"><span><InvIcon name="cube"/></span><b>Smart Inventory</b></div>
+        <p>© 2026 Smart Inventory. Tous droits réservés.</p>
+        <div><button type="button" onClick={logout}>Logout</button><button type="button">Aide</button></div>
+      </div>
+    </footer>
+  </div>;
+}
+
+
+function Operations({me,setTab,logout,hideChrome=false}){
   const {products,associations,detectedEpcs,setProducts,setAssociations,setDetectedEpcs}=useLocalStore();
   const [scanModal,setScanModal]=useState(null);
   const [barcode,setBarcode]=useState("");
@@ -689,6 +743,7 @@ function Operations({me,setTab,logout}){
       inventoryActions={inventoryActions}
       cashMetrics={cashMetrics}
       exportActions={exportActions}
+      hideChrome={hideChrome}
     />
 
     {msg && <p className="success opMessage">{msg}</p>}

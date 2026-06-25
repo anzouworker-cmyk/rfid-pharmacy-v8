@@ -102,11 +102,11 @@ function ExportCard({icon,tone,title,desc,label,onClick,file,onFile}){
 
 export default function ShuffleOperationsPage({
   setTab, logout, cashDate, canChangeCashDate, onCashDateChange,
-  formatValue, headerSolde, headerCash, shortageText, surplusText, inventoryActions, cashMetrics, exportActions
+  formatValue, headerSolde, headerCash, shortageText, surplusText, inventoryActions, cashMetrics, exportActions, hideChrome=false
 }){
   return <ShadowOperationsFrame>
     <div className="antialiased font-body bg-body text-body bg-slate-50 text-slate-800 min-h-screen">
-      <OpsNav setTab={setTab} logout={logout}/>
+      {!hideChrome && <OpsNav setTab={setTab} logout={logout}/>}
       <section className="py-10 px-6">
         <div className="max-w-screen-2xl mx-auto">
           <div className="mb-2"><p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Pour aux essentiels et certaines de ces outils et la progression locale</p></div>
@@ -163,13 +163,13 @@ export default function ShuffleOperationsPage({
           </div>
         </div>
       </section>
-      <footer className="bg-white border-t border-slate-200/80 py-8 px-6 mt-6">
+      {!hideChrome && <footer className="bg-white border-t border-slate-200/80 py-8 px-6 mt-6">
         <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3"><div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center"><CubeIcon className="w-4 h-4 text-white"/></div><span className="font-heading font-semibold text-sm text-slate-900">Smart Inventory</span></div>
           <p className="text-xs text-slate-400">© 2026 Smart Inventory. Tous droits réservés.</p>
           <div className="flex items-center gap-4"><button onClick={logout} className="flex items-center gap-2 text-xs text-slate-500 hover:text-red-500 transition-colors py-2 px-4 rounded-xl border border-slate-200 hover:border-red-200 ops-nav-button"><SimpleIcon type="logout" className="w-4 h-4"/>Logout</button></div>
         </div>
-      </footer>
+      </footer>}
     </div>
   </ShadowOperationsFrame>;
 }
