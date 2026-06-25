@@ -1,0 +1,6 @@
+V133 - Exact Shuffle Inventaire page
+
+- Page Inventaire redesignée avec le design Shuffle fourni dans shuffle-invetaire_page.zip.
+- Conservation de la logique existante: calcul Présent / Manquant / Non associé, recherche, filtre statut, export CSV et navigation.
+- Accueil, login, dashboard, opérations, associations, caisse et API non modifiés.
+- Build Vite vérifié avec node ./node_modules/vite/bin/vite.js build.

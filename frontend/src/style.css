@@ -7915,3 +7915,139 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   .shuffleAssocFooterInner{flex-direction:column;align-items:flex-start}
   .shuffleAssocFooterLinks{flex-wrap:wrap;gap:14px}
 }
+
+/* V133 - Exact Shuffle Inventaire page */
+.shuffleInvPage{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  background:#f8fafc;
+  color:#1e293b;
+  font-family:'Plus Jakarta Sans',Inter,Segoe UI,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:geometricPrecision;
+}
+.shuffleInvPage *{box-sizing:border-box}
+.shuffleInvPage p,.shuffleInvPage h1{margin:0;color:inherit}
+.shuffleInvPage button,.shuffleInvPage input,.shuffleInvPage select{font-family:inherit}
+.shuffleInvPage button{cursor:pointer;border:0;margin:0}
+.shuffleInvPage .invSvg{width:1rem;height:1rem;display:block;flex:0 0 auto}
+.shuffleInvNav{background:#fff;border-bottom:1px solid rgba(226,232,240,.8);box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.shuffleInvNavInner{max-width:1536px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.shuffleInvBrand{display:flex;align-items:center;gap:12px;background:transparent;color:#0f172a;padding:0;border-radius:0;font-weight:800;font-size:18px;letter-spacing:-.02em;white-space:nowrap}
+.shuffleInvBrand:hover{box-shadow:none}
+.shuffleInvBrandIcon{width:36px;height:36px;border-radius:12px;background:#4f46e5;display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto;box-shadow:0 8px 18px rgba(79,70,229,.22)}
+.shuffleInvBrandIcon .invSvg{width:20px;height:20px}
+.shuffleInvLinks{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;flex:1}
+.shuffleInvNavItem{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:transparent;color:#64748b;font-size:14px;font-weight:600;line-height:1.25;transition:all .18s ease;white-space:nowrap}
+.shuffleInvNavItem:hover{color:#4f46e5;background:#eef2ff99;box-shadow:none}
+.shuffleInvNavItem.active{padding:9px 12px;border-radius:10px;background:#4f46e5;color:#fff;font-weight:700;box-shadow:0 8px 18px rgba(79,70,229,.24)}
+.shuffleInvRight{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.shuffleInvStoreBadge{display:flex;align-items:center;gap:8px;background:rgba(241,245,249,.8);border-radius:10px;padding:7px 12px;color:#334155;font-size:14px;font-weight:600;white-space:nowrap}
+.shuffleInvStoreBadge .invSvg{width:16px;height:16px;color:#6366f1}
+.shuffleInvAvatar{width:36px;height:36px;border-radius:999px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;letter-spacing:.01em;box-shadow:0 8px 18px rgba(79,70,229,.22)}
+.shuffleInvMobileBtn{display:none;background:transparent;color:#64748b;border-radius:10px;padding:8px}
+.shuffleInvMobileBtn:hover{background:#f1f5f9;box-shadow:none}
+.shuffleInvMain{width:100%;max-width:1536px;margin:0 auto;flex:1;padding:32px 32px 40px}
+.shuffleInvHeaderSection{padding:0 0 32px}
+.shuffleInvHeaderRow{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:24px}
+.shuffleInvHeaderRow h1{font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif;font-size:30px;line-height:1.15;font-weight:800;color:#0f172a;letter-spacing:-.025em}
+.shuffleInvHeaderRow p{margin-top:6px;color:#64748b;font-size:14px;line-height:1.5}
+.shuffleInvHeaderActions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.shuffleInvBtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;transition:all .18s ease;white-space:nowrap}
+.shuffleInvBtn.secondary{background:#fff;color:#475569;border:1px solid #e2e8f0;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.shuffleInvBtn.secondary:hover{border-color:#a5b4fc;color:#4f46e5;box-shadow:0 3px 8px rgba(15,23,42,.06)}
+.shuffleInvBtn.primary{background:#4f46e5;color:#fff;border:1px solid #4f46e5;box-shadow:0 10px 20px rgba(79,70,229,.22)}
+.shuffleInvBtn.primary:hover{background:#4338ca;border-color:#4338ca}
+.shuffleInvBtn:active{transform:scale(.98)}
+.shuffleInvNotice{display:flex;align-items:flex-start;gap:12px;background:rgba(255,251,235,.8);border:1px solid rgba(252,211,77,.6);border-radius:12px;padding:12px 16px;margin-bottom:24px;color:#92400e}
+.shuffleInvNotice .invSvg{width:20px;height:20px;color:#f59e0b;margin-top:2px}
+.shuffleInvNotice p{font-size:14px;line-height:1.5;color:#92400e}
+.shuffleInvStatsGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:0}
+.shuffleInvStatCard{background:#fff;border:1px solid rgba(226,232,240,.65);border-radius:16px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.06);transition:box-shadow .22s ease,border-color .22s ease,transform .22s ease}
+.shuffleInvStatCard:hover{box-shadow:0 10px 24px rgba(15,23,42,.08);transform:translateY(-1px)}
+.shuffleInvStatTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.shuffleInvStatTop span{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.shuffleInvStatTop .invSvg{width:20px;height:20px}
+.shuffleInvStatTop em{font-style:normal;font-size:12px;font-weight:700;border-radius:999px;padding:4px 8px;line-height:1}
+.shuffleInvStatCard.present .shuffleInvStatTop span{background:#d1fae5;color:#059669}
+.shuffleInvStatCard.present .shuffleInvStatTop em{background:#ecfdf5;color:#059669}
+.shuffleInvStatCard.present:hover{border-color:rgba(16,185,129,.28)}
+.shuffleInvStatCard.missing .shuffleInvStatTop span{background:#ffedd5;color:#ea580c}
+.shuffleInvStatCard.missing .shuffleInvStatTop em{background:#fff7ed;color:#ea580c}
+.shuffleInvStatCard.missing:hover{border-color:rgba(251,146,60,.32)}
+.shuffleInvStatCard.unassociated .shuffleInvStatTop span{background:#fee2e2;color:#dc2626}
+.shuffleInvStatCard.unassociated .shuffleInvStatTop em{background:#fef2f2;color:#dc2626}
+.shuffleInvStatCard.unassociated:hover{border-color:rgba(248,113,113,.32)}
+.shuffleInvStatCard.total .shuffleInvStatTop span{background:#e0e7ff;color:#4f46e5}
+.shuffleInvStatCard.total:hover{border-color:rgba(99,102,241,.32)}
+.shuffleInvStatCard b{display:block;font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif;font-size:30px;line-height:1;font-weight:800;color:#0f172a;letter-spacing:-.02em;margin-bottom:6px}
+.shuffleInvStatCard small{display:block;font-size:14px;color:#64748b;line-height:1.4}
+.shuffleInvTableCard{background:#fff;border:1px solid rgba(226,232,240,.65);border-radius:16px;box-shadow:0 1px 3px rgba(15,23,42,.06);overflow:hidden}
+.shuffleInvToolbar{padding:16px 20px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.shuffleInvSearch{position:relative;display:block;flex:1;min-width:220px}
+.shuffleInvSearch .invSvg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#94a3b8;pointer-events:none}
+.shuffleInvSearch input{width:100%;height:42px;border:1px solid rgba(226,232,240,.7);background:rgba(248,250,252,.8);border-radius:12px;padding:10px 16px 10px 40px;color:#334155;font-size:14px;outline:none;transition:border .18s ease,box-shadow .18s ease,background .18s ease}
+.shuffleInvSearch input::placeholder{color:#94a3b8}
+.shuffleInvSearch input:focus{background:#fff;border-color:#a5b4fc;box-shadow:0 0 0 3px rgba(99,102,241,.16)}
+.shuffleInvFilters{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.shuffleInvFilters select{height:42px;border:1px solid rgba(226,232,240,.7);background:rgba(248,250,252,.8);border-radius:12px;padding:0 40px 0 16px;color:#475569;font-size:14px;font-weight:500;outline:none;transition:border .18s ease,box-shadow .18s ease,background .18s ease;cursor:pointer}
+.shuffleInvFilters select:focus{background:#fff;border-color:#a5b4fc;box-shadow:0 0 0 3px rgba(99,102,241,.16)}
+.shuffleInvFilters span{color:#94a3b8;font-size:12px;white-space:nowrap}
+.shuffleInvTableWrap{overflow-x:auto}
+.shuffleInvTable{width:100%;min-width:1180px;border-collapse:collapse;background:#fff;margin:0;border:0;box-shadow:none}
+.shuffleInvTable thead tr{background:rgba(248,250,252,.6)}
+.shuffleInvTable th{padding:14px 16px;text-align:left;color:#64748b;background:transparent;border-bottom:1px solid #f1f5f9;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.shuffleInvTable td{padding:14px 16px;border-bottom:1px solid #f1f5f9;color:#475569;font-size:14px;vertical-align:middle;background:#fff;white-space:nowrap}
+.shuffleInvTable td b{font-weight:700;color:#0f172a}
+.shuffleInvTable code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:4px 8px;color:#475569;font-size:12px;white-space:nowrap}
+.shuffleInvRow:hover td{background:#f8fafc}
+.shuffleInvRow.present td{box-shadow:inset 3px 0 0 rgba(16,185,129,.35)}
+.shuffleInvRow.missing td{box-shadow:inset 3px 0 0 rgba(249,115,22,.35)}
+.shuffleInvRow.unassociated td{box-shadow:inset 3px 0 0 rgba(239,68,68,.35)}
+.shuffleInvStatus{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800;line-height:1}
+.shuffleInvStatus.present{background:#ecfdf5;color:#059669}
+.shuffleInvStatus.missing{background:#fff7ed;color:#ea580c}
+.shuffleInvStatus.unassociated{background:#fef2f2;color:#dc2626}
+.shuffleInvEmpty{padding:64px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.shuffleInvEmpty div{width:64px;height:64px;border-radius:16px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#cbd5e1}
+.shuffleInvEmpty div .invSvg{width:32px;height:32px;stroke-width:1.5}
+.shuffleInvEmpty p{font-size:14px;font-weight:700;color:#64748b}
+.shuffleInvEmpty small{font-size:12px;color:#94a3b8}
+.shuffleInvEmpty button{margin-top:8px;display:inline-flex;align-items:center;gap:8px;background:#4f46e5;color:#fff;border-radius:12px;padding:10px 16px;font-size:14px;font-weight:700;box-shadow:0 10px 20px rgba(79,70,229,.2)}
+.shuffleInvEmpty button:hover{background:#4338ca;box-shadow:0 10px 20px rgba(79,70,229,.25)}
+.shuffleInvFooter{margin-top:auto;border-top:1px solid rgba(226,232,240,.65);background:#fff}
+.shuffleInvFooterInner{max-width:1536px;margin:0 auto;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.shuffleInvFooterBrand{display:flex;align-items:center;gap:8px;color:#475569;font-size:14px;font-weight:700}
+.shuffleInvFooterBrand span{width:28px;height:28px;border-radius:9px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center}
+.shuffleInvFooterBrand .invSvg{width:16px;height:16px}
+.shuffleInvFooter p{color:#94a3b8;font-size:12px;margin:0}
+.shuffleInvFooterInner>div:last-child{display:flex;align-items:center;gap:16px}
+.shuffleInvFooter button{background:transparent;color:#64748b;border-radius:0;font-size:14px;font-weight:600;padding:0;transition:color .18s ease}
+.shuffleInvFooter button:hover{color:#4f46e5;box-shadow:none}
+@media(max-width:1200px){
+  .shuffleInvNavInner{padding:0 20px}
+  .shuffleInvLinks{justify-content:flex-start;overflow-x:auto;padding-bottom:2px}
+  .shuffleInvNavItem{padding:8px 10px;font-size:13px}
+  .shuffleInvNavItem .invSvg{display:none}
+  .shuffleInvStoreBadge{display:none}
+}
+@media(max-width:900px){
+  .shuffleInvNavInner{height:auto;min-height:64px;align-items:center;flex-wrap:wrap;padding:12px 16px}
+  .shuffleInvLinks{order:3;width:100%;flex-basis:100%}
+  .shuffleInvMobileBtn{display:flex}
+  .shuffleInvMain{padding:24px 16px 32px}
+  .shuffleInvHeaderRow{align-items:flex-start;flex-direction:column}
+  .shuffleInvHeaderActions{width:100%;flex-wrap:wrap}
+  .shuffleInvBtn{flex:1}
+  .shuffleInvStatsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .shuffleInvToolbar{flex-direction:column;align-items:stretch}
+  .shuffleInvFilters{width:100%;flex-wrap:wrap;justify-content:space-between}
+  .shuffleInvFilters select{flex:1;min-width:200px}
+  .shuffleInvFooterInner{padding:20px 16px;flex-direction:column;align-items:flex-start}
+}
+@media(max-width:560px){
+  .shuffleInvStatsGrid{grid-template-columns:1fr}
+  .shuffleInvHeaderRow h1{font-size:26px}
+  .shuffleInvAvatar{display:none}
+}

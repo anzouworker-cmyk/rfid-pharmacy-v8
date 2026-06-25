@@ -345,6 +345,7 @@ function App(){
   if(tab==="dashboard") return <Dashboard setTab={setTab} me={me} menu={menu} logout={logout}/>;
   if(tab==="operations") return <Operations me={me} setTab={setTab} logout={logout}/>;
   if(tab==="association") return <Association setTab={setTab} me={me} logout={logout}/>;
+  if(tab==="inventory") return <Inventory setTab={setTab} me={me} logout={logout}/>;
 
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
@@ -2492,10 +2493,11 @@ function AssocIcon({name}){
 
 
 
-function Inventory(){
+function Inventory({setTab=()=>{}, me, logout=()=>{}}){
   const {products,associations,detectedEpcs}=useLocalStore();
   const [q,setQ]=useState("");
   const [statusFilter,setStatusFilter]=useState("all");
+  const initials = String(me?.username || "AD").slice(0,2).toUpperCase();
 
   const associatedByPid = new Map();
   associations.forEach(a=>{
@@ -2507,20 +2509,18 @@ function Inventory(){
   });
   const detectedSet = new Set((detectedEpcs||[]).map(norm).filter(Boolean));
 
-  // Statut réel = Catalogue produits + Associations Produit/Identifiant + CSV des identifiants détectés.
-  // Les associations seules ne rendent plus un produit "Présent".
   function getStatus(p){
     const epcs=associatedByPid.get(String(p.PID)) || [];
     if(epcs.length===0) return "Non associé";
     return epcs.some(epc=>detectedSet.has(epc)) ? "Présent" : "Manquant";
   }
 
-  const rows = products.map(p=>{
+  const allRows = products.map(p=>{
     const epcs=associatedByPid.get(String(p.PID)) || [];
     const status=getStatus(p);
     return {
-      PID:p.PID,
-      Produit:p.Produit,
+      PID:p.PID || "",
+      Produit:p.Produit || "",
       Catégorie:p["Catégorie"] || p.Catégorie || "",
       Zone:p.Zone || "",
       Stock:p.Stock || "",
@@ -2528,9 +2528,11 @@ function Inventory(){
       "Code barre 2":p["Code barre 2"] || "",
       "Identifiant associé":epcs.join(", "),
       "Statut": status,
-      _rowClass: status==="Présent" ? "rowPresent" : status==="Manquant" ? "rowMissing" : "rowUnassociated"
+      _rowClass: status==="Présent" ? "present" : status==="Manquant" ? "missing" : "unassociated"
     };
-  }).filter(r=>{
+  });
+
+  const rows = allRows.filter(r=>{
     const s = Object.values(r).join(" ").toLowerCase();
     const matchText = s.includes(q.toLowerCase());
     const matchStatus = statusFilter==="all" || r["Statut"]===statusFilter;
@@ -2542,48 +2544,152 @@ function Inventory(){
   const missingCount=products.filter(p=>getStatus(p)==="Manquant").length;
   const unassociatedCount=products.filter(p=>getStatus(p)==="Non associé").length;
 
-  return <section className="tableOnlyPage inventoryStatusPage">
-    <p className="notice">Stock calculé avec le catalogue produits + les associations Produit/Identifiant + le dernier CSV des identifiants détectés importé.</p>
+  function exportRows(){
+    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Identifiant associé","Statut"];
+    exportCSV("inventaire_reel.csv", rows, cols);
+  }
 
-    <div className="statusSummaryGrid">
-      <div className="statusSummary present"><b>{presentCount}</b><span>Présents</span></div>
-      <div className="statusSummary missing"><b>{missingCount}</b><span>Manquants</span></div>
-      <div className="statusSummary unassociated"><b>{unassociatedCount}</b><span>Non associés</span></div>
-      <div className="statusSummary total"><b>{total}</b><span>Total</span></div>
-    </div>
+  const nav = [
+    {id:"dashboard", label:"Dashboard", icon:"home"},
+    {id:"operations", label:"Opérations", icon:"sync"},
+    {id:"association", label:"Associations", icon:"link"},
+    {id:"inventory", label:"Inventaire", icon:"list"},
+    {id:"cash", label:"Caisse", icon:"cash"},
+    {id:"ai", label:"Assistant IA", icon:"lab"},
+    {id:"users", label:"Utilisateurs", icon:"users"}
+  ];
 
-    <div className="tableToolbar inventoryToolbar">
-      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans l’inventaire..."/>
-      <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
-        <option value="all">Tous les statuts</option>
-        <option value="Présent">Présent</option>
-        <option value="Manquant">Manquant</option>
-        <option value="Non associé">Non associé</option>
-      </select>
-      <span>{rows.length} produit(s) · {detectedSet.size} Identifiant détecté(s)</span>
-    </div>
+  return <div className="shuffleInvPage">
+    <nav className="shuffleInvNav">
+      <div className="shuffleInvNavInner">
+        <button type="button" className="shuffleInvBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
+          <span className="shuffleInvBrandIcon"><InvIcon name="cube"/></span>
+          <span>Smart Inventory</span>
+        </button>
+        <div className="shuffleInvLinks">
+          {nav.map(item=><button type="button" key={item.id} className={item.id==="inventory" ? "shuffleInvNavItem active" : "shuffleInvNavItem"} onClick={()=>setTab(item.id)}>
+            <InvIcon name={item.icon}/>
+            <span>{item.label}</span>
+          </button>)}
+        </div>
+        <div className="shuffleInvRight">
+          <div className="shuffleInvStoreBadge"><InvIcon name="store"/><span>{me?.pharmacy_name || "Pharmacie Démo"}</span></div>
+          <div className="shuffleInvAvatar">{initials}</div>
+          <button type="button" className="shuffleInvMobileBtn" aria-label="Menu"><InvIcon name="menu"/></button>
+        </div>
+      </div>
+    </nav>
 
-    <div className="smartTableWrap">
-      <table className="smartTable statusTable">
-        <thead>
-          <tr>{["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Identifiant associé","Statut"].map(c=><th key={c}>{c}</th>)}</tr>
-        </thead>
-        <tbody>
-          {rows.map((r,i)=><tr key={i} className={r._rowClass}>
-            <td>{r.PID}</td>
-            <td>{r.Produit}</td>
-            <td>{r.Catégorie}</td>
-            <td>{r.Zone}</td>
-            <td>{r.Stock}</td>
-            <td>{r["Code barre 1"]}</td>
-            <td>{r["Code barre 2"]}</td>
-            <td>{r["Identifiant associé"]}</td>
-            <td><span className={`statusBadge ${r._rowClass}`}>{r["Statut"]}</span></td>
-          </tr>)}
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <main className="shuffleInvMain">
+      <section className="shuffleInvHeaderSection">
+        <div className="shuffleInvHeaderRow">
+          <div>
+            <h1>Inventaire réel</h1>
+            <p>Suivi en temps réel de votre stock et identifiants</p>
+          </div>
+          <div className="shuffleInvHeaderActions">
+            <button type="button" className="shuffleInvBtn secondary" onClick={exportRows}><InvIcon name="upload"/>Exporter</button>
+            <button type="button" className="shuffleInvBtn primary" onClick={()=>setTab("operations")}><InvIcon name="plus"/>Nouveau scan</button>
+          </div>
+        </div>
+        <div className="shuffleInvNotice">
+          <InvIcon name="warning"/>
+          <p>Stock scanné avec le catalogue produits + les associations Produit/Identifiant + le dernier CSV des identifiants détectés/importés.</p>
+        </div>
+        <div className="shuffleInvStatsGrid">
+          <div className="shuffleInvStatCard present">
+            <div className="shuffleInvStatTop"><span><InvIcon name="check"/></span><em>OK</em></div>
+            <b>{presentCount}</b><small>Présents</small>
+          </div>
+          <div className="shuffleInvStatCard missing">
+            <div className="shuffleInvStatTop"><span><InvIcon name="warning"/></span><em>Alerte</em></div>
+            <b>{missingCount}</b><small>Manquants</small>
+          </div>
+          <div className="shuffleInvStatCard unassociated">
+            <div className="shuffleInvStatTop"><span><InvIcon name="ban"/></span><em>Erreur</em></div>
+            <b>{unassociatedCount}</b><small>Non associés</small>
+          </div>
+          <div className="shuffleInvStatCard total">
+            <div className="shuffleInvStatTop"><span><InvIcon name="grid"/></span></div>
+            <b>{total}</b><small>Total</small>
+          </div>
+        </div>
+      </section>
+
+      <section className="shuffleInvTableCard">
+        <div className="shuffleInvToolbar">
+          <label className="shuffleInvSearch"><InvIcon name="search"/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Recherchez dans l'inventaire..." /></label>
+          <div className="shuffleInvFilters">
+            <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
+              <option value="all">Tous les statuts</option>
+              <option value="Présent">Présent</option>
+              <option value="Manquant">Manquant</option>
+              <option value="Non associé">Non associé</option>
+            </select>
+            <span>{rows.length} produit(s) · {detectedSet.size} identifiant(s) détecté(s)</span>
+          </div>
+        </div>
+        <div className="shuffleInvTableWrap">
+          <table className="shuffleInvTable">
+            <thead>
+              <tr>{["PID","Produit","Catégorie","Zone","Stock","Code Barre 1","Code Barre 2","Identifiant associé","Statut"].map(c=><th key={c}>{c}</th>)}</tr>
+            </thead>
+            <tbody>
+              {rows.length===0 ? <tr><td colSpan={9}>
+                <div className="shuffleInvEmpty">
+                  <div><InvIcon name="cube"/></div>
+                  <p>Aucun produit dans l'inventaire</p>
+                  <small>Lancez un scan ou importez un fichier CSV pour commencer</small>
+                  <button type="button" onClick={()=>setTab("operations")}><InvIcon name="upload"/>Importer CSV</button>
+                </div>
+              </td></tr> : rows.map((r,i)=><tr key={`${r.PID}-${i}`} className={`shuffleInvRow ${r._rowClass}`}>
+                <td>{r.PID || "—"}</td>
+                <td><b>{r.Produit || "—"}</b></td>
+                <td>{r.Catégorie || "—"}</td>
+                <td>{r.Zone || "—"}</td>
+                <td>{r.Stock || "—"}</td>
+                <td>{r["Code barre 1"] || "—"}</td>
+                <td>{r["Code barre 2"] || "—"}</td>
+                <td><code>{r["Identifiant associé"] || "—"}</code></td>
+                <td><span className={`shuffleInvStatus ${r._rowClass}`}>{r.Statut}</span></td>
+              </tr>)}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer className="shuffleInvFooter">
+      <div className="shuffleInvFooterInner">
+        <div className="shuffleInvFooterBrand"><span><InvIcon name="cube"/></span><b>Smart Inventory</b></div>
+        <p>© 2026 Smart Inventory. Tous droits réservés.</p>
+        <div><button type="button" onClick={logout}>Logout</button><button type="button">Aide</button></div>
+      </div>
+    </footer>
+  </div>
+}
+
+function InvIcon({name}){
+  const icons={
+    cube:<path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />,
+    home:<path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />,
+    sync:<path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />,
+    link:<path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />,
+    list:<path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />,
+    cash:<path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />,
+    lab:<path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.591-.659L5 14.5m14 0V17a2 2 0 01-2 2H7a2 2 0 01-2-2v-2.5" />,
+    users:<path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />,
+    store:<path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />,
+    menu:<path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />,
+    upload:<path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />,
+    plus:<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />,
+    warning:<path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />,
+    check:<path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
+    ban:<path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />,
+    grid:<path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />,
+    search:<path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+  };
+  return <svg className="invSvg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icons[name] || icons.cube}</svg>
 }
 
 
