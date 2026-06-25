@@ -76,13 +76,13 @@ function InventoryActionCard({icon,tone,badge,badgeClass,title,desc,label,onClic
   </>;
   const cls="group bg-white rounded-2xl border border-slate-200/80 p-5 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300";
   if(file) return <label className={`${cls} ops-file-label cursor-pointer`}>{inner}<input type="file" accept={file} onChange={e=>onFile?.(e.target.files?.[0])}/></label>;
-  return <button type="button" onClick={onClick} className={`${cls} ops-action-button`}>{inner}</button>;
+  return <button type="button" onClick={onClick} className={`${cls} text-left cursor-pointer`}>{inner}</button>;
 }
 
 function CashMetric({icon,tone,label,value,actionLabel,onClick,muted=false}){
   const bg = {green:"bg-green-50", sky:"bg-sky-50", violet:"bg-violet-50", amber:"bg-amber-50", rose:"bg-rose-50", teal:"bg-teal-50", indigo:"bg-indigo-50", fuchsia:"bg-fuchsia-50", orange:"bg-orange-50", cyan:"bg-cyan-50", lime:"bg-lime-50", pink:"bg-pink-50"}[tone] || "bg-indigo-50";
   const text = {green:"text-green-600", sky:"text-sky-600", violet:"text-violet-600", amber:"text-amber-600", rose:"text-rose-600", teal:"text-teal-600", indigo:"text-indigo-600", fuchsia:"text-fuchsia-600", orange:"text-orange-600", cyan:"text-cyan-600", lime:"text-lime-600", pink:"text-pink-600"}[tone] || "text-indigo-600";
-  return <button type="button" onClick={onClick} className="bg-white rounded-2xl border border-slate-200/80 p-5 hover:shadow-md transition-shadow duration-300 ops-action-button">
+  return <button type="button" onClick={onClick} className="bg-white rounded-2xl border border-slate-200/80 p-5 text-left cursor-pointer shadow-sm shadow-slate-200/50 hover:shadow-md hover:border-indigo-200 transition-all duration-300">
     <div className="flex items-center gap-3 mb-3"><div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center`}><SimpleIcon type={icon} className={`w-4 h-4 ${text}`}/></div></div>
     <p className="text-xs text-slate-500 mb-1">{label}</p>
     <p className="font-heading text-xl font-bold text-slate-900">{value}</p>
@@ -97,7 +97,7 @@ function ExportCard({icon,tone,title,desc,label,onClick,file,onFile}){
   const content=<><div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${bg} flex items-center justify-center mb-5`}><SimpleIcon type={icon} className={`w-6 h-6 ${text}`}/></div><h3 className="font-heading font-semibold text-slate-900 mb-2">{title}</h3><p className="text-xs text-slate-500 leading-relaxed mb-5 grow">{desc}</p><span className={`w-full py-2.5 rounded-xl ${btn} text-white text-xs font-semibold active:scale-[0.98] transition-all duration-200 text-center block`}>{label}</span></>;
   const cls="group bg-white rounded-2xl border border-slate-200/80 p-6 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300 flex flex-col";
   if(file) return <label className={`${cls} ops-file-label cursor-pointer`}>{content}<input type="file" accept={file} onChange={e=>onFile?.(e.target.files?.[0])}/></label>;
-  return <button type="button" onClick={onClick} className={`${cls} ops-action-button`}>{content}</button>;
+  return <button type="button" onClick={onClick} className={`${cls} text-left cursor-pointer`}>{content}</button>;
 }
 
 export default function ShuffleOperationsPage({

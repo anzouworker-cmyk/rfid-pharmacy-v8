@@ -319,7 +319,7 @@ def health():
     return {
         "ok": True,
         "service": "Smart Inventory API",
-        "version":"V136_LEFT_MENU_INTERNAL_PAGES",
+        "version":"V137_OPERATIONS_CARD_BACKGROUND_FIX",
         "cors_origins": allowed_origins,
         "cors_origin_regex": allow_origin_regex or "",
         "db": db_status,
