@@ -1,0 +1,1 @@
+V131: Remplace uniquement le bandeau violet Opérations de caisse par un header sobre comme la référence fournie: titre aligné au style des autres sections, chips montant manquant/surplus à droite, date de caisse à droite, sans modifier les autres sections ni la logique.
