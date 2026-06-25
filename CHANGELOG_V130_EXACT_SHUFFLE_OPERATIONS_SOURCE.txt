@@ -1,0 +1,1 @@
+V130 - Operations page rebuilt from the provided Shuffle operations source and HTML reference. Only the Operations page was updated; home, login, dashboard and backend logic are preserved. Build verified with Vite.
