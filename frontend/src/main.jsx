@@ -344,6 +344,7 @@ function App(){
   }
   if(tab==="dashboard") return <Dashboard setTab={setTab} me={me} menu={menu} logout={logout}/>;
   if(tab==="operations") return <Operations me={me} setTab={setTab} logout={logout}/>;
+  if(tab==="association") return <Association setTab={setTab} me={me} logout={logout}/>;
 
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
@@ -2334,28 +2335,160 @@ function AIAssistant(){
 }
 
 
-function Association(){
+function Association({setTab=()=>{}, me, logout=()=>{}}){
   const {associations}=useLocalStore();
   const [q,setQ]=useState("");
-
   const rows = associations.filter(a=>{
     const s = `${a.PID||""} ${a.Produit||""} ${a.EPC||""} ${a["Code barre 1"]||""} ${a["Code barre 2"]||""}`.toLowerCase();
     return s.includes(q.toLowerCase());
   });
+  const total = rows.length;
+  const startIndex = total ? 1 : 0;
+  const endIndex = total;
+  const initials = String(me?.username || "AD").slice(0,2).toUpperCase();
+  function exportRows(){ exportCSV("associations.csv", rows, ["PID","Produit","Code barre 1","Code barre 2","EPC","Date"]); }
+  const nav = [
+    {id:"dashboard", label:"Dashboard", icon:"home"},
+    {id:"operations", label:"Opérations", icon:"sync"},
+    {id:"association", label:"Associations", icon:"link"},
+    {id:"inventory", label:"Inventaire", icon:"list"},
+    {id:"cash", label:"Caisses", icon:"cash"},
+    {id:"ai", label:"Assistant IA", icon:"lab"},
+    {id:"users", label:"Utilisateurs", icon:"users"}
+  ];
+  return <div className="shuffleAssocPage">
+    <nav className="shuffleAssocNav">
+      <div className="shuffleAssocNavInner">
+        <div className="shuffleAssocNavLeft">
+          <button type="button" className="shuffleAssocBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
+            <span className="shuffleAssocBrandIcon"><AssocIcon name="cube"/></span>
+            <span>Smart Inventory</span>
+          </button>
+          <div className="shuffleAssocLinks">
+            {nav.map(item=><button type="button" key={item.id} className={item.id==="association" ? "shuffleAssocNavItem active" : "shuffleAssocNavItem"} onClick={()=>setTab(item.id)}>
+              <AssocIcon name={item.icon}/>
+              {item.label}
+            </button>)}
+          </div>
+        </div>
+        <div className="shuffleAssocProfileWrap">
+          <span className="shuffleAssocTrial">PRO TRIAL</span>
+          <div className="shuffleAssocUserText">
+            <p>{me?.pharmacy_name || "Pharmacie Démo"}</p>
+            <small>{me?.username || "Utilisateur"}</small>
+          </div>
+          <div className="shuffleAssocAvatar">{initials}</div>
+        </div>
+      </div>
+    </nav>
 
-  return <section className="tableOnlyPage">
-    <p className="notice">Tableau de consultation des associations Produit ↔ identifiant enregistrées localement.</p>
+    <main className="shuffleAssocMain">
+      <div className="shuffleAssocHeader">
+        <div>
+          <h1>Associations</h1>
+          <p>Tableau de consultation des associations Produit — identifiant enregistrées localement.</p>
+        </div>
+        <div className="shuffleAssocActions">
+          <button type="button" className="shuffleAssocBtn secondary" onClick={exportRows}><AssocIcon name="upload"/>Exporter</button>
+          <button type="button" className="shuffleAssocBtn primary"><AssocIcon name="plus"/>Nouvelle association</button>
+        </div>
+      </div>
 
-    <div className="tableToolbar">
-      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans les associations..."/>
-      <span>{rows.length} association(s)</span>
-    </div>
+      <section className="shuffleAssocCard">
+        <div className="shuffleAssocToolbar">
+          <div className="shuffleAssocSearch">
+            <AssocIcon name="search"/>
+            <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans les associations..." />
+          </div>
+          <div className="shuffleAssocTotal">
+            <span>Total :</span>
+            <b>{rows.length} association(s)</b>
+          </div>
+        </div>
 
-    <Table rows={rows} cols={["PID","Produit","Code barre 1","Code barre 2","EPC","Date"]}/>
-  </section>
+        <div className="shuffleAssocTableWrap">
+          <table className="shuffleAssocTable">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>Produit</th>
+                <th>Code Barres 1</th>
+                <th>Code Barres 2</th>
+                <th>EPC</th>
+                <th>Date</th>
+                <th className="right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length===0 ? <tr>
+                <td colSpan={7} className="shuffleAssocEmptyCell">
+                  <div className="shuffleAssocEmpty">
+                    <div className="shuffleAssocEmptyIcon"><AssocIcon name="link"/></div>
+                    <div>
+                      <p>Aucune association trouvée</p>
+                      <small>Créez votre première association produit pour commencer</small>
+                    </div>
+                    <button type="button" className="shuffleAssocAddEmpty"><AssocIcon name="plus"/>Ajouter une association</button>
+                  </div>
+                </td>
+              </tr> : rows.map((r,i)=><tr key={`${r.PID||""}-${r.EPC||""}-${i}`}>
+                <td>{r.PID || "—"}</td>
+                <td>{r.Produit || "—"}</td>
+                <td>{r["Code barre 1"] || "—"}</td>
+                <td>{r["Code barre 2"] || "—"}</td>
+                <td><code>{r.EPC || "—"}</code></td>
+                <td>{r.Date || "—"}</td>
+                <td className="right"><button type="button" className="shuffleAssocRowAction">Voir</button></td>
+              </tr>)}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="shuffleAssocPagination">
+          <p>Affichage de {startIndex} à {endIndex} sur {total} résultats</p>
+          <div>
+            <button type="button" disabled>Précédent</button>
+            <button type="button" className="active">1</button>
+            <button type="button" disabled>Suivant</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer className="shuffleAssocFooter">
+      <div className="shuffleAssocFooterInner">
+        <div className="shuffleAssocFooterBrand">
+          <span><AssocIcon name="cube"/></span>
+          <small>© 2026 Smart Inventory. Tous droits réservés.</small>
+        </div>
+        <div className="shuffleAssocFooterLinks">
+          <a href="#">Aide</a>
+          <a href="#">Conditions</a>
+          <a href="#">Confidentialité</a>
+          <button type="button" onClick={logout}><AssocIcon name="logout"/>Logout</button>
+        </div>
+      </div>
+    </footer>
+  </div>
 }
 
-
+function AssocIcon({name}){
+  const icons={
+    cube:<path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />,
+    home:<path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" />,
+    sync:<path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />,
+    link:<path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />,
+    list:<path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />,
+    cash:<path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />,
+    lab:<path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.591-.659L5 14.5m14 0V17a2 2 0 01-2 2H7a2 2 0 01-2-2v-2.5" />,
+    users:<path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />,
+    upload:<path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />,
+    plus:<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />,
+    search:<path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />,
+    logout:<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+  };
+  return <svg className="assocSvg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icons[name] || icons.link}</svg>
+}
 
 
 

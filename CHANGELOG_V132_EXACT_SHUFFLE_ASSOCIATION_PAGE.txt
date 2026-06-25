@@ -1,0 +1,1 @@
+V132 - Association page redesigned with provided Shuffle reference. Only the Associations page was changed; existing data/search/export logic was preserved.
