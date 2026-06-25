@@ -1,0 +1,7 @@
+V128 - Exact Shuffle operations page integration
+
+- Rebuilt the Operations page from the uploaded Shuffle operations source reference.
+- Kept homepage, login page, dashboard and all existing business logic unchanged.
+- Connected inventory imports, scan modal, cash operations, exports and backup to the existing React/local logic.
+- Added isolated CSS under shuffleOps* classes to prevent conflicts with previous app styles.
+- Build verified with Vite using local node_modules from previous package for syntax/output validation.
