@@ -4,6 +4,7 @@ import {createRoot} from "react-dom/client";
 import axios from "axios";
 import Papa from "papaparse";
 import "./style.css";
+import ShuffleOperationsPage from "./ShuffleOperationsPage.jsx";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 function mediaUrl(url){
@@ -342,6 +343,7 @@ function App(){
     menu.push(...APP_ADMIN_PAGES.map(p=>({...p})));
   }
   if(tab==="dashboard") return <Dashboard setTab={setTab} me={me} menu={menu} logout={logout}/>;
+  if(tab==="operations") return <Operations me={me} setTab={setTab} logout={logout}/>;
 
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
@@ -397,7 +399,7 @@ function App(){
 }
 
 
-function Operations({me}){
+function Operations({me,setTab,logout}){
   const {products,associations,detectedEpcs,setProducts,setAssociations,setDetectedEpcs}=useLocalStore();
   const [scanModal,setScanModal]=useState(null);
   const [barcode,setBarcode]=useState("");
@@ -603,136 +605,56 @@ function Operations({me}){
     {key:"counted", title:"C. fermeture (compté)", value:cashCountedCents, description:"Saisir le comptage réel de fermeture avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
     {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul Excel : max(0, Nouvelle C. fermeture de hier + Dépôt/ajout + Tot. vente en espèce + Règlement crédit - Dépenses).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"}
   ];
-  const cashCardByKey = key => cashOperationCards.find(card => card.key === key);
-  function openCashCard(key){
+  const cashCardByKey = key => cashOperationCards.find(card=>card.key===key);
+  const openCashMetric = key => {
     const card = cashCardByKey(key);
-    if(!card) return;
-    if(card.isExpense) openExpenseModal();
-    else setCashOpModal(card);
-  }
-  const netBenefitCents = totalDailySalesCents - expensesCents;
-  const shuffleCashMetrics = [
-    {label:"Retrait par jour", value:cashToWithdrawCents, prefix:"-", action:()=>openCashCard("toWithdraw")},
-    {label:"Versement global", value:depositsCents, prefix:"-", action:()=>openCashCard("depositsCents")},
-    {label:"Retraits Global", value:withdrawnCents, prefix:"-", action:()=>openCashCard("withdrawnCents")},
-    {label:"Bénéfice Net", value:netBenefitCents, prefix:netBenefitCents>=0 ? "+" : "-", action:()=>openCashCard("totalDailySalesCents")},
-    {label:"Règlements reçus", value:creditSettlementCents, prefix:"+", action:()=>openCashCard("creditSettlementCents")},
-    {label:"Règlements à payer", value:creditSalesCents, prefix:"-", action:()=>openCashCard("creditSalesCents")}
+    if(card?.isExpense) return openExpenseModal();
+    if(card?.editable) return setCashOpModal(card);
+    if(card) return setCashOpModal(card);
+  };
+  const makeCustomCashCard = (key,title,value,description,type="+",tone="blue") => ({key,title,value,description,type,editable:true,tone,cta:"Retour valeur",valueLabel:"Valeur entrée"});
+  const inventoryActions = [
+    {icon:"plus", tone:"violet", badge:"C1", badgeClass:"text-violet-600 bg-violet-50", title:"Insérer Qt/Inventaire", desc:"Insérer le stock/quantité produits...", label:"Charger Liste", file:".csv", onFile:importProducts},
+    {icon:"sync", tone:"blue", badge:"B1", badgeClass:"text-blue-600 bg-blue-50", title:"Insérer op associations", desc:"Insérer, désassocier le lot/paquet...", label:"Charger Liste", file:".csv", onFile:importAssociations},
+    {icon:"doc", tone:"emerald", badge:"B1", badgeClass:"text-emerald-600 bg-emerald-50", title:"Scanner code barre/produit", desc:"Rechercher un lot et son historique...", label:"Scanner", onClick:openBarcode},
+    {icon:"warn", tone:"amber", badge:"A2", badgeClass:"text-amber-600 bg-amber-50", title:"Scanner de ticket", desc:"Accéder à la fiche du ticket scanné...", label:"Charger Ticket", onClick:openBarcode},
+    {icon:"card", tone:"rose", badge:"B1", badgeClass:"text-rose-600 bg-rose-50", title:"Insérer bloc/bon d'achat", desc:"Importer un lot/GTIN à IT rapide...", label:"Charger Bloc", file:".csv,.txt", onFile:importDetectedEpc},
+    {icon:"eye", tone:"teal", badge:"Voir", badgeClass:"text-teal-600 bg-teal-50", title:"Observer résultats", desc:"Importer les résultats associations...", label:"Valider", onClick:exportCoverageReport}
   ];
-  return <section className="operationsPage v113ShuffleOpsPage">
-    <div className="v113ShuffleOperationsFrame">
-      <div className="v113ShuffleBrowserBar">
-        <div className="v113ShuffleBrowserLeft">
-          <span className="v113Dot rose"></span>
-          <span className="v113Dot amber"></span>
-          <span className="v113Dot emerald"></span>
-          <code>app.smartinventory.io/operations</code>
-        </div>
-        <span className="v113StableBadge">2026 Stable</span>
-      </div>
-
-      <div className="v113ShuffleOperationsContent">
-        <section className="v113OpsSection">
-          <header className="v113SectionHeader">
-            <span className="v113HeaderIcon indigo"><DashIcon name="sync"/></span>
-            <div>
-              <h2>Actions Inventaire</h2>
-              <p>Gérez vos importations de stocks et synchronisez vos fichiers en un clic.</p>
-            </div>
-          </header>
-          <div className="v113InventoryGrid">
-            <label className="v113ActionCard v113FileCard">
-              <span className="v113ActionIcon indigo"><DashIcon name="file"/></span>
-              <strong>Importer CSV pharmacie</strong>
-              <small>Mettez à jour le catalogue complet de votre officine.</small>
-              <em>Choisir CSV</em>
-              <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
-            </label>
-
-            <label className="v113ActionCard v113FileCard">
-              <span className="v113ActionIcon emerald"><DashIcon name="link"/></span>
-              <strong>Importer associations</strong>
-              <small>Associez automatiquement vos codes barres et références.</small>
-              <em>Choisir CSV</em>
-              <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
-            </label>
-
-            <button type="button" className="v113ActionCard" onClick={clearAssociations}>
-              <span className="v113ActionIcon rose"><DashIcon name="trash"/></span>
-              <strong>Supprimer stock manquant</strong>
-              <small>Nettoyez votre base de données des entrées obsolètes.</small>
-              <em className="danger">Exécuter</em>
-            </button>
-
-            <button type="button" className="v113ActionCard" onClick={openBarcode}>
-              <span className="v113ActionIcon amber"><DashIcon name="eye"/></span>
-              <strong>Scanner &amp; Vérifier</strong>
-              <small>Contrôle rapide des écarts d'inventaire physiques.</small>
-              <em>Scanner</em>
-            </button>
-          </div>
-        </section>
-
-        <section className="v113OpsSection v113DividedSection">
-          <div className="v113CashHeader">
-            <div className="v113SectionHeader">
-              <span className="v113HeaderIcon indigo"><DashIcon name="cash"/></span>
-              <div>
-                <h2>Opérations de caisse</h2>
-                <p>Suivi des flux financiers entrants et sortants.</p>
-              </div>
-            </div>
-            <div className="v113CashChips">
-              <span className="danger"><i></i>Montant manquant: {formatDH(currentCashMetrics.shortageCents)}</span>
-              <span className="success"><i></i>Montant surplus: {formatDH(currentCashMetrics.surplusCents)}</span>
-            </div>
-          </div>
-
-          <div className="v113DateLine">
-            <span>Date de caisse {canChangeCashDate ? "" : "(admin seulement)"}</span>
-            <input
-              type="date"
-              value={cashDate}
-              disabled={!canChangeCashDate}
-              title={canChangeCashDate ? "Changer la date de caisse" : "Seul un administrateur peut changer cette date"}
-              onChange={e=>canChangeCashDate && setCashDate(e.target.value || todayISO())}
-            />
-          </div>
-
-          <div className="v113MetricGrid">
-            {shuffleCashMetrics.map(metric=><div className="v113MetricTile" key={metric.label}>
-              <span>{metric.label}</span>
-              <strong>{metric.prefix} {formatDH(Math.abs(metric.value))}</strong>
-              <button type="button" onClick={metric.action}>Détails</button>
-            </div>)}
-          </div>
-        </section>
-
-        <section className="v113OpsSection v113DividedSection">
-          <header className="v113SectionHeader">
-            <span className="v113HeaderIcon indigo"><DashIcon name="save"/></span>
-            <div>
-              <h2>Exports et Sauvegardes locales</h2>
-              <p>Sécurisez vos données critiques et exportez vos tables au format standard.</p>
-            </div>
-          </header>
-          <div className="v113ExportGrid">
-            <button type="button" className="v113ExportCard" onClick={exportProducts}>
-              <span><strong>Catalogue de produits</strong><small>Export complet de la base articles.</small></span>
-              <em>Exporter</em>
-            </button>
-            <button type="button" className="v113ExportCard" onClick={exportAssociations}>
-              <span><strong>Historique des ventes</strong><small>Exportez toutes les sessions actives.</small></span>
-              <em>Exporter</em>
-            </button>
-            <button type="button" className="v113ExportCard" onClick={backupProject}>
-              <span><strong>Sauvegarde Complète (JSON)</strong><small>Fichier de restauration complet.</small></span>
-              <em className="primary">Créer backup</em>
-            </button>
-          </div>
-        </section>
-      </div>
-    </div>
+  const cashMetrics = [
+    {icon:"money", tone:"green", label:"Ticket vente en cours", value:`~ ${formatDH(totalDailySalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("totalDailySalesCents")},
+    {icon:"wallet", tone:"sky", label:"Paiement par espèce", value:`~ ${formatDH(salesCashCalculatedCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("salesCashCents")},
+    {icon:"card", tone:"violet", label:"Paiement par TPE", value:`~ ${formatDH(atmSalesCents)}`, actionLabel:"Consulter historique", muted:true, onClick:()=>openCashMetric("atmSalesCents")},
+    {icon:"receipt", tone:"amber", label:"Ticket autre remise", value:`= ${formatDH(creditSalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("creditSalesCents")},
+    {icon:"return", tone:"rose", label:"Produits chèque", value:`+ ${formatDH(creditSettlementCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("creditSettlementCents")},
+    {icon:"calc", tone:"teal", label:"Remboursement espèce", value:`+ ${formatDH(Number(cashCurrent.management.refundsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("refundsCents","Remboursement espèce",Number(cashCurrent.management.refundsCents || 0),"Saisir les remboursements en espèce.","+","green"))},
+    {icon:"box", tone:"indigo", label:"Approvisionnement", value:`~ ${formatDH(depositsCents)}`, actionLabel:"Retour résultats", onClick:()=>openCashMetric("depositsCents")},
+    {icon:"image", tone:"fuchsia", label:"Dépenses caisse", value:`+ ${formatDH(expensesCents)}`, actionLabel:"Retour valeur", onClick:openExpenseModal},
+    {icon:"cart", tone:"orange", label:"Avoirs retournés", value:`~ ${formatDH(Number(cashCurrent.management.returnsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("returnsCents","Avoirs retournés",Number(cashCurrent.management.returnsCents || 0),"Saisir les avoirs retournés.","+","blue"))},
+    {icon:"calendar", tone:"cyan", label:"Bons de commandes", value:`= ${formatDH(Number(cashCurrent.management.purchaseOrdersCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("purchaseOrdersCents","Bons de commandes",Number(cashCurrent.management.purchaseOrdersCents || 0),"Saisir les bons de commandes.","=","blue"))},
+    {icon:"shield", tone:"lime", label:"C encaissements", value:`= ${formatDH(newCashBalanceCents)}`, actionLabel:"Consulter liste", onClick:()=>openCashMetric("closingRealCents")},
+    {icon:"chart", tone:"pink", label:"C virement bancaire", value:`+ ${formatDH(Number(cashCurrent.management.bankTransferCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("bankTransferCents","C virement bancaire",Number(cashCurrent.management.bankTransferCents || 0),"Saisir le virement bancaire.","+","blue"))}
+  ];
+  const exportActions = [
+    {icon:"doc", tone:"violet", title:"Produits locaux", desc:"Exporter la liste des produits en local...", label:"Export CSV", onClick:exportProducts},
+    {icon:"shield", tone:"emerald", title:"Associations", desc:"Exporter les informations et l'index des lots associés...", label:"Export CSV", onClick:exportAssociations},
+    {icon:"money", tone:"sky", title:"Produits sans association", desc:"Exporter la liste de tous les produits non associés...", label:"Export CSV", onClick:exportProductsWithoutRfid},
+    {icon:"chart", tone:"amber", title:"Taux de reconstitution", desc:"Exporter les taux de CP et d'obtention des résultats simples...", label:"Export CSV", onClick:exportCoverageReport},
+    {icon:"db", tone:"rose", title:"Backup complet", desc:"Créer une sauvegarde complète de toutes les données...", label:"Charger Backup", onClick:backupProject}
+  ];
+  return <>
+    <ShuffleOperationsPage
+      setTab={setTab}
+      logout={logout}
+      cashDate={cashDate}
+      canChangeCashDate={canChangeCashDate}
+      onCashDateChange={(next)=>canChangeCashDate && setCashDate(next || todayISO())}
+      headerSolde={formatDH(newCashBalanceCents)}
+      headerCash={formatDH(salesCashCalculatedCents)}
+      inventoryActions={inventoryActions}
+      cashMetrics={cashMetrics}
+      exportActions={exportActions}
+    />
 
     {msg && <p className="success opMessage">{msg}</p>}
 
@@ -813,8 +735,7 @@ function Operations({me}){
       </div>
     </div>}
 
-    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
-  </section>
+  </>
 }
 
 
