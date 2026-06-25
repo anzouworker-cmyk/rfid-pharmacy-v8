@@ -9232,3 +9232,88 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   .dashRefHeroBlock h1{font-size:28px!important;}
   .dashRefHeroBlock h2{font-size:24px!important;}
 }
+
+/* V142 - Fix duplicated chrome after dashboard reference redesign.
+   The dashboard reference shell is the only global chrome for internal pages.
+   Nested Shuffle page headers/footers are hidden inside it to avoid double menus and double footers. */
+.dashRefContent .shuffleAssocNav,
+.dashRefContent .shuffleAssocFooter,
+.dashRefContent .shuffleDashNav,
+.dashRefContent .shuffleDashFooter,
+.dashRefContent .internalTopDashNav,
+.dashRefContent .internalSideNav,
+.dashRefContent .shuffleInvFooter,
+.dashRefContent .pageFooterLikeDashboard{
+  display:none!important;
+}
+.dashRefContent .shuffleAssocPage,
+.dashRefContent .shuffleDashExactPage,
+.dashRefContent .shuffleInvPage,
+.dashRefContent .withInternalTopNav{
+  min-height:auto!important;
+  background:transparent!important;
+  display:block!important;
+  grid-template-columns:none!important;
+  grid-template-rows:none!important;
+}
+.dashRefContent .shuffleAssocMain,
+.dashRefContent .shuffleDashMain,
+.dashRefContent .shuffleInvMain{
+  width:100%!important;
+  max-width:none!important;
+  padding:0!important;
+  margin:0!important;
+}
+.dashRefContent .shuffleAssocHeader,
+.dashRefContent .shuffleInvHeaderSection{
+  margin-top:0!important;
+}
+.dashRefContent .shuffleAssocCard,
+.dashRefContent .shuffleInvTableCard{
+  width:100%!important;
+}
+.dashRefShell .dashRefSideNav button[data-hidden-top="true"]{display:none!important;}
+.dashRefPageLabel{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  color:#0f172a!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+.dashRefPageLabel .invSvg{width:18px!important;height:18px!important;color:#64748b!important;}
+.dashRefTopNavOnly{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:10px!important;
+  flex:1!important;
+  min-width:0!important;
+}
+.dashRefTopNavOnly button{
+  border:0!important;
+  background:transparent!important;
+  color:#64748b!important;
+  padding:9px 14px!important;
+  border-radius:12px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  line-height:1!important;
+  box-shadow:none!important;
+  cursor:pointer!important;
+  transition:background .18s ease,color .18s ease,box-shadow .18s ease!important;
+}
+.dashRefTopNavOnly button .invSvg{width:16px!important;height:16px!important;}
+.dashRefTopNavOnly button:hover{background:#f8fafc!important;color:#334155!important;}
+.dashRefTopNavOnly button.active{background:#4f46e5!important;color:#fff!important;box-shadow:0 10px 20px rgba(79,70,229,.18)!important;}
+.dashRefTopNavOnly button.active .invSvg{color:#fff!important;}
+.dashRefCrumbActive,.dashRefSlash,.dashRefCrumbText{display:none!important;}
+.dashRefFooter{margin-top:auto!important;}
+@media (max-width: 860px){
+  .dashRefTopbar{height:auto!important;min-height:64px!important;flex-wrap:wrap!important;padding:12px 18px!important;}
+  .dashRefTopNavOnly{order:3;width:100%!important;justify-content:flex-start!important;overflow-x:auto!important;}
+}

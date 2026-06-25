@@ -1,0 +1,8 @@
+V142_GLOBAL_CHROME_DUPLICATE_FIX
+
+- Corrected internal authenticated chrome after dashboard reference integration.
+- Removed duplicated nested Shuffle top menus inside wrapped pages.
+- Removed duplicated footers; each internal page now uses one global footer.
+- Left sidebar now holds operational pages; top bar only exposes Dashboard and Dashboard Caisse shortcuts.
+- Inventory is now rendered inside the same global shell for consistency.
+- No business logic, API calls, cash formulas, imports, exports or login behavior changed.

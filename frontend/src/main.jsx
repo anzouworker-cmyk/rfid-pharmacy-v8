@@ -345,7 +345,7 @@ function App(){
   if(tab==="dashboard") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Dashboard setTab={setTab} me={me} menu={menu} logout={logout}/></InventoryLikePageShell>;
   if(tab==="operations") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Operations me={me} setTab={setTab} logout={logout} hideChrome={true}/></InventoryLikePageShell>;
   if(tab==="association") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Association setTab={setTab} me={me} logout={logout}/></InventoryLikePageShell>;
-  if(tab==="inventory") return <Inventory setTab={setTab} me={me} logout={logout}/>;
+  if(tab==="inventory") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Inventory setTab={setTab} me={me} logout={logout}/></InventoryLikePageShell>;
   if(tab==="cash") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashRegister/></InventoryLikePageShell>;
   if(tab==="ai") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><AIAssistant/></InventoryLikePageShell>;
   if(tab==="users") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><MyUsers auth={auth} me={me}/></InventoryLikePageShell>;
@@ -465,11 +465,20 @@ function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
     dashboardAdmin:"Publicités"
   };
   const pageTitle = titleByPage[tab] || "Dashboard";
-  const sidebarItems = nav.map(item=>({
-    ...item,
-    label: item.id==="inventory" ? "Inventaires" : item.id==="cash" ? "Caisses" : item.label,
-    icon: inventoryChromeIcon(item.id)
-  }));
+  const sidebarItems = nav
+    .filter(item=>item.id!=="dashboard" && item.id!=="cashAdmin")
+    .map(item=>({
+      ...item,
+      label: item.id==="inventory" ? "Inventaires" : item.id==="cash" ? "Caisses" : item.label,
+      icon: inventoryChromeIcon(item.id)
+    }));
+  const topItems = nav
+    .filter(item=>item.id==="dashboard" || item.id==="cashAdmin")
+    .map(item=>({
+      ...item,
+      label: item.id==="cashAdmin" ? "Dashboard Caisse" : item.label,
+      icon: inventoryChromeIcon(item.id)
+    }));
   return <div className="dashRefShell">
     <aside className="dashRefSidebar">
       <button type="button" className="dashRefBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory Dashboard">
@@ -492,10 +501,13 @@ function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
       <header className="dashRefTopbar">
         <div className="dashRefBreadcrumb">
           <button type="button" className="dashRefMobileToggle" aria-label="Menu"><InvIcon name="menu"/></button>
-          <span className="dashRefCrumbActive"><InvIcon name={inventoryChromeIcon(tab)}/>{pageTitle}</span>
-          <span className="dashRefSlash">/</span>
-          <button type="button" className={tab==="cashAdmin" ? "dashRefCrumbText active" : "dashRefCrumbText"} onClick={()=>setTab("cashAdmin")}>Dashboard Caisse</button>
+          <span className="dashRefPageLabel"><InvIcon name={inventoryChromeIcon(tab)}/>{pageTitle}</span>
         </div>
+        <nav className="dashRefTopNavOnly" aria-label="Navigation dashboard">
+          {topItems.map(item=><button key={item.id} type="button" className={tab===item.id ? "active" : ""} onClick={()=>setTab(item.id)}>
+            <InvIcon name={item.icon}/><span>{item.label}</span>
+          </button>)}
+        </nav>
         <div className="dashRefTopActions">
           <button type="button" className="dashRefBell" aria-label="Notifications"><InvIcon name="warning"/><i></i></button>
           <span className="dashRefAvatar">{initials}</span>
