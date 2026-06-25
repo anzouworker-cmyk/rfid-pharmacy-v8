@@ -346,6 +346,12 @@ function App(){
   if(tab==="operations") return <Operations me={me} setTab={setTab} logout={logout}/>;
   if(tab==="association") return <Association setTab={setTab} me={me} logout={logout}/>;
   if(tab==="inventory") return <Inventory setTab={setTab} me={me} logout={logout}/>;
+  if(tab==="cash") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashRegister/></ShuffleUnifiedShell>;
+  if(tab==="ai") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><AIAssistant/></ShuffleUnifiedShell>;
+  if(tab==="users") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><MyUsers auth={auth} me={me}/></ShuffleUnifiedShell>;
+  if(tab==="cashAdmin") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashDashboardAdmin/></ShuffleUnifiedShell>;
+  if(tab==="platform") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Platform auth={auth}/></ShuffleUnifiedShell>;
+  if(tab==="dashboardAdmin") return <ShuffleUnifiedShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><DashboardAdmin auth={auth}/></ShuffleUnifiedShell>;
 
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
@@ -398,6 +404,31 @@ function App(){
       <footer className="whiteFooter">© 2026 Smart Inventory. All rights reserved.</footer>
     </section>
   </div>
+}
+
+function ShuffleUnifiedShell({tab,setTab,menu=[],me,logout,children}){
+  const accountInitials = String(me?.pharmacy_name || me?.username || "PI").trim().slice(0,2).toUpperCase() || "PI";
+  const nav = Array.isArray(menu) && menu.length ? menu : APP_USER_PAGES;
+  return <div className="shuffleUnifiedShell">
+    <header className="shuffleUnifiedNav">
+      <div className="shuffleUnifiedNavInner">
+        <button type="button" className="shuffleUnifiedBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory Dashboard">
+          <span className="shuffleUnifiedLogo"><SidebarBrandIcon/></span>
+          <b>Smart Inventory</b>
+        </button>
+        <nav className="shuffleUnifiedLinks" aria-label="Navigation principale">
+          {nav.map(item=><button key={item.id} type="button" className={tab===item.id ? "active" : ""} onClick={()=>setTab(item.id)}>{item.label}{item.id==="ai" && <span>NEW</span>}</button>)}
+        </nav>
+        <div className="shuffleUnifiedAccount">
+          <button type="button" className="shuffleUnifiedGhost" onClick={logout}>Log out</button>
+          <span className="shuffleUnifiedAvatar">{accountInitials}</span>
+        </div>
+      </div>
+    </header>
+    <main className="shuffleUnifiedMain">
+      {children}
+    </main>
+  </div>;
 }
 
 

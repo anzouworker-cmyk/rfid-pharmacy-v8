@@ -8051,3 +8051,527 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   .shuffleInvHeaderRow h1{font-size:26px}
   .shuffleInvAvatar{display:none}
 }
+
+/* V134 - Coherence layer for remaining pages (Caisse, Assistant IA, Dashboard Caisse, Clients SaaS, Publicités) */
+.shuffleUnifiedShell{
+  min-height:100vh;
+  background:#f8fafc;
+  color:#0f172a;
+  font-family:"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.shuffleUnifiedShell *{box-sizing:border-box}
+.shuffleUnifiedNav{
+  position:sticky;
+  top:0;
+  z-index:30;
+  background:rgba(255,255,255,.94);
+  border-bottom:1px solid #e5e7eb;
+  backdrop-filter:blur(16px);
+}
+.shuffleUnifiedNavInner{
+  max-width:1360px;
+  margin:0 auto;
+  height:70px;
+  padding:0 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+}
+.shuffleUnifiedBrand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border:0;
+  background:transparent;
+  color:#0f172a;
+  cursor:pointer;
+  font:inherit;
+  padding:0;
+  white-space:nowrap;
+}
+.shuffleUnifiedBrand b{font-size:18px;font-weight:900;letter-spacing:-.04em}
+.shuffleUnifiedLogo{
+  width:40px;
+  height:40px;
+  border-radius:13px;
+  background:#4f46e5;
+  color:white;
+  display:grid;
+  place-items:center;
+  box-shadow:0 12px 26px rgba(79,70,229,.25);
+}
+.shuffleUnifiedLogo svg{width:22px;height:22px}
+.shuffleUnifiedLinks{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex:1;
+  min-width:0;
+  overflow:auto;
+  scrollbar-width:none;
+}
+.shuffleUnifiedLinks::-webkit-scrollbar{display:none}
+.shuffleUnifiedLinks button{
+  position:relative;
+  border:0;
+  background:transparent;
+  color:#475569;
+  font:inherit;
+  font-size:14px;
+  font-weight:700;
+  padding:24px 13px 20px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.shuffleUnifiedLinks button.active{color:#4f46e5}
+.shuffleUnifiedLinks button.active:after{
+  content:"";
+  position:absolute;
+  left:13px;
+  right:13px;
+  bottom:17px;
+  height:2px;
+  border-radius:999px;
+  background:#4f46e5;
+}
+.shuffleUnifiedLinks button span{
+  display:inline-flex;
+  margin-left:6px;
+  padding:2px 7px;
+  border-radius:999px;
+  background:#eef2ff;
+  color:#4f46e5;
+  border:1px solid #c7d2fe;
+  font-size:10px;
+  line-height:1;
+  font-weight:900;
+}
+.shuffleUnifiedAccount{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.shuffleUnifiedGhost{
+  border:1px solid #e2e8f0;
+  background:#fff;
+  color:#334155;
+  height:38px;
+  padding:0 14px;
+  border-radius:12px;
+  font:inherit;
+  font-weight:800;
+  cursor:pointer;
+}
+.shuffleUnifiedAvatar{
+  width:38px;
+  height:38px;
+  border-radius:14px;
+  background:#4f46e5;
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  box-shadow:0 12px 26px rgba(79,70,229,.22);
+}
+.shuffleUnifiedMain{
+  max-width:1360px;
+  margin:0 auto;
+  padding:36px 24px 56px;
+}
+.shuffleUnifiedShell h1,.shuffleUnifiedShell h2,.shuffleUnifiedShell h3{
+  letter-spacing:-.04em;
+  color:#0f172a;
+}
+.shuffleUnifiedShell p{color:#64748b}
+.shuffleUnifiedShell .pageFooterLikeDashboard{
+  margin-top:32px;
+  padding:18px 0 0;
+  border-top:1px solid #e5e7eb;
+  color:#64748b;
+  font-size:13px;
+  text-align:center;
+}
+
+/* Shared page card language */
+.shuffleUnifiedShell .cashRegisterPage,
+.shuffleUnifiedShell .aiChatPage,
+.shuffleUnifiedShell .cashAdminDashboardPage,
+.shuffleUnifiedShell .platformPage,
+.shuffleUnifiedShell .simpleAdAdmin{
+  background:transparent!important;
+  min-height:auto!important;
+  padding:0!important;
+  color:#0f172a!important;
+  max-width:none!important;
+  margin:0!important;
+}
+.shuffleUnifiedShell .cashRegisterHeader,
+.shuffleUnifiedShell .aiChatTop,
+.shuffleUnifiedShell .cashAdminDashboardHeader,
+.shuffleUnifiedShell .platformHeaderBar,
+.shuffleUnifiedShell .adEditorPanel,
+.shuffleUnifiedShell .adPreviewPanel,
+.shuffleUnifiedShell .adListPanel,
+.shuffleUnifiedShell .card,
+.shuffleUnifiedShell .cashRegisterPanel,
+.shuffleUnifiedShell .cashAdminCard,
+.shuffleUnifiedShell .aiChatPanel,
+.shuffleUnifiedShell .aiContextPanel{
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:24px!important;
+  box-shadow:0 18px 48px rgba(15,23,42,.06)!important;
+}
+.shuffleUnifiedShell .cashRegisterHeader,
+.shuffleUnifiedShell .aiChatTop,
+.shuffleUnifiedShell .cashAdminDashboardHeader,
+.shuffleUnifiedShell .platformHeaderBar{
+  padding:28px 32px!important;
+  margin-bottom:18px!important;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+}
+.shuffleUnifiedShell .cashRegisterHeader h1,
+.shuffleUnifiedShell .cashAdminDashboardHeader h1,
+.shuffleUnifiedShell .platformHeaderBar h2,
+.shuffleUnifiedShell .aiChatTop h2{
+  margin:0!important;
+  font-size:32px!important;
+  line-height:1.05!important;
+  font-weight:900!important;
+}
+.shuffleUnifiedShell .cashRegisterHeader p,
+.shuffleUnifiedShell .cashAdminDashboardHeader p,
+.shuffleUnifiedShell .platformHeaderBar p,
+.shuffleUnifiedShell .aiChatTop p{
+  margin:8px 0 0!important;
+  max-width:680px;
+  color:#64748b!important;
+  font-size:14px!important;
+  line-height:1.65!important;
+}
+.shuffleUnifiedShell button,
+.shuffleUnifiedShell input,
+.shuffleUnifiedShell textarea,
+.shuffleUnifiedShell select{
+  font-family:inherit!important;
+}
+.shuffleUnifiedShell input,
+.shuffleUnifiedShell textarea,
+.shuffleUnifiedShell select{
+  border:1px solid #cbd5e1!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  border-radius:12px!important;
+  outline:none!important;
+}
+.shuffleUnifiedShell input:focus,
+.shuffleUnifiedShell textarea:focus,
+.shuffleUnifiedShell select:focus{
+  border-color:#4f46e5!important;
+  box-shadow:0 0 0 4px rgba(79,70,229,.10)!important;
+}
+.shuffleUnifiedShell .cashHeaderActions button,
+.shuffleUnifiedShell .primaryBtn,
+.shuffleUnifiedShell .platformAddStoreBtn,
+.shuffleUnifiedShell .platformModalCreate,
+.shuffleUnifiedShell .aiComposer button,
+.shuffleUnifiedShell .aiSideActions button:first-child,
+.shuffleUnifiedShell .cashTabs button.active,
+.shuffleUnifiedShell table button,
+.shuffleUnifiedShell .adRowCard button:first-child,
+.shuffleUnifiedShell .cashDateTodayBtn{
+  background:#4f46e5!important;
+  color:#fff!important;
+  border:1px solid #4f46e5!important;
+  border-radius:13px!important;
+  font-weight:800!important;
+  box-shadow:0 14px 24px rgba(79,70,229,.18)!important;
+}
+.shuffleUnifiedShell .cashHeaderActions .cashResetBtn,
+.shuffleUnifiedShell .dangerBtn,
+.shuffleUnifiedShell .dangerSmall{
+  background:#fff1f2!important;
+  color:#e11d48!important;
+  border-color:#fecdd3!important;
+  box-shadow:none!important;
+}
+.shuffleUnifiedShell .cashHeaderActions button:not(.cashResetBtn),
+.shuffleUnifiedShell .cashResetBtn,
+.shuffleUnifiedShell .platformAddStoreBtn,
+.shuffleUnifiedShell .primaryBtn{
+  min-height:44px;
+  padding:0 18px!important;
+}
+.shuffleUnifiedShell .cashRegisterPanel{
+  padding:22px!important;
+}
+.shuffleUnifiedShell .cashTabs{
+  background:#f8fafc!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:18px!important;
+  padding:6px!important;
+  display:flex!important;
+  gap:6px!important;
+  margin-bottom:18px!important;
+}
+.shuffleUnifiedShell .cashTabs button{
+  border:0!important;
+  border-radius:13px!important;
+  padding:11px 16px!important;
+  font-weight:800!important;
+  color:#475569!important;
+  background:transparent!important;
+  cursor:pointer!important;
+}
+.shuffleUnifiedShell .cashTabs button.active{color:#fff!important;background:#4f46e5!important}
+.shuffleUnifiedShell .cashDateBar,
+.shuffleUnifiedShell .expenseHistoryTopbar{
+  background:#f8fafc!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:18px!important;
+  padding:14px 16px!important;
+  margin-bottom:18px!important;
+}
+.shuffleUnifiedShell .cashMainGrid{gap:18px!important}
+.shuffleUnifiedShell .cashExchangeSection,
+.shuffleUnifiedShell .cashManagementSection,
+.shuffleUnifiedShell .cashExpensesSection,
+.shuffleUnifiedShell .cashTotalCard,
+.shuffleUnifiedShell .cashExpensesAside .cashExpenseAsideCard{
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:20px!important;
+  box-shadow:0 12px 30px rgba(15,23,42,.05)!important;
+}
+.shuffleUnifiedShell .cashSectionTitleIcon,
+.shuffleUnifiedShell .cashRecapIcon,
+.shuffleUnifiedShell .cashAdminCardRight,
+.shuffleUnifiedShell .aiChatScore{
+  background:#eef2ff!important;
+  color:#4f46e5!important;
+  border:1px solid #c7d2fe!important;
+}
+.shuffleUnifiedShell table{
+  width:100%;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:18px!important;
+  overflow:hidden!important;
+  box-shadow:0 14px 36px rgba(15,23,42,.05)!important;
+}
+.shuffleUnifiedShell th{
+  background:#f8fafc!important;
+  color:#64748b!important;
+  text-transform:uppercase!important;
+  letter-spacing:.08em!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  border-bottom:1px solid #e2e8f0!important;
+}
+.shuffleUnifiedShell td{
+  border-bottom:1px solid #eef2f7!important;
+  color:#334155!important;
+}
+.shuffleUnifiedShell tr:last-child td{border-bottom:0!important}
+.shuffleUnifiedShell .success{color:#059669!important;background:#ecfdf5!important;border:1px solid #bbf7d0!important;border-radius:14px!important;padding:12px 14px!important}
+.shuffleUnifiedShell .err{color:#e11d48!important;background:#fff1f2!important;border:1px solid #fecdd3!important;border-radius:14px!important;padding:12px 14px!important}
+
+/* Assistant IA coherent Shuffle */
+.shuffleUnifiedShell .aiChatBadge{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:8px 12px!important;
+  border-radius:999px!important;
+  color:#4f46e5!important;
+  background:#eef2ff!important;
+  border:1px solid #c7d2fe!important;
+  font-size:12px!important;
+  font-weight:900!important;
+}
+.shuffleUnifiedShell .aiChatLayout{gap:18px!important}
+.shuffleUnifiedShell .aiChatPanel,
+.shuffleUnifiedShell .aiContextPanel{padding:20px!important}
+.shuffleUnifiedShell .aiMessages{
+  background:#f8fafc!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:20px!important;
+}
+.shuffleUnifiedShell .aiBubble{
+  border-radius:18px!important;
+  border:1px solid #e2e8f0!important;
+  background:#fff!important;
+  color:#0f172a!important;
+}
+.shuffleUnifiedShell .aiBubble.user{background:#4f46e5!important;color:#fff!important;border-color:#4f46e5!important}
+.shuffleUnifiedShell .aiBubble.user span,.shuffleUnifiedShell .aiBubble.user p{color:#fff!important}
+.shuffleUnifiedShell .aiQuickChips button,
+.shuffleUnifiedShell .aiSideActions button{
+  border:1px solid #e2e8f0!important;
+  background:#fff!important;
+  color:#4f46e5!important;
+  border-radius:999px!important;
+  font-weight:800!important;
+}
+.shuffleUnifiedShell .aiComposer{
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:20px!important;
+  padding:10px!important;
+}
+.shuffleUnifiedShell .aiComposer textarea{border:0!important;box-shadow:none!important;background:transparent!important}
+.shuffleUnifiedShell .aiContextStat{
+  border-bottom:1px solid #eef2f7!important;
+  padding:12px 0!important;
+}
+
+/* Dashboard caisse */
+.shuffleUnifiedShell .cashAdminDashboardPage{
+  display:block!important;
+}
+.shuffleUnifiedShell .cashAdminGrid{
+  gap:16px!important;
+}
+.shuffleUnifiedShell .cashAdminCard{
+  padding:18px!important;
+}
+.shuffleUnifiedShell .cashAdminCardHeader h3{
+  font-size:14px!important;
+  font-weight:900!important;
+  color:#0f172a!important;
+}
+.shuffleUnifiedShell .cashAdminMainValue b,
+.shuffleUnifiedShell .cashAdminBigMetric b{
+  color:#0f172a!important;
+  letter-spacing:-.05em!important;
+}
+.shuffleUnifiedShell .cashAdminRing svg circle:last-child{stroke:#4f46e5!important}
+.shuffleUnifiedShell .cashAdminDatePicker,
+.shuffleUnifiedShell .cashAdminInlineDate{font-family:inherit!important}
+
+/* Clients SaaS / utilisateurs */
+.shuffleUnifiedShell .platformPage{
+  display:block!important;
+}
+.shuffleUnifiedShell .platformPage .card,
+.shuffleUnifiedShell .userAccessCard{
+  padding:22px!important;
+  margin-bottom:18px!important;
+}
+.shuffleUnifiedShell .platformCreateGrid,
+.shuffleUnifiedShell .simpleAdForm{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+.shuffleUnifiedShell .pagePermissionBox{
+  background:#f8fafc!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:18px!important;
+  padding:16px!important;
+}
+.shuffleUnifiedShell .pagePermissionGrid,
+.shuffleUnifiedShell .pagePermissionMiniGrid{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important;
+  gap:10px!important;
+}
+.shuffleUnifiedShell .pagePermissionGrid label,
+.shuffleUnifiedShell .pagePermissionMiniGrid label,
+.shuffleUnifiedShell .checkLine{
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:12px!important;
+  padding:10px!important;
+  color:#334155!important;
+}
+.shuffleUnifiedShell .platformStoreModal{
+  border-radius:24px!important;
+  border:1px solid #e2e8f0!important;
+  box-shadow:0 30px 80px rgba(15,23,42,.22)!important;
+}
+.shuffleUnifiedShell .platformModalCancel{
+  background:#fff!important;
+  color:#334155!important;
+  border:1px solid #cbd5e1!important;
+  box-shadow:none!important;
+  border-radius:13px!important;
+  font-weight:800!important;
+}
+
+/* Publicités */
+.shuffleUnifiedShell .simpleAdAdmin:before{
+  content:"Publicités";
+  display:block;
+  margin:0 0 8px;
+  font-size:32px;
+  line-height:1.05;
+  font-weight:900;
+  letter-spacing:-.04em;
+  color:#0f172a;
+}
+.shuffleUnifiedShell .simpleAdAdmin .notice{
+  display:block!important;
+  background:#eef2ff!important;
+  border:1px solid #c7d2fe!important;
+  color:#4f46e5!important;
+  border-radius:999px!important;
+  padding:8px 12px!important;
+  width:max-content!important;
+  max-width:100%!important;
+  font-weight:800!important;
+  margin-bottom:12px!important;
+}
+.shuffleUnifiedShell .adAdminGrid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr)!important;
+  gap:18px!important;
+  align-items:start!important;
+}
+.shuffleUnifiedShell .adEditorPanel,
+.shuffleUnifiedShell .adPreviewPanel,
+.shuffleUnifiedShell .adListPanel{
+  padding:22px!important;
+}
+.shuffleUnifiedShell .uploadBox{
+  background:#f8fafc!important;
+  border:1px dashed #cbd5e1!important;
+  border-radius:18px!important;
+  padding:16px!important;
+}
+.shuffleUnifiedShell .dynamicAdPreview{
+  background:linear-gradient(135deg,#052e2b,#1e3a5f)!important;
+  border-radius:22px!important;
+  min-height:260px!important;
+  border:1px solid rgba(255,255,255,.15)!important;
+  overflow:hidden!important;
+  box-shadow:0 22px 45px rgba(4,47,46,.18)!important;
+}
+.shuffleUnifiedShell .adRowCard{
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:18px!important;
+  box-shadow:0 10px 28px rgba(15,23,42,.04)!important;
+}
+.shuffleUnifiedShell .adRowCard button{
+  border-radius:12px!important;
+  font-weight:800!important;
+}
+
+@media (max-width: 960px){
+  .shuffleUnifiedNavInner{height:auto;min-height:70px;align-items:flex-start;flex-wrap:wrap;padding:14px 18px}
+  .shuffleUnifiedLinks{order:3;width:100%;justify-content:flex-start}
+  .shuffleUnifiedLinks button{padding:12px 10px 14px}
+  .shuffleUnifiedLinks button.active:after{bottom:8px}
+  .shuffleUnifiedMain{padding:24px 16px 44px}
+  .shuffleUnifiedShell .cashRegisterHeader,
+  .shuffleUnifiedShell .aiChatTop,
+  .shuffleUnifiedShell .cashAdminDashboardHeader,
+  .shuffleUnifiedShell .platformHeaderBar{flex-direction:column;align-items:flex-start;padding:22px!important}
+  .shuffleUnifiedShell .adAdminGrid{grid-template-columns:1fr!important}
+  .shuffleUnifiedShell .platformCreateGrid,
+  .shuffleUnifiedShell .simpleAdForm{grid-template-columns:1fr!important}
+}

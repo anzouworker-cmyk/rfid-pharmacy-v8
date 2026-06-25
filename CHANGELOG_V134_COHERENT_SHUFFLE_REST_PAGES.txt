@@ -1,0 +1,9 @@
+V134 - Coherent Shuffle redesign for remaining pages
+
+- Added a shared Shuffle-style white top navigation shell for: Caisse, Assistant IA, Utilisateurs, Dashboard Caisse, Clients SaaS, and Publicités.
+- Restyled Caisse page cards, tabs, tables, recap card, date bars, buttons and inputs to match the new Shuffle visual language.
+- Restyled Assistant IA chat page, context panel, composer and quick actions with indigo/slate SaaS cards.
+- Restyled Dashboard Caisse admin cards and date controls for coherent white-card SaaS UI.
+- Restyled Clients SaaS and user management tables, permission controls and modals.
+- Restyled Publicités dashboard admin editor, preview panel and ad list.
+- Kept all existing business logic, API calls, calculations, local storage keys, imports/exports, and permissions unchanged.
