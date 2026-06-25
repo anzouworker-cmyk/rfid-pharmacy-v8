@@ -102,7 +102,7 @@ function ExportCard({icon,tone,title,desc,label,onClick,file,onFile}){
 
 export default function ShuffleOperationsPage({
   setTab, logout, cashDate, canChangeCashDate, onCashDateChange,
-  formatValue, headerSolde, headerCash, inventoryActions, cashMetrics, exportActions
+  formatValue, headerSolde, headerCash, shortageText, surplusText, inventoryActions, cashMetrics, exportActions
 }){
   return <ShadowOperationsFrame>
     <div className="antialiased font-body bg-body text-body bg-slate-50 text-slate-800 min-h-screen">
@@ -118,13 +118,32 @@ export default function ShuffleOperationsPage({
       </section>
       <section className="py-10 px-6">
         <div className="max-w-screen-2xl mx-auto">
-          <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 rounded-3xl p-8 mb-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div><h2 className="font-heading text-2xl font-bold text-white mb-2">Opérations de caisse</h2><p className="text-sm text-indigo-200">Gérer les opérations comptables et de caisse en temps réel.</p></div>
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-4 text-center"><p className="text-xs text-indigo-200 mb-1">Solde actuel</p><p className="font-heading text-2xl font-bold text-white">{headerSolde}</p><p className="text-xs text-indigo-300 mt-1">Par caisse</p></div>
-                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-4 text-center"><p className="text-xs text-indigo-200 mb-1">Montant espèce</p><p className="font-heading text-2xl font-bold text-white">{headerCash}</p><p className="text-xs text-indigo-300 mt-1">Par caisse</p></div>
-                <div className="hidden sm:block"><label className="text-xs text-indigo-200 block mb-1">Sélectionner date</label><input type="date" value={cashDate} disabled={!canChangeCashDate} onChange={e=>onCashDateChange?.(e.target.value)} className="ops-date-input bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm text-white placeholder-indigo-300 focus:outline-none focus:ring-2 focus:ring-white/30" /></div>
+          <div className="border-t border-slate-200 pt-8 mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                  <SimpleIcon type="card" className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="font-heading text-lg font-bold text-slate-900 leading-tight mb-1">Opérations de caisse</h2>
+                  <p className="text-xs text-slate-500">Suivi des flux financiers entrants et sortants.</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-start lg:items-end gap-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                    Montant manquant: {shortageText || 'DH 0'}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    Montant surplus: {surplusText || 'DH 0'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Date de caisse</label>
+                  <input type="date" value={cashDate} disabled={!canChangeCashDate} onChange={e=>onCashDateChange?.(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 disabled:bg-slate-50 disabled:text-slate-400" />
+                </div>
               </div>
             </div>
           </div>

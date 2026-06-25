@@ -651,6 +651,8 @@ function Operations({me,setTab,logout}){
       onCashDateChange={(next)=>canChangeCashDate && setCashDate(next || todayISO())}
       headerSolde={formatDH(newCashBalanceCents)}
       headerCash={formatDH(salesCashCalculatedCents)}
+      shortageText={formatDH(currentCashMetrics.shortageCents)}
+      surplusText={formatDH(currentCashMetrics.surplusCents)}
       inventoryActions={inventoryActions}
       cashMetrics={cashMetrics}
       exportActions={exportActions}
