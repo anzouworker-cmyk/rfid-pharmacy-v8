@@ -8612,3 +8612,167 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
 .invChromePage .shuffleInvFooter{
   flex-shrink:0;
 }
+
+
+/* V136 - Internal pages left navigation
+   Applies the Inventory/Shuffe navigation design as a left sidebar to all authenticated pages.
+   Public home and login pages are untouched because they do not use .shuffleInvPage. */
+@media (min-width: 1025px){
+  .shuffleInvPage{
+    display:grid!important;
+    grid-template-columns:284px minmax(0,1fr)!important;
+    grid-template-rows:minmax(0,1fr) auto!important;
+    align-items:stretch!important;
+    min-height:100vh!important;
+    background:#f8fafc!important;
+  }
+  .shuffleInvNav{
+    grid-column:1!important;
+    grid-row:1 / span 2!important;
+    position:sticky!important;
+    top:0!important;
+    align-self:start!important;
+    width:284px!important;
+    min-height:100vh!important;
+    height:100vh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    background:#fff!important;
+    border-right:1px solid rgba(226,232,240,.95)!important;
+    border-bottom:0!important;
+    box-shadow:4px 0 18px rgba(15,23,42,.035)!important;
+    z-index:30!important;
+  }
+  .shuffleInvNavInner{
+    width:100%!important;
+    max-width:none!important;
+    height:100%!important;
+    min-height:100vh!important;
+    margin:0!important;
+    padding:24px 16px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    gap:18px!important;
+  }
+  .shuffleInvBrand{
+    width:100%!important;
+    justify-content:flex-start!important;
+    padding:0 6px 18px!important;
+    border-bottom:1px solid #eef2f7!important;
+    font-size:18px!important;
+  }
+  .shuffleInvBrandIcon{
+    width:40px!important;
+    height:40px!important;
+    border-radius:14px!important;
+  }
+  .shuffleInvLinks{
+    width:100%!important;
+    min-width:0!important;
+    flex:0 0 auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    gap:6px!important;
+    padding:2px 0!important;
+  }
+  .shuffleInvNavItem{
+    width:100%!important;
+    justify-content:flex-start!important;
+    gap:10px!important;
+    min-height:44px!important;
+    padding:11px 12px!important;
+    border-radius:12px!important;
+    color:#64748b!important;
+    font-size:14px!important;
+    font-weight:700!important;
+    text-align:left!important;
+  }
+  .shuffleInvNavItem .invSvg{
+    display:block!important;
+    width:17px!important;
+    height:17px!important;
+  }
+  .shuffleInvNavItem:hover{
+    color:#4f46e5!important;
+    background:#eef2ff!important;
+    transform:none!important;
+    box-shadow:none!important;
+  }
+  .shuffleInvNavItem.active{
+    color:#fff!important;
+    background:#4f46e5!important;
+    box-shadow:0 10px 22px rgba(79,70,229,.24)!important;
+  }
+  .shuffleInvRight{
+    width:100%!important;
+    margin-top:auto!important;
+    padding-top:18px!important;
+    border-top:1px solid #eef2f7!important;
+    display:grid!important;
+    grid-template-columns:1fr auto!important;
+    align-items:center!important;
+    gap:10px!important;
+  }
+  .shuffleInvStoreBadge{
+    width:100%!important;
+    min-width:0!important;
+    justify-content:flex-start!important;
+    padding:10px 12px!important;
+    white-space:normal!important;
+  }
+  .shuffleInvStoreBadge span{
+    min-width:0!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  .shuffleInvAvatar{
+    width:38px!important;
+    height:38px!important;
+  }
+  .shuffleInvMobileBtn{display:none!important;}
+  .shuffleInvMain,
+  .invChromeMain{
+    grid-column:2!important;
+    grid-row:1!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:32px 36px 44px!important;
+  }
+  .shuffleInvFooter{
+    grid-column:2!important;
+    grid-row:2!important;
+    width:100%!important;
+    margin:0!important;
+    border-top:1px solid rgba(226,232,240,.75)!important;
+  }
+  .shuffleInvFooterInner{
+    max-width:none!important;
+    padding:20px 36px!important;
+  }
+  .invChromePage .shuffleDashMain,
+  .invChromePage .shuffleAssocMain{
+    padding-top:0!important;
+  }
+}
+
+@media (max-width: 1024px){
+  .shuffleInvPage{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  .shuffleInvNav{
+    position:relative!important;
+    width:100%!important;
+    min-height:auto!important;
+    height:auto!important;
+    border-right:0!important;
+    border-bottom:1px solid rgba(226,232,240,.8)!important;
+  }
+}

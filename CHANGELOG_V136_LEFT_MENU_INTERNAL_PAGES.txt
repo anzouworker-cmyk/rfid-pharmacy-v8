@@ -1,0 +1,6 @@
+V136 - Left menu for internal pages
+
+- Redesign the top menu into a left sidebar for all authenticated/internal pages.
+- Keep public Accueil and Connexion pages unchanged.
+- Reuse the Inventory page navigation style as the exact visual base for the internal sidebar.
+- Preserve all routes, API calls, permissions, imports, exports, caisse, inventory, dashboard and login logic.
