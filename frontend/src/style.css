@@ -3724,35 +3724,68 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
 }
 .cashAdminGrid{
   display:grid!important;
-  gap:0!important;
-  border:1px solid #dce4f1!important;
-  border-radius:8px!important;
-  overflow:hidden!important;
-  background:#fff!important;
+  gap:16px!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow:visible!important;
+  background:transparent!important;
 }
 .cashAdminGridTop{grid-template-columns:repeat(5,minmax(0,1fr))!important;}
 .cashAdminGridBottom{grid-template-columns:repeat(5,minmax(0,1fr))!important;}
+.cashAdminGridResults{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
 .cashAdminCard{
-  min-height:238px!important;
+  position:relative!important;
+  min-height:212px!important;
   background:#fff!important;
-  border-right:1px solid #dce4f1!important;
+  border:1px solid #e8edf6!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
   display:flex!important;
   flex-direction:column!important;
+  box-shadow:0 1px 2px rgba(16,24,40,.04), 0 10px 26px -18px rgba(16,24,40,.30)!important;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease!important;
 }
-.cashAdminGrid .cashAdminCard:last-child{border-right:0!important;}
+.cashAdminCard:hover{
+  transform:translateY(-3px)!important;
+  box-shadow:0 2px 4px rgba(16,24,40,.05), 0 18px 36px -20px rgba(16,24,40,.40)!important;
+  border-color:#dbe3f2!important;
+}
+.cashAdminCardAccent{
+  position:absolute!important;
+  inset:0 0 auto 0!important;
+  height:4px!important;
+  background:var(--cashTone,#3b82f6)!important;
+}
 .cashAdminCardHeader{
   min-height:52px!important;
-  padding:12px 18px!important;
-  border-bottom:1px solid #e9eef6!important;
+  padding:16px 18px 10px!important;
   display:flex!important;
   flex-direction:column!important;
-  gap:4px!important;
+  gap:6px!important;
 }
+.cashAdminCardTitleRow{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+.cashAdminCardIcon{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:30px!important;
+  height:30px!important;
+  border-radius:9px!important;
+  flex:0 0 auto!important;
+  background:var(--cashToneSoft,#eff4ff)!important;
+  color:var(--cashTone,#3b82f6)!important;
+}
+.cashAdminCardIcon svg{width:17px!important;height:17px!important;}
 .cashAdminCardHeader h3{
   margin:0!important;
-  font-size:17px!important;
+  font-size:15px!important;
   font-weight:700!important;
-  color:#111827!important;
+  letter-spacing:-.01em!important;
+  color:#0f172a!important;
 }
 .cashAdminCardMeta{
   min-height:18px!important;
@@ -3760,17 +3793,30 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   align-items:center!important;
   justify-content:space-between!important;
   gap:8px!important;
-  color:#7c879a!important;
+  color:#94a3b8!important;
   font-size:12px!important;
 }
-.cashAdminCardRight{font-weight:700!important;color:#7c879a!important;}
+.cashAdminCardRight{
+  font-weight:700!important;
+  color:var(--cashTone,#64748b)!important;
+  background:var(--cashToneSoft,#f1f5f9)!important;
+  border-radius:999px!important;
+  padding:2px 9px!important;
+  font-size:11px!important;
+}
 .cashAdminCardBody{
   flex:1!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
-  padding:18px!important;
+  padding:8px 18px 22px!important;
 }
+.cashAdminCard--brand{--cashTone:#2563eb;--cashToneSoft:#eaf1ff;}
+.cashAdminCard--rose{--cashTone:#e11d48;--cashToneSoft:#ffe9ee;}
+.cashAdminCard--emerald{--cashTone:#059669;--cashToneSoft:#e3f7ef;}
+.cashAdminCard--amber{--cashTone:#d97706;--cashToneSoft:#fdf0dc;}
+.cashAdminCard--indigo{--cashTone:#4f46e5;--cashToneSoft:#ecebff;}
+.cashAdminCard--neutral{--cashTone:#64748b;--cashToneSoft:#eef2f7;}
 .cashAdminMainValue,
 .cashAdminBigMetric{
   display:flex!important;
@@ -3781,19 +3827,20 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
 }
 .cashAdminMainValue small,
 .cashAdminBigMetric small{
-  font-size:18px!important;
+  font-size:15px!important;
   font-weight:800!important;
-  color:#111827!important;
-  padding-bottom:10px!important;
+  color:var(--cashTone,#64748b)!important;
+  opacity:.7!important;
+  padding-bottom:9px!important;
 }
 .cashAdminMainValue b,
 .cashAdminBigMetric b{
-  font-size:58px!important;
-  font-weight:700!important;
+  font-size:50px!important;
+  font-weight:780!important;
   letter-spacing:-.05em!important;
-  color:#000!important;
+  color:var(--cashTone,#0f172a)!important;
 }
-.cashAdminBigMetric b{font-size:56px!important;}
+.cashAdminBigMetric b{font-size:48px!important;}
 .cashAdminRingWrap{
   display:grid!important;
   justify-items:center!important;
@@ -3807,15 +3854,20 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
 .cashAdminRing svg{width:132px!important;height:132px!important;transform:rotate(-90deg)!important;}
 .cashAdminRing circle:first-child{
   fill:none!important;
-  stroke:#e5e7eb!important;
+  stroke:var(--cashToneSoft,#eef2f7)!important;
   stroke-width:10!important;
 }
 .cashAdminRing circle:last-child{
   fill:none!important;
-  stroke:#d1d5db!important;
+  stroke:var(--cashTone,#4f46e5)!important;
   stroke-width:10!important;
   stroke-linecap:round!important;
+  transition:stroke-dashoffset .5s ease!important;
 }
+.cashAdminRing--indigo{--cashTone:#4f46e5;--cashToneSoft:#ecebff;}
+.cashAdminRing--amber{--cashTone:#d97706;--cashToneSoft:#fdf0dc;}
+.cashAdminRing--brand{--cashTone:#2563eb;--cashToneSoft:#eaf1ff;}
+.cashAdminRing--emerald{--cashTone:#059669;--cashToneSoft:#e3f7ef;}
 .cashAdminRing div{
   position:absolute!important;
   inset:0!important;
@@ -3825,7 +3877,7 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   justify-content:center!important;
   color:#111827!important;
 }
-.cashAdminRing b{font-size:28px!important;font-weight:700!important;letter-spacing:-.03em!important;}
+.cashAdminRing b{font-size:28px!important;font-weight:700!important;letter-spacing:-.03em!important;color:var(--cashTone,#111827)!important;}
 .cashAdminRing small{font-size:14px!important;font-weight:700!important;color:#6b7280!important;}
 .cashAdminRingWrap strong{
   font-size:15px!important;
@@ -3862,15 +3914,11 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   padding-top:4px!important;
 }
 @media(max-width:1400px){
-  .cashAdminGridTop,.cashAdminGridBottom{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
-  .cashAdminGrid .cashAdminCard:nth-child(2n){border-right:0!important;}
-  .cashAdminGrid .cashAdminCard:nth-child(n+3){border-top:1px solid #dce4f1!important;}
+  .cashAdminGridTop,.cashAdminGridBottom,.cashAdminGridResults{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
 }
 @media(max-width:800px){
-  .cashAdminGridTop,.cashAdminGridBottom{grid-template-columns:1fr!important;}
-  .cashAdminGrid .cashAdminCard{border-right:0!important;border-top:1px solid #dce4f1!important;}
-  .cashAdminGrid .cashAdminCard:first-child{border-top:0!important;}
-  .cashAdminMainValue b,.cashAdminBigMetric b{font-size:46px!important;}
+  .cashAdminGridTop,.cashAdminGridBottom,.cashAdminGridResults{grid-template-columns:1fr!important;}
+  .cashAdminMainValue b,.cashAdminBigMetric b{font-size:44px!important;}
 }
 
 .cashSectionHeading{

@@ -1515,12 +1515,12 @@ function buildCashDayMetrics(date, dayData, store={}){
   };
 }
 
-function CashProgressRing({value,label,subLabel}){
+function CashProgressRing({value,label,subLabel,tone="brand"}){
   const safe = Math.max(0, Math.min(100, Number(value) || 0));
   const radius = 44;
   const circumference = 2 * Math.PI * radius;
   const dash = circumference - (safe / 100) * circumference;
-  return <div className="cashAdminRingWrap">
+  return <div className={`cashAdminRingWrap cashAdminRing--${tone}`}>
     <div className="cashAdminRing">
       <svg viewBox="0 0 120 120" aria-hidden="true">
         <circle cx="60" cy="60" r={radius}></circle>
@@ -1536,10 +1536,14 @@ function CashProgressRing({value,label,subLabel}){
   </div>;
 }
 
-function CashAdminCard({title, children, meta, right}){
-  return <article className="cashAdminCard">
+function CashAdminCard({title, children, meta, right, tone="neutral", icon}){
+  return <article className={`cashAdminCard cashAdminCard--${tone}`}>
+    <span className="cashAdminCardAccent" aria-hidden="true" />
     <div className="cashAdminCardHeader">
-      <h3>{title}</h3>
+      <div className="cashAdminCardTitleRow">
+        {icon ? <span className="cashAdminCardIcon" aria-hidden="true"><DashIcon name={icon}/></span> : null}
+        <h3>{title}</h3>
+      </div>
       <div className="cashAdminCardMeta">{meta}{right ? <span className="cashAdminCardRight">{right}</span> : null}</div>
     </div>
     <div className="cashAdminCardBody">{children}</div>
@@ -1810,66 +1814,66 @@ function CashDashboardAdmin(){
     </div>
 
     <div className="cashAdminGrid cashAdminGridTop">
-      <CashAdminCard title="Balance due progress" meta={<span>{monthMetrics.length} date(s) enregistrée(s)</span>}>
-        <CashProgressRing value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
+      <CashAdminCard tone="indigo" icon="refresh" title="Balance due progress" meta={<span>{monthMetrics.length} date(s) enregistrée(s)</span>}>
+        <CashProgressRing tone="indigo" value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
       </CashAdminCard>
 
-      <CashAdminCard title="Real time CR balance" meta={selectedDateMeta("Date temps réel enregistrée pour Real time CR balance")} right="SD">
+      <CashAdminCard tone="brand" icon="cash" title="Real time CR balance" meta={selectedDateMeta("Date temps réel enregistrée pour Real time CR balance")} right="SD">
         <div className="cashAdminBigMetric">
           <small>DH</small>
           <b>{((selectedMetrics.countedCents || 0) / 100).toFixed(1)}</b>
         </div>
       </CashAdminCard>
 
-      <CashAdminCard title="Tot. montant manquant" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>} right="📅">
+      <CashAdminCard tone="rose" icon="warning" title="Tot. montant manquant" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>}>
         <div className="cashAdminMainValue"><small>DH</small><b>{(monthlyShortageCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Tot. montant surplus" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>} right="📅">
+      <CashAdminCard tone="emerald" icon="check" title="Tot. montant surplus" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>}>
         <div className="cashAdminMainValue"><small>DH</small><b>{(monthlySurplusCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Tot. dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
-        <CashProgressRing value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Aucune vente"} />
+      <CashAdminCard tone="amber" icon="chart" title="Tot. dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
+        <CashProgressRing tone="amber" value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Aucune vente"} />
       </CashAdminCard>
     </div>
 
     <div className="cashAdminGrid cashAdminGridBottom">
-      <CashAdminCard title="Balance due" meta={selectedDateMeta("Date enregistrée pour Balance due")} right="SD">
+      <CashAdminCard tone="indigo" icon="clock" title="Balance due" meta={selectedDateMeta("Date enregistrée pour Balance due")} right="SD">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.dueBalanceCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Montant manquant" meta={selectedDateMeta("Date enregistrée pour Montant manquant")} right="SD">
+      <CashAdminCard tone="rose" icon="warning" title="Montant manquant" meta={selectedDateMeta("Date enregistrée pour Montant manquant")} right="SD">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.shortageCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Montant surplus" meta={selectedDateMeta("Date enregistrée pour Montant surplus")} right="SD">
+      <CashAdminCard tone="emerald" icon="check" title="Montant surplus" meta={selectedDateMeta("Date enregistrée pour Montant surplus")} right="SD">
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Retiré" meta={selectedDateMeta("Date enregistrée pour Retiré")}>
+      <CashAdminCard tone="brand" icon="download" title="Retiré" meta={selectedDateMeta("Date enregistrée pour Retiré")}>
         <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.withdrawnCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
+      <CashAdminCard tone="amber" icon="chart" title="Dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
         <div className="cashAdminMainValue"><small>DH</small><b>{Math.round(monthlyExpensesCents/100)}</b></div>
       </CashAdminCard>
     </div>
 
     <div className="cashAdminGrid cashAdminGridResults">
-      <CashAdminCard title="Tot. vente" meta={resultDateMeta("totalSales")} right="=">
+      <CashAdminCard tone="brand" icon="cash" title="Tot. vente" meta={resultDateMeta("totalSales")} right="=">
         <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.totalSales.totalSalesCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="C. fermeture (théorique)" meta={resultDateMeta("closingCalculated")} right="=">
+      <CashAdminCard tone="neutral" icon="doc" title="C. fermeture (théorique)" meta={resultDateMeta("closingCalculated")} right="=">
         <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingCalculated.closingCalculatedCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Nouvelle C. fermeture" meta={resultDateMeta("closingReal")} right="=">
+      <CashAdminCard tone="indigo" icon="save" title="Nouvelle C. fermeture" meta={resultDateMeta("closingReal")} right="=">
         <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingReal.closingRealCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
 
-      <CashAdminCard title="Écart cash comptée vs calculée" meta={resultDateMeta("gap")} right="Δ">
+      <CashAdminCard tone={resultMetrics.gap.gapCents>=0 ? "emerald" : "rose"} icon={resultMetrics.gap.gapCents>=0 ? "check" : "warning"} title="Écart cash comptée vs calculée" meta={resultDateMeta("gap")} right="Δ">
         <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.gap.gapCents/100).toFixed(1)}</b></div>
       </CashAdminCard>
     </div>
