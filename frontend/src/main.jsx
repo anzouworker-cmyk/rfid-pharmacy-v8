@@ -6,7 +6,8 @@ import Papa from "papaparse";
 import "./style.css";
 import ShuffleOperationsPage from "./ShuffleOperationsPage.jsx";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL || "https://rfid-pharmacy-v8-gh.onrender.com";
+const API = API_URL;
 function mediaUrl(url){
   const u = String(url || "").trim();
   if(!u) return "";
