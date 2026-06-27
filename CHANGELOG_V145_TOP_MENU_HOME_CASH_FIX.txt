@@ -1,0 +1,7 @@
+V145 - Correction navigation/top menu + accueil V142 + dashboard caisse
+
+- Correction runtime du Dashboard Caisse : import de useCallback ajouté pour éviter le crash de CashDashboardAdmin.
+- Suppression du menu vertical gauche dans le shell interne.
+- Conservation d'une seule barre de menu en haut de page avec toutes les pages disponibles.
+- Suppression du titre global ajouté par le shell pour éviter les doubles titres dans les pages.
+- Restauration de la page d'accueil depuis la référence V142 : bloc HTML/CSS Shuffle exact restauré.
