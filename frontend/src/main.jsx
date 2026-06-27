@@ -1669,7 +1669,7 @@ function ShuffleExactHomepage({goLogin}){
         :host{display:block;min-height:100vh;background:#fafbfe;color:#0f172a;}
         .shuffle-home-root{min-height:100vh;background:#fafbfe;color:#0f172a;}
       </style>
-      <style>${SHUFFLE_HOME_CSS}</style>
+      <style>${SHUFFLE_LOGIN_SOURCE_CSS}</style>
       <style>
         .shuffleHeroStockHighlight{color:#4f46e5!important;-webkit-text-fill-color:#4f46e5!important;background:none!important;}
       </style>

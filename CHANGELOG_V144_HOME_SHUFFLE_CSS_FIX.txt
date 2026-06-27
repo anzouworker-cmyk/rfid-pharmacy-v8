@@ -1,0 +1,6 @@
+V144_HOME_SHUFFLE_CSS_FIX
+
+- Correction de l'erreur frontend qui bloquait l'ouverture de la première page : SHUFFLE_HOME_CSS non défini.
+- La page d'accueil Shuffle réutilise maintenant le CSS Shuffle disponible pour éviter le crash au chargement.
+- Ajustement des scripts npm pour appeler Vite directement via node_modules/vite/bin/vite.js, afin d'éviter un problème de .bin/vite cassé dans certains zips.
+- Build frontend validé avec npm run build.
