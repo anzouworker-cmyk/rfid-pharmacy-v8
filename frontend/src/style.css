@@ -9317,3 +9317,53 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   .dashRefTopbar{height:auto!important;min-height:64px!important;flex-wrap:wrap!important;padding:12px 18px!important;}
   .dashRefTopNavOnly{order:3;width:100%!important;justify-content:flex-start!important;overflow-x:auto!important;}
 }
+
+/* V143 - global Shuffle chrome + cash dashboard */
+.dashRefShellV2 .dashRefMain{background:#f8fafc!important;}
+.dashRefGlobalHeader{position:sticky!important;top:0!important;z-index:40!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:18px!important;padding:18px 28px!important;background:rgba(255,255,255,.9)!important;border-bottom:1px solid #e2e8f0!important;backdrop-filter:blur(14px)!important;}
+.dashRefHeaderBrand{display:flex!important;align-items:center!important;gap:12px!important;background:transparent!important;border:0!important;padding:0!important;color:#0f172a!important;box-shadow:none!important;cursor:pointer!important;white-space:nowrap!important;}
+.dashRefHeaderBrand b{font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif!important;font-size:20px!important;font-weight:800!important;letter-spacing:-.03em!important;}
+.dashRefHeaderNav{display:flex!important;align-items:center!important;gap:8px!important;flex:1!important;min-width:0!important;justify-content:center!important;overflow:auto!important;padding:0 6px!important;}
+.dashRefHeaderNav button{display:inline-flex!important;align-items:center!important;gap:8px!important;border:0!important;background:transparent!important;border-radius:12px!important;padding:10px 12px!important;color:#64748b!important;font-size:13px!important;font-weight:700!important;white-space:nowrap!important;cursor:pointer!important;box-shadow:none!important;}
+.dashRefHeaderNav button .invSvg{width:16px!important;height:16px!important;}
+.dashRefHeaderNav button em{margin-left:2px!important;background:#eef2ff!important;color:#4f46e5!important;border-radius:999px!important;padding:2px 6px!important;font-size:10px!important;font-style:normal!important;font-weight:800!important;}
+.dashRefHeaderNav button:hover{background:#f8fafc!important;color:#334155!important;}
+.dashRefHeaderNav button.active{background:#4f46e5!important;color:#fff!important;box-shadow:0 10px 20px rgba(79,70,229,.18)!important;}
+.dashRefHeaderNav button.active .invSvg{color:#fff!important;}
+.dashRefHeaderAccount{display:flex!important;align-items:center!important;gap:12px!important;white-space:nowrap!important;}
+.dashRefHeaderBadge{display:inline-flex!important;align-items:center!important;justify-content:center!important;height:28px!important;padding:0 10px!important;border-radius:999px!important;background:#eef2ff!important;color:#4f46e5!important;font-size:11px!important;font-weight:800!important;letter-spacing:.06em!important;}
+.dashRefHeaderUserText b{display:block!important;color:#0f172a!important;font-size:13px!important;line-height:16px!important;max-width:180px!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+.dashRefHeaderUserText small{display:block!important;color:#94a3b8!important;font-size:12px!important;line-height:15px!important;max-width:180px!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+.dashRefPageHeading{padding:20px 32px 0!important;}
+.dashRefPageHeading h1{margin:0!important;font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif!important;font-size:28px!important;line-height:1.1!important;font-weight:800!important;color:#0f172a!important;letter-spacing:-.04em!important;}
+.dashRefShellV2 .dashRefContent{padding-top:20px!important;}
+.dashRefCashDashboard{max-width:1280px!important;margin:0 auto!important;width:100%!important;}
+.dashRefCashHero{align-items:center!important;}
+.dashRefCashHeroActions{justify-content:flex-end!important;align-items:center!important;}
+.dashRefCashHeaderDate{display:flex!important;flex-direction:column!important;gap:10px!important;padding:18px!important;border-radius:18px!important;background:#f8fafc!important;border:1px solid #e2e8f0!important;min-width:280px!important;}
+.dashRefCashHeaderDate span{color:#64748b!important;font-size:12px!important;font-weight:700!important;}
+.dashRefCashKpiGrid .dashRefKpi strong{font-size:28px!important;line-height:1.1!important;}
+.dashRefCashBottomGrid .dashRefReportGrid button{min-height:160px!important;}
+.dashRefCashCardValue{display:block!important;margin-top:10px!important;font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif!important;font-size:28px!important;line-height:1.1!important;font-weight:800!important;color:#0f172a!important;letter-spacing:-.03em!important;}
+.dashRefCashSummaryCard p{white-space:normal!important;}
+.dashRefCashSummaryCard .dashRefPartnerLine b{color:#fff!important;}
+.dashRefAlertsCard .cashAdminInlineDate{margin-top:8px!important;}
+.dashRefAlertsCard .cashAdminDatePicker{background:transparent!important;padding:0!important;border:0!important;box-shadow:none!important;}
+.dashRefAlertsCard .cashAdminDatePickerDisplay{background:#f8fafc!important;}
+@media (max-width: 1200px){
+  .dashRefGlobalHeader{flex-wrap:wrap!important;padding:16px 20px!important;}
+  .dashRefHeaderNav{order:3!important;width:100%!important;justify-content:flex-start!important;}
+  .dashRefPageHeading{padding:18px 20px 0!important;}
+}
+@media (max-width: 900px){
+  .dashRefCashHeaderDate{min-width:0!important;width:100%!important;}
+}
+@media (max-width: 768px){
+  .dashRefSidebar{display:none!important;}
+  .dashRefGlobalHeader{padding:14px 16px!important;}
+  .dashRefHeaderBrand b{font-size:18px!important;}
+  .dashRefHeaderAccount{width:100%!important;justify-content:flex-end!important;}
+  .dashRefPageHeading{padding:16px 16px 0!important;}
+  .dashRefShellV2 .dashRefContent{padding:16px!important;}
+  .dashRefCashHero{display:block!important;}
+}

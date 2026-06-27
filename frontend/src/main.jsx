@@ -449,14 +449,14 @@ function inventoryChromeIcon(pageId){
 
 function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
   const initials = String(me?.username || me?.pharmacy_name || "AD").trim().slice(0,2).toUpperCase() || "AD";
-  const accountName = me?.pharmacy_name || me?.username || "Admin";
-  const roleName = me?.role==="platform_admin" ? "admin@smartinv.com" : "officine@smartinv.com";
+  const accountName = me?.pharmacy_name || "Smart Inventory";
+  const roleName = me?.username || (me?.role==="platform_admin" ? "admin@smartinv.com" : "officine@smartinv.com");
   const nav = Array.isArray(menu) && menu.length ? menu : APP_USER_PAGES;
   const titleByPage={
     dashboard:"Dashboard",
     operations:"Opérations",
     association:"Associations",
-    inventory:"Inventaires",
+    inventory:"Inventaire",
     cash:"Caisses",
     ai:"Assistant IA",
     users:"Utilisateurs",
@@ -464,28 +464,24 @@ function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
     platform:"Clients SaaS",
     dashboardAdmin:"Publicités"
   };
+  const sidebarItems = nav.map(item=>({
+    ...item,
+    label: item.id==="inventory" ? "Inventaires" : item.id==="cash" ? "Caisses" : item.id==="cashAdmin" ? "Dashboard Caisse" : item.label,
+    icon: inventoryChromeIcon(item.id)
+  }));
+  const topItems = nav.filter(item=>item.id!=="platform" && item.id!=="dashboardAdmin").map(item=>({
+    ...item,
+    label: item.id==="inventory" ? "Inventaire" : item.id==="cash" ? "Caisses" : item.id==="cashAdmin" ? "Dashboard Caisse" : item.label,
+    icon: inventoryChromeIcon(item.id)
+  }));
   const pageTitle = titleByPage[tab] || "Dashboard";
-  const sidebarItems = nav
-    .filter(item=>item.id!=="dashboard" && item.id!=="cashAdmin")
-    .map(item=>({
-      ...item,
-      label: item.id==="inventory" ? "Inventaires" : item.id==="cash" ? "Caisses" : item.label,
-      icon: inventoryChromeIcon(item.id)
-    }));
-  const topItems = nav
-    .filter(item=>item.id==="dashboard" || item.id==="cashAdmin")
-    .map(item=>({
-      ...item,
-      label: item.id==="cashAdmin" ? "Dashboard Caisse" : item.label,
-      icon: inventoryChromeIcon(item.id)
-    }));
-  return <div className="dashRefShell">
+  return <div className="dashRefShell dashRefShellV2">
     <aside className="dashRefSidebar">
       <button type="button" className="dashRefBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory Dashboard">
         <span className="dashRefBrandIcon"><InvIcon name="cube"/></span>
         <b>Smart Inventory</b>
       </button>
-      <nav className="dashRefSideNav" aria-label="Navigation principale">
+      <nav className="dashRefSideNav" aria-label="Navigation latérale">
         {sidebarItems.map(item=><button type="button" key={item.id} className={item.id===tab ? "active" : ""} onClick={()=>setTab(item.id)}>
           <InvIcon name={item.icon}/>
           <span>{item.label}</span>
@@ -498,30 +494,33 @@ function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
       </div>
     </aside>
     <main className="dashRefMain">
-      <header className="dashRefTopbar">
-        <div className="dashRefBreadcrumb">
-          <button type="button" className="dashRefMobileToggle" aria-label="Menu"><InvIcon name="menu"/></button>
-          <span className="dashRefPageLabel"><InvIcon name={inventoryChromeIcon(tab)}/>{pageTitle}</span>
-        </div>
-        <nav className="dashRefTopNavOnly" aria-label="Navigation dashboard">
+      <header className="dashRefGlobalHeader">
+        <button type="button" className="dashRefHeaderBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory Dashboard">
+          <span className="dashRefBrandIcon"><InvIcon name="cube"/></span>
+          <b>Smart Inventory</b>
+        </button>
+        <nav className="dashRefHeaderNav" aria-label="Navigation principale">
           {topItems.map(item=><button key={item.id} type="button" className={tab===item.id ? "active" : ""} onClick={()=>setTab(item.id)}>
-            <InvIcon name={item.icon}/><span>{item.label}</span>
+            <InvIcon name={item.icon}/><span>{item.label}</span>{item.id==="ai" && <em>NEW</em>}
           </button>)}
         </nav>
-        <div className="dashRefTopActions">
-          <button type="button" className="dashRefBell" aria-label="Notifications"><InvIcon name="warning"/><i></i></button>
+        <div className="dashRefHeaderAccount">
+          <span className="dashRefHeaderBadge">PRO TRIAL</span>
+          <div className="dashRefHeaderUserText"><b>{accountName}</b><small>{roleName}</small></div>
           <span className="dashRefAvatar">{initials}</span>
         </div>
       </header>
+      <div className="dashRefPageHeading"><h1>{pageTitle}</h1></div>
       <div className="dashRefContent">{children}</div>
       <footer className="dashRefFooter">
         <div><span className="dashRefFooterLogo"><InvIcon name="cube"/></span><b>Smart Inventory</b></div>
         <p>© 2026 Smart Inventory. Tous droits réservés.</p>
-        <div><button type="button">Légal</button><button type="button">FAQ</button><button type="button" onClick={logout}>Logout</button></div>
+        <div><button type="button">Aide</button><button type="button">Conditions</button><button type="button">Confidentialité</button><button type="button" onClick={logout}>Logout</button></div>
       </footer>
     </main>
   </div>;
 }
+
 
 
 function Operations({me,setTab,logout,hideChrome=false}){
@@ -1552,334 +1551,111 @@ function CashDashboardAdmin(){
   const dashboardToday = todayISO();
   const allDates = useMemo(()=>Object.keys(store).sort(),[store]);
   const dashboardDates = useMemo(()=>allDates.filter(date=>hasCashDayActivity(store[date])),[allDates,store]);
-  const dashboardMonths = useMemo(()=>Array.from(new Set(dashboardDates.map(date=>date.slice(0,7)))).sort(),[dashboardDates]);
   const latestDate = dashboardDates.length ? dashboardDates[dashboardDates.length-1] : dashboardToday;
   const earliestDate = dashboardDates.length ? dashboardDates[0] : dashboardToday;
   const [selectedDate,setSelectedDate] = useState(latestDate);
   const selectedMonth = selectedDate.slice(0,7);
-  const [resultsDates,setResultsDates] = useState(()=>({
-    totalSales: latestDate,
-    closingCalculated: latestDate,
-    closingReal: latestDate,
-    gap: latestDate
-  }));
+  const [resultsDates,setResultsDates] = useState(()=>({ totalSales: latestDate, closingCalculated: latestDate, closingReal: latestDate, gap: latestDate }));
 
-  function syncAllResultDates(date){
-    setResultsDates({
-      totalSales: date,
-      closingCalculated: date,
-      closingReal: date,
-      gap: date
-    });
-  }
+  function syncAllResultDates(date){ setResultsDates({ totalSales: date, closingCalculated: date, closingReal: date, gap: date }); }
+  const closestRegisteredDate = useCallback((value)=>{
+    if(!dashboardDates.length) return dashboardToday;
+    if(dashboardDates.includes(value)) return value;
+    const sameOrAfter = dashboardDates.find(date=>date >= value);
+    return sameOrAfter || dashboardDates[dashboardDates.length - 1];
+  },[dashboardDates,dashboardToday]);
 
-  useEffect(()=>{
-    if(!selectedDate){
-      setSelectedDate(latestDate);
-      syncAllResultDates(latestDate);
-    }
-  },[selectedDate, latestDate]);
-
-  useEffect(()=>{
-    if(!selectedDate) return;
-    syncAllResultDates(selectedDate);
-  },[selectedDate]);
-
-  useEffect(()=>{
-    setResultsDates(prev=>({
-      totalSales: prev.totalSales && dashboardDates.includes(prev.totalSales) ? prev.totalSales : latestDate,
-      closingCalculated: prev.closingCalculated && dashboardDates.includes(prev.closingCalculated) ? prev.closingCalculated : latestDate,
-      closingReal: prev.closingReal && dashboardDates.includes(prev.closingReal) ? prev.closingReal : latestDate,
-      gap: prev.gap && dashboardDates.includes(prev.gap) ? prev.gap : latestDate
-    }));
-  },[latestDate, store, dashboardDates]);
-
-  const selectedMetrics = useMemo(()=>buildCashDayMetrics(selectedDate, store[selectedDate], store),[selectedDate,store]);
+  const monthlyMetrics = useMemo(()=>dashboardDates.filter(date=>date.startsWith(selectedMonth)).map(date=>computeCashDayMetrics(store,date,reserveCents)),[dashboardDates,selectedMonth,store,reserveCents]);
+  const selectedMetrics = useMemo(()=>computeCashDayMetrics(store,closestRegisteredDate(selectedDate),reserveCents),[store,selectedDate,closestRegisteredDate,reserveCents]);
   const resultMetrics = useMemo(()=>({
-    totalSales: buildCashDayMetrics(resultsDates.totalSales, store[resultsDates.totalSales], store),
-    closingCalculated: buildCashDayMetrics(resultsDates.closingCalculated, store[resultsDates.closingCalculated], store),
-    closingReal: buildCashDayMetrics(resultsDates.closingReal, store[resultsDates.closingReal], store),
-    gap: buildCashDayMetrics(resultsDates.gap, store[resultsDates.gap], store)
-  }),[resultsDates, store]);
-  const monthMetrics = useMemo(()=>Object.entries(store)
-    .filter(([date,day])=>date.startsWith(selectedMonth) && hasCashDayActivity(day))
-    .map(([date,day])=>buildCashDayMetrics(date, day, store))
-    .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth]);
-
-  const monthlyShortageCents = monthMetrics.reduce((sum,x)=>sum + x.shortageCents,0);
-  const monthlySurplusCents = monthMetrics.reduce((sum,x)=>sum + x.surplusCents,0);
-  const monthlyExpensesCents = monthMetrics.reduce((sum,x)=>sum + x.expensesCents,0);
-  const monthlyWithdrawnCents = monthMetrics.reduce((sum,x)=>sum + x.withdrawnCents,0);
-  const monthlyDueBalanceCents = monthMetrics.reduce((sum,x)=>sum + x.dueBalanceCents,0);
-  const monthBalancedDays = monthMetrics.filter(x=>x.isBalanced).length;
-  const progressValue = monthMetrics.length ? (monthBalancedDays / monthMetrics.length) * 100 : 0;
-  const monthSalesCents = monthMetrics.reduce((sum,x)=>sum + x.totalSalesCents,0);
-  const expensesProgress = monthSalesCents>0 ? Math.min(100, (monthlyExpensesCents / monthSalesCents) * 100) : 0;
-
-  function closestRegisteredDate(date){
-    if(!dashboardDates.length) return date || dashboardToday;
-    if(dashboardDates.includes(date)) return date;
-    if(!date) return latestDate;
-    const target = new Date(`${date}T00:00:00`).getTime();
-    if(Number.isNaN(target)) return latestDate;
-    return dashboardDates.reduce((best,current)=>{
-      const bestDiff = Math.abs(new Date(`${best}T00:00:00`).getTime() - target);
-      const currentDiff = Math.abs(new Date(`${current}T00:00:00`).getTime() - target);
-      return currentDiff < bestDiff ? current : best;
-    }, dashboardDates[0]);
-  }
+    totalSales: computeCashDayMetrics(store,closestRegisteredDate(resultsDates.totalSales),reserveCents),
+    closingCalculated: computeCashDayMetrics(store,closestRegisteredDate(resultsDates.closingCalculated),reserveCents),
+    closingReal: computeCashDayMetrics(store,closestRegisteredDate(resultsDates.closingReal),reserveCents),
+    gap: computeCashDayMetrics(store,closestRegisteredDate(resultsDates.gap),reserveCents)
+  }),[store,resultsDates,closestRegisteredDate,reserveCents]);
+  const monthBalancedDays = monthlyMetrics.filter(metric=>metric.isBalanced).length;
+  const progressValue = monthlyMetrics.length ? (monthBalancedDays / monthlyMetrics.length) * 100 : 0;
+  const monthlyShortageCents = monthlyMetrics.reduce((sum,metric)=>sum + metric.shortageCents,0);
+  const monthlySurplusCents = monthlyMetrics.reduce((sum,metric)=>sum + metric.surplusCents,0);
+  const monthlyExpensesCents = monthlyMetrics.reduce((sum,metric)=>sum + metric.expensesCents,0);
 
   function shiftDateValue(date, delta){
     if(!dashboardDates.length) return date || dashboardToday;
     const current = date || latestDate;
     const exactIndex = dashboardDates.indexOf(current);
     let nextIndex = exactIndex;
-    if(exactIndex >= 0){
-      nextIndex = exactIndex + delta;
-    }else if(delta > 0){
-      const afterIndex = dashboardDates.findIndex(d=>d > current);
-      nextIndex = afterIndex >= 0 ? afterIndex : dashboardDates.length - 1;
-    }else{
-      nextIndex = dashboardDates.map((d,i)=>d < current ? i : -1).filter(i=>i>=0).pop();
-      if(nextIndex === undefined) nextIndex = 0;
-    }
+    if(exactIndex >= 0) nextIndex = exactIndex + delta;
+    else if(delta > 0){ const afterIndex = dashboardDates.findIndex(d=>d > current); nextIndex = afterIndex >= 0 ? afterIndex : dashboardDates.length - 1; }
+    else { nextIndex = dashboardDates.map((d,i)=>d < current ? i : -1).filter(i=>i>=0).pop(); if(nextIndex === undefined) nextIndex = 0; }
     nextIndex = Math.max(0, Math.min(dashboardDates.length - 1, nextIndex));
     return dashboardDates[nextIndex];
   }
-
-  function selectMainDate(date){
-    const nextDate = closestRegisteredDate(date);
-    setSelectedDate(nextDate);
-    syncAllResultDates(nextDate);
-  }
-
-  function shiftSelectedDate(delta){
-    const nextDate = shiftDateValue(selectedDate, delta);
-    setSelectedDate(nextDate);
-    syncAllResultDates(nextDate);
-  }
-
-  function updateResultDate(key,value){
-    const nextDate = closestRegisteredDate(value || latestDate);
-    setResultsDates(prev=>({...prev,[key]: nextDate}));
-  }
-
-  function shiftResultDate(key,delta){
-    const nextDate = shiftDateValue(resultsDates[key] || latestDate, delta);
-    setResultsDates(prev=>({...prev,[key]: nextDate}));
-  }
+  function selectMainDate(date){ const nextDate = closestRegisteredDate(date); setSelectedDate(nextDate); syncAllResultDates(nextDate); }
+  function shiftSelectedDate(delta){ const nextDate = shiftDateValue(selectedDate, delta); setSelectedDate(nextDate); syncAllResultDates(nextDate); }
+  function updateResultDate(key,value){ const nextDate = closestRegisteredDate(value || latestDate); setResultsDates(prev=>({...prev,[key]: nextDate})); }
+  function shiftResultDate(key,delta){ const nextDate = shiftDateValue(resultsDates[key] || latestDate, delta); setResultsDates(prev=>({...prev,[key]: nextDate})); }
 
   function DateOperationPicker({value,onChange,onShift,compact=false,ariaLabel="Date enregistrée"}){
     const activeDate = closestRegisteredDate(value || latestDate);
     const prevDisabled = !dashboardDates.length || activeDate <= earliestDate;
     const nextDisabled = !dashboardDates.length || activeDate >= latestDate;
-    const [isOpen,setIsOpen] = useState(false);
-    const [viewMonth,setViewMonth] = useState(()=>activeDate.slice(0,7));
-    const pickerRef = useRef(null);
-    const monthChoices = dashboardMonths.length ? dashboardMonths : [activeDate.slice(0,7)];
-    const viewMonthIndex = Math.max(0, monthChoices.indexOf(viewMonth));
-    const canPrevMonth = viewMonthIndex > 0;
-    const canNextMonth = viewMonthIndex < monthChoices.length - 1;
-    const activeMonth = activeDate.slice(0,7);
-    const availableDatesInView = dashboardDates.filter(date=>date.startsWith(viewMonth));
-    const availableDatesSet = new Set(availableDatesInView);
-
-    useEffect(()=>{
-      setViewMonth(activeMonth);
-    },[activeMonth]);
-
-    useEffect(()=>{
-      function handleOutsideClick(event){
-        if(pickerRef.current && !pickerRef.current.contains(event.target)) setIsOpen(false);
-      }
-      function handleEscape(event){
-        if(event.key === "Escape") setIsOpen(false);
-      }
-      document.addEventListener("mousedown", handleOutsideClick);
-      document.addEventListener("keydown", handleEscape);
-      return ()=>{
-        document.removeEventListener("mousedown", handleOutsideClick);
-        document.removeEventListener("keydown", handleEscape);
-      };
-    },[]);
-
-    function openPicker(){
-      setViewMonth(activeMonth);
-      setIsOpen(true);
-    }
-
-    function changeMonth(delta){
-      const nextIndex = Math.max(0, Math.min(monthChoices.length - 1, viewMonthIndex + delta));
-      setViewMonth(monthChoices[nextIndex]);
-    }
-
-    function buildCalendarCells(){
-      const [year, month] = viewMonth.split("-").map(Number);
-      const firstDay = new Date(year, month - 1, 1).getDay();
-      const daysInMonth = new Date(year, month, 0).getDate();
-      const cells = [];
-      for(let i=0;i<firstDay;i++) cells.push({type:"blank", key:`blank-${i}`});
-      for(let day=1; day<=daysInMonth; day++){
-        const isoDate = `${viewMonth}-${String(day).padStart(2,"0")}`;
-        cells.push({
-          type: availableDatesSet.has(isoDate) ? "date" : "empty",
-          key: isoDate,
-          day,
-          isoDate,
-          active: isoDate === activeDate
-        });
-      }
-      while(cells.length % 7 !== 0) cells.push({type:"blank", key:`tail-${cells.length}`});
-      return cells;
-    }
-
-    const calendarCells = buildCalendarCells();
-
-    return <div className={compact ? "cashAdminDatePicker cashAdminDatePickerCompact" : "cashAdminDatePicker"} ref={pickerRef}>
+    return <div className={compact ? "cashAdminDatePicker cashAdminDatePickerCompact" : "cashAdminDatePicker"}>
       <button type="button" onClick={()=>onShift ? onShift(-1) : onChange(shiftDateValue(activeDate,-1))} disabled={prevDisabled} aria-label="Date enregistrée précédente">‹</button>
-      <button
-        type="button"
-        className="cashAdminDatePickerDisplay"
-        onClick={()=>isOpen ? setIsOpen(false) : openPicker()}
-        disabled={!dashboardDates.length}
-        aria-label={ariaLabel}
-        aria-haspopup="dialog"
-        aria-expanded={isOpen}
-        title="Cliquer pour ouvrir le calendrier des dates enregistrées."
-      >
-        <span>{activeDate}</span>
-        <span className="cashAdminDatePickerIcon">📅</span>
-      </button>
+      <button type="button" className="cashAdminDatePickerDisplay" onClick={()=>onChange(activeDate)} disabled={!dashboardDates.length} aria-label={ariaLabel}><span>{activeDate}</span><span className="cashAdminDatePickerIcon">📅</span></button>
       <button type="button" onClick={()=>onShift ? onShift(1) : onChange(shiftDateValue(activeDate,1))} disabled={nextDisabled} aria-label="Date enregistrée suivante">›</button>
-      {isOpen && <div className="cashAdminCalendarPopover" role="dialog" aria-label="Calendrier des dates enregistrées">
-        <div className="cashAdminCalendarHeader">
-          <button type="button" onClick={()=>changeMonth(-1)} disabled={!canPrevMonth} aria-label="Mois précédent">‹</button>
-          <strong>{formatMonthLabel(viewMonth)}</strong>
-          <button type="button" onClick={()=>changeMonth(1)} disabled={!canNextMonth} aria-label="Mois suivant">›</button>
-        </div>
-        <div className="cashAdminCalendarWeekdays">
-          {["Su","Mo","Tu","We","Th","Fr","Sa"].map(day=><span key={day}>{day}</span>)}
-        </div>
-        <div className="cashAdminCalendarGrid">
-          {calendarCells.map(cell=>{
-            if(cell.type === "blank") return <span key={cell.key} className="cashAdminCalendarBlank" />;
-            if(cell.type === "empty") return <span key={cell.key} className="cashAdminCalendarEmpty" aria-hidden="true" />;
-            return <button
-              type="button"
-              key={cell.key}
-              className={cell.active ? "cashAdminCalendarDay isActive" : "cashAdminCalendarDay"}
-              onClick={()=>{
-                onChange(cell.isoDate);
-                setIsOpen(false);
-              }}
-            >
-              {cell.day}
-            </button>;
-          })}
-        </div>
-        <div className="cashAdminCalendarHint">Seules les dates avec opérations enregistrées sont affichées.</div>
-      </div>}
     </div>;
   }
+  function resultDateMeta(key){ return <div className="cashAdminInlineDate"><DateOperationPicker compact value={resultsDates[key]} onChange={date=>updateResultDate(key,date)} onShift={delta=>shiftResultDate(key,delta)} ariaLabel={`Date enregistrée pour ${key}`} /></div>; }
 
-  function resultDateMeta(key){
-    return <div className="cashAdminInlineDate">
-      <DateOperationPicker compact value={resultsDates[key]} onChange={date=>updateResultDate(key,date)} onShift={delta=>shiftResultDate(key,delta)} ariaLabel={`Date enregistrée pour ${key}`} />
-    </div>;
-  }
-
-  function selectedDateMeta(label){
-    return <div className="cashAdminInlineDate">
-      <DateOperationPicker compact value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel={label} />
-    </div>;
-  }
-
-  return <section className="cashAdminDashboardPage">
-    <div className="cashAdminDashboardHeader">
+  return <section className="dashRefDashboard dashRefCashDashboard">
+    <div className="dashRefHeroBlock dashRefCashHero">
       <div>
-        <h1>Cash register dashboard</h1>
-        <p>Vue admin pour consulter les dates enregistrées où des opérations de caisse existent, avec calendrier et flèches de navigation.</p>
+        <div className="dashRefStatusLine"><span className="dark">app.smartinventory.io/caisse</span><span>Mode stable</span><span className="success">Synchronisation active</span></div>
+        <h1>Dashboard caisse</h1>
+        <h2>Suivi financier en temps réel.</h2>
+        <p>Consultez les dates enregistrées, les soldes, les écarts et les performances de caisse avec le même langage visuel Shuffle que le reste de l'application.</p>
       </div>
-      <div className="cashAdminToolbar cashAdminToolbarSingle">
-        <label className="cashAdminPrimaryDateControl">
-          <span>Date temps réel</span>
-          <DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date temps réel enregistrée" />
-        </label>
-      </div>
+      <div className="dashRefHeroActions dashRefCashHeroActions"><div className="dashRefCashHeaderDate"><span>Date enregistrée</span><DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date enregistrée principale" /></div></div>
     </div>
 
-    <div className="cashAdminGrid cashAdminGridTop">
-      <CashAdminCard title="Balance due progress" meta={<span>{monthMetrics.length} date(s) enregistrée(s)</span>}>
-        <CashProgressRing value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
-      </CashAdminCard>
+    <div className="dashRefKpiGrid dashRefCashKpiGrid">
+      <article className="dashRefKpi"><div><span className="dashRefIcon blue"><InvIcon name="cash"/></span><em>Équilibre</em></div><strong>{monthlyMetrics.length}</strong><b>Date(s) enregistrée(s)</b><small>{monthBalancedDays} jour(s) équilibré(s)</small></article>
+      <article className="dashRefKpi"><div><span className="dashRefIcon emerald"><InvIcon name="cash"/></span><em>Réel</em></div><strong>{formatDH(selectedMetrics.countedCents)}</strong><b>Solde réel du jour</b><small>{closestRegisteredDate(selectedDate)}</small></article>
+      <article className="dashRefKpi"><div><span className="dashRefIcon amber"><InvIcon name="warning"/></span><em>Manquant</em></div><strong>{formatDH(monthlyShortageCents)}</strong><b>Montant manquant total</b><small>{formatMonthLabel(selectedMonth)}</small></article>
+      <article className="dashRefKpi"><div><span className="dashRefIcon violet"><InvIcon name="list"/></span><em>Surplus</em></div><strong>{formatDH(monthlySurplusCents)}</strong><b>Montant surplus total</b><small>{formatMonthLabel(selectedMonth)}</small></article>
+    </div>
 
-      <CashAdminCard title="Real time CR balance" meta={selectedDateMeta("Date temps réel enregistrée pour Real time CR balance")} right="SD">
-        <div className="cashAdminBigMetric">
-          <small>DH</small>
-          <b>{((selectedMetrics.countedCents || 0) / 100).toFixed(1)}</b>
+    <div className="dashRefTwoColumns dashRefCashTwoColumns">
+      <section className="dashRefCoverageCard">
+        <div className="dashRefSectionHead"><div><b>Taux d'équilibre</b><span>Mesure la part des journées sans écart.</span></div><em>{Math.round(progressValue)}%</em></div>
+        <div className="dashRefCoverageBody"><div className="dashRefCircle"><span>{Math.round(progressValue)}%</span></div><div><h3>{monthBalancedDays===monthlyMetrics.length && monthlyMetrics.length ? "Toutes les journées sont équilibrées." : "Votre suivi de caisse peut être amélioré."}</h3><p>Suivez les soldes réels, les retraits, les dépenses et les différences entre caisse comptée et calculée. Utilisez la date sélectionnée pour parcourir les opérations disponibles.</p><div><button type="button" className="dashRefPrimary">Voir l'avancement</button><button type="button" className="dashRefSecondary">Consulter l'historique</button></div></div></div>
+      </section>
+      <aside className="dashRefAdCard dashRefCashSummaryCard"><span>RÉSUMÉ CAISSE</span><h3>Espace indicateurs financiers</h3><div className="dashRefPartnerLine"><i><InvIcon name="cash"/></i><b>Vue rapide</b></div><p>Date active : {closestRegisteredDate(selectedDate)}<br/>Tot. vente : {formatDH(resultMetrics.totalSales.totalSalesCents)}<br/>Tot. dépenses : {formatDH(monthlyExpensesCents)}<br/>Réserve cible : {formatDH(reserveCents)}</p><button type="button">Exporter le résumé</button></aside>
+    </div>
+
+    <div className="dashRefBottomGrid dashRefCashBottomGrid">
+      <section className="dashRefReportsBlock">
+        <div className="dashRefSectionHead"><div><b>Indicateurs journaliers</b><span>Mesures liées à la date sélectionnée.</span></div><button type="button">Exports sécurisés</button></div>
+        <div className="dashRefReportGrid">
+          <button type="button"><span className="dashRefIcon sky"><InvIcon name="cash"/></span><b>Balance due</b><strong className="dashRefCashCardValue">{formatDH(selectedMetrics.dueBalanceCents)}</strong><small>{closestRegisteredDate(selectedDate)}</small></button>
+          <button type="button"><span className="dashRefIcon red"><InvIcon name="warning"/></span><b>Montant manquant</b><strong className="dashRefCashCardValue">{formatDH(selectedMetrics.shortageCents)}</strong><small>{closestRegisteredDate(selectedDate)}</small></button>
+          <button type="button"><span className="dashRefIcon emerald"><InvIcon name="list"/></span><b>Montant surplus</b><strong className="dashRefCashCardValue">{formatDH(selectedMetrics.surplusCents)}</strong><small>{closestRegisteredDate(selectedDate)}</small></button>
+          <button type="button"><span className="dashRefIcon amber"><InvIcon name="upload"/></span><b>Retiré</b><strong className="dashRefCashCardValue">{formatDH(selectedMetrics.withdrawnCents)}</strong><small>{closestRegisteredDate(selectedDate)}</small></button>
         </div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Tot. montant manquant" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>} right="📅">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(monthlyShortageCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Tot. montant surplus" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>} right="📅">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(monthlySurplusCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Tot. dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
-        <CashProgressRing value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Aucune vente"} />
-      </CashAdminCard>
+      </section>
+      <section className="dashRefAlertsBlock">
+        <div className="dashRefSectionHead"><div><b>Résultats prioritaires</b><span>Points clés calculés à partir des dates enregistrées.</span></div><button type="button">{formatMonthLabel(selectedMonth)}</button></div>
+        <div className="dashRefAlertsCard">
+          <div className="dashRefAlert"><span className="dashRefIcon blue"><InvIcon name="sync"/></span><div><b>Tot. vente</b><small>{formatDH(resultMetrics.totalSales.totalSalesCents)}</small>{resultDateMeta("totalSales")}</div></div>
+          <div className="dashRefAlert"><span className="dashRefIcon violet"><InvIcon name="cash"/></span><div><b>C. fermeture (théorique)</b><small>{formatDH(resultMetrics.closingCalculated.closingCalculatedCents)}</small>{resultDateMeta("closingCalculated")}</div></div>
+          <div className="dashRefAlert"><span className="dashRefIcon emerald"><InvIcon name="cash"/></span><div><b>Nouvelle C. fermeture</b><small>{formatDH(resultMetrics.closingReal.closingRealCents)}</small>{resultDateMeta("closingReal")}</div></div>
+          <div className="dashRefAlert"><span className="dashRefIcon amber"><InvIcon name="warning"/></span><div><b>Écart cash comptée vs calculée</b><small>{formatDH(resultMetrics.gap.gapCents)}</small>{resultDateMeta("gap")}</div></div>
+        </div>
+      </section>
     </div>
-
-    <div className="cashAdminGrid cashAdminGridBottom">
-      <CashAdminCard title="Balance due" meta={selectedDateMeta("Date enregistrée pour Balance due")} right="SD">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.dueBalanceCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Montant manquant" meta={selectedDateMeta("Date enregistrée pour Montant manquant")} right="SD">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.shortageCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Montant surplus" meta={selectedDateMeta("Date enregistrée pour Montant surplus")} right="SD">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Retiré" meta={selectedDateMeta("Date enregistrée pour Retiré")}>
-        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.withdrawnCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
-        <div className="cashAdminMainValue"><small>DH</small><b>{Math.round(monthlyExpensesCents/100)}</b></div>
-      </CashAdminCard>
-    </div>
-
-    <div className="cashAdminGrid cashAdminGridResults">
-      <CashAdminCard title="Tot. vente" meta={resultDateMeta("totalSales")} right="=">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.totalSales.totalSalesCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="C. fermeture (théorique)" meta={resultDateMeta("closingCalculated")} right="=">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingCalculated.closingCalculatedCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Nouvelle C. fermeture" meta={resultDateMeta("closingReal")} right="=">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingReal.closingRealCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-
-      <CashAdminCard title="Écart cash comptée vs calculée" meta={resultDateMeta("gap")} right="Δ">
-        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.gap.gapCents/100).toFixed(1)}</b></div>
-      </CashAdminCard>
-    </div>
-
-    <div className="cashAdminBottomNote">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>;
 }
 
-
-
-const SHUFFLE_HOME_CSS = "@import url(\"https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap\");\n/*! tailwindcss v4.1.8 | MIT License | https://tailwindcss.com */\n@layer properties;\n@layer theme, base, components, utilities;\n@layer theme {\n  :root, :host {\n    --font-sans: ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\",\n      \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\";\n    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\",\n      \"Courier New\", monospace;\n    --color-amber-50: oklch(98.7% 0.022 95.277);\n    --color-amber-400: oklch(82.8% 0.189 84.429);\n    --color-amber-600: oklch(66.6% 0.179 58.318);\n    --color-emerald-50: oklch(97.9% 0.021 166.113);\n    --color-emerald-100: oklch(95% 0.052 163.051);\n    --color-emerald-400: oklch(76.5% 0.177 163.223);\n    --color-emerald-600: oklch(59.6% 0.145 163.225);\n    --color-emerald-800: oklch(43.2% 0.095 166.913);\n    --color-indigo-50: oklch(96.2% 0.018 272.314);\n    --color-indigo-100: oklch(93% 0.034 272.788);\n    --color-indigo-300: oklch(78.5% 0.115 274.713);\n    --color-indigo-500: oklch(58.5% 0.233 277.117);\n    --color-indigo-600: oklch(51.1% 0.262 276.966);\n    --color-indigo-700: oklch(45.7% 0.24 277.023);\n    --color-indigo-800: oklch(39.8% 0.195 277.366);\n    --color-rose-50: oklch(96.9% 0.015 12.422);\n    --color-rose-100: oklch(94.1% 0.03 12.58);\n    --color-rose-400: oklch(71.2% 0.194 13.428);\n    --color-rose-600: oklch(58.6% 0.253 17.585);\n    --color-rose-800: oklch(45.5% 0.188 13.697);\n    --color-slate-50: oklch(98.4% 0.003 247.858);\n    --color-slate-100: oklch(96.8% 0.007 247.896);\n    --color-slate-200: oklch(92.9% 0.013 255.508);\n    --color-slate-300: oklch(86.9% 0.022 252.894);\n    --color-slate-400: oklch(70.4% 0.04 256.788);\n    --color-slate-500: oklch(55.4% 0.046 257.417);\n    --color-slate-600: oklch(44.6% 0.043 257.281);\n    --color-slate-700: oklch(37.2% 0.044 257.287);\n    --color-slate-800: oklch(27.9% 0.041 260.031);\n    --color-slate-900: oklch(20.8% 0.042 265.755);\n    --color-white: #fff;\n    --spacing: 0.25rem;\n    --container-2xl: 42rem;\n    --container-4xl: 56rem;\n    --container-5xl: 64rem;\n    --container-7xl: 80rem;\n    --text-xs: 0.75rem;\n    --text-xs--line-height: calc(1 / 0.75);\n    --text-sm: 0.875rem;\n    --text-sm--line-height: calc(1.25 / 0.875);\n    --text-base: 1rem;\n    --text-base--line-height: calc(1.5 / 1);\n    --text-lg: 1.125rem;\n    --text-lg--line-height: calc(1.75 / 1.125);\n    --text-xl: 1.25rem;\n    --text-xl--line-height: calc(1.75 / 1.25);\n    --text-3xl: 1.875rem;\n    --text-3xl--line-height: calc(2.25 / 1.875);\n    --text-4xl: 2.25rem;\n    --text-4xl--line-height: calc(2.5 / 2.25);\n    --text-5xl: 3rem;\n    --text-5xl--line-height: 1;\n    --text-6xl: 3.75rem;\n    --text-6xl--line-height: 1;\n    --font-weight-medium: 500;\n    --font-weight-semibold: 600;\n    --font-weight-bold: 700;\n    --font-weight-extrabold: 800;\n    --tracking-tight: -0.025em;\n    --tracking-wider: 0.05em;\n    --tracking-widest: 0.1em;\n    --leading-tight: 1.25;\n    --leading-relaxed: 1.625;\n    --radius-lg: 0.5rem;\n    --radius-xl: 0.75rem;\n    --radius-2xl: 1rem;\n    --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;\n    --blur-md: 12px;\n    --blur-3xl: 64px;\n    --default-transition-duration: 150ms;\n    --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n    --default-font-family: var(--font-sans);\n    --default-mono-font-family: var(--font-mono);\n    --font-body: \"Plus Jakarta Sans\";\n    --font-heading: Outfit;\n  }\n}\n@layer base {\n  *, ::after, ::before, ::backdrop, ::file-selector-button {\n    box-sizing: border-box;\n    margin: 0;\n    padding: 0;\n    border: 0 solid;\n  }\n  html, :host {\n    line-height: 1.5;\n    -webkit-text-size-adjust: 100%;\n    tab-size: 4;\n    font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\");\n    font-feature-settings: var(--default-font-feature-settings, normal);\n    font-variation-settings: var(--default-font-variation-settings, normal);\n    -webkit-tap-highlight-color: transparent;\n  }\n  hr {\n    height: 0;\n    color: inherit;\n    border-top-width: 1px;\n  }\n  abbr:where([title]) {\n    -webkit-text-decoration: underline dotted;\n    text-decoration: underline dotted;\n  }\n  h1, h2, h3, h4, h5, h6 {\n    font-size: inherit;\n    font-weight: inherit;\n  }\n  a {\n    color: inherit;\n    -webkit-text-decoration: inherit;\n    text-decoration: inherit;\n  }\n  b, strong {\n    font-weight: bolder;\n  }\n  code, kbd, samp, pre {\n    font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace);\n    font-feature-settings: var(--default-mono-font-feature-settings, normal);\n    font-variation-settings: var(--default-mono-font-variation-settings, normal);\n    font-size: 1em;\n  }\n  small {\n    font-size: 80%;\n  }\n  sub, sup {\n    font-size: 75%;\n    line-height: 0;\n    position: relative;\n    vertical-align: baseline;\n  }\n  sub {\n    bottom: -0.25em;\n  }\n  sup {\n    top: -0.5em;\n  }\n  table {\n    text-indent: 0;\n    border-color: inherit;\n    border-collapse: collapse;\n  }\n  :-moz-focusring {\n    outline: auto;\n  }\n  progress {\n    vertical-align: baseline;\n  }\n  summary {\n    display: list-item;\n  }\n  ol, ul, menu {\n    list-style: none;\n  }\n  img, svg, video, canvas, audio, iframe, embed, object {\n    display: block;\n    vertical-align: middle;\n  }\n  img, video {\n    max-width: 100%;\n    height: auto;\n  }\n  button, input, select, optgroup, textarea, ::file-selector-button {\n    font: inherit;\n    font-feature-settings: inherit;\n    font-variation-settings: inherit;\n    letter-spacing: inherit;\n    color: inherit;\n    border-radius: 0;\n    background-color: transparent;\n    opacity: 1;\n  }\n  :where(select:is([multiple], [size])) optgroup {\n    font-weight: bolder;\n  }\n  :where(select:is([multiple], [size])) optgroup option {\n    padding-inline-start: 20px;\n  }\n  ::file-selector-button {\n    margin-inline-end: 4px;\n  }\n  ::placeholder {\n    opacity: 1;\n  }\n  @supports (not (-webkit-appearance: -apple-pay-button))  or (contain-intrinsic-size: 1px) {\n    ::placeholder {\n      color: currentcolor;\n      @supports (color: color-mix(in lab, red, red)) {\n        color: color-mix(in oklab, currentcolor 50%, transparent);\n      }\n    }\n  }\n  textarea {\n    resize: vertical;\n  }\n  ::-webkit-search-decoration {\n    -webkit-appearance: none;\n  }\n  ::-webkit-date-and-time-value {\n    min-height: 1lh;\n    text-align: inherit;\n  }\n  ::-webkit-datetime-edit {\n    display: inline-flex;\n  }\n  ::-webkit-datetime-edit-fields-wrapper {\n    padding: 0;\n  }\n  ::-webkit-datetime-edit, ::-webkit-datetime-edit-year-field, ::-webkit-datetime-edit-month-field, ::-webkit-datetime-edit-day-field, ::-webkit-datetime-edit-hour-field, ::-webkit-datetime-edit-minute-field, ::-webkit-datetime-edit-second-field, ::-webkit-datetime-edit-millisecond-field, ::-webkit-datetime-edit-meridiem-field {\n    padding-block: 0;\n  }\n  :-moz-ui-invalid {\n    box-shadow: none;\n  }\n  button, input:where([type=\"button\"], [type=\"reset\"], [type=\"submit\"]), ::file-selector-button {\n    appearance: button;\n  }\n  ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {\n    height: auto;\n  }\n  [hidden]:where(:not([hidden=\"until-found\"])) {\n    display: none !important;\n  }\n}\n@layer utilities {\n  .absolute {\n    position: absolute;\n  }\n  .relative {\n    position: relative;\n  }\n  .sticky {\n    position: sticky;\n  }\n  .top-0 {\n    top: calc(var(--spacing) * 0);\n  }\n  .right-0 {\n    right: calc(var(--spacing) * 0);\n  }\n  .z-50 {\n    z-index: 50;\n  }\n  .mx-auto {\n    margin-inline: auto;\n  }\n  .mt-0\\.5 {\n    margin-top: calc(var(--spacing) * 0.5);\n  }\n  .mt-1 {\n    margin-top: calc(var(--spacing) * 1);\n  }\n  .mt-4 {\n    margin-top: calc(var(--spacing) * 4);\n  }\n  .mt-6 {\n    margin-top: calc(var(--spacing) * 6);\n  }\n  .mt-10 {\n    margin-top: calc(var(--spacing) * 10);\n  }\n  .mb-1 {\n    margin-bottom: calc(var(--spacing) * 1);\n  }\n  .mb-2 {\n    margin-bottom: calc(var(--spacing) * 2);\n  }\n  .mb-3 {\n    margin-bottom: calc(var(--spacing) * 3);\n  }\n  .mb-6 {\n    margin-bottom: calc(var(--spacing) * 6);\n  }\n  .ml-4 {\n    margin-left: calc(var(--spacing) * 4);\n  }\n  .block {\n    display: block;\n  }\n  .flex {\n    display: flex;\n  }\n  .grid {\n    display: grid;\n  }\n  .hidden {\n    display: none;\n  }\n  .inline-block {\n    display: inline-block;\n  }\n  .inline-flex {\n    display: inline-flex;\n  }\n  .h-1\\.5 {\n    height: calc(var(--spacing) * 1.5);\n  }\n  .h-2 {\n    height: calc(var(--spacing) * 2);\n  }\n  .h-3 {\n    height: calc(var(--spacing) * 3);\n  }\n  .h-3\\.5 {\n    height: calc(var(--spacing) * 3.5);\n  }\n  .h-4 {\n    height: calc(var(--spacing) * 4);\n  }\n  .h-5 {\n    height: calc(var(--spacing) * 5);\n  }\n  .h-8 {\n    height: calc(var(--spacing) * 8);\n  }\n  .h-10 {\n    height: calc(var(--spacing) * 10);\n  }\n  .h-64 {\n    height: calc(var(--spacing) * 64);\n  }\n  .w-1\\.5 {\n    width: calc(var(--spacing) * 1.5);\n  }\n  .w-2 {\n    width: calc(var(--spacing) * 2);\n  }\n  .w-3 {\n    width: calc(var(--spacing) * 3);\n  }\n  .w-3\\.5 {\n    width: calc(var(--spacing) * 3.5);\n  }\n  .w-4 {\n    width: calc(var(--spacing) * 4);\n  }\n  .w-5 {\n    width: calc(var(--spacing) * 5);\n  }\n  .w-8 {\n    width: calc(var(--spacing) * 8);\n  }\n  .w-10 {\n    width: calc(var(--spacing) * 10);\n  }\n  .w-64 {\n    width: calc(var(--spacing) * 64);\n  }\n  .w-full {\n    width: 100%;\n  }\n  .max-w-2xl {\n    max-width: var(--container-2xl);\n  }\n  .max-w-4xl {\n    max-width: var(--container-4xl);\n  }\n  .max-w-5xl {\n    max-width: var(--container-5xl);\n  }\n  .max-w-7xl {\n    max-width: var(--container-7xl);\n  }\n  .shrink-0 {\n    flex-shrink: 0;\n  }\n  .animate-pulse {\n    animation: var(--animate-pulse);\n  }\n  .grid-cols-1 {\n    grid-template-columns: repeat(1, minmax(0, 1fr));\n  }\n  .grid-cols-2 {\n    grid-template-columns: repeat(2, minmax(0, 1fr));\n  }\n  .flex-col {\n    flex-direction: column;\n  }\n  .flex-wrap {\n    flex-wrap: wrap;\n  }\n  .items-center {\n    align-items: center;\n  }\n  .items-start {\n    align-items: flex-start;\n  }\n  .justify-between {\n    justify-content: space-between;\n  }\n  .justify-center {\n    justify-content: center;\n  }\n  .gap-1\\.5 {\n    gap: calc(var(--spacing) * 1.5);\n  }\n  .gap-2 {\n    gap: calc(var(--spacing) * 2);\n  }\n  .gap-3 {\n    gap: calc(var(--spacing) * 3);\n  }\n  .gap-3\\.5 {\n    gap: calc(var(--spacing) * 3.5);\n  }\n  .gap-4 {\n    gap: calc(var(--spacing) * 4);\n  }\n  .gap-6 {\n    gap: calc(var(--spacing) * 6);\n  }\n  .gap-8 {\n    gap: calc(var(--spacing) * 8);\n  }\n  .gap-12 {\n    gap: calc(var(--spacing) * 12);\n  }\n  .space-y-2 {\n    :where(& > :not(:last-child)) {\n      --tw-space-y-reverse: 0;\n      margin-block-start: calc(calc(var(--spacing) * 2) * var(--tw-space-y-reverse));\n      margin-block-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-y-reverse)));\n    }\n  }\n  .space-y-4 {\n    :where(& > :not(:last-child)) {\n      --tw-space-y-reverse: 0;\n      margin-block-start: calc(calc(var(--spacing) * 4) * var(--tw-space-y-reverse));\n      margin-block-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-y-reverse)));\n    }\n  }\n  .space-y-6 {\n    :where(& > :not(:last-child)) {\n      --tw-space-y-reverse: 0;\n      margin-block-start: calc(calc(var(--spacing) * 6) * var(--tw-space-y-reverse));\n      margin-block-end: calc(calc(var(--spacing) * 6) * calc(1 - var(--tw-space-y-reverse)));\n    }\n  }\n  .space-y-8 {\n    :where(& > :not(:last-child)) {\n      --tw-space-y-reverse: 0;\n      margin-block-start: calc(calc(var(--spacing) * 8) * var(--tw-space-y-reverse));\n      margin-block-end: calc(calc(var(--spacing) * 8) * calc(1 - var(--tw-space-y-reverse)));\n    }\n  }\n  .space-y-12 {\n    :where(& > :not(:last-child)) {\n      --tw-space-y-reverse: 0;\n      margin-block-start: calc(calc(var(--spacing) * 12) * var(--tw-space-y-reverse));\n      margin-block-end: calc(calc(var(--spacing) * 12) * calc(1 - var(--tw-space-y-reverse)));\n    }\n  }\n  .overflow-hidden {\n    overflow: hidden;\n  }\n  .rounded {\n    border-radius: 0.25rem;\n  }\n  .rounded-2xl {\n    border-radius: var(--radius-2xl);\n  }\n  .rounded-full {\n    border-radius: calc(infinity * 1px);\n  }\n  .rounded-lg {\n    border-radius: var(--radius-lg);\n  }\n  .rounded-xl {\n    border-radius: var(--radius-xl);\n  }\n  .border {\n    border-style: var(--tw-border-style);\n    border-width: 1px;\n  }\n  .border-t {\n    border-top-style: var(--tw-border-style);\n    border-top-width: 1px;\n  }\n  .border-b {\n    border-bottom-style: var(--tw-border-style);\n    border-bottom-width: 1px;\n  }\n  .border-b-2 {\n    border-bottom-style: var(--tw-border-style);\n    border-bottom-width: 2px;\n  }\n  .border-emerald-100 {\n    border-color: var(--color-emerald-100);\n  }\n  .border-indigo-100 {\n    border-color: var(--color-indigo-100);\n  }\n  .border-indigo-600 {\n    border-color: var(--color-indigo-600);\n  }\n  .border-rose-100 {\n    border-color: var(--color-rose-100);\n  }\n  .border-slate-100 {\n    border-color: var(--color-slate-100);\n  }\n  .border-slate-200 {\n    border-color: var(--color-slate-200);\n  }\n  .border-slate-200\\/80 {\n    border-color: color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      border-color: color-mix(in oklab, var(--color-slate-200) 80%, transparent);\n    }\n  }\n  .border-slate-600 {\n    border-color: var(--color-slate-600);\n  }\n  .border-slate-700\\/50 {\n    border-color: color-mix(in srgb, oklch(37.2% 0.044 257.287) 50%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      border-color: color-mix(in oklab, var(--color-slate-700) 50%, transparent);\n    }\n  }\n  .border-slate-800 {\n    border-color: var(--color-slate-800);\n  }\n  .bg-\\[\\#fafbfe\\] {\n    background-color: #fafbfe;\n  }\n  .bg-amber-50 {\n    background-color: var(--color-amber-50);\n  }\n  .bg-amber-400 {\n    background-color: var(--color-amber-400);\n  }\n  .bg-emerald-50 {\n    background-color: var(--color-emerald-50);\n  }\n  .bg-emerald-50\\/50 {\n    background-color: color-mix(in srgb, oklch(97.9% 0.021 166.113) 50%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      background-color: color-mix(in oklab, var(--color-emerald-50) 50%, transparent);\n    }\n  }\n  .bg-emerald-100 {\n    background-color: var(--color-emerald-100);\n  }\n  .bg-emerald-400 {\n    background-color: var(--color-emerald-400);\n  }\n  .bg-emerald-600 {\n    background-color: var(--color-emerald-600);\n  }\n  .bg-indigo-50 {\n    background-color: var(--color-indigo-50);\n  }\n  .bg-indigo-100 {\n    background-color: var(--color-indigo-100);\n  }\n  .bg-indigo-500 {\n    background-color: var(--color-indigo-500);\n  }\n  .bg-indigo-500\\/10 {\n    background-color: color-mix(in srgb, oklch(58.5% 0.233 277.117) 10%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      background-color: color-mix(in oklab, var(--color-indigo-500) 10%, transparent);\n    }\n  }\n  .bg-indigo-600 {\n    background-color: var(--color-indigo-600);\n  }\n  .bg-rose-50 {\n    background-color: var(--color-rose-50);\n  }\n  .bg-rose-50\\/50 {\n    background-color: color-mix(in srgb, oklch(96.9% 0.015 12.422) 50%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      background-color: color-mix(in oklab, var(--color-rose-50) 50%, transparent);\n    }\n  }\n  .bg-rose-400 {\n    background-color: var(--color-rose-400);\n  }\n  .bg-rose-600 {\n    background-color: var(--color-rose-600);\n  }\n  .bg-slate-50 {\n    background-color: var(--color-slate-50);\n  }\n  .bg-slate-50\\/20 {\n    background-color: color-mix(in srgb, oklch(98.4% 0.003 247.858) 20%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      background-color: color-mix(in oklab, var(--color-slate-50) 20%, transparent);\n    }\n  }\n  .bg-slate-50\\/40 {\n    background-color: color-mix(in srgb, oklch(98.4% 0.003 247.858) 40%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      background-color: color-mix(in oklab, var(--color-slate-50) 40%, transparent);\n    }\n  }\n  .bg-slate-50\\/50 {\n    background-color: color-mix(in srgb, oklch(98.4% 0.003 247.858) 50%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      background-color: color-mix(in oklab, var(--color-slate-50) 50%, transparent);\n    }\n  }\n  .bg-slate-100 {\n    background-color: var(--color-slate-100);\n  }\n  .bg-slate-200\\/50 {\n    background-color: color-mix(in srgb, oklch(92.9% 0.013 255.508) 50%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      background-color: color-mix(in oklab, var(--color-slate-200) 50%, transparent);\n    }\n  }\n  .bg-slate-800 {\n    background-color: var(--color-slate-800);\n  }\n  .bg-slate-800\\/80 {\n    background-color: color-mix(in srgb, oklch(27.9% 0.041 260.031) 80%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      background-color: color-mix(in oklab, var(--color-slate-800) 80%, transparent);\n    }\n  }\n  .bg-slate-900 {\n    background-color: var(--color-slate-900);\n  }\n  .bg-transparent {\n    background-color: transparent;\n  }\n  .bg-white {\n    background-color: var(--color-white);\n  }\n  .bg-white\\/80 {\n    background-color: color-mix(in srgb, #fff 80%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      background-color: color-mix(in oklab, var(--color-white) 80%, transparent);\n    }\n  }\n  .bg-gradient-to-b {\n    --tw-gradient-position: to bottom in oklab;\n    background-image: linear-gradient(var(--tw-gradient-stops));\n  }\n  .bg-gradient-to-r {\n    --tw-gradient-position: to right in oklab;\n    background-image: linear-gradient(var(--tw-gradient-stops));\n  }\n  .from-indigo-600 {\n    --tw-gradient-from: var(--color-indigo-600);\n    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));\n  }\n  .from-white {\n    --tw-gradient-from: var(--color-white);\n    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));\n  }\n  .via-\\[\\#fafbfe\\] {\n    --tw-gradient-via: #fafbfe;\n    --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);\n    --tw-gradient-stops: var(--tw-gradient-via-stops);\n  }\n  .to-indigo-800 {\n    --tw-gradient-to: var(--color-indigo-800);\n    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));\n  }\n  .to-slate-50 {\n    --tw-gradient-to: var(--color-slate-50);\n    --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));\n  }\n  .bg-clip-text {\n    background-clip: text;\n  }\n  .p-2\\.5 {\n    padding: calc(var(--spacing) * 2.5);\n  }\n  .p-4 {\n    padding: calc(var(--spacing) * 4);\n  }\n  .p-5 {\n    padding: calc(var(--spacing) * 5);\n  }\n  .p-6 {\n    padding: calc(var(--spacing) * 6);\n  }\n  .px-1\\.5 {\n    padding-inline: calc(var(--spacing) * 1.5);\n  }\n  .px-2 {\n    padding-inline: calc(var(--spacing) * 2);\n  }\n  .px-2\\.5 {\n    padding-inline: calc(var(--spacing) * 2.5);\n  }\n  .px-3 {\n    padding-inline: calc(var(--spacing) * 3);\n  }\n  .px-4 {\n    padding-inline: calc(var(--spacing) * 4);\n  }\n  .px-6 {\n    padding-inline: calc(var(--spacing) * 6);\n  }\n  .px-8 {\n    padding-inline: calc(var(--spacing) * 8);\n  }\n  .py-0\\.5 {\n    padding-block: calc(var(--spacing) * 0.5);\n  }\n  .py-1 {\n    padding-block: calc(var(--spacing) * 1);\n  }\n  .py-1\\.5 {\n    padding-block: calc(var(--spacing) * 1.5);\n  }\n  .py-2 {\n    padding-block: calc(var(--spacing) * 2);\n  }\n  .py-2\\.5 {\n    padding-block: calc(var(--spacing) * 2.5);\n  }\n  .py-3\\.5 {\n    padding-block: calc(var(--spacing) * 3.5);\n  }\n  .py-4 {\n    padding-block: calc(var(--spacing) * 4);\n  }\n  .py-12 {\n    padding-block: calc(var(--spacing) * 12);\n  }\n  .py-16 {\n    padding-block: calc(var(--spacing) * 16);\n  }\n  .py-20 {\n    padding-block: calc(var(--spacing) * 20);\n  }\n  .pt-2 {\n    padding-top: calc(var(--spacing) * 2);\n  }\n  .pt-4 {\n    padding-top: calc(var(--spacing) * 4);\n  }\n  .pt-8 {\n    padding-top: calc(var(--spacing) * 8);\n  }\n  .pb-1 {\n    padding-bottom: calc(var(--spacing) * 1);\n  }\n  .pb-4 {\n    padding-bottom: calc(var(--spacing) * 4);\n  }\n  .pb-24 {\n    padding-bottom: calc(var(--spacing) * 24);\n  }\n  .text-center {\n    text-align: center;\n  }\n  .font-body {\n    font-family: var(--font-body);\n  }\n  .font-heading {\n    font-family: var(--font-heading);\n  }\n  .font-mono {\n    font-family: var(--font-mono);\n  }\n  .font-sans {\n    font-family: var(--font-sans);\n  }\n  .text-3xl {\n    font-size: var(--text-3xl);\n    line-height: var(--tw-leading, var(--text-3xl--line-height));\n  }\n  .text-4xl {\n    font-size: var(--text-4xl);\n    line-height: var(--tw-leading, var(--text-4xl--line-height));\n  }\n  .text-base {\n    font-size: var(--text-base);\n    line-height: var(--tw-leading, var(--text-base--line-height));\n  }\n  .text-lg {\n    font-size: var(--text-lg);\n    line-height: var(--tw-leading, var(--text-lg--line-height));\n  }\n  .text-sm {\n    font-size: var(--text-sm);\n    line-height: var(--tw-leading, var(--text-sm--line-height));\n  }\n  .text-xl {\n    font-size: var(--text-xl);\n    line-height: var(--tw-leading, var(--text-xl--line-height));\n  }\n  .text-xs {\n    font-size: var(--text-xs);\n    line-height: var(--tw-leading, var(--text-xs--line-height));\n  }\n  .text-\\[10px\\] {\n    font-size: 10px;\n  }\n  .leading-relaxed {\n    --tw-leading: var(--leading-relaxed);\n    line-height: var(--leading-relaxed);\n  }\n  .leading-tight {\n    --tw-leading: var(--leading-tight);\n    line-height: var(--leading-tight);\n  }\n  .font-bold {\n    --tw-font-weight: var(--font-weight-bold);\n    font-weight: var(--font-weight-bold);\n  }\n  .font-extrabold {\n    --tw-font-weight: var(--font-weight-extrabold);\n    font-weight: var(--font-weight-extrabold);\n  }\n  .font-medium {\n    --tw-font-weight: var(--font-weight-medium);\n    font-weight: var(--font-weight-medium);\n  }\n  .font-semibold {\n    --tw-font-weight: var(--font-weight-semibold);\n    font-weight: var(--font-weight-semibold);\n  }\n  .tracking-tight {\n    --tw-tracking: var(--tracking-tight);\n    letter-spacing: var(--tracking-tight);\n  }\n  .tracking-wider {\n    --tw-tracking: var(--tracking-wider);\n    letter-spacing: var(--tracking-wider);\n  }\n  .tracking-widest {\n    --tw-tracking: var(--tracking-widest);\n    letter-spacing: var(--tracking-widest);\n  }\n  .text-amber-600 {\n    color: var(--color-amber-600);\n  }\n  .text-emerald-600 {\n    color: var(--color-emerald-600);\n  }\n  .text-emerald-800 {\n    color: var(--color-emerald-800);\n  }\n  .text-indigo-300 {\n    color: var(--color-indigo-300);\n  }\n  .text-indigo-600 {\n    color: var(--color-indigo-600);\n  }\n  .text-indigo-700 {\n    color: var(--color-indigo-700);\n  }\n  .text-rose-600 {\n    color: var(--color-rose-600);\n  }\n  .text-rose-800 {\n    color: var(--color-rose-800);\n  }\n  .text-slate-200 {\n    color: var(--color-slate-200);\n  }\n  .text-slate-300 {\n    color: var(--color-slate-300);\n  }\n  .text-slate-400 {\n    color: var(--color-slate-400);\n  }\n  .text-slate-500 {\n    color: var(--color-slate-500);\n  }\n  .text-slate-600 {\n    color: var(--color-slate-600);\n  }\n  .text-slate-700 {\n    color: var(--color-slate-700);\n  }\n  .text-slate-800 {\n    color: var(--color-slate-800);\n  }\n  .text-slate-900 {\n    color: var(--color-slate-900);\n  }\n  .text-transparent {\n    color: transparent;\n  }\n  .text-white {\n    color: var(--color-white);\n  }\n  .uppercase {\n    text-transform: uppercase;\n  }\n  .antialiased {\n    -webkit-font-smoothing: antialiased;\n    -moz-osx-font-smoothing: grayscale;\n  }\n  .shadow-2xl {\n    --tw-shadow: 0 25px 50px -12px var(--tw-shadow-color, rgb(0 0 0 / 0.25));\n    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);\n  }\n  .shadow-lg {\n    --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));\n    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);\n  }\n  .shadow-md {\n    --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));\n    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);\n  }\n  .shadow-sm {\n    --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));\n    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);\n  }\n  .shadow-xl {\n    --tw-shadow: 0 20px 25px -5px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 8px 10px -6px var(--tw-shadow-color, rgb(0 0 0 / 0.1));\n    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);\n  }\n  .shadow-indigo-100 {\n    --tw-shadow-color: oklch(93% 0.034 272.788);\n    @supports (color: color-mix(in lab, red, red)) {\n      --tw-shadow-color: color-mix(in oklab, var(--color-indigo-100) var(--tw-shadow-alpha), transparent);\n    }\n  }\n  .shadow-indigo-500\\/20 {\n    --tw-shadow-color: color-mix(in srgb, oklch(58.5% 0.233 277.117) 20%, transparent);\n    @supports (color: color-mix(in lab, red, red)) {\n      --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-indigo-500) 20%, transparent) var(--tw-shadow-alpha), transparent);\n    }\n  }\n  .blur-3xl {\n    --tw-blur: blur(var(--blur-3xl));\n    filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);\n  }\n  .backdrop-blur-md {\n    --tw-backdrop-blur: blur(var(--blur-md));\n    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);\n    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);\n  }\n  .transition-all {\n    transition-property: all;\n    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));\n    transition-duration: var(--tw-duration, var(--default-transition-duration));\n  }\n  .transition-colors {\n    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;\n    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));\n    transition-duration: var(--tw-duration, var(--default-transition-duration));\n  }\n  .hover\\:border-indigo-100 {\n    &:hover {\n      @media (hover: hover) {\n        border-color: var(--color-indigo-100);\n      }\n    }\n  }\n  .hover\\:border-indigo-600 {\n    &:hover {\n      @media (hover: hover) {\n        border-color: var(--color-indigo-600);\n      }\n    }\n  }\n  .hover\\:bg-indigo-100 {\n    &:hover {\n      @media (hover: hover) {\n        background-color: var(--color-indigo-100);\n      }\n    }\n  }\n  .hover\\:bg-indigo-700 {\n    &:hover {\n      @media (hover: hover) {\n        background-color: var(--color-indigo-700);\n      }\n    }\n  }\n  .hover\\:bg-rose-100 {\n    &:hover {\n      @media (hover: hover) {\n        background-color: var(--color-rose-100);\n      }\n    }\n  }\n  .hover\\:bg-slate-50 {\n    &:hover {\n      @media (hover: hover) {\n        background-color: var(--color-slate-50);\n      }\n    }\n  }\n  .hover\\:bg-slate-200 {\n    &:hover {\n      @media (hover: hover) {\n        background-color: var(--color-slate-200);\n      }\n    }\n  }\n  .hover\\:bg-slate-700 {\n    &:hover {\n      @media (hover: hover) {\n        background-color: var(--color-slate-700);\n      }\n    }\n  }\n  .hover\\:bg-slate-800 {\n    &:hover {\n      @media (hover: hover) {\n        background-color: var(--color-slate-800);\n      }\n    }\n  }\n  .hover\\:bg-white {\n    &:hover {\n      @media (hover: hover) {\n        background-color: var(--color-white);\n      }\n    }\n  }\n  .hover\\:text-indigo-600 {\n    &:hover {\n      @media (hover: hover) {\n        color: var(--color-indigo-600);\n      }\n    }\n  }\n  .hover\\:text-slate-900 {\n    &:hover {\n      @media (hover: hover) {\n        color: var(--color-slate-900);\n      }\n    }\n  }\n  .hover\\:shadow-lg {\n    &:hover {\n      @media (hover: hover) {\n        --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));\n        box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);\n      }\n    }\n  }\n  .hover\\:shadow-md {\n    &:hover {\n      @media (hover: hover) {\n        --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));\n        box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);\n      }\n    }\n  }\n  .hover\\:shadow-sm {\n    &:hover {\n      @media (hover: hover) {\n        --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));\n        box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);\n      }\n    }\n  }\n  .hover\\:shadow-indigo-100 {\n    &:hover {\n      @media (hover: hover) {\n        --tw-shadow-color: oklch(93% 0.034 272.788);\n        @supports (color: color-mix(in lab, red, red)) {\n          --tw-shadow-color: color-mix(in oklab, var(--color-indigo-100) var(--tw-shadow-alpha), transparent);\n        }\n      }\n    }\n  }\n  .sm\\:inline-flex {\n    @media (width >= 40rem) {\n      display: inline-flex;\n    }\n  }\n  .sm\\:flex-row {\n    @media (width >= 40rem) {\n      flex-direction: row;\n    }\n  }\n  .sm\\:items-center {\n    @media (width >= 40rem) {\n      align-items: center;\n    }\n  }\n  .md\\:grid-cols-2 {\n    @media (width >= 48rem) {\n      grid-template-columns: repeat(2, minmax(0, 1fr));\n    }\n  }\n  .md\\:grid-cols-3 {\n    @media (width >= 48rem) {\n      grid-template-columns: repeat(3, minmax(0, 1fr));\n    }\n  }\n  .md\\:flex-row {\n    @media (width >= 48rem) {\n      flex-direction: row;\n    }\n  }\n  .md\\:p-8 {\n    @media (width >= 48rem) {\n      padding: calc(var(--spacing) * 8);\n    }\n  }\n  .md\\:px-8 {\n    @media (width >= 48rem) {\n      padding-inline: calc(var(--spacing) * 8);\n    }\n  }\n  .md\\:px-12 {\n    @media (width >= 48rem) {\n      padding-inline: calc(var(--spacing) * 12);\n    }\n  }\n  .md\\:py-24 {\n    @media (width >= 48rem) {\n      padding-block: calc(var(--spacing) * 24);\n    }\n  }\n  .md\\:text-4xl {\n    @media (width >= 48rem) {\n      font-size: var(--text-4xl);\n      line-height: var(--tw-leading, var(--text-4xl--line-height));\n    }\n  }\n  .md\\:text-5xl {\n    @media (width >= 48rem) {\n      font-size: var(--text-5xl);\n      line-height: var(--tw-leading, var(--text-5xl--line-height));\n    }\n  }\n  .md\\:text-6xl {\n    @media (width >= 48rem) {\n      font-size: var(--text-6xl);\n      line-height: var(--tw-leading, var(--text-6xl--line-height));\n    }\n  }\n  .md\\:text-lg {\n    @media (width >= 48rem) {\n      font-size: var(--text-lg);\n      line-height: var(--tw-leading, var(--text-lg--line-height));\n    }\n  }\n  .lg\\:col-span-5 {\n    @media (width >= 64rem) {\n      grid-column: span 5 / span 5;\n    }\n  }\n  .lg\\:col-span-7 {\n    @media (width >= 64rem) {\n      grid-column: span 7 / span 7;\n    }\n  }\n  .lg\\:flex {\n    @media (width >= 64rem) {\n      display: flex;\n    }\n  }\n  .lg\\:grid-cols-4 {\n    @media (width >= 64rem) {\n      grid-template-columns: repeat(4, minmax(0, 1fr));\n    }\n  }\n  .lg\\:grid-cols-6 {\n    @media (width >= 64rem) {\n      grid-template-columns: repeat(6, minmax(0, 1fr));\n    }\n  }\n  .lg\\:grid-cols-12 {\n    @media (width >= 64rem) {\n      grid-template-columns: repeat(12, minmax(0, 1fr));\n    }\n  }\n}\n@property --tw-space-y-reverse {\n  syntax: \"*\";\n  inherits: false;\n  initial-value: 0;\n}\n@property --tw-border-style {\n  syntax: \"*\";\n  inherits: false;\n  initial-value: solid;\n}\n@property --tw-gradient-position {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-gradient-from {\n  syntax: \"<color>\";\n  inherits: false;\n  initial-value: #0000;\n}\n@property --tw-gradient-via {\n  syntax: \"<color>\";\n  inherits: false;\n  initial-value: #0000;\n}\n@property --tw-gradient-to {\n  syntax: \"<color>\";\n  inherits: false;\n  initial-value: #0000;\n}\n@property --tw-gradient-stops {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-gradient-via-stops {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-gradient-from-position {\n  syntax: \"<length-percentage>\";\n  inherits: false;\n  initial-value: 0%;\n}\n@property --tw-gradient-via-position {\n  syntax: \"<length-percentage>\";\n  inherits: false;\n  initial-value: 50%;\n}\n@property --tw-gradient-to-position {\n  syntax: \"<length-percentage>\";\n  inherits: false;\n  initial-value: 100%;\n}\n@property --tw-leading {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-font-weight {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-tracking {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-shadow {\n  syntax: \"*\";\n  inherits: false;\n  initial-value: 0 0 #0000;\n}\n@property --tw-shadow-color {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-shadow-alpha {\n  syntax: \"<percentage>\";\n  inherits: false;\n  initial-value: 100%;\n}\n@property --tw-inset-shadow {\n  syntax: \"*\";\n  inherits: false;\n  initial-value: 0 0 #0000;\n}\n@property --tw-inset-shadow-color {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-inset-shadow-alpha {\n  syntax: \"<percentage>\";\n  inherits: false;\n  initial-value: 100%;\n}\n@property --tw-ring-color {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-ring-shadow {\n  syntax: \"*\";\n  inherits: false;\n  initial-value: 0 0 #0000;\n}\n@property --tw-inset-ring-color {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-inset-ring-shadow {\n  syntax: \"*\";\n  inherits: false;\n  initial-value: 0 0 #0000;\n}\n@property --tw-ring-inset {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-ring-offset-width {\n  syntax: \"<length>\";\n  inherits: false;\n  initial-value: 0px;\n}\n@property --tw-ring-offset-color {\n  syntax: \"*\";\n  inherits: false;\n  initial-value: #fff;\n}\n@property --tw-ring-offset-shadow {\n  syntax: \"*\";\n  inherits: false;\n  initial-value: 0 0 #0000;\n}\n@property --tw-blur {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-brightness {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-contrast {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-grayscale {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-hue-rotate {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-invert {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-opacity {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-saturate {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-sepia {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-drop-shadow {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-drop-shadow-color {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-drop-shadow-alpha {\n  syntax: \"<percentage>\";\n  inherits: false;\n  initial-value: 100%;\n}\n@property --tw-drop-shadow-size {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-backdrop-blur {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-backdrop-brightness {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-backdrop-contrast {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-backdrop-grayscale {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-backdrop-hue-rotate {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-backdrop-invert {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-backdrop-opacity {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-backdrop-saturate {\n  syntax: \"*\";\n  inherits: false;\n}\n@property --tw-backdrop-sepia {\n  syntax: \"*\";\n  inherits: false;\n}\n@keyframes pulse {\n  50% {\n    opacity: 0.5;\n  }\n}\n@layer properties {\n  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {\n    *, ::before, ::after, ::backdrop {\n      --tw-space-y-reverse: 0;\n      --tw-border-style: solid;\n      --tw-gradient-position: initial;\n      --tw-gradient-from: #0000;\n      --tw-gradient-via: #0000;\n      --tw-gradient-to: #0000;\n      --tw-gradient-stops: initial;\n      --tw-gradient-via-stops: initial;\n      --tw-gradient-from-position: 0%;\n      --tw-gradient-via-position: 50%;\n      --tw-gradient-to-position: 100%;\n      --tw-leading: initial;\n      --tw-font-weight: initial;\n      --tw-tracking: initial;\n      --tw-shadow: 0 0 #0000;\n      --tw-shadow-color: initial;\n      --tw-shadow-alpha: 100%;\n      --tw-inset-shadow: 0 0 #0000;\n      --tw-inset-shadow-color: initial;\n      --tw-inset-shadow-alpha: 100%;\n      --tw-ring-color: initial;\n      --tw-ring-shadow: 0 0 #0000;\n      --tw-inset-ring-color: initial;\n      --tw-inset-ring-shadow: 0 0 #0000;\n      --tw-ring-inset: initial;\n      --tw-ring-offset-width: 0px;\n      --tw-ring-offset-color: #fff;\n      --tw-ring-offset-shadow: 0 0 #0000;\n      --tw-blur: initial;\n      --tw-brightness: initial;\n      --tw-contrast: initial;\n      --tw-grayscale: initial;\n      --tw-hue-rotate: initial;\n      --tw-invert: initial;\n      --tw-opacity: initial;\n      --tw-saturate: initial;\n      --tw-sepia: initial;\n      --tw-drop-shadow: initial;\n      --tw-drop-shadow-color: initial;\n      --tw-drop-shadow-alpha: 100%;\n      --tw-drop-shadow-size: initial;\n      --tw-backdrop-blur: initial;\n      --tw-backdrop-brightness: initial;\n      --tw-backdrop-contrast: initial;\n      --tw-backdrop-grayscale: initial;\n      --tw-backdrop-hue-rotate: initial;\n      --tw-backdrop-invert: initial;\n      --tw-backdrop-opacity: initial;\n      --tw-backdrop-saturate: initial;\n      --tw-backdrop-sepia: initial;\n    }\n  }\n}\n";
 const SHUFFLE_HOME_HTML = "\n<nav class=\"border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50 py-4 px-6 md:px-12\">\n<div class=\"max-w-7xl mx-auto flex items-center justify-between\">\n<div class=\"flex items-center gap-3\">\n<div class=\"w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100\">\n<svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path>\n</svg>\n</div>\n<span class=\"font-heading font-bold text-xl tracking-tight text-slate-900\">Smart Inventory</span>\n</div>\n<div class=\"hidden lg:flex items-center gap-8\">\n<a class=\"text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors\" href=\"#dashboard\">Dashboard</a>\n<a class=\"text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 pb-1\" href=\"#operations\">Op\u00e9rations</a>\n<a class=\"text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors\" href=\"#associations\">Associations</a>\n<a class=\"text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors\" href=\"#inventaire\">Inventaire</a>\n<a class=\"text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors flex items-center gap-1.5\" href=\"#assistant-ai\">\n<span>Assistant AI</span>\n<span class=\"px-1.5 py-0.5 text-[10px] bg-indigo-100 text-indigo-700 font-bold rounded-full uppercase tracking-wider\">New</span>\n</a>\n</div>\n<div class=\"flex items-center gap-4\">\n<a class=\"hidden sm:inline-flex text-sm font-medium text-slate-600 hover:text-slate-900\" data-auth-link=\"true\" href=\"#login\">Connexion</a>\n<a class=\"px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm hover:shadow-indigo-100 hover:shadow-lg\" data-auth-link=\"true\" href=\"#login\">Essai gratuit</a>\n</div>\n</div>\n</nav>\n<section class=\"py-16 md:py-24 px-6 md:px-12 bg-gradient-to-b from-white via-[#fafbfe] to-slate-50\">\n<div class=\"max-w-7xl mx-auto text-center\">\n<span class=\"inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-xs font-semibold text-indigo-700 mb-6\">\n<span class=\"w-2 h-2 rounded-full bg-indigo-600 animate-pulse\"></span>\n            Red\u00e9finir la gestion d'inventaire SaaS\n          </span>\n<h1 class=\"font-heading text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight\">\n            Pilotez vos <span class=\"shuffleHeroStockHighlight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-800\">Op\u00e9rations de Stock</span> et de Caisse en un seul \u00e9cran\n          </h1>\n<p class=\"mt-6 text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed\">\n            Importez vos catalogues de pharmacies, automatisez les rapprochements de caisse et synchronisez votre comptabilit\u00e9 avec un tableau de bord ultra-fluide.\n          </p>\n<div class=\"mt-10 flex flex-wrap justify-center gap-4\">\n<a class=\"px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition-all shadow-md\" data-auth-link=\"true\" href=\"#login\">Acc\u00e9der \u00e0 l'application</a>\n<a class=\"px-6 py-3.5 bg-white border border-slate-200 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2\" href=\"#demo\">\n<svg class=\"w-5 h-5 text-slate-400\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path><path d=\"M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path></svg>\n              Voir la d\u00e9mo interactive\n            </a>\n</div>\n</div>\n</section>\n<section class=\"py-12 pb-24 px-4 md:px-8 bg-slate-50\" id=\"operations-panel\">\n<div class=\"max-w-7xl mx-auto\">\n<div class=\"bg-white rounded-2xl border border-slate-200/80 shadow-xl overflow-hidden\">\n<div class=\"border-b border-slate-100 bg-slate-50/50 px-6 py-4 flex items-center justify-between\">\n<div class=\"flex items-center gap-2\">\n<div class=\"flex gap-1.5\">\n<span class=\"w-3 h-3 rounded-full bg-rose-400\"></span>\n<span class=\"w-3 h-3 rounded-full bg-amber-400\"></span>\n<span class=\"w-3 h-3 rounded-full bg-emerald-400\"></span>\n</div>\n<span class=\"text-xs font-semibold text-slate-500 ml-4 font-mono\">app.smartinventory.io/operations</span>\n</div>\n<div class=\"flex items-center gap-2\">\n<span class=\"text-xs text-slate-400 bg-slate-200/50 px-2 py-1 rounded\">2026 Stable</span>\n</div>\n</div>\n<div class=\"p-6 md:p-8 space-y-12\">\n<div>\n<div class=\"flex items-center gap-3 mb-6\">\n<div class=\"w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600\">\n<svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path></svg>\n</div>\n<div>\n<h3 class=\"font-heading text-lg font-bold text-slate-900\">Actions Inventaire</h3>\n<p class=\"text-xs text-slate-500\">G\u00e9rez vos importations de stocks et synchronisez vos fichiers en un clic.</p>\n</div>\n</div>\n<div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4\">\n<div class=\"p-5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-md hover:border-indigo-100 transition-all flex flex-col justify-between\">\n<div>\n<span class=\"p-2.5 rounded-lg bg-indigo-50 text-indigo-600 inline-block mb-3\">\n<svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path></svg>\n</span>\n<h4 class=\"font-semibold text-sm text-slate-900\">Importer CSV pharmacie</h4>\n<p class=\"text-xs text-slate-500 mt-1\">Mettez \u00e0 jour le catalogue complet de votre officine.</p>\n</div>\n<button class=\"mt-4 w-full py-2 bg-white border border-slate-200 hover:border-indigo-600 hover:text-indigo-600 text-xs font-semibold text-slate-700 rounded-lg transition-colors\">Choisir CSV</button>\n</div>\n<div class=\"p-5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-md hover:border-indigo-100 transition-all flex flex-col justify-between\">\n<div>\n<span class=\"p-2.5 rounded-lg bg-emerald-50 text-emerald-600 inline-block mb-3\">\n<svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path></svg>\n</span>\n<h4 class=\"font-semibold text-sm text-slate-900\">Importer associations</h4>\n<p class=\"text-xs text-slate-500 mt-1\">Associez automatiquement vos codes barres et r\u00e9f\u00e9rences.</p>\n</div>\n<button class=\"mt-4 w-full py-2 bg-white border border-slate-200 hover:border-indigo-600 hover:text-indigo-600 text-xs font-semibold text-slate-700 rounded-lg transition-colors\">Choisir CSV</button>\n</div>\n<div class=\"p-5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-md hover:border-indigo-100 transition-all flex flex-col justify-between\">\n<div>\n<span class=\"p-2.5 rounded-lg bg-rose-50 text-rose-600 inline-block mb-3\">\n<svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-16v1a3 3 0 003 3h10M9 3h6m2 5V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path></svg>\n</span>\n<h4 class=\"font-semibold text-sm text-slate-900\">Supprimer stock manquant</h4>\n<p class=\"text-xs text-slate-500 mt-1\">Nettoyez votre base de donn\u00e9es des entr\u00e9es obsol\u00e8tes.</p>\n</div>\n<button class=\"mt-4 w-full py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-semibold rounded-lg transition-colors\">Ex\u00e9cuter</button>\n</div>\n<div class=\"p-5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-md hover:border-indigo-100 transition-all flex flex-col justify-between\">\n<div>\n<span class=\"p-2.5 rounded-lg bg-amber-50 text-amber-600 inline-block mb-3\">\n<svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M15 12a3 3 0 11-6 0 3 3 0 016 0z\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path><path d=\"M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path></svg>\n</span>\n<h4 class=\"font-semibold text-sm text-slate-900\">Scanner &amp; V\u00e9rifier</h4>\n<p class=\"text-xs text-slate-500 mt-1\">Contr\u00f4le rapide des \u00e9carts d'inventaire physiques.</p>\n</div>\n<button class=\"mt-4 w-full py-2 bg-white border border-slate-200 hover:border-indigo-600 hover:text-indigo-600 text-xs font-semibold text-slate-700 rounded-lg transition-colors\">Scanner</button>\n</div>\n</div>\n</div>\n<div>\n<div class=\"flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-t border-slate-100 pt-8\">\n<div class=\"flex items-center gap-3\">\n<div class=\"w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600\">\n<svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 00-2 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path></svg>\n</div>\n<div>\n<h3 class=\"font-heading text-lg font-bold text-slate-900\">Op\u00e9rations de caisse</h3>\n<p class=\"text-xs text-slate-500\">Suivi des flux financiers entrants et sortants.</p>\n</div>\n</div>\n<div class=\"flex gap-3\">\n<div class=\"flex items-center gap-2 px-3 py-1.5 rounded-lg border border-rose-100 bg-rose-50/50\">\n<span class=\"w-1.5 h-1.5 rounded-full bg-rose-600\"></span>\n<span class=\"text-xs text-rose-800 font-semibold\">Montant manquant: 0 DH</span>\n</div>\n<div class=\"flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-100 bg-emerald-50/50\">\n<span class=\"w-1.5 h-1.5 rounded-full bg-emerald-600\"></span>\n<span class=\"text-xs text-emerald-800 font-semibold\">Montant surplus: 0 DH</span>\n</div>\n</div>\n</div>\n<div class=\"grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3\">\n<div class=\"p-4 rounded-xl border border-slate-100 bg-slate-50/20 hover:bg-white hover:shadow-sm transition-all text-center\">\n<span class=\"text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1\">Retrait par jour</span>\n<span class=\"text-base font-bold text-slate-800 block mb-2\">- DH 0</span>\n<button class=\"px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700 rounded\">D\u00e9tails</button>\n</div>\n<div class=\"p-4 rounded-xl border border-slate-100 bg-slate-50/20 hover:bg-white hover:shadow-sm transition-all text-center\">\n<span class=\"text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1\">Versement global</span>\n<span class=\"text-base font-bold text-slate-800 block mb-2\">- DH 0</span>\n<button class=\"px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700 rounded\">D\u00e9tails</button>\n</div>\n<div class=\"p-4 rounded-xl border border-slate-100 bg-slate-50/20 hover:bg-white hover:shadow-sm transition-all text-center\">\n<span class=\"text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1\">Retraits Global</span>\n<span class=\"text-base font-bold text-slate-800 block mb-2\">- DH 0</span>\n<button class=\"px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700 rounded\">D\u00e9tails</button>\n</div>\n<div class=\"p-4 rounded-xl border border-slate-100 bg-slate-50/20 hover:bg-white hover:shadow-sm transition-all text-center\">\n<span class=\"text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1\">B\u00e9n\u00e9fice Net</span>\n<span class=\"text-base font-bold text-slate-800 block mb-2\">+ DH 0</span>\n<button class=\"px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700 rounded\">D\u00e9tails</button>\n</div>\n<div class=\"p-4 rounded-xl border border-slate-100 bg-slate-50/20 hover:bg-white hover:shadow-sm transition-all text-center\">\n<span class=\"text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1\">R\u00e8glements re\u00e7us</span>\n<span class=\"text-base font-bold text-slate-800 block mb-2\">+ DH 0</span>\n<button class=\"px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700 rounded\">D\u00e9tails</button>\n</div>\n<div class=\"p-4 rounded-xl border border-slate-100 bg-slate-50/20 hover:bg-white hover:shadow-sm transition-all text-center\">\n<span class=\"text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1\">R\u00e8glements \u00e0 payer</span>\n<span class=\"text-base font-bold text-slate-800 block mb-2\">- DH 0</span>\n<button class=\"px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[10px] font-semibold text-slate-700 rounded\">D\u00e9tails</button>\n</div>\n</div>\n</div>\n<div>\n<div class=\"flex items-center gap-3 mb-6 border-t border-slate-100 pt-8\">\n<div class=\"w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600\">\n<svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path></svg>\n</div>\n<div>\n<h3 class=\"font-heading text-lg font-bold text-slate-900\">Exports et Sauvegardes locales</h3>\n<p class=\"text-xs text-slate-500\">S\u00e9curisez vos donn\u00e9es critiques et exportez vos tables au format standard.</p>\n</div>\n</div>\n<div class=\"grid grid-cols-1 md:grid-cols-3 gap-4\">\n<div class=\"p-5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-md transition-all flex justify-between items-center\">\n<div>\n<h4 class=\"font-semibold text-sm text-slate-900\">Catalogue de produits</h4>\n<p class=\"text-xs text-slate-500 mt-0.5\">Export complet de la base articles.</p>\n</div>\n<button class=\"px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition-colors\">Exporter</button>\n</div>\n<div class=\"p-5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-md transition-all flex justify-between items-center\">\n<div>\n<h4 class=\"font-semibold text-sm text-slate-900\">Historique des ventes</h4>\n<p class=\"text-xs text-slate-500 mt-0.5\">Exportez toutes les sessions actives.</p>\n</div>\n<button class=\"px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition-colors\">Exporter</button>\n</div>\n<div class=\"p-5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-md transition-all flex justify-between items-center\">\n<div>\n<h4 class=\"font-semibold text-sm text-slate-900\">Sauvegarde Compl\u00e8te (JSON)</h4>\n<p class=\"text-xs text-slate-500 mt-0.5\">Fichier de restauration complet.</p>\n</div>\n<button class=\"px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors\">Cr\u00e9er backup</button>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</section>\n<section class=\"py-20 px-6 md:px-12 bg-white\">\n<div class=\"max-w-7xl mx-auto\">\n<div class=\"grid lg:grid-cols-12 gap-12 items-center\">\n<div class=\"lg:col-span-5 space-y-6\">\n<span class=\"text-sm font-bold tracking-widest text-indigo-600 uppercase\">Algorithmes intelligents</span>\n<h2 class=\"font-heading text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight\">\n                L'Assistant AI au service de votre rentabilit\u00e9\n              </h2>\n<p class=\"text-slate-600 leading-relaxed\">\n                Notre assistant intelligent analyse en continu vos historiques de vente pour anticiper les ruptures de stock, sugg\u00e9rer des ajustements de prix automatiques et optimiser vos commandes fournisseurs.\n              </p>\n<div class=\"space-y-4 pt-4\">\n<div class=\"flex items-start gap-3.5\">\n<div class=\"mt-1 w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0\">\n<svg class=\"w-3.5 h-3.5\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M5 13l4 4L19 7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\"></path></svg>\n</div>\n<div>\n<h4 class=\"font-bold text-slate-900 text-sm\">D\u00e9tection intelligente d'anomalies de caisse</h4>\n<p class=\"text-xs text-slate-500 mt-0.5\">Rep\u00e9rez instantan\u00e9ment les \u00e9carts injustifi\u00e9s entre stock r\u00e9el et virtuel.</p>\n</div>\n</div>\n<div class=\"flex items-start gap-3.5\">\n<div class=\"mt-1 w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0\">\n<svg class=\"w-3.5 h-3.5\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M5 13l4 4L19 7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2.5\"></path></svg>\n</div>\n<div>\n<h4 class=\"font-bold text-slate-900 text-sm\">Recommandations pr\u00e9dictives</h4>\n<p class=\"text-xs text-slate-500 mt-0.5\">Sachez exactement quels produits commander avant la haute saison.</p>\n</div>\n</div>\n</div>\n</div>\n<div class=\"lg:col-span-7\">\n<div class=\"p-6 md:p-8 rounded-2xl bg-slate-900 text-white relative overflow-hidden shadow-2xl\">\n<div class=\"absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl\"></div>\n<div class=\"flex items-center justify-between border-b border-slate-800 pb-4 mb-6\">\n<div class=\"flex items-center gap-2\">\n<div class=\"w-3 h-3 rounded-full bg-indigo-500 animate-pulse\"></div>\n<span class=\"font-mono text-xs text-slate-400\">Assistant AI connect\u00e9</span>\n</div>\n<span class=\"text-xs px-2 py-1 bg-slate-800 rounded text-indigo-300 font-mono\">v2.4-stable</span>\n</div>\n<div class=\"space-y-4 font-mono text-sm\">\n<div class=\"text-slate-400\">&gt; Analyse des ventes de la semaine...</div>\n<div class=\"text-indigo-300\">&gt; [ALERTE] \u00c9cart de -12 unit\u00e9s d\u00e9tect\u00e9 sur la r\u00e9f\u00e9rence 'Parac\u00e9tamol 500mg'.</div>\n<div class=\"p-4 rounded-xl bg-slate-800/80 border border-slate-700/50 space-y-2\">\n<p class=\"text-xs text-slate-300 font-sans\">\"Il semblerait qu'un lot re\u00e7u le 12/03 n'ait pas \u00e9t\u00e9 scann\u00e9 \u00e0 l'entr\u00e9e. Voulez-vous que je r\u00e9gularise l'association de stock ?\"</p>\n<div class=\"flex gap-2 pt-2\">\n<button class=\"px-3 py-1.5 bg-indigo-600 text-white font-sans text-xs font-semibold rounded hover:bg-indigo-700 transition-colors\">Oui, r\u00e9gulariser</button>\n<button class=\"px-3 py-1.5 bg-transparent border border-slate-600 text-slate-300 font-sans text-xs font-semibold rounded hover:bg-slate-700 transition-colors\">Ignorer</button>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</section>\n<section class=\"py-20 px-6 md:px-12 bg-slate-900 text-white\">\n<div class=\"max-w-5xl mx-auto text-center space-y-8\">\n<h2 class=\"font-heading text-3xl md:text-5xl font-extrabold tracking-tight\">\n            Pr\u00eat \u00e0 passer \u00e0 la vitesse sup\u00e9rieure ?\n          </h2>\n<p class=\"text-slate-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed\">\n            Rejoignez les dizaines de pharmacies et commerces qui font confiance \u00e0 Smart Inventory pour s\u00e9curiser, optimiser et automatiser leur gestion quotidienne.\n          </p>\n<div class=\"pt-4 flex flex-wrap justify-center gap-4\">\n<a class=\"px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20\" data-auth-link=\"true\" href=\"#login\">Commencer l'essai gratuit de 14 jours</a>\n<a class=\"px-8 py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl transition-all\" href=\"#contact\">Parler \u00e0 un expert</a>\n</div>\n<p class=\"text-xs text-slate-500\">Aucune carte de cr\u00e9dit requise. Installation et synchronisation en moins de 10 minutes.</p>\n</div>\n</section>\n<footer class=\"border-t border-slate-100 bg-white py-12 px-6 md:px-12\">\n<div class=\"max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6\">\n<div class=\"flex items-center gap-3\">\n<div class=\"w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white\">\n<svg class=\"w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewbox=\"0 0 24 24\"><path d=\"M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"></path></svg>\n</div>\n<span class=\"font-heading font-bold text-base text-slate-900\">Smart Inventory</span>\n</div>\n<div class=\"flex flex-wrap justify-center gap-8 text-sm text-slate-500\">\n<a class=\"hover:text-indigo-600 transition-colors\" href=\"#politique\">Politique de confidentialit\u00e9</a>\n<a class=\"hover:text-indigo-600 transition-colors\" href=\"#cgu\">Conditions d'utilisation</a>\n<a class=\"hover:text-indigo-600 transition-colors\" href=\"#contact\">Contact &amp; Support</a>\n</div>\n<p class=\"text-xs text-slate-400\">\u00a9 2026 Smart Inventory. Tous droits r\u00e9serv\u00e9s.</p>\n</div>\n</footer>\n";
 
 function ShuffleExactHomepage({goLogin}){

@@ -1,0 +1,7 @@
+V143 - Caisse dashboard redesign + global menu redesign
+
+- Redesigned the cash dashboard to follow the Shuffle caisse dashboard visual structure.
+- Updated the authenticated application chrome so all internal pages use the same Shuffle-style menu/header system.
+- Added a global top navigation, refined sidebar, and unified header account area.
+- Kept all existing business logic and cash calculations intact.
+- Build verified successfully with `npm run build`.
