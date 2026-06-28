@@ -1,0 +1,22 @@
+V148 - Dashboard Caisse content restored from V142 with current design
+
+- Reworked only the Cash Dashboard content area.
+- Restored the same V142 dashboard content/cards:
+  - Balance due progress
+  - Real time CR balance
+  - Tot. montant manquant
+  - Tot. montant surplus
+  - Tot. dépenses
+  - Balance due
+  - Montant manquant
+  - Montant surplus
+  - Retiré
+  - Dépenses
+  - Tot. vente
+  - C. fermeture (théorique)
+  - Nouvelle C. fermeture
+  - Écart cash comptée vs calculée
+- Kept the current top-only menu and footer unchanged.
+- Kept the current Shuffle visual style for the dashboard cards.
+- Restored V142 date picker behavior with calendar popover for recorded operation dates.
+- Frontend build tested successfully with npm run build.
