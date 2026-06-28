@@ -1,0 +1,16 @@
+V157 - Balance due and tolerance limits
+
+- Updated Dashboard Caisse "Balance due progress" logic.
+- Replaced the old balanced-days progress with a cash-gap tolerance progress.
+- Added configurable tolerance limit in DH for cash gap progression.
+- Balance due now represents the daily cash gap:
+  - surplus => positive amount (+) to withdraw from cash
+  - shortage => negative amount (-) to add to cash
+  - zero => no action required
+- Added a descriptive action title under the Balance due value.
+- Added configurable monthly expense limit in DH.
+- Tot. dépenses progress is now based on monthly expenses / monthly expense limit instead of expenses / sales.
+- Added limit edit controls in Dashboard Caisse.
+- Added settings entries in Operations for tolerance limit and monthly expense limit.
+- Kept menu and footer unchanged.
+- Frontend build tested successfully.

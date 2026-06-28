@@ -697,9 +697,9 @@ function Operations({me,setTab,logout,hideChrome=false}){
   const withdrawnCents = Number(cashCurrent.management.withdrawnCents || 0);
   const depositsCents = Number(cashCurrent.management.depositsCents || 0);
   const newCashBalanceCents = getClosingRealCentsForDate(cashStore, cashDate);
-  const cashToWithdrawCents = Math.max(0, cashCountedCents - 300000);
+  const cashToWithdrawCents = Math.max(0, cashCountedCents - reserveCents);
   const closingTheoreticalCents = getTheoreticalClosingCentsForDate(cashStore, cashDate);
-  const currentCashMetrics = useMemo(()=>buildCashDayMetrics(cashDate, cashCurrent, cashStore),[cashDate,cashCurrent,cashStore]);
+  const currentCashMetrics = useMemo(()=>buildCashDayMetrics(cashDate, cashCurrent, cashStore, reserveCents),[cashDate,cashCurrent,cashStore,reserveCents]);
 
   function saveCashDay(day){
     const updated={...cashStore,[cashDate]:day};
@@ -756,7 +756,7 @@ function Operations({me,setTab,logout,hideChrome=false}){
     {key:"depositsCents", title:"Dépôts / ajouts", value:depositsCents, description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"creditSettlementCents", title:"Règlement de crédit", value:creditSettlementCents, description:"Saisir le règlement de crédit.", type:"+", editable:true, tone:"indigo", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"},
-    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 3000 DH, minimum 0.", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
+    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - réserve configurable, minimum 0.", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"withdrawnCents", title:"Retiré (réel)", value:withdrawnCents, description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"closingRealCents", title:"Nouvelle C. fermeture", value:newCashBalanceCents, description:"Calcul Excel : C. fermeture (compté) - Retiré (réel).", type:"=", editable:false, tone:"blue", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"counted", title:"C. fermeture (compté)", value:cashCountedCents, description:"Saisir le comptage réel de fermeture avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
@@ -787,6 +787,8 @@ function Operations({me,setTab,logout,hideChrome=false}){
     {icon:"calc", tone:"teal", label:"Remboursement espèce", value:`+ ${formatDH(Number(cashCurrent.management.refundsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("refundsCents","Remboursement espèce",Number(cashCurrent.management.refundsCents || 0),"Saisir les remboursements en espèce.","+","green"))},
     {icon:"box", tone:"indigo", label:"Approvisionnement", value:`~ ${formatDH(depositsCents)}`, actionLabel:"Retour résultats", onClick:()=>openCashMetric("depositsCents")},
     {icon:"image", tone:"fuchsia", label:"Dépenses caisse", value:`+ ${formatDH(expensesCents)}`, actionLabel:"Retour valeur", onClick:openExpenseModal},
+    {icon:"warn", tone:"amber", label:"Limite tolérance écart", value:`= ${formatDH(cashSettings.toleranceLimitCents || 0)}`, actionLabel:"Modifier limite", onClick:()=>setCashOpModal({key:"toleranceLimitCents", title:"Limite tolérance écart", description:"Définir la limite de tolérance utilisée pour la progression de l’écart caisse.", isSetting:true})},
+    {icon:"chart", tone:"indigo", label:"Limite dépenses mois", value:`= ${formatDH(cashSettings.monthlyExpenseLimitCents || 0)}`, actionLabel:"Modifier limite", onClick:()=>setCashOpModal({key:"monthlyExpenseLimitCents", title:"Limite dépenses mensuelles", description:"Définir la limite mensuelle utilisée pour la progression des dépenses.", isSetting:true})},
     {icon:"cart", tone:"orange", label:"Avoirs retournés", value:`~ ${formatDH(Number(cashCurrent.management.returnsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("returnsCents","Avoirs retournés",Number(cashCurrent.management.returnsCents || 0),"Saisir les avoirs retournés.","+","blue"))},
     {icon:"calendar", tone:"cyan", label:"Bons de commandes", value:`= ${formatDH(Number(cashCurrent.management.purchaseOrdersCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("purchaseOrdersCents","Bons de commandes",Number(cashCurrent.management.purchaseOrdersCents || 0),"Saisir les bons de commandes.","=","blue"))},
     {icon:"shield", tone:"lime", label:"C encaissements", value:`= ${formatDH(newCashBalanceCents)}`, actionLabel:"Consulter liste", onClick:()=>openCashMetric("closingRealCents")},
@@ -845,7 +847,14 @@ function Operations({me,setTab,logout,hideChrome=false}){
         <h2>{cashOpModal.title}</h2>
         <p>{cashOpModal.description}</p>
         <div className="foundProduct"><b>Date de caisse</b><small>{cashDate}</small></div>
-        {cashOpModal.key==="counted" ? <>
+        {cashOpModal.isSetting ? <>
+          <div className="foundProduct"><b>Paramètre de caisse</b><small>Valeur utilisée dans Dashboard Caisse.</small></div>
+          <input autoFocus value={moneyInputValue(cashSettings[cashOpModal.key] || 0)} onChange={e=>updateCashSetting(cashOpModal.key,e.target.value)} placeholder="0"/>
+          <div className="cashModalTotalBar">
+            <span>Valeur actuelle</span>
+            <strong>{formatDH(cashSettings[cashOpModal.key] || 0)}</strong>
+          </div>
+        </> : cashOpModal.key==="counted" ? <>
           <div className="cashModalTableWrap">
             <table className="cashMiniTable">
               <thead><tr><th>Quantité</th><th>Bill</th></tr></thead>
@@ -994,7 +1003,11 @@ function defaultCashDay(){
 }
 
 function defaultCashSettings(){
-  return { reserveCents: 300000 };
+  return {
+    reserveCents: 300000,
+    toleranceLimitCents: 50000,
+    monthlyExpenseLimitCents: 1000000
+  };
 }
 
 function getCountedCentsForDate(store, date){
@@ -1529,7 +1542,9 @@ function buildCashDayMetrics(date, dayData, store={}, reserveCents=300000){
   const shortageCents = Math.max(0, closingCalculatedCents - sameDayClosingRealCents);
   const surplusCents = Math.max(0, sameDayClosingRealCents - closingCalculatedCents);
   const gapCents = sameDayClosingRealCents - closingCalculatedCents;
-  const dueBalanceCents = Math.max(0, autoToWithdrawCents - Number(day.management.withdrawnCents || 0));
+  const withdrawalDueCents = Math.max(0, autoToWithdrawCents - Number(day.management.withdrawnCents || 0));
+  const signedBalanceDueCents = gapCents > 0 ? surplusCents : shortageCents > 0 ? -shortageCents : 0;
+  const dueBalanceCents = Math.abs(signedBalanceDueCents);
   const isBalanced = shortageCents===0 && surplusCents===0;
   return {
     date:safeDate,
@@ -1545,6 +1560,8 @@ function buildCashDayMetrics(date, dayData, store={}, reserveCents=300000){
     surplusCents,
     gapCents,
     dueBalanceCents,
+    signedBalanceDueCents,
+    withdrawalDueCents,
     withdrawnCents:Number(day.management.withdrawnCents || 0),
     depositsCents:Number(day.management.depositsCents || 0),
     creditSalesCents:Number(day.management.creditSalesCents || 0),
@@ -1571,8 +1588,8 @@ function buildCashAnomalyAlerts(metrics){
     if(item.surplusCents > 0){
       alerts.push({tone:"warning", label:"Montant surplus", date:item.date, amountCents:item.surplusCents, detail:"Caisse comptée supérieure au théorique"});
     }
-    if(item.dueBalanceCents > 0){
-      alerts.push({tone:"info", label:"Retrait à vérifier", date:item.date, amountCents:item.dueBalanceCents, detail:"Montant théorique non retiré"});
+    if(item.withdrawalDueCents > 0){
+      alerts.push({tone:"info", label:"Retrait à vérifier", date:item.date, amountCents:item.withdrawalDueCents, detail:"Montant théorique non retiré"});
     }
     if(item.totalSalesCents > 0 && item.expensesCents > item.totalSalesCents * 0.35){
       alerts.push({tone:"warning", label:"Dépenses élevées", date:item.date, amountCents:item.expensesCents, detail:"Dépenses élevées vs ventes"});
@@ -1614,8 +1631,10 @@ function CashAdminCard({title, children, meta, right}){
 
 function CashDashboardAdmin(){
   const [store] = useState(()=>loadLS(LS_CASH_REGISTER,{}));
-  const [cashSettings] = useState(()=>({ ...defaultCashSettings(), ...(loadLS(LS_CASH_SETTINGS,{}) || {}) }));
+  const [cashSettings,setCashSettings] = useState(()=>({ ...defaultCashSettings(), ...(loadLS(LS_CASH_SETTINGS,{}) || {}) }));
   const reserveCents = Number(cashSettings.reserveCents || 0);
+  const toleranceLimitCents = Math.max(0, Number(cashSettings.toleranceLimitCents || 0));
+  const monthlyExpenseLimitCents = Math.max(0, Number(cashSettings.monthlyExpenseLimitCents || 0));
   const dashboardToday = todayISO();
   const allDates = useMemo(()=>Object.keys(store).sort(),[store]);
   const dashboardDates = useMemo(()=>allDates.filter(date=>hasCashDayActivity(store[date])),[allDates,store]);
@@ -1678,10 +1697,16 @@ function CashDashboardAdmin(){
   const monthlyShortageCents = monthMetrics.reduce((sum,x)=>sum + x.shortageCents,0);
   const monthlySurplusCents = monthMetrics.reduce((sum,x)=>sum + x.surplusCents,0);
   const monthlyExpensesCents = monthMetrics.reduce((sum,x)=>sum + x.expensesCents,0);
-  const monthBalancedDays = monthMetrics.filter(x=>x.isBalanced).length;
-  const progressValue = monthMetrics.length ? (monthBalancedDays / monthMetrics.length) * 100 : 0;
-  const monthSalesCents = monthMetrics.reduce((sum,x)=>sum + x.totalSalesCents,0);
-  const expensesProgress = monthSalesCents>0 ? Math.min(100, (monthlyExpensesCents / monthSalesCents) * 100) : 0;
+  const selectedBalanceDueSignedCents = Number(selectedMetrics.signedBalanceDueCents || 0);
+  const selectedBalanceDueAbsCents = Math.abs(selectedBalanceDueSignedCents);
+  const balanceDueProgressValue = toleranceLimitCents > 0 ? Math.min(100, (selectedBalanceDueAbsCents / toleranceLimitCents) * 100) : 0;
+  const expensesProgress = monthlyExpenseLimitCents > 0 ? Math.min(100, (monthlyExpensesCents / monthlyExpenseLimitCents) * 100) : 0;
+  const balanceDueActionTitle = selectedBalanceDueSignedCents > 0
+    ? "Montant à retirer de la caisse"
+    : selectedBalanceDueSignedCents < 0
+      ? "Montant à ajouter à la caisse"
+      : "Aucune action requise";
+  const balanceDueTone = selectedBalanceDueSignedCents > 0 ? "positive" : selectedBalanceDueSignedCents < 0 ? "negative" : "";
   const dayAnomalyAlerts = useMemo(()=>buildCashAnomalyAlerts(selectedMetrics),[selectedMetrics]);
   const monthAnomalyAlerts = useMemo(()=>buildCashAnomalyAlerts(monthMetrics),[monthMetrics]);
   const anomalyAlerts = anomalyScope === "month" ? monthAnomalyAlerts : dayAnomalyAlerts;
@@ -1693,6 +1718,22 @@ function CashDashboardAdmin(){
   useEffect(()=>{
     setAnomalyIndex(0);
   },[anomalyScope, selectedDate, selectedMonth, dayAnomalyAlerts.length, monthAnomalyAlerts.length]);
+
+  function updateDashboardCashSetting(key,value){
+    const updated={...cashSettings,[key]:parseMoneyToCents(value)};
+    setCashSettings(updated);
+    saveLS(LS_CASH_SETTINGS,updated);
+  }
+
+  function promptDashboardCashSetting(key,label,currentCents){
+    const next=prompt(`${label} (DH):`, moneyInputValue(currentCents));
+    if(next===null) return;
+    updateDashboardCashSetting(key,next);
+  }
+
+  function limitMeta(label,key,currentCents){
+    return <><span>{label}</span><button type="button" className="cashLimitEditBtn" onClick={()=>promptDashboardCashSetting(key,label,currentCents)}>Limite: {formatDH(currentCents)}</button></>;
+  }
 
   function cashNumber(cents, decimals=1){
     return ((Number(cents) || 0) / 100).toFixed(decimals);
@@ -1875,6 +1916,16 @@ function CashDashboardAdmin(){
     </div>;
   }
 
+  function CashShuffleSignedAmount({cents, decimals=1, tone="", large=false, xl=false}){
+    const safe = Number(cents || 0);
+    const sign = safe > 0 ? "+" : safe < 0 ? "-" : "";
+    return <CashShuffleAmount tone={tone} large={large} xl={xl}>{`${sign}${cashNumber(Math.abs(safe), decimals)}`}</CashShuffleAmount>;
+  }
+
+  function CashShuffleActionNote({text}){
+    return <div className="cashShuffleActionNote">{text}</div>;
+  }
+
   function CashShuffleProgress({value,label,subLabel}){
     const safe = Math.max(0, Math.min(100, Number(value) || 0));
     return <div className="cashShuffleProgressRow">
@@ -1971,24 +2022,24 @@ function CashDashboardAdmin(){
 
     <div className="cashShuffleGrid cashShuffleContentV142">
       <div className="cashShuffleSection cashShuffleSectionTop">
-      <CashShuffleCard title="Balance due progress" meta={cardMeta(`${monthMetrics.length} date(s) enregistrée(s)`)} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="indigo">
-        <CashShuffleProgress value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
+      <CashShuffleCard title="Progression écart de caisse" meta={limitMeta("Tolérance écart", "toleranceLimitCents", toleranceLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="indigo">
+        <CashShuffleProgress value={balanceDueProgressValue} label={formatDH(selectedBalanceDueAbsCents)} subLabel={`${Math.round(balanceDueProgressValue)}% de la limite`} />
       </CashShuffleCard>
 
       <CashShuffleCard title="Real time CR balance" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleCardTall cashShuffleBalanceCard">
         <CashShuffleAmount cents={selectedMetrics.countedCents} large />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall cashShuffleCenteredMetric">
+      <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall">
         <CashShuffleAmount cents={monthlyShortageCents} tone="negative" xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall cashShuffleCenteredMetric">
+      <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall">
         <CashShuffleAmount cents={monthlySurplusCents} tone="positive" xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. dépenses" meta={cardMeta("Total mensuel")} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleCenteredMetric cashShuffleExpenseCard" dotTone="amber">
-        <CashShuffleProgress value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthlyExpensesCents > 0 ? (monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Ratio ventes indisponible") : "Aucune dépense enregistrée"} />
+      <CashShuffleCard title="Tot. dépenses" meta={limitMeta("Total mensuel", "monthlyExpenseLimitCents", monthlyExpenseLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="amber">
+        <CashShuffleProgress value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={`${Math.round(expensesProgress)}% de la limite`} />
       </CashShuffleCard>
 
       <CashShuffleCard title="Alertes anomalies" meta={cardMeta(anomalyMetaText)} className="cashShuffleCardTall cashShuffleAnomalyCard" dotTone={anomalyAlerts.length ? "amber" : "emerald"}>
@@ -1998,8 +2049,9 @@ function CashDashboardAdmin(){
       </div>
 
       <div className="cashShuffleSection cashShuffleSectionBottom">
-      <CashShuffleCard title="Balance due" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleMini">
-        <CashShuffleAmount cents={selectedMetrics.dueBalanceCents} />
+      <CashShuffleCard title="Balance due" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleMini cashShuffleBalanceDueActionCard">
+        <CashShuffleSignedAmount cents={selectedBalanceDueSignedCents} tone={balanceDueTone} />
+        <CashShuffleActionNote text={balanceDueActionTitle} />
       </CashShuffleCard>
 
       <CashShuffleCard title="Montant manquant" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleMini">
@@ -2014,8 +2066,8 @@ function CashDashboardAdmin(){
         <CashShuffleAmount cents={selectedMetrics.withdrawnCents} />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Dépenses" meta={cardMeta("Total mensuel")} className="cashShuffleMini" dotTone="amber">
-        <CashShuffleAmount>{Math.round(monthlyExpensesCents/100)}</CashShuffleAmount>
+      <CashShuffleCard title="Dépenses" meta={cardMeta("Jour sélectionné")} className="cashShuffleMini" dotTone="amber">
+        <CashShuffleAmount cents={selectedMetrics.expensesCents} />
       </CashShuffleCard>
 
       </div>

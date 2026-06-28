@@ -10609,55 +10609,51 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   justify-content:flex-end!important;
 }
 
-/* V155 - center monthly cash KPI content and correct expense empty wording */
-.cashShuffleContentV142 .cashShuffleCenteredMetric .cashShuffleMetricBody{
-  flex:1 1 auto!important;
-  width:100%!important;
-  display:flex!important;
+/* V157 - Balance due as signed cash gap + configurable tolerance limits */
+.cashLimitEditBtn{
+  display:inline-flex!important;
   align-items:center!important;
   justify-content:center!important;
-  margin-top:0!important;
-  text-align:center!important;
-}
-.cashShuffleContentV142 .cashShuffleCenteredMetric .cashShuffleAmount{
-  flex-direction:column!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:8px!important;
-  width:100%!important;
-}
-.cashShuffleContentV142 .cashShuffleCenteredMetric .cashShuffleAmount em{
-  font-size:18px!important;
+  min-height:28px!important;
+  padding:0 10px!important;
+  margin-left:6px!important;
+  border-radius:9px!important;
+  border:1px solid #dbe5f0!important;
+  background:#fff!important;
+  color:#475569!important;
+  font-size:11px!important;
+  line-height:1!important;
   font-weight:800!important;
-  color:#94a3b8!important;
-  line-height:1!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.03)!important;
+  cursor:pointer!important;
 }
-.cashShuffleContentV142 .cashShuffleCenteredMetric .cashShuffleAmountXL strong{
-  font-size:44px!important;
-  line-height:1!important;
+.cashLimitEditBtn:hover{
+  border-color:#a5b4fc!important;
+  background:#eef2ff!important;
+  color:#4338ca!important;
 }
-.cashShuffleExpenseCard .cashShuffleProgressRow{
-  width:100%!important;
+.cashShuffleActionNote{
+  margin-top:8px!important;
+  color:#64748b!important;
+  font-size:12px!important;
+  line-height:1.25!important;
+  font-weight:800!important;
+}
+.cashShuffleBalanceDueActionCard .cashShuffleMetricBody{
+  display:flex!important;
   flex-direction:column!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:12px!important;
-  text-align:center!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
 }
-.cashShuffleExpenseCard .cashShuffleRing{
-  width:92px!important;
-  height:92px!important;
-  flex-basis:92px!important;
+.cashShuffleBalanceDueActionCard .cashShuffleAmount strong{
+  font-size:26px!important;
 }
-.cashShuffleExpenseCard .cashShuffleProgressRow span{
-  margin:0 0 6px!important;
-  font-size:14px!important;
-  text-transform:none!important;
-  letter-spacing:0!important;
-  color:#94a3b8!important;
+.cashShuffleProgressCard .cashShuffleCardMeta{
+  gap:6px!important;
 }
-.cashShuffleExpenseCard .cashShuffleProgressRow strong{
-  font-size:24px!important;
-  line-height:1.15!important;
-  letter-spacing:-.025em!important;
+@media(max-width:820px){
+  .cashLimitEditBtn{
+    margin-left:0!important;
+    margin-top:4px!important;
+  }
 }

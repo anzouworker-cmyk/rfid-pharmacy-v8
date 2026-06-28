@@ -1,0 +1,8 @@
+V156 - Dashboard Caisse expense card correction
+
+- Corrected the small "Dépenses" card in Dashboard Caisse.
+- This card now shows daily expenses for the selected day instead of a monthly total.
+- Updated the card meta from "Total mensuel" to "Jour sélectionné".
+- The amount now uses selectedMetrics.expensesCents.
+- Also removed the incorrect "Aucune vente" wording in the monthly expenses card and replaced it with the percentage text consistently.
+- Frontend build tested successfully.
