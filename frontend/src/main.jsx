@@ -3255,12 +3255,9 @@ function MyUsers({auth,me}){
       <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
       <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
       <input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)}/>
-      <div className="pagePermissionBox pagePermissionButtonBox">
+      <div className="pagePermissionBox pagePermissionButtonBox pagePermissionOnlyEditBox">
         <div className="pagePermissionButtonHeader">
-          <div>
-            <strong>Pages visibles</strong>
-            <small>{pages.length} page(s) sélectionnée(s)</small>
-          </div>
+          <strong>Pages visibles</strong>
           <PagePermissionsModalButton
             buttonLabel="Editer"
             title="Pages visibles"
@@ -3270,7 +3267,6 @@ function MyUsers({auth,me}){
             onSave={next=>setPages(next)}
           />
         </div>
-        <PagePermissionSummaryChips ids={pages} options={visiblePageOptions} max={4}/>
       </div>
       <button onClick={createUser}>Créer utilisateur</button>
     </div>
@@ -3286,8 +3282,7 @@ function MyUsers({auth,me}){
             <td>{u.username}</td>
             <td>{u.full_name}</td>
             <td>
-              <div className="pagePermissionCell">
-                <PagePermissionSummaryChips ids={currentPages} options={visiblePageOptions} max={2}/>
+              <div className="pagePermissionCell pagePermissionOnlyEditCell">
                 <PagePermissionsModalButton
                   buttonLabel="Editer"
                   title={`Pages visibles - ${u.username}`}
@@ -3439,12 +3434,9 @@ return <section className="platformPage">
           <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
           <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Peut créer ses propres utilisateurs</label>
         </div>
-        <div className="pagePermissionBox pagePermissionButtonBox">
+        <div className="pagePermissionBox pagePermissionButtonBox pagePermissionOnlyEditBox">
           <div className="pagePermissionButtonHeader">
-            <div>
-              <strong>Pages visibles pour ce client</strong>
-              <small>{pagePermissions.length} page(s) sélectionnée(s)</small>
-            </div>
+            <strong>Pages visibles pour ce client</strong>
             <PagePermissionsModalButton
               buttonLabel="Editer"
               title="Pages visibles du client"
@@ -3454,7 +3446,6 @@ return <section className="platformPage">
               onSave={next=>setPagePermissions(next)}
             />
           </div>
-          <PagePermissionSummaryChips ids={pagePermissions} options={ASSIGNABLE_PAGE_OPTIONS} max={4}/>
         </div>
         <div className="platformModalActions">
           <button type="button" className="platformModalCancel" onClick={()=>setShowCreateModal(false)}>Annuler</button>
@@ -3501,8 +3492,7 @@ return <section className="platformPage">
             }</td>
             <td>{isAdmin ? "Toutes" : (()=>{
               const currentPages=normalizePagePermissions(c.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
-              return <div className="pagePermissionCell">
-                <PagePermissionSummaryChips ids={currentPages} options={ASSIGNABLE_PAGE_OPTIONS} max={2}/>
+              return <div className="pagePermissionCell pagePermissionOnlyEditCell">
                 <PagePermissionsModalButton
                   buttonLabel="Editer"
                   title={`Pages visibles - ${c.username}`}

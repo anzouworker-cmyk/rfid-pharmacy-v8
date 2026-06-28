@@ -1,0 +1,9 @@
+V160 - Pages visibles edit-only + Dashboard Caisse permission fix
+
+- Changed the Pages visibles column to show only the Editer button.
+- Removed selected page chips from the Pages visibles table cells and create forms.
+- Fixed Dashboard Caisse permission persistence.
+- Backend now accepts and returns cashAdmin as an assignable client/user page.
+- Platform admin-only pages platform and dashboardAdmin remain restricted to platform admin.
+- Frontend build tested successfully.
+- Backend Python syntax compilation tested successfully.

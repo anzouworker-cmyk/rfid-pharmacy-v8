@@ -10,23 +10,27 @@ const OPS_INTERNAL_LAYOUT_CSS = `
   .opsInAppRoot .opsActionGrid,
   .opsInAppRoot .opsCashGrid,
   .opsInAppRoot .opsExportGrid{width:100%!important;}
-  .opsInAppRoot .opsActionGrid{grid-template-columns:repeat(auto-fit,minmax(270px,1fr))!important;}
-  .opsInAppRoot .opsCashGrid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))!important;}
-  .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))!important;}
+  .opsInAppRoot .opsActionGrid{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))!important;}
+  .opsInAppRoot .opsCashGrid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))!important;}
+  .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))!important;}
   .opsInAppRoot .opsActionGrid > *,
   .opsInAppRoot .opsCashGrid > *,
   .opsInAppRoot .opsExportGrid > *{min-width:0;}
   .opsInAppRoot .opsActionGrid > *,
-  .opsInAppRoot .opsCashGrid > button{min-height:160px;}
-  .opsInAppRoot .opsCashGrid > button{padding:24px!important;}
-  .opsInAppRoot .opsCashGrid .font-heading.text-xl{font-size:1.55rem!important;line-height:1.9rem!important;}
+  .opsInAppRoot .opsCashGrid > button{min-height:190px;}
+  .opsInAppRoot .opsCashGrid > button{padding:26px!important;}
+  .opsInAppRoot .opsCashGrid .font-heading.text-xl{font-size:1.8rem!important;line-height:2.1rem!important;}
   .opsInAppRoot .opsActionGrid h3,
-  .opsInAppRoot .opsExportGrid h3{font-size:0.98rem!important;}
+  .opsInAppRoot .opsExportGrid h3{font-size:1.08rem!important;line-height:1.4!important;}
   .opsInAppRoot .opsPageHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 32px!important;}
-  .opsInAppRoot .opsPageHeading h1{font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:30px!important;line-height:1.15!important;font-weight:800!important;letter-spacing:-.025em!important;color:#0f172a!important;margin:0!important;}
-  .opsInAppRoot .opsPageHeading p{margin-top:6px!important;font-size:14px!important;line-height:1.5!important;font-weight:500!important;color:#64748b!important;}
-  .opsInAppRoot .opsSectionTitle h2{font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:20px!important;line-height:1.2!important;font-weight:800!important;letter-spacing:-.025em!important;margin:0 0 6px!important;color:#0f172a!important;}
+  .opsInAppRoot .opsPageHeading h1{font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:38px!important;line-height:1.08!important;font-weight:800!important;letter-spacing:-.03em!important;color:#0f172a!important;margin:0!important;}
+  .opsInAppRoot .opsPageHeading p{margin-top:10px!important;font-size:16px!important;line-height:1.6!important;font-weight:500!important;color:#64748b!important;max-width:780px!important;}
+  .opsInAppRoot .opsSectionTitle h2{font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:24px!important;line-height:1.18!important;font-weight:800!important;letter-spacing:-.028em!important;margin:0 0 8px!important;color:#0f172a!important;}
+  .opsInAppRoot .opsSectionTitle p{font-size:14px!important;line-height:1.6!important;color:#64748b!important;}
+  .opsInAppRoot .opsPanelWrap{background:#fff!important;border:1px solid rgba(226,232,240,.95)!important;border-radius:26px!important;box-shadow:0 18px 40px rgba(15,23,42,.06)!important;padding:30px!important;}
   @media (max-width:900px){
+    .opsInAppRoot .opsPanelWrap{padding:22px!important;border-radius:22px!important;}
+    .opsInAppRoot .opsPageHeading h1{font-size:30px!important;}
     .opsInAppRoot .opsActionGrid,
     .opsInAppRoot .opsCashGrid,
     .opsInAppRoot .opsExportGrid{grid-template-columns:1fr!important;}
@@ -100,12 +104,12 @@ function InventoryActionCard({icon,tone,badge,badgeClass,title,desc,label,onClic
   const iconBg = {violet:"bg-violet-50", blue:"bg-blue-50", emerald:"bg-emerald-50", amber:"bg-amber-50", rose:"bg-rose-50", teal:"bg-teal-50"}[tone] || "bg-indigo-50";
   const iconText = {violet:"text-violet-600", blue:"text-blue-600", emerald:"text-emerald-600", amber:"text-amber-600", rose:"text-rose-600", teal:"text-teal-600"}[tone] || "text-indigo-600";
   const inner = <>
-    <div className="flex items-center gap-3 mb-4"><div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center`}><SimpleIcon type={icon} className={`w-5 h-5 ${iconText}`}/></div><span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badgeClass}`}>{badge}</span></div>
-    <h3 className="font-heading font-semibold text-sm text-slate-900 mb-1">{title}</h3>
-    <p className="text-xs text-slate-500 mb-4 leading-relaxed">{desc}</p>
-    <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">{label}<ChevronIcon className="w-3 h-3"/></span>
+    <div className="flex items-center gap-4 mb-5"><div className={`w-12 h-12 rounded-2xl ${iconBg} flex items-center justify-center`}><SimpleIcon type={icon} className={`w-6 h-6 ${iconText}`}/></div><span className={`text-sm font-semibold px-2.5 py-1 rounded-full ${badgeClass}`}>{badge}</span></div>
+    <h3 className="font-heading font-semibold text-slate-900 mb-2">{title}</h3>
+    <p className="text-sm text-slate-500 mb-5 leading-relaxed">{desc}</p>
+    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">{label}<ChevronIcon className="w-3.5 h-3.5"/></span>
   </>;
-  const cls="group bg-white rounded-2xl border border-slate-200/80 p-5 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300";
+  const cls="group bg-white rounded-2xl border border-slate-200/80 p-6 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300";
   if(file) return <label className={`${cls} ops-file-label cursor-pointer`}>{inner}<input type="file" accept={file} onChange={e=>onFile?.(e.target.files?.[0])}/></label>;
   return <button type="button" onClick={onClick} className={`${cls} text-left cursor-pointer`}>{inner}</button>;
 }
@@ -113,11 +117,11 @@ function InventoryActionCard({icon,tone,badge,badgeClass,title,desc,label,onClic
 function CashMetric({icon,tone,label,value,actionLabel,onClick,muted=false}){
   const bg = {green:"bg-green-50", sky:"bg-sky-50", violet:"bg-violet-50", amber:"bg-amber-50", rose:"bg-rose-50", teal:"bg-teal-50", indigo:"bg-indigo-50", fuchsia:"bg-fuchsia-50", orange:"bg-orange-50", cyan:"bg-cyan-50", lime:"bg-lime-50", pink:"bg-pink-50"}[tone] || "bg-indigo-50";
   const text = {green:"text-green-600", sky:"text-sky-600", violet:"text-violet-600", amber:"text-amber-600", rose:"text-rose-600", teal:"text-teal-600", indigo:"text-indigo-600", fuchsia:"text-fuchsia-600", orange:"text-orange-600", cyan:"text-cyan-600", lime:"text-lime-600", pink:"text-pink-600"}[tone] || "text-indigo-600";
-  return <button type="button" onClick={onClick} className="bg-white rounded-2xl border border-slate-200/80 p-5 text-left cursor-pointer shadow-sm shadow-slate-200/50 hover:shadow-md hover:border-indigo-200 transition-all duration-300">
-    <div className="flex items-center gap-3 mb-3"><div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center`}><SimpleIcon type={icon} className={`w-4 h-4 ${text}`}/></div></div>
-    <p className="text-xs text-slate-500 mb-1">{label}</p>
-    <p className="font-heading text-xl font-bold text-slate-900">{value}</p>
-    <span className={`inline-block mt-3 text-xs font-semibold ${muted ? "text-slate-400" : text.includes("green") || text.includes("lime") ? "text-emerald-600 hover:text-emerald-700" : "text-indigo-600 hover:text-indigo-700"} transition-colors`}>{actionLabel}</span>
+  return <button type="button" onClick={onClick} className="bg-white rounded-2xl border border-slate-200/80 p-6 text-left cursor-pointer shadow-sm shadow-slate-200/50 hover:shadow-md hover:border-indigo-200 transition-all duration-300">
+    <div className="flex items-center gap-3 mb-4"><div className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center`}><SimpleIcon type={icon} className={`w-5 h-5 ${text}`}/></div></div>
+    <p className="text-sm text-slate-500 mb-2">{label}</p>
+    <p className="font-heading text-2xl font-bold text-slate-900">{value}</p>
+    <span className={`inline-block mt-4 text-sm font-semibold ${muted ? "text-slate-400" : text.includes("green") || text.includes("lime") ? "text-emerald-600 hover:text-emerald-700" : "text-indigo-600 hover:text-indigo-700"} transition-colors`}>{actionLabel}</span>
   </button>;
 }
 
@@ -125,8 +129,8 @@ function ExportCard({icon,tone,title,desc,label,onClick,file,onFile}){
   const bg={violet:"from-violet-100 to-violet-50",emerald:"from-emerald-100 to-emerald-50",sky:"from-sky-100 to-sky-50",amber:"from-amber-100 to-amber-50",rose:"from-rose-100 to-rose-50"}[tone]||"from-indigo-100 to-indigo-50";
   const text={violet:"text-violet-600",emerald:"text-emerald-600",sky:"text-sky-600",amber:"text-amber-600",rose:"text-rose-600"}[tone]||"text-indigo-600";
   const btn={violet:"bg-indigo-600 hover:bg-indigo-700",emerald:"bg-emerald-600 hover:bg-emerald-700",sky:"bg-sky-600 hover:bg-sky-700",amber:"bg-amber-600 hover:bg-amber-700",rose:"bg-rose-600 hover:bg-rose-700"}[tone]||"bg-indigo-600 hover:bg-indigo-700";
-  const content=<><div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${bg} flex items-center justify-center mb-5`}><SimpleIcon type={icon} className={`w-6 h-6 ${text}`}/></div><h3 className="font-heading font-semibold text-slate-900 mb-2">{title}</h3><p className="text-xs text-slate-500 leading-relaxed mb-5 grow">{desc}</p><span className={`w-full py-2.5 rounded-xl ${btn} text-white text-xs font-semibold active:scale-[0.98] transition-all duration-200 text-center block`}>{label}</span></>;
-  const cls="group bg-white rounded-2xl border border-slate-200/80 p-6 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300 flex flex-col";
+  const content=<><div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${bg} flex items-center justify-center mb-5`}><SimpleIcon type={icon} className={`w-7 h-7 ${text}`}/></div><h3 className="font-heading font-semibold text-slate-900 mb-2">{title}</h3><p className="text-sm text-slate-500 leading-relaxed mb-6 grow">{desc}</p><span className={`w-full py-3 rounded-xl ${btn} text-white text-sm font-semibold active:scale-[0.98] transition-all duration-200 text-center block`}>{label}</span></>;
+  const cls="group bg-white rounded-2xl border border-slate-200/80 p-7 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300 flex flex-col";
   if(file) return <label className={`${cls} ops-file-label cursor-pointer`}>{content}<input type="file" accept={file} onChange={e=>onFile?.(e.target.files?.[0])}/></label>;
   return <button type="button" onClick={onClick} className={`${cls} text-left cursor-pointer`}>{content}</button>;
 }
@@ -140,20 +144,23 @@ export default function ShuffleOperationsPage({
       {!hideChrome && <OpsNav setTab={setTab} logout={logout}/>}
       <section className="py-10 px-6">
         <div className="max-w-screen-2xl mx-auto">
+          <div className="opsPanelWrap">
           <div className="opsPageHeading">
             <div>
               <h1>Actions Inventaire</h1>
               <p>Toutes les actions nécessaires pour la gestion de votre inventaire.</p>
             </div>
           </div>
-          <div className="opsActionGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="opsActionGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
             {inventoryActions.map(a=><InventoryActionCard key={a.title} {...a}/>) }
+          </div>
           </div>
         </div>
       </section>
       <section className="py-10 px-6">
         <div className="max-w-screen-2xl mx-auto">
-          <div className="border-t border-slate-200 pt-8 mb-6">
+          <div className="opsPanelWrap">
+          <div className="border-t border-slate-200 pt-8 mb-7">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
@@ -182,19 +189,22 @@ export default function ShuffleOperationsPage({
               </div>
             </div>
           </div>
-          <div className="opsCashGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
+          <div className="opsCashGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5 mb-5">
             {cashMetrics.slice(0,6).map(m=><CashMetric key={m.label} {...m}/>) }
           </div>
-          <div className="opsCashGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="opsCashGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
             {cashMetrics.slice(6).map(m=><CashMetric key={m.label} {...m}/>) }
+          </div>
           </div>
         </div>
       </section>
       <section className="py-10 px-6">
         <div className="max-w-screen-2xl mx-auto">
+          <div className="opsPanelWrap">
           <div className="mb-8 opsSectionTitle"><h2>Exports et sauvegarde locales</h2><p className="text-sm text-slate-500">Exporter les données de vos CTRL et générer des rapports détaillés locaux.</p></div>
           <div className="opsExportGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
             {exportActions.map(a=><ExportCard key={a.title} {...a}/>) }
+          </div>
           </div>
         </div>
       </section>

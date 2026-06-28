@@ -1,0 +1,11 @@
+V159 - Operations page containers and readability improvements
+
+- Reworked the Operations page layout to use clear white rounded containers for each main section.
+- Enlarged page headings, section headings, card titles, descriptions, icons, and action labels for better readability.
+- Increased card padding and improved spacing while keeping the current design language.
+- Applied improvements to:
+  - Actions Inventaire
+  - Opérations de caisse
+  - Exports et sauvegarde locales
+- Menu and footer preserved.
+- Frontend build tested successfully.

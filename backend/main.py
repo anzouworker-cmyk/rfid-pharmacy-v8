@@ -109,22 +109,25 @@ class DashboardContent(Base):
 
 
 CLIENT_PAGE_IDS = ["dashboard", "operations", "association", "inventory", "cash", "ai"]
+ASSIGNABLE_CLIENT_PAGE_IDS = CLIENT_PAGE_IDS + ["cashAdmin"]
 ADMIN_PAGE_IDS = CLIENT_PAGE_IDS + ["cashAdmin", "platform", "dashboardAdmin"]
 
 
-def normalize_page_permissions(pages=None):
+def normalize_page_permissions(pages=None, allowed_page_ids=None, default_page_ids=None):
+    allowed = list(allowed_page_ids or CLIENT_PAGE_IDS)
+    default = list(default_page_ids or CLIENT_PAGE_IDS)
     if not pages:
-        return list(CLIENT_PAGE_IDS)
+        return default
     cleaned = []
     for page in pages:
         p = str(page or "").strip()
-        if p in CLIENT_PAGE_IDS and p not in cleaned:
+        if p in allowed and p not in cleaned:
             cleaned.append(p)
-    return cleaned or list(CLIENT_PAGE_IDS)
+    return cleaned or default
 
 
-def serialize_pages(pages=None):
-    return json.dumps(normalize_page_permissions(pages), ensure_ascii=False)
+def serialize_pages(pages=None, allowed_page_ids=None, default_page_ids=None):
+    return json.dumps(normalize_page_permissions(pages, allowed_page_ids or ASSIGNABLE_CLIENT_PAGE_IDS, default_page_ids or CLIENT_PAGE_IDS), ensure_ascii=False)
 
 
 def account_pages(acc: Account):
@@ -135,7 +138,7 @@ def account_pages(acc: Account):
         data = json.loads(raw) if raw else []
     except Exception:
         data = []
-    pages = normalize_page_permissions(data)
+    pages = normalize_page_permissions(data, ASSIGNABLE_CLIENT_PAGE_IDS, CLIENT_PAGE_IDS)
     if not getattr(acc, "ai_premium", False) and "ai" in pages:
         # Le menu peut cacher l'IA si l'admin retire cette page; Premium AI reste géré séparément.
         pass
@@ -841,9 +844,9 @@ def create_store_user(data: StoreUserIn, acc: Account = Depends(current_user), s
     if s.get(Account, username):
         raise HTTPException(400, "Username exists")
     allowed = set(account_pages(acc))
-    requested = [p for p in normalize_page_permissions(data.page_permissions) if p in allowed]
+    requested = [p for p in normalize_page_permissions(data.page_permissions, ASSIGNABLE_CLIENT_PAGE_IDS, CLIENT_PAGE_IDS) if p in allowed]
     if not requested:
-        requested = list(allowed) or normalize_page_permissions([])
+        requested = list(allowed) or normalize_page_permissions([], ASSIGNABLE_CLIENT_PAGE_IDS, CLIENT_PAGE_IDS)
     owner = owner_username(acc)
     s.add(Account(
         username=username,
@@ -870,7 +873,7 @@ def update_store_user_pages(username: str, data: PagePermissionsIn, acc: Account
     if not obj or obj.parent_username != owner:
         raise HTTPException(404, "User not found")
     allowed = set(account_pages(acc))
-    obj.page_permissions = json.dumps([p for p in normalize_page_permissions(data.page_permissions) if p in allowed], ensure_ascii=False)
+    obj.page_permissions = json.dumps([p for p in normalize_page_permissions(data.page_permissions, ASSIGNABLE_CLIENT_PAGE_IDS, CLIENT_PAGE_IDS) if p in allowed], ensure_ascii=False)
     s.commit()
     return {"ok": True, "page_permissions": account_pages(obj)}
 
