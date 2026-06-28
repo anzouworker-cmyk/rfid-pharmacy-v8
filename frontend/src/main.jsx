@@ -1653,9 +1653,6 @@ function CashDashboardAdmin(){
     syncAllResultDates(selectedDate);
   },[selectedDate]);
 
-  useEffect(()=>{
-    setAnomalyIndex(0);
-  },[anomalyScope, selectedDate, selectedMonth, dayAnomalyAlerts.length, monthAnomalyAlerts.length]);
 
   useEffect(()=>{
     setResultsDates(prev=>({
@@ -1692,6 +1689,10 @@ function CashDashboardAdmin(){
     ? `${monthAnomalyAlerts.length} alerte(s) du mois`
     : `${dayAnomalyAlerts.length} alerte(s) du jour`;
   const [anomalyIndex,setAnomalyIndex] = useState(0);
+
+  useEffect(()=>{
+    setAnomalyIndex(0);
+  },[anomalyScope, selectedDate, selectedMonth, dayAnomalyAlerts.length, monthAnomalyAlerts.length]);
 
   function cashNumber(cents, decimals=1){
     return ((Number(cents) || 0) / 100).toFixed(decimals);

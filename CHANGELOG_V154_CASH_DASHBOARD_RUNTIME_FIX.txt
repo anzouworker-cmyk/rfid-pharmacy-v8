@@ -1,0 +1,7 @@
+V154 - Dashboard Caisse runtime fix
+
+- Fixed Dashboard Caisse crash introduced in the anomaly alert carousel.
+- Moved anomaly carousel reset logic after the alert arrays are computed.
+- Preserved the compact anomaly card design from V153.
+- Preserved menu, footer, pages and permissions popup changes.
+- Frontend build tested successfully.
