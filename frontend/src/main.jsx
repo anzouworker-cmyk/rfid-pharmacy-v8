@@ -1950,6 +1950,24 @@ function CashDashboardAdmin(){
     </div>;
   }
 
+  function CashShuffleExpenseProgress({value,cents,limitCents}){
+    const safe = Math.max(0, Math.min(100, Number(value) || 0));
+    return <div className="cashShuffleExpenseProgress">
+      <div className="cashShuffleRing cashShuffleExpenseRing">
+        <svg viewBox="0 0 36 36" aria-hidden="true">
+          <path className="track" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path className="value" strokeDasharray={`${safe}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+        <div>{safe.toFixed(1)}%</div>
+      </div>
+      <div className="cashShuffleExpenseText">
+        <strong>{formatDH(cents)}</strong>
+        <span>{Number(cents || 0) > 0 ? "Dépenses enregistrées" : "Aucune dépense enregistrée"}</span>
+        <small>{limitCents ? `${Math.round(safe)}% de la limite utilisée` : "Limite non définie"}</small>
+      </div>
+    </div>;
+  }
+
   function CashShuffleCard({title,meta,badge,children,className="cashShuffleMetricCard",dotTone=""}){
     return <article className={`cashShuffleCard ${className}`.trim()}>
       <div className="cashShuffleCardTop">
@@ -2046,7 +2064,7 @@ function CashDashboardAdmin(){
       </CashShuffleCard>
 
       <CashShuffleCard title="Tot. dépenses" meta={limitMeta("Total mensuel", "monthlyExpenseLimitCents", monthlyExpenseLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleExpensesLimitCard" dotTone="amber">
-        <CashShuffleProgress value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthlyExpenseLimitCents ? `${Math.round(expensesProgress)}% de la limite utilisée` : "Limite non définie"} />
+        <CashShuffleExpenseProgress value={expensesProgress} cents={monthlyExpensesCents} limitCents={monthlyExpenseLimitCents} />
       </CashShuffleCard>
 
       <CashShuffleCard title="Alertes anomalies" meta={cardMeta(anomalyMetaText)} className="cashShuffleCardTall cashShuffleAnomalyCard" dotTone={anomalyAlerts.length ? "amber" : "emerald"}>
@@ -3327,6 +3345,13 @@ function Platform({auth}){
   const [canManageUsers,setCanManageUsers]=useState(true);
   const [msg,setMsg]=useState("");
   const [showCreateModal,setShowCreateModal]=useState(false);
+  const [search,setSearch]=useState("");
+  const [statusFilter,setStatusFilter]=useState("all");
+  const [premiumFilter,setPremiumFilter]=useState("all");
+  const [manageFilter,setManageFilter]=useState("all");
+  const [expireFilter,setExpireFilter]=useState("all");
+  const [infoClient,setInfoClient]=useState(null);
+  const [infoDraft,setInfoDraft]=useState(null);
 
   async function load(){
     try{
@@ -3337,6 +3362,28 @@ function Platform({auth}){
     }
   }
   useEffect(()=>{ load(); },[]);
+
+  function normalizeClientDraft(c){
+    return {
+      originalUsername:c.username,
+      username:c.username || "",
+      pharmacy_name:c.pharmacy_name || "",
+      phone:c.phone || "",
+      email:c.email || "",
+      address:c.address || "",
+      notes:c.notes || "",
+      expires_at:c.expires_at ? c.expires_at.slice(0,10) : "",
+      ai_premium:!!c.ai_premium,
+      can_manage_users:!!c.can_manage_users,
+      active:!!c.active,
+      created_at:c.created_at || ""
+    };
+  }
+
+  function openClientInfo(c){
+    setInfoClient(c);
+    setInfoDraft(normalizeClientDraft(c));
+  }
 
   async function create(){
     try{
@@ -3382,19 +3429,6 @@ function Platform({auth}){
     }
   }
 
-  async function changeExpiry(u, currentDate){
-    const d=prompt(`Nouvelle date expiration pour ${u} (YYYY-MM-DD):`, currentDate || "");
-    if(!d) return;
-    try{
-      await axios.post(`${API}/platform/client-update-expiry/${encodeURIComponent(u)}`,{expires_at:d},auth);
-      setMsg(`Date expiration changée pour ${u}.`);
-      await load();
-    }catch(e){
-      setMsg(e.response?.data?.detail || "Erreur changement date expiration");
-    }
-  }
-
-  
   async function toggleAiPremium(u, enabled){
     try{
       await axios.post(`${API}/platform/client-ai-premium/${encodeURIComponent(u)}?enabled=${enabled}`,{},auth);
@@ -3403,10 +3437,6 @@ function Platform({auth}){
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur Premium AI");
     }
-  }
-
-  function toggleCreatePage(pageId){
-    setPagePermissions(prev=>prev.includes(pageId) ? prev.filter(x=>x!==pageId) : [...prev,pageId]);
   }
 
   async function updateClientAccess(client,nextPages,nextCanManage){
@@ -3422,115 +3452,164 @@ function Platform({auth}){
     }
   }
 
-return <section className="platformPage">
-    <div className="platformHeaderBar">
+  async function saveClientInfo(){
+    if(!infoDraft) return;
+    try{
+      await axios.post(`${API}/platform/client-info/${encodeURIComponent(infoDraft.originalUsername)}`, infoDraft, auth);
+      setMsg("Informations utilisateur enregistrées.");
+      setInfoClient(null);
+      setInfoDraft(null);
+      await load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur sauvegarde informations client");
+    }
+  }
+
+  function resetFilters(){
+    setSearch(""); setStatusFilter("all"); setPremiumFilter("all"); setManageFilter("all"); setExpireFilter("all");
+  }
+
+  function isExpired(c){
+    if(!c.expires_at) return false;
+    return new Date(c.expires_at) < new Date();
+  }
+
+  const filteredClients = clients.filter(c=>{
+    const q = search.trim().toLowerCase();
+    if(q && !`${c.username || ""} ${c.pharmacy_name || ""} ${c.email || ""}`.toLowerCase().includes(q)) return false;
+    if(statusFilter !== "all" && String(!!c.active) !== statusFilter) return false;
+    if(premiumFilter !== "all" && String(!!c.ai_premium) !== premiumFilter) return false;
+    if(manageFilter !== "all" && String(!!c.can_manage_users) !== manageFilter) return false;
+    if(expireFilter === "expired" && !isExpired(c)) return false;
+    if(expireFilter === "valid" && isExpired(c)) return false;
+    return true;
+  });
+
+  const avatarText = c => (c.username || "U").slice(0,2).toUpperCase();
+  const createdLabel = d => d ? new Date(d).toLocaleString("fr-FR", {year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit"}) : "—";
+
+return <section className="platformPage platformUsersPage">
+    <div className="platformUsersTitle">
+      <div className="platformUsersIcon"><InvIcon name="users" /></div>
       <div>
-        <h2>Stores / clients pharmacie</h2>
-        <p>Gérez les comptes clients, leurs accès et leurs permissions.</p>
+        <h2>Utilisateurs</h2>
+        <p>Gérez les comptes utilisateurs et leurs accès.</p>
       </div>
-      <button type="button" className="platformAddStoreBtn" onClick={()=>setShowCreateModal(true)}>Ajouter Store</button>
+      <button type="button" className="platformAddStoreBtn" onClick={()=>setShowCreateModal(true)}>Ajouter User</button>
     </div>
 
     {showCreateModal && <div className="modalOverlay" onClick={()=>setShowCreateModal(false)}>
       <div className="scanModal platformStoreModal" onClick={e=>e.stopPropagation()}>
         <button type="button" className="modalClose" onClick={()=>setShowCreateModal(false)}>×</button>
-        <h2>Ajouter Store</h2>
-        <p>Créer un client pharmacie avec ses accès et permissions.</p>
+        <h2>Ajouter User</h2>
+        <p>Créer un utilisateur avec ses accès et permissions.</p>
         <div className="platformCreateGrid">
-          <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
-          <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
-          <input placeholder="nom pharmacie" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/>
+          <input placeholder="User" value={username} onChange={e=>setUsername(e.target.value)}/>
+          <input placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
+          <input placeholder="User name" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/>
           <input placeholder="jours" value={days} onChange={e=>setDays(e.target.value)}/>
         </div>
         <div className="platformCreateChecks">
           <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
-          <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Peut créer ses propres utilisateurs</label>
+          <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Gestion users autorisée</label>
         </div>
         <div className="pagePermissionBox pagePermissionButtonBox">
           <div className="pagePermissionButtonHeader">
             <div>
-              <strong>Pages visibles pour ce client</strong>
+              <strong>Pages visibles pour ce user</strong>
               <small>{pagePermissions.length} page(s) sélectionnée(s)</small>
             </div>
             <PagePermissionsModalButton
               buttonLabel="Editer"
-              title="Pages visibles du client"
-              description="Choisissez les pages visibles pour ce client."
+              title="Pages visibles du user"
+              description="Choisissez les pages visibles pour ce user."
               options={ASSIGNABLE_PAGE_OPTIONS}
               value={pagePermissions}
               onSave={next=>setPagePermissions(next)}
             />
           </div>
-          <PagePermissionSummaryChips ids={pagePermissions} options={ASSIGNABLE_PAGE_OPTIONS} max={4}/>
         </div>
         <div className="platformModalActions">
           <button type="button" className="platformModalCancel" onClick={()=>setShowCreateModal(false)}>Annuler</button>
-          <button type="button" className="platformModalCreate" onClick={create}>Créer client</button>
+          <button type="button" className="platformModalCreate" onClick={create}>Créer user</button>
         </div>
       </div>
     </div>}
 
     <p className={msg.includes("Erreur") || msg.includes("not") ? "err" : "success"}>{msg}</p>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Client</th>
-          <th>Pharmacie</th>
-          <th>Abonnement</th>
-          <th>Compte</th>
-          <th>Expire</th>
-          <th>Mot de passe</th>
-          <th>Premium AI</th>
-          <th>Pages visibles</th>
-          <th>Gestion users</th>
-          <th>Statut</th>
-          <th>Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        {clients.map(c=>{
-          const isAdmin=c.username==="admin" || c.role==="platform_admin";
-          const expDate=c.expires_at ? c.expires_at.slice(0,10) : "";
-          return <tr key={c.username}>
-            <td>{c.username}</td>
-            <td>{c.pharmacy_name}</td>
-            <td>{c.subscription_status}</td>
-            <td>{c.active ? "active" : "inactive"}</td>
-            <td>
-              {isAdmin ? "N/A" : expDate}
-              {!isAdmin && <><br/><button onClick={()=>changeExpiry(c.username, expDate)}>Changer date</button></>}
-            </td>
-            <td><button onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
-            <td>{isAdmin
-              ? <label className="checkLine compact"><input type="checkbox" checked disabled/> Activé</label>
-              : <label className="checkLine compact"><input type="checkbox" checked={!!c.ai_premium} onChange={e=>toggleAiPremium(c.username,e.target.checked)}/> Activé</label>
-            }</td>
-            <td>{isAdmin ? "Toutes" : (()=>{
-              const currentPages=normalizePagePermissions(c.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
-              return <div className="pagePermissionCell">
-                <PagePermissionSummaryChips ids={currentPages} options={ASSIGNABLE_PAGE_OPTIONS} max={2}/>
-                <PagePermissionsModalButton
-                  buttonLabel="Editer"
-                  title={`Pages visibles - ${c.username}`}
-                  description="Choisissez les pages visibles pour ce client."
-                  options={ASSIGNABLE_PAGE_OPTIONS}
-                  value={currentPages}
-                  onSave={next=>updateClientAccess(c,next,c.can_manage_users)}
-                />
-              </div>;
-            })()}</td>
-            <td>{isAdmin ? "Oui" : <label className="checkLine compact"><input type="checkbox" checked={!!c.can_manage_users} onChange={e=>updateClientAccess(c,normalizePagePermissions(c.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages()),e.target.checked)}/> Autorisé</label>}</td>
-            <td>{isAdmin ? "" : <button onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "Désactiver" : "Activer"}</button>}</td>
-            <td>{isAdmin ? "" : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
+    <div className="platformUsersPanel">
+      <div className="platformUsersFilters">
+        <div className="platformSearchBox"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un utilisateur..." /></div>
+        <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="all">Status — Tous</option><option value="true">Activé</option><option value="false">Désactivé</option></select>
+        <select value={premiumFilter} onChange={e=>setPremiumFilter(e.target.value)}><option value="all">Premium AI — Tous</option><option value="true">Activé</option><option value="false">Désactivé</option></select>
+        <select value={manageFilter} onChange={e=>setManageFilter(e.target.value)}><option value="all">Gestion users — Tous</option><option value="true">Autorisé</option><option value="false">Non autorisé</option></select>
+        <select value={expireFilter} onChange={e=>setExpireFilter(e.target.value)}><option value="all">Expires — Tous</option><option value="valid">Valide</option><option value="expired">Expiré</option></select>
+        <button type="button" className="platformResetFilter" onClick={resetFilters}>↻ Réinitialiser</button>
+      </div>
+      <table className="platformUsersTable">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>User name</th>
+            <th>Abonnement</th>
+            <th>Mot de passe</th>
+            <th>Pages visibles</th>
+            <th>Status</th>
+            <th>Infos</th>
+            <th>Delete</th>
           </tr>
-        })}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {filteredClients.map(c=>{
+            const isAdmin=c.username==="admin" || c.role==="platform_admin";
+            const currentPages=normalizePagePermissions(c.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
+            return <tr key={c.username}>
+              <td><div className="platformUserIdentity"><span className="platformAvatar">{avatarText(c)}</span><span>{c.username}</span></div></td>
+              <td>{c.pharmacy_name}</td>
+              <td>{c.subscription_status}</td>
+              <td><button className="platformSoftPill" onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
+              <td>{isAdmin ? <PagePermissionsModalButton buttonLabel="Editer" title={`Pages visibles - ${c.username}`} description="Compte admin : toutes les pages restent disponibles." options={ASSIGNABLE_PAGE_OPTIONS} value={ASSIGNABLE_PAGE_IDS} onSave={()=>{}} /> : <PagePermissionsModalButton
+                    buttonLabel="Editer"
+                    title={`Pages visibles - ${c.username}`}
+                    description="Choisissez les pages visibles pour ce user."
+                    options={ASSIGNABLE_PAGE_OPTIONS}
+                    value={currentPages}
+                    onSave={next=>updateClientAccess(c,next,c.can_manage_users)}
+                  />}</td>
+              <td>{isAdmin ? <span className="platformStatusPill active">● Activé</span> : <button type="button" className={`platformStatusPill ${c.active ? "active" : "inactive"}`} onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "● Activé" : "○ Désactivé"}<span>⌄</span></button>}</td>
+              <td><button type="button" className="platformInfoBtn" onClick={()=>openClientInfo(c)}>ⓘ Voir infos</button></td>
+              <td>{isAdmin ? <button className="dangerBtn disabled" disabled>Delete</button> : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
+            </tr>
+          })}
+          {!filteredClients.length && <tr><td colSpan="8" className="expenseHistoryEmpty">Aucun utilisateur trouvé.</td></tr>}
+        </tbody>
+      </table>
+      <div className="platformUsersFooter">Affichage de {filteredClients.length ? 1 : 0} à {filteredClients.length} sur {clients.length} utilisateurs</div>
+    </div>
+
+    {infoDraft && <aside className="platformInfoDrawer" role="dialog" aria-label="Infos utilisateur">
+      <div className="platformInfoDrawerHeader">
+        <span className="platformAvatar">{avatarText(infoDraft)}</span>
+        <div><h3>Infos utilisateur</h3><p>{infoDraft.pharmacy_name} ({infoDraft.username})</p></div>
+        <button type="button" onClick={()=>{setInfoClient(null);setInfoDraft(null);}}>×</button>
+      </div>
+      <div className="platformInfoForm">
+        <label><span>Téléphone</span><input value={infoDraft.phone} onChange={e=>setInfoDraft({...infoDraft,phone:e.target.value})} placeholder="+212 6 12 34 56 78" /></label>
+        <label><span>Email</span><input value={infoDraft.email} onChange={e=>setInfoDraft({...infoDraft,email:e.target.value})} placeholder="contact@example.com" /></label>
+        <label className="full"><span>User</span><input value={infoDraft.username} onChange={e=>setInfoDraft({...infoDraft,username:e.target.value})} /></label>
+        <label className="full"><span>Pharmacie / User name</span><input value={infoDraft.pharmacy_name} onChange={e=>setInfoDraft({...infoDraft,pharmacy_name:e.target.value})} /></label>
+        <label className="full"><span>Adresse</span><input value={infoDraft.address} onChange={e=>setInfoDraft({...infoDraft,address:e.target.value})} placeholder="Adresse" /></label>
+        <label className="full"><span>Expire le</span><input type="date" value={infoDraft.expires_at} onChange={e=>setInfoDraft({...infoDraft,expires_at:e.target.value})} /></label>
+        <label><span>Premium AI</span><div className="platformDrawerCheck"><input type="checkbox" checked={!!infoDraft.ai_premium} onChange={e=>setInfoDraft({...infoDraft,ai_premium:e.target.checked})}/> Activé</div></label>
+        <label><span>Gestion users</span><div className="platformDrawerCheck"><input type="checkbox" checked={!!infoDraft.can_manage_users} onChange={e=>setInfoDraft({...infoDraft,can_manage_users:e.target.checked})}/> Autorisé</div></label>
+        <label className="full"><span>Notes</span><textarea value={infoDraft.notes} onChange={e=>setInfoDraft({...infoDraft,notes:e.target.value})} placeholder="Notes utilisateur" /></label>
+      </div>
+      <div className="platformInfoMeta"><span><small>ID utilisateur</small>{infoDraft.originalUsername}</span><span><small>Créé le</small>{createdLabel(infoDraft.created_at)}</span></div>
+      <div className="platformInfoActions"><button type="button" onClick={()=>{setInfoClient(null);setInfoDraft(null);}}>Annuler</button><button type="button" onClick={saveClientInfo}>Enregistrer</button></div>
+    </aside>}
   </section>
 }
-
-
 
 
 
