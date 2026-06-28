@@ -1,0 +1,9 @@
+V151 - Harmonisation titres + filtres alertes caisse
+
+- Harmonisation des titres de pages avec la page Associations, sauf la page Dashboard.
+- Correction des pages Tables de caisse, Stores / clients pharmacie, Publicité Dashboard et Actions Inventaire.
+- Ajout d’un en-tête cohérent pour Publicité Dashboard.
+- Dashboard Caisse : ajout d’un filtre dans Alertes anomalies pour basculer entre Jour choisi et Mois choisi.
+- Les alertes du jour utilisent uniquement la date sélectionnée.
+- Les alertes du mois regroupent toutes les anomalies du mois sélectionné.
+- Menu et pied de page conservés.

@@ -22,6 +22,10 @@ const OPS_INTERNAL_LAYOUT_CSS = `
   .opsInAppRoot .opsCashGrid .font-heading.text-xl{font-size:1.55rem!important;line-height:1.9rem!important;}
   .opsInAppRoot .opsActionGrid h3,
   .opsInAppRoot .opsExportGrid h3{font-size:0.98rem!important;}
+  .opsInAppRoot .opsPageHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 32px!important;}
+  .opsInAppRoot .opsPageHeading h1{font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:30px!important;line-height:1.15!important;font-weight:800!important;letter-spacing:-.025em!important;color:#0f172a!important;margin:0!important;}
+  .opsInAppRoot .opsPageHeading p{margin-top:6px!important;font-size:14px!important;line-height:1.5!important;font-weight:500!important;color:#64748b!important;}
+  .opsInAppRoot .opsSectionTitle h2{font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:20px!important;line-height:1.2!important;font-weight:800!important;letter-spacing:-.025em!important;margin:0 0 6px!important;color:#0f172a!important;}
   @media (max-width:900px){
     .opsInAppRoot .opsActionGrid,
     .opsInAppRoot .opsCashGrid,
@@ -136,8 +140,12 @@ export default function ShuffleOperationsPage({
       {!hideChrome && <OpsNav setTab={setTab} logout={logout}/>}
       <section className="py-10 px-6">
         <div className="max-w-screen-2xl mx-auto">
-          <div className="mb-2"><p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Pour aux essentiels et certaines de ces outils et la progression locale</p></div>
-          <div className="mb-8"><h1 className="font-heading text-2xl font-bold text-slate-900 mb-1">Actions Inventaire</h1><p className="text-sm text-slate-500">Toutes les actions nécessaires pour la gestion de votre inventaire.</p></div>
+          <div className="opsPageHeading">
+            <div>
+              <h1>Actions Inventaire</h1>
+              <p>Toutes les actions nécessaires pour la gestion de votre inventaire.</p>
+            </div>
+          </div>
           <div className="opsActionGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {inventoryActions.map(a=><InventoryActionCard key={a.title} {...a}/>) }
           </div>
@@ -151,8 +159,8 @@ export default function ShuffleOperationsPage({
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
                   <SimpleIcon type="card" className="w-4 h-4" />
                 </div>
-                <div>
-                  <h2 className="font-heading text-lg font-bold text-slate-900 leading-tight mb-1">Opérations de caisse</h2>
+                <div className="opsSectionTitle">
+                  <h2>Opérations de caisse</h2>
                   <p className="text-xs text-slate-500">Suivi des flux financiers entrants et sortants.</p>
                 </div>
               </div>
@@ -184,7 +192,7 @@ export default function ShuffleOperationsPage({
       </section>
       <section className="py-10 px-6">
         <div className="max-w-screen-2xl mx-auto">
-          <div className="mb-8"><h2 className="font-heading text-2xl font-bold text-slate-900 mb-2">Exports et sauvegarde locales</h2><p className="text-sm text-slate-500">Exporter les données de vos CTRL et générer des rapports détaillés locaux.</p></div>
+          <div className="mb-8 opsSectionTitle"><h2>Exports et sauvegarde locales</h2><p className="text-sm text-slate-500">Exporter les données de vos CTRL et générer des rapports détaillés locaux.</p></div>
           <div className="opsExportGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
             {exportActions.map(a=><ExportCard key={a.title} {...a}/>) }
           </div>

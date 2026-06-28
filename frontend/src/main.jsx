@@ -1489,6 +1489,27 @@ function computeCashDayMetrics(store={}, date=todayISO(), reserveCents=300000){
   return buildCashDayMetrics(safeDate, safeStore[safeDate], safeStore, reserveCents);
 }
 
+function buildCashAnomalyAlerts(metrics){
+  const items = Array.isArray(metrics) ? metrics : [metrics].filter(Boolean);
+  return items.flatMap(item=>{
+    if(!item) return [];
+    const alerts = [];
+    if(item.shortageCents > 0){
+      alerts.push({tone:"critical", label:"Montant manquant", date:item.date, amountCents:item.shortageCents, detail:"Caisse comptée inférieure au théorique"});
+    }
+    if(item.surplusCents > 0){
+      alerts.push({tone:"warning", label:"Montant surplus", date:item.date, amountCents:item.surplusCents, detail:"Caisse comptée supérieure au théorique"});
+    }
+    if(item.dueBalanceCents > 0){
+      alerts.push({tone:"info", label:"Retrait à vérifier", date:item.date, amountCents:item.dueBalanceCents, detail:"Montant théorique non retiré"});
+    }
+    if(item.totalSalesCents > 0 && item.expensesCents > item.totalSalesCents * 0.35){
+      alerts.push({tone:"warning", label:"Dépenses élevées", date:item.date, amountCents:item.expensesCents, detail:"Dépenses élevées vs ventes"});
+    }
+    return alerts;
+  }).sort((a,b)=>b.date.localeCompare(a.date) || Math.abs(b.amountCents) - Math.abs(a.amountCents));
+}
+
 function CashProgressRing({value,label,subLabel}){
   const safe = Math.max(0, Math.min(100, Number(value) || 0));
   const radius = 44;
@@ -1531,6 +1552,7 @@ function CashDashboardAdmin(){
   const latestDate = dashboardDates.length ? dashboardDates[dashboardDates.length-1] : dashboardToday;
   const earliestDate = dashboardDates.length ? dashboardDates[0] : dashboardToday;
   const [selectedDate,setSelectedDate] = useState(latestDate);
+  const [anomalyScope,setAnomalyScope] = useState("day");
   const selectedMonth = selectedDate.slice(0,7);
   const [resultsDates,setResultsDates] = useState(()=>({
     totalSales: latestDate,
@@ -1588,22 +1610,12 @@ function CashDashboardAdmin(){
   const progressValue = monthMetrics.length ? (monthBalancedDays / monthMetrics.length) * 100 : 0;
   const monthSalesCents = monthMetrics.reduce((sum,x)=>sum + x.totalSalesCents,0);
   const expensesProgress = monthSalesCents>0 ? Math.min(100, (monthlyExpensesCents / monthSalesCents) * 100) : 0;
-  const anomalyAlerts = useMemo(()=>monthMetrics.flatMap(item=>{
-    const alerts = [];
-    if(item.shortageCents > 0){
-      alerts.push({tone:"critical", label:"Montant manquant", date:item.date, amountCents:item.shortageCents, detail:"Caisse comptée inférieure au théorique"});
-    }
-    if(item.surplusCents > 0){
-      alerts.push({tone:"warning", label:"Montant surplus", date:item.date, amountCents:item.surplusCents, detail:"Caisse comptée supérieure au théorique"});
-    }
-    if(item.dueBalanceCents > 0){
-      alerts.push({tone:"info", label:"Retrait à vérifier", date:item.date, amountCents:item.dueBalanceCents, detail:"Montant théorique non retiré"});
-    }
-    if(item.totalSalesCents > 0 && item.expensesCents > item.totalSalesCents * 0.35){
-      alerts.push({tone:"warning", label:"Dépenses élevées", date:item.date, amountCents:item.expensesCents, detail:"Dépenses élevées vs ventes"});
-    }
-    return alerts;
-  }).sort((a,b)=>b.date.localeCompare(a.date) || Math.abs(b.amountCents) - Math.abs(a.amountCents)).slice(0,4), [monthMetrics]);
+  const dayAnomalyAlerts = useMemo(()=>buildCashAnomalyAlerts(selectedMetrics),[selectedMetrics]);
+  const monthAnomalyAlerts = useMemo(()=>buildCashAnomalyAlerts(monthMetrics),[monthMetrics]);
+  const anomalyAlerts = anomalyScope === "month" ? monthAnomalyAlerts : dayAnomalyAlerts;
+  const anomalyMetaText = anomalyScope === "month"
+    ? `${monthAnomalyAlerts.length} alerte(s) du mois`
+    : `${dayAnomalyAlerts.length} alerte(s) du jour`;
 
   function cashNumber(cents, decimals=1){
     return ((Number(cents) || 0) / 100).toFixed(decimals);
@@ -1817,8 +1829,15 @@ function CashDashboardAdmin(){
   }
 
   function CashAnomalyList(){
+    const emptyText = anomalyScope === "month"
+      ? "Aucune anomalie détectée pour le mois sélectionné."
+      : "Aucune anomalie détectée pour le jour choisi.";
     return <div className="cashShuffleAnomalyList">
-      {anomalyAlerts.length ? anomalyAlerts.map((alert,index)=><div key={`${alert.date}-${alert.label}-${index}`} className={`cashShuffleAnomalyItem ${alert.tone}`}>
+      <div className="cashShuffleAnomalyFilters" role="group" aria-label="Filtrer les alertes anomalies">
+        <button type="button" className={anomalyScope === "day" ? "active" : ""} onClick={()=>setAnomalyScope("day")}>Jour choisi</button>
+        <button type="button" className={anomalyScope === "month" ? "active" : ""} onClick={()=>setAnomalyScope("month")}>Mois choisi</button>
+      </div>
+      {anomalyAlerts.length ? anomalyAlerts.slice(0, anomalyScope === "month" ? 8 : 4).map((alert,index)=><div key={`${alert.date}-${alert.label}-${index}`} className={`cashShuffleAnomalyItem ${alert.tone}`}>
         <span className="cashShuffleAnomalyIcon" aria-hidden="true">!</span>
         <div>
           <strong>{alert.label}</strong>
@@ -1829,7 +1848,7 @@ function CashDashboardAdmin(){
         <span className="cashShuffleAnomalyIcon ok" aria-hidden="true">✓</span>
         <div>
           <strong>Aucune anomalie détectée</strong>
-          <small>Les données de caisse du mois sélectionné sont équilibrées.</small>
+          <small>{emptyText}</small>
         </div>
       </div>}
     </div>;
@@ -1871,7 +1890,7 @@ function CashDashboardAdmin(){
         <CashShuffleProgress value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Aucune vente"} />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Alertes anomalies" meta={cardMeta(`${anomalyAlerts.length} alerte(s) ce mois`)} className="cashShuffleCardTall cashShuffleAnomalyCard" dotTone={anomalyAlerts.length ? "amber" : "emerald"}>
+      <CashShuffleCard title="Alertes anomalies" meta={cardMeta(anomalyMetaText)} className="cashShuffleCardTall cashShuffleAnomalyCard" dotTone={anomalyAlerts.length ? "amber" : "emerald"}>
         <CashAnomalyList />
       </CashShuffleCard>
 
@@ -3586,12 +3605,17 @@ function DashboardAdmin({auth}){
   const previewSrc = imageFile ? URL.createObjectURL(imageFile) : mediaUrl(imageUrl);
 
   return <section className="simpleAdAdmin dynamicAdAdmin">
-    <p className="notice">Gérez l’espace publicitaire du dashboard. L’image peut avoir une dimension dynamique; le bouton et son lien sont configurables.</p>
+    <div className="adAdminPageHeader">
+      <div>
+        <h1>Publicité Dashboard</h1>
+        <p>Gérez l’espace publicitaire du dashboard. L’image peut avoir une dimension dynamique; le bouton et son lien sont configurables.</p>
+      </div>
+    </div>
     <p className="mutedText">Pour une image externe, il faut une URL directe d'image. Une page Pixabay/Unsplash ne fonctionne pas comme image directe.</p>
 
     <div className="adAdminGrid">
       <div className="adEditorPanel">
-        <h2>Publicité Dashboard</h2>
+        <h2>Configuration publicité</h2>
         <p className="mutedText">Image recommandée : 1200 × 800 px, mais les dimensions sont acceptées dynamiquement. Utilisez PNG, JPG ou WEBP.</p>
 
         <div className="adFormGrid simpleAdForm">
