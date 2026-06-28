@@ -18,7 +18,7 @@ from sqlalchemy import create_engine, Column, String, DateTime, Boolean, Text
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from sqlalchemy import text, inspect
 from pydantic_settings import BaseSettings
-
+# V160
 class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./license_saas.db"
     SECRET_KEY: str = "change_this_secret_key"
