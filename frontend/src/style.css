@@ -10657,15 +10657,3 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
     margin-top:4px!important;
   }
 }
-
-/* V160 - Pages visibles: show only Editer button in table/create rows */
-.pagePermissionOnlyEditBox .pagePermissionButtonHeader{
-  align-items:center!important;
-}
-.pagePermissionOnlyEditCell{
-  min-width:0!important;
-  justify-content:flex-start!important;
-}
-.pagePermissionOnlyEditCell .pagePermissionEditBtn{
-  min-width:88px!important;
-}

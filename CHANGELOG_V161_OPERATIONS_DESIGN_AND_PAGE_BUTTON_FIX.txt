@@ -1,0 +1,18 @@
+V161 - Operations readability design + page visibility cleanup
+
+- Reworked the Operations page visual hierarchy.
+- Kept the large section containers but reduced excessive width and whitespace.
+- Made internal cards more visible with stronger borders and shadows.
+- Increased readability of titles, descriptions, values, icons, and action labels.
+- Improved the Opérations de caisse header block with clearer badges/date grouping.
+- Corrected several labels:
+  - Importer quantités inventaire
+  - Importer associations
+  - Scanner code-barres produit
+  - Scanner un ticket
+  - Importer bon d’achat
+  - Contrôler les résultats
+  - Taux de couverture
+- Pages visibles: only the Editer button is shown; page badges are hidden.
+- Dashboard Caisse remains assignable as a visible page.
+- Frontend build tested successfully.

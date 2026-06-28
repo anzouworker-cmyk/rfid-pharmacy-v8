@@ -28,6 +28,142 @@ const OPS_INTERNAL_LAYOUT_CSS = `
   .opsInAppRoot .opsSectionTitle h2{font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:24px!important;line-height:1.18!important;font-weight:800!important;letter-spacing:-.028em!important;margin:0 0 8px!important;color:#0f172a!important;}
   .opsInAppRoot .opsSectionTitle p{font-size:14px!important;line-height:1.6!important;color:#64748b!important;}
   .opsInAppRoot .opsPanelWrap{background:#fff!important;border:1px solid rgba(226,232,240,.95)!important;border-radius:26px!important;box-shadow:0 18px 40px rgba(15,23,42,.06)!important;padding:30px!important;}
+
+  /* V161 - readable contained operations layout */
+  .opsInAppRoot .max-w-screen-2xl{
+    max-width:1760px!important;
+    width:calc(100% - 48px)!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+  }
+  .opsInAppRoot section{padding-top:22px!important;padding-bottom:22px!important;}
+  .opsInAppRoot .opsPanelWrap{
+    padding:34px!important;
+    border-radius:24px!important;
+    border:1px solid #dbe5f1!important;
+    box-shadow:0 18px 42px rgba(15,23,42,.065)!important;
+  }
+  .opsInAppRoot .opsActionGrid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:22px!important;
+  }
+  .opsInAppRoot .opsCashGrid{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:22px!important;
+  }
+  .opsInAppRoot .opsExportGrid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:22px!important;
+  }
+  .opsInAppRoot .opsActionGrid > *,
+  .opsInAppRoot .opsCashGrid > button,
+  .opsInAppRoot .opsExportGrid > *{
+    background:#fff!important;
+    border:1px solid #d7e2ef!important;
+    box-shadow:0 10px 26px rgba(15,23,42,.055)!important;
+    border-radius:18px!important;
+  }
+  .opsInAppRoot .opsActionGrid > *,
+  .opsInAppRoot .opsCashGrid > button{
+    min-height:185px!important;
+  }
+  .opsInAppRoot .opsExportGrid > *{
+    min-height:210px!important;
+  }
+  .opsInAppRoot .opsPageHeading h1{
+    font-size:40px!important;
+  }
+  .opsInAppRoot .opsPageHeading p{
+    font-size:16px!important;
+  }
+  .opsInAppRoot .opsActionGrid h3,
+  .opsInAppRoot .opsExportGrid h3{
+    font-size:18px!important;
+    line-height:1.3!important;
+    letter-spacing:-.01em!important;
+  }
+  .opsInAppRoot .opsActionGrid p,
+  .opsInAppRoot .opsExportGrid p{
+    font-size:14px!important;
+    line-height:1.55!important;
+  }
+  .opsInAppRoot .opsActionGrid span.inline-flex,
+  .opsInAppRoot .opsCashGrid span.inline-block,
+  .opsInAppRoot .opsExportGrid span.block{
+    font-size:14px!important;
+  }
+  .opsInAppRoot .opsCashGrid button p:first-of-type{
+    font-size:14px!important;
+    line-height:1.35!important;
+    color:#64748b!important;
+  }
+  .opsInAppRoot .opsCashGrid button p.font-heading{
+    font-size:30px!important;
+    line-height:1.1!important;
+    margin-top:8px!important;
+  }
+  .opsInAppRoot .opsCashGrid button .w-11,
+  .opsInAppRoot .opsCashGrid button .w-9{
+    width:46px!important;
+    height:46px!important;
+  }
+  .opsInAppRoot .opsActionGrid .w-12,
+  .opsInAppRoot .opsActionGrid .w-10{
+    width:48px!important;
+    height:48px!important;
+  }
+  .opsInAppRoot .opsExportGrid .w-14,
+  .opsInAppRoot .opsExportGrid .w-12{
+    width:54px!important;
+    height:54px!important;
+  }
+  .opsInAppRoot .opsSectionTitle h2{
+    font-size:26px!important;
+  }
+  .opsInAppRoot .opsSectionTitle p{
+    font-size:15px!important;
+  }
+  .opsInAppRoot .cashHeaderTools{
+    background:#f8fafc!important;
+    border:1px solid #e2e8f0!important;
+    border-radius:18px!important;
+    padding:16px!important;
+  }
+  .opsInAppRoot .cashHeaderTools .cashBadges{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    justify-content:flex-end!important;
+    gap:10px!important;
+  }
+  .opsInAppRoot .cashHeaderTools .cashBadges span{
+    font-size:13px!important;
+    padding:9px 12px!important;
+  }
+  .opsInAppRoot .cashHeaderTools label{
+    font-size:12px!important;
+  }
+  .opsInAppRoot .cashHeaderTools input{
+    min-height:42px!important;
+    font-size:14px!important;
+  }
+  .opsInAppRoot .opsExportGrid span.w-full{
+    padding-top:12px!important;
+    padding-bottom:12px!important;
+    font-size:14px!important;
+  }
+  @media (max-width:1400px){
+    .opsInAppRoot .opsActionGrid,
+    .opsInAppRoot .opsCashGrid,
+    .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  }
+  @media (max-width:900px){
+    .opsInAppRoot .max-w-screen-2xl{width:calc(100% - 24px)!important;}
+    .opsInAppRoot .opsPanelWrap{padding:22px!important;}
+    .opsInAppRoot .opsActionGrid,
+    .opsInAppRoot .opsCashGrid,
+    .opsInAppRoot .opsExportGrid{grid-template-columns:1fr!important;}
+  }
+
   @media (max-width:900px){
     .opsInAppRoot .opsPanelWrap{padding:22px!important;border-radius:22px!important;}
     .opsInAppRoot .opsPageHeading h1{font-size:30px!important;}
@@ -171,8 +307,8 @@ export default function ShuffleOperationsPage({
                   <p className="text-xs text-slate-500">Suivi des flux financiers entrants et sortants.</p>
                 </div>
               </div>
-              <div className="flex flex-col items-start lg:items-end gap-4">
-                <div className="flex flex-wrap items-center gap-3">
+              <div className="cashHeaderTools flex flex-col items-start lg:items-end gap-4">
+                <div className="cashBadges flex flex-wrap items-center gap-3">
                   <span className="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
                     Montant manquant: {shortageText || 'DH 0'}

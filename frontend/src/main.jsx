@@ -771,12 +771,12 @@ function Operations({me,setTab,logout,hideChrome=false}){
   };
   const makeCustomCashCard = (key,title,value,description,type="+",tone="blue") => ({key,title,value,description,type,editable:true,tone,cta:"Retour valeur",valueLabel:"Valeur entrée"});
   const inventoryActions = [
-    {icon:"plus", tone:"violet", badge:"C1", badgeClass:"text-violet-600 bg-violet-50", title:"Insérer Qt/Inventaire", desc:"Insérer le stock/quantité produits...", label:"Charger Liste", file:".csv", onFile:importProducts},
-    {icon:"sync", tone:"blue", badge:"B1", badgeClass:"text-blue-600 bg-blue-50", title:"Insérer op associations", desc:"Insérer, désassocier le lot/paquet...", label:"Charger Liste", file:".csv", onFile:importAssociations},
-    {icon:"doc", tone:"emerald", badge:"B1", badgeClass:"text-emerald-600 bg-emerald-50", title:"Scanner code barre/produit", desc:"Rechercher un lot et son historique...", label:"Scanner", onClick:openBarcode},
-    {icon:"warn", tone:"amber", badge:"A2", badgeClass:"text-amber-600 bg-amber-50", title:"Scanner de ticket", desc:"Accéder à la fiche du ticket scanné...", label:"Charger Ticket", onClick:openBarcode},
-    {icon:"card", tone:"rose", badge:"B1", badgeClass:"text-rose-600 bg-rose-50", title:"Insérer bloc/bon d'achat", desc:"Importer un lot/GTIN à IT rapide...", label:"Charger Bloc", file:".csv,.txt", onFile:importDetectedEpc},
-    {icon:"eye", tone:"teal", badge:"Voir", badgeClass:"text-teal-600 bg-teal-50", title:"Observer résultats", desc:"Importer les résultats associations...", label:"Valider", onClick:exportCoverageReport}
+    {icon:"plus", tone:"violet", badge:"C1", badgeClass:"text-violet-600 bg-violet-50", title:"Importer quantités inventaire", desc:"Importer les quantités et le stock produits.", label:"Charger Liste", file:".csv", onFile:importProducts},
+    {icon:"sync", tone:"blue", badge:"B1", badgeClass:"text-blue-600 bg-blue-50", title:"Importer associations", desc:"Associer ou désassocier les lots produits.", label:"Charger Liste", file:".csv", onFile:importAssociations},
+    {icon:"doc", tone:"emerald", badge:"B1", badgeClass:"text-emerald-600 bg-emerald-50", title:"Scanner code-barres produit", desc:"Rechercher un produit et son historique.", label:"Scanner", onClick:openBarcode},
+    {icon:"warn", tone:"amber", badge:"A2", badgeClass:"text-amber-600 bg-amber-50", title:"Scanner un ticket", desc:"Accéder à la fiche du ticket scanné.", label:"Charger Ticket", onClick:openBarcode},
+    {icon:"card", tone:"rose", badge:"B1", badgeClass:"text-rose-600 bg-rose-50", title:"Importer bon d’achat", desc:"Importer un lot, GTIN ou bon d’achat.", label:"Charger Bloc", file:".csv,.txt", onFile:importDetectedEpc},
+    {icon:"eye", tone:"teal", badge:"Voir", badgeClass:"text-teal-600 bg-teal-50", title:"Contrôler les résultats", desc:"Valider les résultats des associations.", label:"Valider", onClick:exportCoverageReport}
   ];
   const cashMetrics = [
     {icon:"money", tone:"green", label:"Ticket vente en cours", value:`~ ${formatDH(totalDailySalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("totalDailySalesCents")},
@@ -798,7 +798,7 @@ function Operations({me,setTab,logout,hideChrome=false}){
     {icon:"doc", tone:"violet", title:"Produits locaux", desc:"Exporter la liste des produits en local...", label:"Export CSV", onClick:exportProducts},
     {icon:"shield", tone:"emerald", title:"Associations", desc:"Exporter les informations et l'index des lots associés...", label:"Export CSV", onClick:exportAssociations},
     {icon:"money", tone:"sky", title:"Produits sans association", desc:"Exporter la liste de tous les produits non associés...", label:"Export CSV", onClick:exportProductsWithoutRfid},
-    {icon:"chart", tone:"amber", title:"Taux de reconstitution", desc:"Exporter les taux de CP et d'obtention des résultats simples...", label:"Export CSV", onClick:exportCoverageReport},
+    {icon:"chart", tone:"amber", title:"Taux de couverture", desc:"Exporter le taux de couverture des associations.", label:"Export CSV", onClick:exportCoverageReport},
     {icon:"db", tone:"rose", title:"Backup complet", desc:"Créer une sauvegarde complète de toutes les données...", label:"Charger Backup", onClick:backupProject}
   ];
   return <>
@@ -3255,9 +3255,12 @@ function MyUsers({auth,me}){
       <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
       <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
       <input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)}/>
-      <div className="pagePermissionBox pagePermissionButtonBox pagePermissionOnlyEditBox">
+      <div className="pagePermissionBox pagePermissionButtonBox">
         <div className="pagePermissionButtonHeader">
-          <strong>Pages visibles</strong>
+          <div>
+            <strong>Pages visibles</strong>
+            <small>{pages.length} page(s) sélectionnée(s)</small>
+          </div>
           <PagePermissionsModalButton
             buttonLabel="Editer"
             title="Pages visibles"
@@ -3282,7 +3285,7 @@ function MyUsers({auth,me}){
             <td>{u.username}</td>
             <td>{u.full_name}</td>
             <td>
-              <div className="pagePermissionCell pagePermissionOnlyEditCell">
+              <div className="pagePermissionCell">
                 <PagePermissionsModalButton
                   buttonLabel="Editer"
                   title={`Pages visibles - ${u.username}`}
@@ -3434,9 +3437,12 @@ return <section className="platformPage">
           <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
           <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Peut créer ses propres utilisateurs</label>
         </div>
-        <div className="pagePermissionBox pagePermissionButtonBox pagePermissionOnlyEditBox">
+        <div className="pagePermissionBox pagePermissionButtonBox">
           <div className="pagePermissionButtonHeader">
-            <strong>Pages visibles pour ce client</strong>
+            <div>
+              <strong>Pages visibles pour ce client</strong>
+              <small>{pagePermissions.length} page(s) sélectionnée(s)</small>
+            </div>
             <PagePermissionsModalButton
               buttonLabel="Editer"
               title="Pages visibles du client"
@@ -3492,7 +3498,7 @@ return <section className="platformPage">
             }</td>
             <td>{isAdmin ? "Toutes" : (()=>{
               const currentPages=normalizePagePermissions(c.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
-              return <div className="pagePermissionCell pagePermissionOnlyEditCell">
+              return <div className="pagePermissionCell">
                 <PagePermissionsModalButton
                   buttonLabel="Editer"
                   title={`Pages visibles - ${c.username}`}
