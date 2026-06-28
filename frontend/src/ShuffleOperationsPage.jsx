@@ -4,40 +4,120 @@ import {SHUFFLE_OPERATIONS_CSS} from "./shuffleOperationsAssets.js";
 
 const OPS_INTERNAL_LAYOUT_CSS = `
   :host{display:block;width:100%;min-width:0;}
-  .opsInAppRoot{width:100%;min-width:0;background:#f6f8fc;}
-  .opsInAppRoot section{padding-left:0!important;padding-right:0!important;}
-  .opsInAppRoot .max-w-screen-2xl{max-width:1680px!important;width:100%!important;margin-left:auto!important;margin-right:auto!important;}
+  .opsInAppRoot{
+    width:100%;
+    min-width:0;
+    background:#f6f8fc;
+    color:#0f172a;
+    font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .opsInAppRoot .max-w-screen-2xl{max-width:1680px!important;width:100%!important;margin:0 auto!important;}
+  .opsInAppRoot section{padding:12px 16px!important;}
+  .opsInAppRoot .opsPanelWrap{
+    background:#fff!important;
+    border:1px solid #e6edf5!important;
+    border-radius:28px!important;
+    box-shadow:0 8px 24px rgba(15,23,42,.04)!important;
+    padding:28px 32px!important;
+  }
+  .opsInAppRoot .opsPageHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 20px!important;}
+  .opsInAppRoot .opsPageHeading h1,
+  .opsInAppRoot .opsSectionTitle h2{
+    font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;
+    font-size:24px!important;
+    line-height:1.16!important;
+    font-weight:800!important;
+    letter-spacing:-.03em!important;
+    color:#162447!important;
+    margin:0!important;
+  }
+  .opsInAppRoot .opsPageHeading p,
+  .opsInAppRoot .opsSectionTitle p{
+    margin-top:10px!important;
+    font-size:14px!important;
+    line-height:1.55!important;
+    font-weight:500!important;
+    color:#718096!important;
+    max-width:780px!important;
+  }
   .opsInAppRoot .opsActionGrid,
   .opsInAppRoot .opsCashGrid,
-  .opsInAppRoot .opsExportGrid{width:100%!important;}
-  .opsInAppRoot .opsActionGrid{grid-template-columns:repeat(6,minmax(0,1fr))!important;}
-  .opsInAppRoot .opsCashGrid{grid-template-columns:repeat(6,minmax(0,1fr))!important;}
-  .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(5,minmax(0,1fr))!important;}
+  .opsInAppRoot .opsCashGridSecondary,
+  .opsInAppRoot .opsExportGrid{width:100%!important;display:grid!important;}
+  .opsInAppRoot .opsActionGrid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:22px!important;}
+  .opsInAppRoot .opsCashGrid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:18px!important;}
+  .opsInAppRoot .opsCashGridSecondary{grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:16px!important;}
+  .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:18px!important;}
   .opsInAppRoot .opsActionGrid > *,
   .opsInAppRoot .opsCashGrid > *,
+  .opsInAppRoot .opsCashGridSecondary > *,
   .opsInAppRoot .opsExportGrid > *{min-width:0;}
-  .opsInAppRoot .opsActionGrid > *{min-height:166px;}
-  .opsInAppRoot .opsCashGrid > button{min-height:126px;}
-  .opsInAppRoot .opsCashGrid > button{padding:18px 20px!important;}
-  .opsInAppRoot .opsCashGrid .font-heading.text-xl{font-size:1.8rem!important;line-height:2rem!important;}
-  .opsInAppRoot .opsActionGrid h3,
-  .opsInAppRoot .opsExportGrid h3{font-size:1.02rem!important;line-height:1.35!important;}
-  .opsInAppRoot .opsPageHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 22px!important;}
-  .opsInAppRoot .opsPageHeading h1{font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:42px!important;line-height:1.08!important;font-weight:800!important;letter-spacing:-.03em!important;color:#14213d!important;margin:0!important;}
-  .opsInAppRoot .opsPageHeading p{margin-top:10px!important;font-size:17px!important;line-height:1.55!important;font-weight:500!important;color:#64748b!important;max-width:780px!important;}
-  .opsInAppRoot .opsSectionTitle h2{font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;font-size:22px!important;line-height:1.18!important;font-weight:800!important;letter-spacing:-.028em!important;margin:0 0 6px!important;color:#14213d!important;}
-  .opsInAppRoot .opsSectionTitle p{font-size:15px!important;line-height:1.6!important;color:#64748b!important;}
-  .opsInAppRoot .opsPanelWrap{background:#fff!important;border:1px solid rgba(226,232,240,.95)!important;border-radius:28px!important;box-shadow:0 12px 32px rgba(15,23,42,.05)!important;padding:28px 30px!important;}
-  @media (max-width:1400px){
+  .opsInAppRoot .opsActionCard,
+  .opsInAppRoot .opsMetricCard,
+  .opsInAppRoot .opsExportCard{
+    background:#fff!important;
+    border:1px solid #e8edf4!important;
+    box-shadow:0 4px 14px rgba(15,23,42,.03)!important;
+  }
+  .opsInAppRoot .opsActionCard:hover,
+  .opsInAppRoot .opsMetricCard:hover,
+  .opsInAppRoot .opsExportCard:hover{
+    border-color:#dbe5f1!important;
+    box-shadow:0 8px 18px rgba(15,23,42,.05)!important;
+  }
+  .opsInAppRoot .opsActionCard{
+    min-height:162px!important;
+    border-radius:18px!important;
+    padding:18px 18px 16px!important;
+  }
+  .opsInAppRoot .opsMetricCard{
+    min-height:104px!important;
+    border-radius:16px!important;
+    padding:14px 16px!important;
+  }
+  .opsInAppRoot .opsMetricCardWide{min-height:96px!important;}
+  .opsInAppRoot .opsExportCard{
+    min-height:168px!important;
+    border-radius:18px!important;
+    padding:18px!important;
+  }
+  .opsInAppRoot .opsChip{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:32px!important;
+    padding:0 16px!important;
+    border-radius:10px!important;
+    border:1px solid #e4ebf3!important;
+    font-size:14px!important;
+    font-weight:700!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+  .opsInAppRoot .opsDateBox{display:flex!important;align-items:center!important;gap:14px!important;}
+  .opsInAppRoot .opsDateLabel{font-size:13px!important;font-weight:800!important;color:#475569!important;}
+  .opsInAppRoot .opsDateField{
+    background:#fff!important;
+    border:1px solid #e4ebf3!important;
+    border-radius:12px!important;
+    padding:0 14px!important;
+    min-height:40px!important;
+    font-size:14px!important;
+    font-weight:700!important;
+    color:#334155!important;
+  }
+  @media (max-width:1500px){
     .opsInAppRoot .opsActionGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
     .opsInAppRoot .opsCashGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
-    .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+    .opsInAppRoot .opsCashGridSecondary{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+    .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
   }
   @media (max-width:900px){
-    .opsInAppRoot .opsPanelWrap{padding:22px!important;border-radius:22px!important;}
-    .opsInAppRoot .opsPageHeading h1{font-size:32px!important;}
+    .opsInAppRoot section{padding:10px 12px!important;}
+    .opsInAppRoot .opsPanelWrap{padding:22px 20px!important;border-radius:22px!important;}
     .opsInAppRoot .opsActionGrid,
     .opsInAppRoot .opsCashGrid,
+    .opsInAppRoot .opsCashGridSecondary,
     .opsInAppRoot .opsExportGrid{grid-template-columns:1fr!important;}
   }
 `;
@@ -85,9 +165,7 @@ function SimpleIcon({type,className=""}){
 }
 
 function OpsNav({setTab, logout}){
-  const nav = [
-    ["operations","Opérations"],["cash","Encaissements"],["inventory","Inventaire"],["cash","Caisse"],["association","Associations"],["dashboard","CRM Achats"]
-  ];
+  const nav = [["operations","Opérations"],["cash","Encaissements"],["inventory","Inventaire"],["cash","Caisse"],["association","Associations"],["dashboard","CRM Achats"]];
   return <nav className="bg-white border-b border-slate-200/80">
     <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -109,110 +187,117 @@ function InventoryActionCard({icon,tone,badge,badgeClass,title,desc,label,onClic
   const iconBg = {violet:"bg-violet-50", blue:"bg-blue-50", emerald:"bg-emerald-50", amber:"bg-amber-50", rose:"bg-rose-50", teal:"bg-teal-50"}[tone] || "bg-indigo-50";
   const iconText = {violet:"text-violet-600", blue:"text-blue-600", emerald:"text-emerald-600", amber:"text-amber-600", rose:"text-rose-600", teal:"text-teal-600"}[tone] || "text-indigo-600";
   const inner = <>
-    <div className="flex items-start justify-between gap-4 mb-5"><div className={`w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center shadow-sm`}><SimpleIcon type={icon} className={`w-7 h-7 ${iconText}`}/></div><span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeClass}`}>{badge}</span></div>
-    <h3 className="font-heading font-semibold text-[1.06rem] text-slate-900 mb-2">{title}</h3>
-    <p className="text-[13px] text-slate-500 mb-5 leading-relaxed min-h-[40px]">{desc}</p>
-    <span className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">{label}<ChevronIcon className="w-3.5 h-3.5"/></span>
+    <div className="flex items-start justify-between gap-4 mb-5">
+      <div className={`w-[58px] h-[58px] rounded-[16px] ${iconBg} flex items-center justify-center`}><SimpleIcon type={icon} className={`w-7 h-7 ${iconText}`}/></div>
+      <span className={`text-[14px] font-semibold px-4 py-1.5 rounded-full ${badgeClass}`}>{badge}</span>
+    </div>
+    <h3 className="font-heading font-semibold text-[16px] leading-[1.3] text-slate-900 mb-2">{title}</h3>
+    <p className="text-[13px] leading-[1.55] text-slate-500 mb-6 min-h-[38px]">{desc}</p>
+    <span className="inline-flex items-center gap-2 text-[15px] font-semibold text-indigo-600">{label}<ChevronIcon className="w-3.5 h-3.5"/></span>
   </>;
-  const cls="group bg-white rounded-[22px] border border-slate-200/90 p-5 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300";
+  const cls="opsActionCard group";
   if(file) return <label className={`${cls} ops-file-label cursor-pointer`}>{inner}<input type="file" accept={file} onChange={e=>onFile?.(e.target.files?.[0])}/></label>;
   return <button type="button" onClick={onClick} className={`${cls} text-left cursor-pointer`}>{inner}</button>;
 }
 
-function CashMetric({icon,tone,label,value,actionLabel,onClick,muted=false}){
+function CashMetric({icon,tone,label,value,actionLabel,onClick,muted=false,wide=false}){
   const bg = {green:"bg-green-50", sky:"bg-sky-50", violet:"bg-violet-50", amber:"bg-amber-50", rose:"bg-rose-50", teal:"bg-teal-50", indigo:"bg-indigo-50", fuchsia:"bg-fuchsia-50", orange:"bg-orange-50", cyan:"bg-cyan-50", lime:"bg-lime-50", pink:"bg-pink-50"}[tone] || "bg-indigo-50";
   const text = {green:"text-green-600", sky:"text-sky-600", violet:"text-violet-600", amber:"text-amber-600", rose:"text-rose-600", teal:"text-teal-600", indigo:"text-indigo-600", fuchsia:"text-fuchsia-600", orange:"text-orange-600", cyan:"text-cyan-600", lime:"text-lime-600", pink:"text-pink-600"}[tone] || "text-indigo-600";
-  return <button type="button" onClick={onClick} className="bg-white rounded-[20px] border border-slate-200/85 p-5 text-left cursor-pointer shadow-sm shadow-slate-200/40 hover:shadow-md hover:border-indigo-200 transition-all duration-300">
-    <div className="flex items-center gap-3 mb-4"><div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center`}><SimpleIcon type={icon} className={`w-5 h-5 ${text}`}/></div><p className="text-[13px] font-medium text-slate-500 mb-0">{label}</p></div>
-    <p className="font-heading text-[2.05rem] leading-none font-bold text-slate-900">{value}</p>
-    <span className={`inline-block mt-4 text-[14px] font-semibold ${muted ? "text-slate-400" : text.includes("green") || text.includes("lime") ? "text-emerald-600 hover:text-emerald-700" : "text-indigo-600 hover:text-indigo-700"} transition-colors`}>{actionLabel}</span>
+  return <button type="button" onClick={onClick} className={`opsMetricCard ${wide ? "opsMetricCardWide" : ""} text-left cursor-pointer`}>
+    <div className="flex items-center gap-3 mb-4"><div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}><SimpleIcon type={icon} className={`w-5 h-5 ${text}`}/></div><p className="text-[13px] font-medium leading-[1.25] text-slate-500 mb-0">{label}</p></div>
+    <p className="font-heading text-[18px] leading-none font-bold text-slate-900">{value}</p>
+    <span className={`inline-block mt-4 text-[13px] font-semibold ${muted ? "text-slate-400" : text.includes("green") || text.includes("lime") ? "text-emerald-600" : "text-indigo-600"}`}>{actionLabel}</span>
   </button>;
 }
 
 function ExportCard({icon,tone,title,desc,label,onClick,file,onFile}){
   const bg={violet:"from-violet-100 to-violet-50",emerald:"from-emerald-100 to-emerald-50",sky:"from-sky-100 to-sky-50",amber:"from-amber-100 to-amber-50",rose:"from-rose-100 to-rose-50"}[tone]||"from-indigo-100 to-indigo-50";
   const text={violet:"text-violet-600",emerald:"text-emerald-600",sky:"text-sky-600",amber:"text-amber-600",rose:"text-rose-600"}[tone]||"text-indigo-600";
-  const btnTone={violet:"text-violet-600 border-violet-300 hover:bg-violet-50",emerald:"text-emerald-600 border-emerald-300 hover:bg-emerald-50",sky:"text-sky-600 border-sky-300 hover:bg-sky-50",amber:"text-amber-600 border-amber-300 hover:bg-amber-50",rose:"text-rose-600 border-rose-300 hover:bg-rose-600 hover:text-white"}[tone]||"text-indigo-600 border-indigo-300 hover:bg-indigo-50";
-  const solidBg = tone === "rose" ? "bg-rose-600 hover:bg-rose-700 text-white border-rose-600" : "bg-white";
-  const content=<><div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${bg} flex items-center justify-center mb-5`}><SimpleIcon type={icon} className={`w-7 h-7 ${text}`}/></div><h3 className="font-heading font-semibold text-slate-900 mb-2 text-[1.05rem]">{title}</h3><p className="text-[13px] text-slate-500 leading-relaxed mb-6 grow min-h-[38px]">{desc}</p><span className={`w-full py-3 rounded-xl border text-sm font-semibold active:scale-[0.98] transition-all duration-200 text-center block ${tone === "rose" ? solidBg : btnTone}`}>{label}</span></>;
-  const cls="group bg-white rounded-[22px] border border-slate-200/85 p-6 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300 flex flex-col";
+  const btnTone={violet:"text-violet-600 border-violet-300 hover:bg-violet-50",emerald:"text-emerald-600 border-emerald-300 hover:bg-emerald-50",sky:"text-sky-600 border-sky-300 hover:bg-sky-50",amber:"text-amber-600 border-amber-300 hover:bg-amber-50",rose:"bg-rose-600 hover:bg-rose-700 text-white border-rose-600"}[tone]||"text-indigo-600 border-indigo-300 hover:bg-indigo-50";
+  const content = <>
+    <div className={`w-[60px] h-[60px] rounded-[16px] bg-gradient-to-br ${bg} flex items-center justify-center mb-5`}><SimpleIcon type={icon} className={`w-7 h-7 ${text}`}/></div>
+    <h3 className="font-heading font-semibold text-[16px] leading-[1.3] text-slate-900 mb-2">{title}</h3>
+    <p className="text-[13px] leading-[1.55] text-slate-500 mb-6 grow min-h-[40px]">{desc}</p>
+    <span className={`w-full py-3 rounded-[12px] border text-[15px] font-semibold text-center block ${btnTone}`}>{label}</span>
+  </>;
+  const cls="opsExportCard group flex flex-col";
   if(file) return <label className={`${cls} ops-file-label cursor-pointer`}>{content}<input type="file" accept={file} onChange={e=>onFile?.(e.target.files?.[0])}/></label>;
   return <button type="button" onClick={onClick} className={`${cls} text-left cursor-pointer`}>{content}</button>;
 }
 
 export default function ShuffleOperationsPage({
   setTab, logout, cashDate, canChangeCashDate, onCashDateChange,
-  formatValue, headerSolde, headerCash, shortageText, surplusText, inventoryActions, cashMetrics, exportActions, hideChrome=false
+  shortageText, surplusText, inventoryActions, cashMetrics, exportActions, hideChrome=false
 }){
   return <ShadowOperationsFrame>
-    <div className={`antialiased font-body bg-body text-body bg-slate-50 text-slate-800 min-h-screen ${hideChrome ? "opsInAppRoot" : ""}`}>
-      {!hideChrome && <OpsNav setTab={setTab} logout={logout}/>}
-      <section className="py-10 px-6">
+    <div className={`antialiased font-body bg-body text-body min-h-screen ${hideChrome ? "opsInAppRoot" : ""}`}>
+      {!hideChrome && <OpsNav setTab={setTab} logout={logout}/>}      
+      <section>
         <div className="max-w-screen-2xl mx-auto">
           <div className="opsPanelWrap">
-          <div className="opsPageHeading">
-            <div>
-              <h1>Actions Inventaire</h1>
-              <p>Toutes les actions nécessaires pour la gestion de votre inventaire.</p>
+            <div className="opsPageHeading">
+              <div>
+                <h1>Actions Inventaire</h1>
+                <p>Toutes les actions nécessaires pour la gestion de votre inventaire.</p>
+              </div>
             </div>
-          </div>
-          <div className="opsActionGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
-            {inventoryActions.map(a=><InventoryActionCard key={a.title} {...a}/>) }
-          </div>
+            <div className="opsActionGrid">
+              {inventoryActions.map(a=><InventoryActionCard key={a.title} {...a} />)}
+            </div>
           </div>
         </div>
       </section>
-      <section className="py-10 px-6">
+
+      <section>
         <div className="max-w-screen-2xl mx-auto">
           <div className="opsPanelWrap">
-          <div className="mb-7">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
-                  <SimpleIcon type="card" className="w-4 h-4" />
+            <div className="mb-7">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                    <SimpleIcon type="card" className="w-4 h-4" />
+                  </div>
+                  <div className="opsSectionTitle">
+                    <h2>Opérations de caisse</h2>
+                    <p>Suivi des flux financiers entrants et sortants.</p>
+                  </div>
                 </div>
-                <div className="opsSectionTitle">
-                  <h2>Opérations de caisse</h2>
-                  <p>Suivi des flux financiers entrants et sortants.</p>
-                </div>
-              </div>
-              <div className="flex flex-col items-start lg:items-end gap-4">
-                <div className="flex flex-wrap items-center justify-end gap-3">
-                  <span className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-5 py-2.5 text-sm font-semibold text-rose-700">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
-                    Montant manquant: {shortageText || 'DH 0'}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-700">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                    Montant surplus: {surplusText || 'DH 0'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <label className="text-sm font-bold text-slate-600">Date de caisse</label>
-                  <input type="date" value={cashDate} disabled={!canChangeCashDate} onChange={e=>onCashDateChange?.(e.target.value)} className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 disabled:bg-slate-50 disabled:text-slate-400" />
+                <div className="flex flex-col items-start lg:items-end gap-4">
+                  <div className="flex flex-wrap items-center justify-end gap-4">
+                    <span className="opsChip bg-rose-50 text-rose-700 border-rose-200">Montant manquant: {shortageText || 'DH 0'}</span>
+                    <span className="opsChip bg-emerald-50 text-emerald-700 border-emerald-200">Montant surplus: {surplusText || 'DH 0'}</span>
+                  </div>
+                  <div className="opsDateBox">
+                    <label className="opsDateLabel">Date de caisse</label>
+                    <input type="date" value={cashDate} disabled={!canChangeCashDate} onChange={e=>onCashDateChange?.(e.target.value)} className="opsDateField focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 disabled:bg-slate-50 disabled:text-slate-400" />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="opsCashGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
-            {cashMetrics.slice(0,6).map(m=><CashMetric key={m.label} {...m}/>) }
-          </div>
-          <div className="opsCashGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            {cashMetrics.slice(6).map(m=><CashMetric key={m.label} {...m}/>) }
-          </div>
+            <div className="opsCashGrid mb-4">
+              {cashMetrics.slice(0,6).map(m=><CashMetric key={m.label} {...m} />)}
+            </div>
+            <div className="opsCashGridSecondary">
+              {cashMetrics.slice(6).map(m=><CashMetric key={m.label} {...m} wide />)}
+            </div>
           </div>
         </div>
       </section>
-      <section className="py-10 px-6">
+
+      <section>
         <div className="max-w-screen-2xl mx-auto">
           <div className="opsPanelWrap">
-          <div className="mb-8 opsSectionTitle"><h2>Exports et sauvegardes locales</h2><p>Exporter les données de vos CTRL et générer des rapports détaillés locaux.</p></div>
-          <div className="opsExportGrid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-            {exportActions.map(a=><ExportCard key={a.title} {...a}/>) }
-          </div>
+            <div className="mb-8 opsSectionTitle">
+              <h2>Exports et sauvegardes locales</h2>
+              <p>Exporter les données de vos CTRL et générer des rapports détaillés locaux.</p>
+            </div>
+            <div className="opsExportGrid">
+              {exportActions.map(a=><ExportCard key={a.title} {...a} />)}
+            </div>
           </div>
         </div>
       </section>
+
       {!hideChrome && <footer className="bg-white border-t border-slate-200/80 py-8 px-6 mt-6">
         <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3"><div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center"><CubeIcon className="w-4 h-4 text-white"/></div><span className="font-heading font-semibold text-sm text-slate-900">Smart Inventory</span></div>

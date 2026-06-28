@@ -771,35 +771,35 @@ function Operations({me,setTab,logout,hideChrome=false}){
   };
   const makeCustomCashCard = (key,title,value,description,type="+",tone="blue") => ({key,title,value,description,type,editable:true,tone,cta:"Retour valeur",valueLabel:"Valeur entrée"});
   const inventoryActions = [
-    {icon:"plus", tone:"violet", badge:"C1", badgeClass:"text-violet-600 bg-violet-50", title:"Insérer Qt/Inventaire", desc:"Insérer le stock/quantité produits...", label:"Charger Liste", file:".csv", onFile:importProducts},
-    {icon:"sync", tone:"blue", badge:"B1", badgeClass:"text-blue-600 bg-blue-50", title:"Insérer op associations", desc:"Insérer, désassocier le lot/paquet...", label:"Charger Liste", file:".csv", onFile:importAssociations},
-    {icon:"doc", tone:"emerald", badge:"B1", badgeClass:"text-emerald-600 bg-emerald-50", title:"Scanner code barre/produit", desc:"Rechercher un lot et son historique...", label:"Scanner", onClick:openBarcode},
-    {icon:"warn", tone:"amber", badge:"A2", badgeClass:"text-amber-600 bg-amber-50", title:"Scanner de ticket", desc:"Accéder à la fiche du ticket scanné...", label:"Charger Ticket", onClick:openBarcode},
-    {icon:"card", tone:"rose", badge:"B1", badgeClass:"text-rose-600 bg-rose-50", title:"Insérer bloc/bon d'achat", desc:"Importer un lot/GTIN à IT rapide...", label:"Charger Bloc", file:".csv,.txt", onFile:importDetectedEpc},
-    {icon:"eye", tone:"teal", badge:"Voir", badgeClass:"text-teal-600 bg-teal-50", title:"Observer résultats", desc:"Importer les résultats associations...", label:"Valider", onClick:exportCoverageReport}
+    {icon:"plus", tone:"violet", badge:"C1", badgeClass:"text-violet-600 bg-violet-50", title:"Importer quantités inventaire", desc:"Importer le stock/quantité produits.", label:"Importer", file:".csv", onFile:importProducts},
+    {icon:"sync", tone:"blue", badge:"B1", badgeClass:"text-blue-600 bg-blue-50", title:"Importer associations", desc:"Importer, associer le lot paquet...", label:"Importer", file:".csv", onFile:importAssociations},
+    {icon:"doc", tone:"emerald", badge:"B1", badgeClass:"text-emerald-600 bg-emerald-50", title:"Scanner code-barres produit", desc:"Rechercher un lot et son historique.", label:"Scanner", onClick:openBarcode},
+    {icon:"warn", tone:"amber", badge:"A2", badgeClass:"text-amber-600 bg-amber-50", title:"Scanner un ticket", desc:"Accéder à la fiche du ticket scanné.", label:"Scanner", onClick:openBarcode},
+    {icon:"card", tone:"rose", badge:"B1", badgeClass:"text-rose-600 bg-rose-50", title:"Importer bon d'achat", desc:"Importer un bon d'achat (TIN à IT) rapide.", label:"Importer", file:".csv,.txt", onFile:importDetectedEpc},
+    {icon:"eye", tone:"teal", badge:"Voir", badgeClass:"text-teal-600 bg-teal-50", title:"Contrôler les résultats", desc:"Inspecter les résultats associations...", label:"Contrôler", onClick:exportCoverageReport}
   ];
   const cashMetrics = [
-    {icon:"money", tone:"green", label:"Ticket vente en cours", value:`~ ${formatDH(totalDailySalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("totalDailySalesCents")},
-    {icon:"wallet", tone:"sky", label:"Paiement par espèce", value:`~ ${formatDH(salesCashCalculatedCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("salesCashCents")},
-    {icon:"card", tone:"violet", label:"Paiement par TPE", value:`~ ${formatDH(atmSalesCents)}`, actionLabel:"Consulter historique", muted:true, onClick:()=>openCashMetric("atmSalesCents")},
-    {icon:"receipt", tone:"amber", label:"Ticket autre remise", value:`= ${formatDH(creditSalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("creditSalesCents")},
+    {icon:"money", tone:"green", label:"Ticket vente en cours", value:`- ${formatDH(totalDailySalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("totalDailySalesCents")},
+    {icon:"wallet", tone:"sky", label:"Paiement par espèce", value:`- ${formatDH(salesCashCalculatedCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("salesCashCents")},
+    {icon:"card", tone:"violet", label:"Paiement par TPE", value:`- ${formatDH(atmSalesCents)}`, actionLabel:"Consulter historique", muted:true, onClick:()=>openCashMetric("atmSalesCents")},
+    {icon:"receipt", tone:"amber", label:"Ticket autre remise", value:`- ${formatDH(creditSalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("creditSalesCents")},
     {icon:"return", tone:"rose", label:"Produits chèque", value:`+ ${formatDH(creditSettlementCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("creditSettlementCents")},
     {icon:"calc", tone:"teal", label:"Remboursement espèce", value:`+ ${formatDH(Number(cashCurrent.management.refundsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("refundsCents","Remboursement espèce",Number(cashCurrent.management.refundsCents || 0),"Saisir les remboursements en espèce.","+","green"))},
-    {icon:"box", tone:"indigo", label:"Approvisionnement", value:`~ ${formatDH(depositsCents)}`, actionLabel:"Retour résultats", onClick:()=>openCashMetric("depositsCents")},
+    {icon:"box", tone:"indigo", label:"Approvisionnement", value:`- ${formatDH(depositsCents)}`, actionLabel:"Retour résultats", onClick:()=>openCashMetric("depositsCents")},
     {icon:"image", tone:"fuchsia", label:"Dépenses caisse", value:`+ ${formatDH(expensesCents)}`, actionLabel:"Retour valeur", onClick:openExpenseModal},
     {icon:"warn", tone:"amber", label:"Limite tolérance écart", value:`= ${formatDH(cashSettings.toleranceLimitCents || 0)}`, actionLabel:"Modifier limite", onClick:()=>setCashOpModal({key:"toleranceLimitCents", title:"Limite tolérance écart", description:"Définir la limite de tolérance utilisée pour la progression de l’écart caisse.", isSetting:true})},
     {icon:"chart", tone:"indigo", label:"Limite dépenses mois", value:`= ${formatDH(cashSettings.monthlyExpenseLimitCents || 0)}`, actionLabel:"Modifier limite", onClick:()=>setCashOpModal({key:"monthlyExpenseLimitCents", title:"Limite dépenses mensuelles", description:"Définir la limite mensuelle utilisée pour la progression des dépenses.", isSetting:true})},
-    {icon:"cart", tone:"orange", label:"Avoirs retournés", value:`~ ${formatDH(Number(cashCurrent.management.returnsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("returnsCents","Avoirs retournés",Number(cashCurrent.management.returnsCents || 0),"Saisir les avoirs retournés.","+","blue"))},
+    {icon:"cart", tone:"orange", label:"Avoirs retournés", value:`- ${formatDH(Number(cashCurrent.management.returnsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("returnsCents","Avoirs retournés",Number(cashCurrent.management.returnsCents || 0),"Saisir les avoirs retournés.","+","blue"))},
     {icon:"calendar", tone:"cyan", label:"Bons de commandes", value:`= ${formatDH(Number(cashCurrent.management.purchaseOrdersCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("purchaseOrdersCents","Bons de commandes",Number(cashCurrent.management.purchaseOrdersCents || 0),"Saisir les bons de commandes.","=","blue"))},
     {icon:"shield", tone:"lime", label:"C encaissements", value:`= ${formatDH(newCashBalanceCents)}`, actionLabel:"Consulter liste", onClick:()=>openCashMetric("closingRealCents")},
     {icon:"chart", tone:"pink", label:"C virement bancaire", value:`+ ${formatDH(Number(cashCurrent.management.bankTransferCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("bankTransferCents","C virement bancaire",Number(cashCurrent.management.bankTransferCents || 0),"Saisir le virement bancaire.","+","blue"))}
   ];
   const exportActions = [
-    {icon:"doc", tone:"violet", title:"Produits locaux", desc:"Exporter la liste des produits en local...", label:"Export CSV", onClick:exportProducts},
-    {icon:"shield", tone:"emerald", title:"Associations", desc:"Exporter les informations et l'index des lots associés...", label:"Export CSV", onClick:exportAssociations},
-    {icon:"money", tone:"sky", title:"Produits sans association", desc:"Exporter la liste de tous les produits non associés...", label:"Export CSV", onClick:exportProductsWithoutRfid},
-    {icon:"chart", tone:"amber", title:"Taux de reconstitution", desc:"Exporter les taux de CP et d'obtention des résultats simples...", label:"Export CSV", onClick:exportCoverageReport},
-    {icon:"db", tone:"rose", title:"Backup complet", desc:"Créer une sauvegarde complète de toutes les données...", label:"Charger Backup", onClick:backupProject}
+    {icon:"doc", tone:"violet", title:"Produits locaux", desc:"Exporter la liste des produits en local.", label:"Exporter CSV", onClick:exportProducts},
+    {icon:"shield", tone:"emerald", title:"Associations", desc:"Exporter les informations et l'index des lots associés...", label:"Exporter CSV", onClick:exportAssociations},
+    {icon:"money", tone:"sky", title:"Produits sans association", desc:"Exporter la liste de tous les produits non associés.", label:"Exporter CSV", onClick:exportProductsWithoutRfid},
+    {icon:"chart", tone:"amber", title:"Taux de couverture", desc:"Exporter les taux de Cᵖ et d'obtention des résultats simples.", label:"Exporter CSV", onClick:exportCoverageReport},
+    {icon:"db", tone:"rose", title:"Backup complet", desc:"Créer une sauvegarde complète de toutes les données.", label:"Charger Backup", onClick:backupProject}
   ];
   return <>
     <ShuffleOperationsPage
