@@ -1,0 +1,13 @@
+V149_DATE_BAR_TITLE_CLEANUP
+
+Corrections ciblées frontend :
+- Suppression du badge PRO TRIAL dans la barre supérieure interne.
+- Dashboard Caisse : remplacement du titre par Gestion de caisse avec typographie cohérente.
+- Dashboard Caisse : conservation d'une seule barre de date principale pour piloter toutes les cartes.
+- Dashboard Caisse : suppression des sélecteurs de date dupliqués dans les cartes.
+- Dashboard Caisse : calendrier plus compact, dates affichées en français et semaines Lu-Di.
+- Tables de caisse : harmonisation de la police/taille du titre avec les autres pages.
+- Gestion de caisse / Dépenses : suppression du doublon de période causé par le champ month natif visible à côté du mois déjà affiché.
+- Aucun changement volontaire au menu actuel ni au pied de page.
+
+Validation : npm install + npm run build OK.

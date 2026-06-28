@@ -470,7 +470,6 @@ function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
           </button>)}
         </nav>
         <div className="dashRefHeaderAccount">
-          <span className="dashRefHeaderBadge">PRO TRIAL</span>
           <div className="dashRefHeaderUserText"><b>{accountName}</b><small>{roleName}</small></div>
           <span className="dashRefAvatar">{initials}</span>
         </div>
@@ -871,6 +870,14 @@ function formatMonthLabel(isoMonth){
   return new Intl.DateTimeFormat("fr-FR", {year:"numeric", month:"long"}).format(d);
 }
 
+function formatCashDateLabel(isoDate, options={}){
+  const safe = String(isoDate || todayISO());
+  const [year,month,day] = safe.split("-").map(Number);
+  const d = new Date(year || new Date().getFullYear(), (month || 1) - 1, day || 1);
+  const withDay = options.day !== false;
+  return new Intl.DateTimeFormat("fr-FR", withDay ? {day:"numeric", month:"long", year:"numeric"} : {month:"long", year:"numeric"}).format(d);
+}
+
 function parseMoneyToCents(value){
   const raw = String(value ?? "").replace(/[^0-9,.-]/g, "").replace(",", ".");
   if(!raw || raw==="-" || raw===".") return 0;
@@ -1260,7 +1267,6 @@ function CashRegister(){
                   <button type="button" onClick={()=>setManagementMonth(shiftISOMonth(managementMonth,-1))}>‹</button>
                   <div className="expenseMonthValue">{formatMonthLabel(managementMonth)}</div>
                   <button type="button" onClick={()=>setManagementMonth(shiftISOMonth(managementMonth,1))}>›</button>
-                  <input type="month" value={managementMonth} onChange={e=>setManagementMonth(e.target.value || todayMonthISO())}/>
                 </div>
               </div>
 
@@ -1313,7 +1319,6 @@ function CashRegister(){
                   <button type="button" onClick={()=>setExpensesMonth(shiftISOMonth(expensesMonth,-1))}>‹</button>
                   <div className="expenseMonthValue">{formatMonthLabel(expensesMonth)}</div>
                   <button type="button" onClick={()=>setExpensesMonth(shiftISOMonth(expensesMonth,1))}>›</button>
-                  <input type="month" value={expensesMonth} onChange={e=>setExpensesMonth(e.target.value || todayMonthISO())}/>
                 </div>
               </div>
 
@@ -1688,9 +1693,10 @@ function CashDashboardAdmin(){
     function buildCalendarCells(){
       const [year, month] = viewMonth.split("-").map(Number);
       const firstDay = new Date(year, month - 1, 1).getDay();
+      const mondayFirstDay = (firstDay + 6) % 7;
       const daysInMonth = new Date(year, month, 0).getDate();
       const cells = [];
-      for(let i=0;i<firstDay;i++) cells.push({type:"blank", key:`blank-${i}`});
+      for(let i=0;i<mondayFirstDay;i++) cells.push({type:"blank", key:`blank-${i}`});
       for(let day=1; day<=daysInMonth; day++){
         const isoDate = `${viewMonth}-${String(day).padStart(2,"0")}`;
         cells.push({
@@ -1717,9 +1723,9 @@ function CashDashboardAdmin(){
         aria-label={ariaLabel}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        title="Cliquer pour ouvrir le calendrier des dates enregistrées."
+        title="Choisir une date enregistrée."
       >
-        <span>{activeDate}</span>
+        <span>{formatCashDateLabel(activeDate)}</span>
         <span className="cashAdminDatePickerIcon">📅</span>
       </button>
       <button type="button" onClick={()=>onShift ? onShift(1) : onChange(shiftDateValue(activeDate,1))} disabled={nextDisabled} aria-label="Date enregistrée suivante">›</button>
@@ -1730,7 +1736,7 @@ function CashDashboardAdmin(){
           <button type="button" onClick={()=>changeMonth(1)} disabled={!canNextMonth} aria-label="Mois suivant">›</button>
         </div>
         <div className="cashAdminCalendarWeekdays">
-          {["Su","Mo","Tu","We","Th","Fr","Sa"].map(day=><span key={day}>{day}</span>)}
+          {["Lu","Ma","Me","Je","Ve","Sa","Di"].map(day=><span key={day}>{day}</span>)}
         </div>
         <div className="cashAdminCalendarGrid">
           {calendarCells.map(cell=>{
@@ -1754,16 +1760,8 @@ function CashDashboardAdmin(){
     </div>;
   }
 
-  function resultDateMeta(key){
-    return <div className="cashShuffleMetaDate">
-      <DateOperationPicker compact value={resultsDates[key]} onChange={date=>updateResultDate(key,date)} onShift={delta=>shiftResultDate(key,delta)} ariaLabel={`Date enregistrée pour ${key}`} />
-    </div>;
-  }
-
-  function selectedDateMeta(label){
-    return <div className="cashShuffleMetaDate">
-      <DateOperationPicker compact value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel={label} />
-    </div>;
+  function cardMeta(text){
+    return text ? <span>{text}</span> : null;
   }
 
   function CashShuffleAmount({cents, decimals=1, tone="", large=false, xl=false, children}){
@@ -1805,13 +1803,13 @@ function CashDashboardAdmin(){
   return <section className="cashShuffleDashboard">
     <div className="cashShuffleHeader">
       <div>
-        <h1>Cash register dashboard</h1>
-        <p>Vue admin pour consulter les dates enregistrées où des opérations de caisse existent, avec calendrier et flèches de navigation.</p>
+        <h1>Gestion de caisse</h1>
+        <p>Consultez les indicateurs de caisse à partir d’une seule date sélectionnée.</p>
       </div>
       <div className="cashShuffleHeaderActions">
         <div className="cashShuffleDateControl">
-          <span>Date temps réel</span>
-          <DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date temps réel enregistrée" />
+          <span>Gestion de caisse</span>
+          <DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date de gestion de caisse" />
         </div>
         <button type="button" className="cashShuffleRefresh" onClick={()=>selectMainDate(latestDate)} aria-label="Actualiser la date"><InvIcon name="sync"/></button>
       </div>
@@ -1819,66 +1817,66 @@ function CashDashboardAdmin(){
 
     <div className="cashShuffleGrid cashShuffleContentV142">
       <div className="cashShuffleSection cashShuffleSectionTop">
-      <CashShuffleCard title="Balance due progress" meta={<span>{monthMetrics.length} date(s) enregistrée(s)</span>} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="indigo">
+      <CashShuffleCard title="Balance due progress" meta={cardMeta(`${monthMetrics.length} date(s) enregistrée(s)`)} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="indigo">
         <CashShuffleProgress value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Real time CR balance" meta={selectedDateMeta("Date temps réel enregistrée pour Real time CR balance")} badge="SD" className="cashShuffleCardTall cashShuffleBalanceCard">
+      <CashShuffleCard title="Real time CR balance" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleCardTall cashShuffleBalanceCard">
         <CashShuffleAmount cents={selectedMetrics.countedCents} large />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant manquant" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>} badge="📅" className="cashShuffleCardTall">
+      <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall">
         <CashShuffleAmount cents={monthlyShortageCents} tone="negative" xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant surplus" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>} badge="📅" className="cashShuffleCardTall">
+      <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall">
         <CashShuffleAmount cents={monthlySurplusCents} tone="positive" xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="amber">
+      <CashShuffleCard title="Tot. dépenses" meta={cardMeta("Total mensuel")} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="amber">
         <CashShuffleProgress value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Aucune vente"} />
       </CashShuffleCard>
 
       </div>
 
       <div className="cashShuffleSection cashShuffleSectionBottom">
-      <CashShuffleCard title="Balance due" meta={selectedDateMeta("Date enregistrée pour Balance due")} badge="SD" className="cashShuffleMini">
+      <CashShuffleCard title="Balance due" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleMini">
         <CashShuffleAmount cents={selectedMetrics.dueBalanceCents} />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Montant manquant" meta={selectedDateMeta("Date enregistrée pour Montant manquant")} badge="SD" className="cashShuffleMini">
+      <CashShuffleCard title="Montant manquant" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleMini">
         <CashShuffleAmount cents={selectedMetrics.shortageCents} tone="negative" />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Montant surplus" meta={selectedDateMeta("Date enregistrée pour Montant surplus")} badge="SD" className="cashShuffleMini">
+      <CashShuffleCard title="Montant surplus" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleMini">
         <CashShuffleAmount cents={selectedMetrics.surplusCents} tone="positive" />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Retiré" meta={selectedDateMeta("Date enregistrée pour Retiré")} className="cashShuffleMini">
+      <CashShuffleCard title="Retiré" meta={cardMeta("Jour sélectionné")} className="cashShuffleMini">
         <CashShuffleAmount cents={selectedMetrics.withdrawnCents} />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>} className="cashShuffleMini" dotTone="amber">
+      <CashShuffleCard title="Dépenses" meta={cardMeta("Total mensuel")} className="cashShuffleMini" dotTone="amber">
         <CashShuffleAmount>{Math.round(monthlyExpensesCents/100)}</CashShuffleAmount>
       </CashShuffleCard>
 
       </div>
 
       <div className="cashShuffleSection cashShuffleSectionResults">
-      <CashShuffleCard title="Tot. vente" meta={resultDateMeta("totalSales")} badge="=" className="cashShuffleWide">
-        <CashShuffleAmount cents={resultMetrics.totalSales.totalSalesCents} xl />
+      <CashShuffleCard title="Tot. vente" meta={cardMeta("Jour sélectionné")} badge="=" className="cashShuffleWide">
+        <CashShuffleAmount cents={selectedMetrics.totalSalesCents} xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="C. fermeture (théorique)" meta={resultDateMeta("closingCalculated")} badge="=" className="cashShuffleWide">
-        <CashShuffleAmount cents={resultMetrics.closingCalculated.closingCalculatedCents} xl />
+      <CashShuffleCard title="C. fermeture (théorique)" meta={cardMeta("Jour sélectionné")} badge="=" className="cashShuffleWide">
+        <CashShuffleAmount cents={selectedMetrics.closingCalculatedCents} xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Nouvelle C. fermeture" meta={resultDateMeta("closingReal")} badge="=" className="cashShuffleWide">
-        <CashShuffleAmount cents={resultMetrics.closingReal.closingRealCents} xl />
+      <CashShuffleCard title="Nouvelle C. fermeture" meta={cardMeta("Jour sélectionné")} badge="=" className="cashShuffleWide">
+        <CashShuffleAmount cents={selectedMetrics.closingRealCents} xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Écart cash comptée vs calculée" meta={resultDateMeta("gap")} badge="Δ" className="cashShuffleWide cashShuffleWideDelta" dotTone="amber">
-        <CashShuffleAmount cents={resultMetrics.gap.gapCents} xl />
+      <CashShuffleCard title="Écart cash comptée vs calculée" meta={cardMeta("Jour sélectionné")} badge="Δ" className="cashShuffleWide cashShuffleWideDelta" dotTone="amber">
+        <CashShuffleAmount cents={selectedMetrics.gapCents} xl />
       </CashShuffleCard>
       </div>
     </div>
