@@ -1771,13 +1771,13 @@ function CashDashboardAdmin(){
   }
 
   function selectMainDate(date){
-    const nextDate = closestRegisteredDate(date);
+    const nextDate = date || dashboardToday;
     setSelectedDate(nextDate);
     syncAllResultDates(nextDate);
   }
 
   function shiftSelectedDate(delta){
-    const nextDate = shiftDateValue(selectedDate, delta);
+    const nextDate = shiftISODate(selectedDate || dashboardToday, delta);
     setSelectedDate(nextDate);
     syncAllResultDates(nextDate);
   }
@@ -2038,10 +2038,13 @@ function CashDashboardAdmin(){
         <p>Consultez les indicateurs de caisse à partir d’une seule date sélectionnée.</p>
       </div>
       <div className="cashShuffleHeaderActions">
-        <div className="cashShuffleDateControl" aria-label="Barre de date de gestion de caisse">
-          <DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date de gestion de caisse" />
+        <div className="cashShuffleSimpleDateBar" aria-label="Barre de date de gestion de caisse">
+          <span>Date de caisse</span>
+          <button type="button" onClick={()=>shiftSelectedDate(-1)} aria-label="Jour précédent">‹</button>
+          <input type="date" value={selectedDate || dashboardToday} onChange={e=>selectMainDate(e.target.value || dashboardToday)} />
+          <button type="button" onClick={()=>shiftSelectedDate(1)} aria-label="Jour suivant">›</button>
         </div>
-        <button type="button" className="cashShuffleRefresh" onClick={()=>selectMainDate(latestDate)} aria-label="Actualiser la date"><InvIcon name="sync"/></button>
+        <button type="button" className="cashShuffleRefresh" onClick={()=>selectMainDate(dashboardToday)} aria-label="Aujourd’hui"><InvIcon name="sync"/></button>
       </div>
     </div>
 

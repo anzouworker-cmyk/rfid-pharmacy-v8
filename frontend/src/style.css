@@ -12199,3 +12199,146 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText{align-items:center!important;text-align:center!important;}
   .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText span{max-width:none!important;}
 }
+
+/* V170 - use Monnaie d'échange date style on Dashboard Caisse + coherent expense card sizing */
+.cashShuffleHeaderActions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+  flex-wrap:wrap!important;
+}
+.cashShuffleSimpleDateBar{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  background:#fff!important;
+  border:1px solid #dbe5f1!important;
+  border-radius:18px!important;
+  padding:10px 12px!important;
+  box-shadow:0 8px 20px rgba(15,23,42,.04)!important;
+}
+.cashShuffleSimpleDateBar span{
+  font-size:13px!important;
+  font-weight:800!important;
+  color:#64748b!important;
+  white-space:nowrap!important;
+  margin-right:2px!important;
+}
+.cashShuffleSimpleDateBar button,
+.cashShuffleRefresh{
+  width:44px!important;
+  min-width:44px!important;
+  height:44px!important;
+  min-height:44px!important;
+  border-radius:14px!important;
+  border:1px solid #d3deec!important;
+  background:#fff!important;
+  color:#183b63!important;
+  font-size:22px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  box-shadow:0 5px 14px rgba(15,23,42,.04)!important;
+}
+.cashShuffleSimpleDateBar input{
+  width:158px!important;
+  height:44px!important;
+  min-height:44px!important;
+  border:1px solid #d3deec!important;
+  border-radius:14px!important;
+  padding:0 12px!important;
+  background:#fff!important;
+  color:#183b63!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+}
+.cashShuffleSimpleDateBar input:focus,
+.cashShuffleSimpleDateBar button:focus,
+.cashShuffleRefresh:focus{
+  outline:none!important;
+  border-color:#9fb3cc!important;
+  box-shadow:0 0 0 3px rgba(99,102,241,.10)!important;
+}
+.cashShuffleSimpleDateBar button:hover,
+.cashShuffleRefresh:hover,
+.cashShuffleSimpleDateBar input:hover{
+  border-color:#b7c7dc!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleMetricBody{
+  align-items:center!important;
+  justify-content:center!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseProgress{
+  width:100%!important;
+  grid-template-columns:112px minmax(0,1fr)!important;
+  gap:18px!important;
+  align-items:center!important;
+  justify-content:start!important;
+  padding:4px 8px 8px 4px!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing{
+  width:96px!important;
+  min-width:96px!important;
+  height:96px!important;
+  margin-left:0!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing svg{
+  width:96px!important;
+  height:96px!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing > div{
+  font-size:18px!important;
+  line-height:1!important;
+  font-weight:800!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText{
+  gap:5px!important;
+  align-items:flex-start!important;
+  min-width:0!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText strong{
+  font-size:38px!important;
+  line-height:.98!important;
+  letter-spacing:-.035em!important;
+  font-weight:800!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText span{
+  font-size:18px!important;
+  line-height:1.18!important;
+  font-weight:500!important;
+  max-width:230px!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText small{
+  font-size:14px!important;
+  line-height:1.25!important;
+  font-weight:600!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleCardMeta{
+  gap:10px!important;
+  align-items:center!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleCardMeta .cashLimitEditBtn{
+  min-height:34px!important;
+  padding:0 14px!important;
+  border-radius:12px!important;
+  font-size:13px!important;
+  font-weight:800!important;
+}
+@media(max-width:900px){
+  .cashShuffleSimpleDateBar{width:100%!important;}
+  .cashShuffleSimpleDateBar input{flex:1 1 auto!important;width:auto!important;min-width:150px!important;}
+}
+@media(max-width:720px){
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseProgress{
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+    text-align:center!important;
+  }
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText{align-items:center!important;}
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText span{max-width:none!important;}
+}
