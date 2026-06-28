@@ -112,8 +112,8 @@ class DashboardContent(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
-CLIENT_PAGE_IDS = ["dashboard", "operations", "association", "inventory", "cash", "ai"]
-ADMIN_PAGE_IDS = CLIENT_PAGE_IDS + ["cashAdmin", "platform", "dashboardAdmin"]
+CLIENT_PAGE_IDS = ["dashboard", "operations", "association", "inventory", "cash", "ai", "cashAdmin"]
+ADMIN_PAGE_IDS = CLIENT_PAGE_IDS + ["platform", "dashboardAdmin"]
 
 
 def normalize_page_permissions(pages=None):
@@ -186,9 +186,15 @@ class ClientIn(BaseModel):
     password: str
     pharmacy_name: str
     days: int = 30
+    expires_at: str = ""
+    phone: str = ""
+    email: str = ""
+    address: str = ""
+    notes: str = ""
     ai_premium: bool = False
     page_permissions: List[str] = []
     can_manage_users: bool = False
+    active: bool = True
 
 class PasswordIn(BaseModel):
     password: str
@@ -406,22 +412,48 @@ def me(acc: Account = Depends(current_user)):
 def create_client(data: ClientIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
-    if s.get(Account, data.username):
+
+    username = (data.username or "").strip()
+    password = data.password or ""
+    pharmacy_name = (data.pharmacy_name or "").strip()
+    if not username:
+        raise HTTPException(400, "Username required")
+    if not password:
+        raise HTTPException(400, "Password required")
+    if not pharmacy_name:
+        raise HTTPException(400, "User name required")
+    if s.get(Account, username):
         raise HTTPException(400, "Username exists")
+
+    if data.expires_at:
+        try:
+            expiry = datetime.strptime(data.expires_at[:10], "%Y-%m-%d")
+        except Exception:
+            raise HTTPException(400, "Invalid date format. Use YYYY-MM-DD")
+    else:
+        expiry = datetime.utcnow() + timedelta(days=max(int(data.days or 30), 1))
+
+    active = bool(data.active)
     s.add(Account(
-        username=data.username,
-        password_hash=hpw(data.password),
-        pharmacy_name=data.pharmacy_name,
+        username=username,
+        password_hash=hpw(password),
+        pharmacy_name=pharmacy_name,
         role="client",
-        ai_premium=data.ai_premium,
+        ai_premium=bool(data.ai_premium),
         parent_username=None,
         page_permissions=serialize_pages(data.page_permissions),
         can_manage_users=bool(data.can_manage_users),
-        subscription_status="active",
-        expires_at=datetime.utcnow() + timedelta(days=data.days)
+        subscription_status="active" if expiry >= datetime.utcnow() else "expired",
+        expires_at=expiry,
+        active=active,
+        phone=(data.phone or "").strip(),
+        email=(data.email or "").strip(),
+        address=(data.address or "").strip(),
+        notes=(data.notes or "").strip(),
+        created_at=datetime.utcnow()
     ))
     s.commit()
-    return {"ok": True}
+    return {"ok": True, "username": username}
 
 @app.get("/platform/clients")
 def clients(acc: Account = Depends(current_user), s: Session = Depends(db)):

@@ -3343,6 +3343,12 @@ function Platform({auth}){
   const [aiPremium,setAiPremium]=useState(false);
   const [pagePermissions,setPagePermissions]=useState(()=>defaultUserPages());
   const [canManageUsers,setCanManageUsers]=useState(true);
+  const [createActive,setCreateActive]=useState(true);
+  const [createPhone,setCreatePhone]=useState("");
+  const [createEmail,setCreateEmail]=useState("");
+  const [createAddress,setCreateAddress]=useState("");
+  const [createNotes,setCreateNotes]=useState("");
+  const [createExpiresAt,setCreateExpiresAt]=useState(()=>shiftISODate(todayISO(),30));
   const [msg,setMsg]=useState("");
   const [showCreateModal,setShowCreateModal]=useState(false);
   const [search,setSearch]=useState("");
@@ -3385,15 +3391,51 @@ function Platform({auth}){
     setInfoDraft(normalizeClientDraft(c));
   }
 
+  function resetCreateForm(){
+    setUsername("");
+    setPassword("");
+    setPharmacy("");
+    setDays(30);
+    setCreateExpiresAt(shiftISODate(todayISO(),30));
+    setCreatePhone("");
+    setCreateEmail("");
+    setCreateAddress("");
+    setCreateNotes("");
+    setAiPremium(false);
+    setPagePermissions(defaultUserPages());
+    setCanManageUsers(true);
+    setCreateActive(true);
+  }
+
   async function create(){
+    const cleanUser = username.trim();
+    const cleanPharmacy = pharmacy.trim();
+    if(!cleanUser || !password || !cleanPharmacy || !createExpiresAt){
+      setMsg("Erreur création user: User, password, User name et date d’expiration sont obligatoires.");
+      return;
+    }
     try{
-      await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days),ai_premium:aiPremium,page_permissions:pagePermissions,can_manage_users:canManageUsers},auth);
-      setUsername(""); setPassword(""); setPharmacy(""); setDays(30); setAiPremium(false); setPagePermissions(defaultUserPages()); setCanManageUsers(true);
+      await axios.post(`${API}/platform/create-client`,{
+        username: cleanUser,
+        password,
+        pharmacy_name: cleanPharmacy,
+        days:Number(days),
+        expires_at:createExpiresAt,
+        phone:createPhone,
+        email:createEmail,
+        address:createAddress,
+        notes:createNotes,
+        ai_premium:aiPremium,
+        page_permissions:pagePermissions,
+        can_manage_users:canManageUsers,
+        active:createActive
+      },auth);
+      resetCreateForm();
       setShowCreateModal(false);
-      setMsg("Client créé.");
+      setMsg("User créé.");
       await load();
     }catch(e){
-      setMsg(e.response?.data?.detail || "Erreur création client");
+      setMsg(e.response?.data?.detail || "Erreur création user");
     }
   }
 
@@ -3411,7 +3453,11 @@ function Platform({auth}){
     if(!confirm(`Supprimer définitivement le client ${u} ?`)) return;
     try{
       await axios.post(`${API}/platform/client-delete/${encodeURIComponent(u)}`,{},auth);
-      setMsg("Client supprimé.");
+      if(infoDraft?.originalUsername === u || infoDraft?.username === u){
+        setInfoClient(null);
+        setInfoDraft(null);
+      }
+      setMsg("User supprimé.");
       await load();
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur suppression client");
@@ -3504,12 +3550,17 @@ return <section className="platformPage platformUsersPage">
         <h2>Ajouter User</h2>
         <p>Créer un utilisateur avec ses accès et permissions.</p>
         <div className="platformCreateGrid">
-          <input placeholder="User" value={username} onChange={e=>setUsername(e.target.value)}/>
-          <input placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
-          <input placeholder="User name" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/>
-          <input placeholder="jours" value={days} onChange={e=>setDays(e.target.value)}/>
+          <label><span>User *</span><input placeholder="ex: pharma" value={username} onChange={e=>setUsername(e.target.value)}/></label>
+          <label><span>Password *</span><input placeholder="Mot de passe" type="password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
+          <label><span>User name *</span><input placeholder="ex: pharma Tanger" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/></label>
+          <label><span>Expire le *</span><input type="date" value={createExpiresAt} onChange={e=>setCreateExpiresAt(e.target.value)}/></label>
+          <label><span>Téléphone</span><input placeholder="+212 6 12 34 56 78" value={createPhone} onChange={e=>setCreatePhone(e.target.value)}/></label>
+          <label><span>Email</span><input placeholder="contact@example.com" type="email" value={createEmail} onChange={e=>setCreateEmail(e.target.value)}/></label>
+          <label className="full"><span>Adresse</span><input placeholder="Adresse complète" value={createAddress} onChange={e=>setCreateAddress(e.target.value)}/></label>
+          <label className="full"><span>Notes</span><textarea placeholder="Notes utilisateur" value={createNotes} onChange={e=>setCreateNotes(e.target.value)} /></label>
         </div>
         <div className="platformCreateChecks">
+          <label className="checkLine"><input type="checkbox" checked={createActive} onChange={e=>setCreateActive(e.target.checked)}/> Status activé</label>
           <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
           <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Gestion users autorisée</label>
         </div>
