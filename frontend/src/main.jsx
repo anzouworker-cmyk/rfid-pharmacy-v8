@@ -1732,7 +1732,7 @@ function CashDashboardAdmin(){
   }
 
   function limitMeta(label,key,currentCents){
-    return <><span>{label}</span><button type="button" className="cashLimitEditBtn" onClick={()=>promptDashboardCashSetting(key,label,currentCents)}>Limite : {formatDH(currentCents)}</button></>;
+    return <><span>{label}</span><button type="button" className="cashLimitEditBtn" onClick={()=>promptDashboardCashSetting(key,label,currentCents)}>Limite : {formatDH(currentCents).replace(/\u202f|\u00a0/g," ")}</button></>;
   }
 
   function cashNumber(cents, decimals=1){
@@ -3358,6 +3358,7 @@ function Platform({auth}){
   const [expireFilter,setExpireFilter]=useState("all");
   const [infoClient,setInfoClient]=useState(null);
   const [infoDraft,setInfoDraft]=useState(null);
+  const [deletingUser,setDeletingUser]=useState("");
 
   async function load(){
     try{
@@ -3450,7 +3451,9 @@ function Platform({auth}){
   }
 
   async function deleteClient(u){
-    if(!confirm(`Supprimer définitivement le client ${u} ?`)) return;
+    if(!u || deletingUser) return;
+    if(!confirm(`Supprimer définitivement le user ${u} ?`)) return;
+    setDeletingUser(u);
     try{
       await axios.post(`${API}/platform/client-delete/${encodeURIComponent(u)}`,{},auth);
       if(infoDraft?.originalUsername === u || infoDraft?.username === u){
@@ -3461,6 +3464,8 @@ function Platform({auth}){
       await load();
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur suppression client");
+    }finally{
+      setDeletingUser("");
     }
   }
 
@@ -3541,48 +3546,65 @@ return <section className="platformPage platformUsersPage">
         <h2>Utilisateurs</h2>
         <p>Gérez les comptes utilisateurs et leurs accès.</p>
       </div>
-      <button type="button" className="platformAddStoreBtn" onClick={()=>setShowCreateModal(true)}>Ajouter User</button>
+      <button type="button" className="platformAddStoreBtn" onClick={()=>{resetCreateForm(); setShowCreateModal(true);}}>Ajouter User</button>
     </div>
 
-    {showCreateModal && <div className="modalOverlay" onClick={()=>setShowCreateModal(false)}>
-      <div className="scanModal platformStoreModal" onClick={e=>e.stopPropagation()}>
+    {showCreateModal && <div className="modalOverlay platformCreateOverlay" onClick={()=>setShowCreateModal(false)}>
+      <div className="scanModal platformStoreModal platformCreateUserModal" onClick={e=>e.stopPropagation()} role="dialog" aria-label="Créer un utilisateur">
         <button type="button" className="modalClose" onClick={()=>setShowCreateModal(false)}>×</button>
-        <h2>Ajouter User</h2>
-        <p>Créer un utilisateur avec ses accès et permissions.</p>
-        <div className="platformCreateGrid">
-          <label><span>User *</span><input placeholder="ex: pharma" value={username} onChange={e=>setUsername(e.target.value)}/></label>
-          <label><span>Password *</span><input placeholder="Mot de passe" type="password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
-          <label><span>User name *</span><input placeholder="ex: pharma Tanger" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/></label>
-          <label><span>Expire le *</span><input type="date" value={createExpiresAt} onChange={e=>setCreateExpiresAt(e.target.value)}/></label>
-          <label><span>Téléphone</span><input placeholder="+212 6 12 34 56 78" value={createPhone} onChange={e=>setCreatePhone(e.target.value)}/></label>
-          <label><span>Email</span><input placeholder="contact@example.com" type="email" value={createEmail} onChange={e=>setCreateEmail(e.target.value)}/></label>
-          <label className="full"><span>Adresse</span><input placeholder="Adresse complète" value={createAddress} onChange={e=>setCreateAddress(e.target.value)}/></label>
-          <label className="full"><span>Notes</span><textarea placeholder="Notes utilisateur" value={createNotes} onChange={e=>setCreateNotes(e.target.value)} /></label>
+        <div className="platformCreateModalHeader">
+          <h2>Créer un utilisateur</h2>
+          <p>Créer un utilisateur avec ses accès et permissions.</p>
         </div>
-        <div className="platformCreateChecks">
-          <label className="checkLine"><input type="checkbox" checked={createActive} onChange={e=>setCreateActive(e.target.checked)}/> Status activé</label>
-          <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
-          <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Gestion users autorisée</label>
-        </div>
-        <div className="pagePermissionBox pagePermissionButtonBox">
-          <div className="pagePermissionButtonHeader">
-            <div>
-              <strong>Pages visibles pour ce user</strong>
-              <small>{pagePermissions.length} page(s) sélectionnée(s)</small>
+        <div className="platformCreateModalBody">
+          <section className="platformCreateSection">
+            <h3>Identifiants</h3>
+            <div className="platformCreateGrid">
+              <label><span>User *</span><input placeholder="ex: pharma" value={username} onChange={e=>setUsername(e.target.value)}/></label>
+              <label><span>Password *</span><input placeholder="Mot de passe" type="password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
+              <label><span>User name *</span><input placeholder="ex: pharma Tanger" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/></label>
+              <label><span>Expire le *</span><input type="date" value={createExpiresAt} onChange={e=>setCreateExpiresAt(e.target.value)}/></label>
             </div>
-            <PagePermissionsModalButton
-              buttonLabel="Editer"
-              title="Pages visibles du user"
-              description="Choisissez les pages visibles pour ce user."
-              options={ASSIGNABLE_PAGE_OPTIONS}
-              value={pagePermissions}
-              onSave={next=>setPagePermissions(next)}
-            />
-          </div>
+          </section>
+          <section className="platformCreateSection">
+            <h3>Informations utilisateur</h3>
+            <div className="platformCreateGrid">
+              <label><span>Téléphone</span><input placeholder="+212 6 12 34 56 78" value={createPhone} onChange={e=>setCreatePhone(e.target.value)}/></label>
+              <label><span>Email</span><input placeholder="contact@example.com" type="email" value={createEmail} onChange={e=>setCreateEmail(e.target.value)}/></label>
+              <label className="full"><span>Adresse</span><input placeholder="Adresse complète" value={createAddress} onChange={e=>setCreateAddress(e.target.value)}/></label>
+              <label className="full"><span>Notes</span><textarea placeholder="Notes utilisateur" value={createNotes} onChange={e=>setCreateNotes(e.target.value)} /></label>
+            </div>
+          </section>
+          <section className="platformCreateSection">
+            <h3>Accès et permissions</h3>
+            <div className="platformCreateChecks platformCreateChecksCompact">
+              <label className="checkLine"><input type="checkbox" checked={createActive} onChange={e=>setCreateActive(e.target.checked)}/> Status activé</label>
+              <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
+              <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Gestion users autorisée</label>
+            </div>
+          </section>
+          <section className="platformCreateSection platformCreatePagesSection">
+            <div className="pagePermissionBox pagePermissionButtonBox platformCreatePagesCompact">
+              <div className="pagePermissionButtonHeader">
+                <div>
+                  <strong>Pages visibles</strong>
+                  <small>{pagePermissions.length} page(s) sélectionnée(s)</small>
+                </div>
+                <PagePermissionsModalButton
+                  buttonLabel="Editer"
+                  title="Pages visibles du user"
+                  description="Choisissez les pages visibles pour ce user."
+                  options={ASSIGNABLE_PAGE_OPTIONS}
+                  value={pagePermissions}
+                  onSave={next=>setPagePermissions(next)}
+                />
+              </div>
+            </div>
+          </section>
         </div>
-        <div className="platformModalActions">
+        <div className="platformModalActions platformCreateFooter">
           <button type="button" className="platformModalCancel" onClick={()=>setShowCreateModal(false)}>Annuler</button>
-          <button type="button" className="platformModalCreate" onClick={create}>Créer user</button>
+          <button type="button" className="platformModalCreate" onClick={create}>Créer utilisateur</button>
         </div>
       </div>
     </div>}
@@ -3630,7 +3652,7 @@ return <section className="platformPage platformUsersPage">
                   />}</td>
               <td>{isAdmin ? <span className="platformStatusPill active">● Activé</span> : <button type="button" className={`platformStatusPill ${c.active ? "active" : "inactive"}`} onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "● Activé" : "○ Désactivé"}<span>⌄</span></button>}</td>
               <td><button type="button" className="platformInfoBtn" onClick={()=>openClientInfo(c)}>ⓘ Voir infos</button></td>
-              <td>{isAdmin ? <button className="dangerBtn disabled" disabled>Delete</button> : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
+              <td>{isAdmin ? <button className="dangerBtn disabled" disabled>Delete</button> : <button className={`dangerBtn ${deletingUser===c.username ? "disabled" : ""}`} disabled={deletingUser===c.username} onClick={()=>deleteClient(c.username)}>{deletingUser===c.username ? "Suppression..." : "Delete"}</button>}</td>
             </tr>
           })}
           {!filteredClients.length && <tr><td colSpan="8" className="expenseHistoryEmpty">Aucun utilisateur trouvé.</td></tr>}
