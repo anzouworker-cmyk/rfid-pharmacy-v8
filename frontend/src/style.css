@@ -12073,3 +12073,129 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   .platformCreateFooter .platformModalCancel,
   .platformCreateFooter .platformModalCreate{width:100%!important;}
 }
+
+/* V169 - cash dashboard date bar + expense card coherence fixes */
+.cashShuffleHeaderActions{
+  gap:16px!important;
+  align-items:center!important;
+}
+.cashShuffleDateControl,
+.cashShuffleDateControl .cashAdminDatePicker{
+  gap:14px!important;
+  align-items:center!important;
+}
+.cashShuffleDateControl .cashAdminDatePicker > button:not(.cashAdminDatePickerDisplay),
+.cashShuffleRefresh{
+  width:76px!important;
+  min-width:76px!important;
+  height:76px!important;
+  min-height:76px!important;
+  border-radius:22px!important;
+  font-size:40px!important;
+}
+.cashShuffleDateControl .cashAdminDatePicker > button.cashAdminDatePickerDisplay,
+.cashShuffleDateControl .cashAdminDatePicker button.cashAdminDatePickerDisplay,
+button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
+  width:min(100%, 560px)!important;
+  min-width:420px!important;
+  max-width:560px!important;
+  height:76px!important;
+  min-height:76px!important;
+  padding:0 28px!important;
+  border-radius:24px!important;
+  cursor:pointer!important;
+}
+.cashShuffleDateControl .cashAdminDatePicker > button.cashAdminDatePickerDisplay > span:first-child,
+.cashShuffleDateControl .cashAdminDatePicker button.cashAdminDatePickerDisplay > span:first-child{
+  font-size:30px!important;
+  line-height:1.1!important;
+  font-weight:700!important;
+  letter-spacing:-.02em!important;
+  color:#64748b!important;
+}
+.cashShuffleDateControl .cashAdminDatePicker > button.cashAdminDatePickerDisplay > .cashAdminDatePickerIcon,
+.cashShuffleDateControl .cashAdminDatePicker button.cashAdminDatePickerDisplay > .cashAdminDatePickerIcon{
+  width:44px!important;
+  min-width:44px!important;
+  height:44px!important;
+  font-size:0!important;
+  opacity:1!important;
+}
+.cashShuffleDateControl .cashAdminDatePicker > button.cashAdminDatePickerDisplay > .cashAdminDatePickerIcon::before,
+.cashShuffleDateControl .cashAdminDatePicker button.cashAdminDatePickerDisplay > .cashAdminDatePickerIcon::before{
+  width:44px!important;
+  height:44px!important;
+}
+.cashShuffleDateControl .cashAdminDatePickerDisplay:hover,
+.cashShuffleDateControl .cashAdminDatePickerDisplay:focus{
+  border-color:#cbd5e1!important;
+  box-shadow:0 0 0 3px rgba(99,102,241,.08)!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseProgress{
+  grid-template-columns:160px minmax(0,1fr)!important;
+  gap:26px!important;
+  align-items:center!important;
+  padding:6px 10px 6px 0!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing{
+  width:136px!important;
+  min-width:136px!important;
+  height:136px!important;
+  margin-left:8px!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing > div{
+  font-size:22px!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText{
+  gap:8px!important;
+  align-items:flex-start!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText strong{
+  font-size:54px!important;
+  line-height:1!important;
+  letter-spacing:-.04em!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText span{
+  font-size:25px!important;
+  line-height:1.18!important;
+  font-weight:500!important;
+  max-width:320px!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText small{
+  font-size:18px!important;
+  line-height:1.25!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleCardMeta .cashShuffleLimitBadge{
+  min-height:40px!important;
+  padding:0 18px!important;
+  font-size:14px!important;
+}
+@media (max-width: 1100px){
+  .cashShuffleDateControl .cashAdminDatePicker > button:not(.cashAdminDatePickerDisplay),
+  .cashShuffleRefresh{
+    width:64px!important;min-width:64px!important;height:64px!important;min-height:64px!important;font-size:34px!important;border-radius:20px!important;
+  }
+  .cashShuffleDateControl .cashAdminDatePicker > button.cashAdminDatePickerDisplay,
+  .cashShuffleDateControl .cashAdminDatePicker button.cashAdminDatePickerDisplay,
+  button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
+    min-width:300px!important;max-width:440px!important;height:68px!important;min-height:68px!important;padding:0 22px!important;border-radius:20px!important;
+  }
+  .cashShuffleDateControl .cashAdminDatePicker > button.cashAdminDatePickerDisplay > span:first-child,
+  .cashShuffleDateControl .cashAdminDatePicker button.cashAdminDatePickerDisplay > span:first-child{font-size:24px!important;}
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseProgress{grid-template-columns:132px minmax(0,1fr)!important;gap:20px!important;}
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing{width:118px!important;min-width:118px!important;height:118px!important;}
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText strong{font-size:44px!important;}
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText span{font-size:20px!important;max-width:260px!important;}
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText small{font-size:16px!important;}
+}
+@media (max-width: 780px){
+  .cashShuffleHeaderActions{width:100%!important;}
+  .cashShuffleDateControl,
+  .cashShuffleDateControl .cashAdminDatePicker{width:100%!important;gap:10px!important;}
+  .cashShuffleDateControl .cashAdminDatePicker > button.cashAdminDatePickerDisplay,
+  .cashShuffleDateControl .cashAdminDatePicker button.cashAdminDatePickerDisplay,
+  button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{min-width:0!important;width:100%!important;max-width:none!important;}
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseProgress{grid-template-columns:1fr!important;gap:14px!important;padding:8px 8px 10px!important;}
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText{align-items:center!important;text-align:center!important;}
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText span{max-width:none!important;}
+}
