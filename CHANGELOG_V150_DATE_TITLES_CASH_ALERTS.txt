@@ -1,0 +1,7 @@
+V150 - Date, titres et alertes anomalies caisse
+
+- Dashboard Caisse : suppression du libellé incorrect "Gestion de caisse" dans la barre de date.
+- Dashboard Caisse : ajout d'une carte "Alertes anomalies" dans l'espace vide des indicateurs.
+- Alertes anomalies : détection des montants manquants, surplus, retraits à vérifier et dépenses élevées du mois sélectionné.
+- Titres de pages : harmonisation de la police/taille avec le style de la page Associations, sans appliquer ce changement à la page Dashboard.
+- Menu et pied de page : non modifiés.

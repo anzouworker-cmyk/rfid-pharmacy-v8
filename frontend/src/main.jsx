@@ -1588,6 +1588,22 @@ function CashDashboardAdmin(){
   const progressValue = monthMetrics.length ? (monthBalancedDays / monthMetrics.length) * 100 : 0;
   const monthSalesCents = monthMetrics.reduce((sum,x)=>sum + x.totalSalesCents,0);
   const expensesProgress = monthSalesCents>0 ? Math.min(100, (monthlyExpensesCents / monthSalesCents) * 100) : 0;
+  const anomalyAlerts = useMemo(()=>monthMetrics.flatMap(item=>{
+    const alerts = [];
+    if(item.shortageCents > 0){
+      alerts.push({tone:"critical", label:"Montant manquant", date:item.date, amountCents:item.shortageCents, detail:"Caisse comptée inférieure au théorique"});
+    }
+    if(item.surplusCents > 0){
+      alerts.push({tone:"warning", label:"Montant surplus", date:item.date, amountCents:item.surplusCents, detail:"Caisse comptée supérieure au théorique"});
+    }
+    if(item.dueBalanceCents > 0){
+      alerts.push({tone:"info", label:"Retrait à vérifier", date:item.date, amountCents:item.dueBalanceCents, detail:"Montant théorique non retiré"});
+    }
+    if(item.totalSalesCents > 0 && item.expensesCents > item.totalSalesCents * 0.35){
+      alerts.push({tone:"warning", label:"Dépenses élevées", date:item.date, amountCents:item.expensesCents, detail:"Dépenses élevées vs ventes"});
+    }
+    return alerts;
+  }).sort((a,b)=>b.date.localeCompare(a.date) || Math.abs(b.amountCents) - Math.abs(a.amountCents)).slice(0,4), [monthMetrics]);
 
   function cashNumber(cents, decimals=1){
     return ((Number(cents) || 0) / 100).toFixed(decimals);
@@ -1800,6 +1816,25 @@ function CashDashboardAdmin(){
     </article>;
   }
 
+  function CashAnomalyList(){
+    return <div className="cashShuffleAnomalyList">
+      {anomalyAlerts.length ? anomalyAlerts.map((alert,index)=><div key={`${alert.date}-${alert.label}-${index}`} className={`cashShuffleAnomalyItem ${alert.tone}`}>
+        <span className="cashShuffleAnomalyIcon" aria-hidden="true">!</span>
+        <div>
+          <strong>{alert.label}</strong>
+          <small>{formatCashDateLabel(alert.date)} · {alert.detail}</small>
+        </div>
+        <b>{formatDH(alert.amountCents)}</b>
+      </div>) : <div className="cashShuffleAnomalyEmpty">
+        <span className="cashShuffleAnomalyIcon ok" aria-hidden="true">✓</span>
+        <div>
+          <strong>Aucune anomalie détectée</strong>
+          <small>Les données de caisse du mois sélectionné sont équilibrées.</small>
+        </div>
+      </div>}
+    </div>;
+  }
+
   return <section className="cashShuffleDashboard">
     <div className="cashShuffleHeader">
       <div>
@@ -1807,8 +1842,7 @@ function CashDashboardAdmin(){
         <p>Consultez les indicateurs de caisse à partir d’une seule date sélectionnée.</p>
       </div>
       <div className="cashShuffleHeaderActions">
-        <div className="cashShuffleDateControl">
-          <span>Gestion de caisse</span>
+        <div className="cashShuffleDateControl" aria-label="Barre de date de gestion de caisse">
           <DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date de gestion de caisse" />
         </div>
         <button type="button" className="cashShuffleRefresh" onClick={()=>selectMainDate(latestDate)} aria-label="Actualiser la date"><InvIcon name="sync"/></button>
@@ -1835,6 +1869,10 @@ function CashDashboardAdmin(){
 
       <CashShuffleCard title="Tot. dépenses" meta={cardMeta("Total mensuel")} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="amber">
         <CashShuffleProgress value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Aucune vente"} />
+      </CashShuffleCard>
+
+      <CashShuffleCard title="Alertes anomalies" meta={cardMeta(`${anomalyAlerts.length} alerte(s) ce mois`)} className="cashShuffleCardTall cashShuffleAnomalyCard" dotTone={anomalyAlerts.length ? "amber" : "emerald"}>
+        <CashAnomalyList />
       </CashShuffleCard>
 
       </div>
