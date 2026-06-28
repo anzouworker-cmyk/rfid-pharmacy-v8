@@ -10373,3 +10373,238 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
     align-items:flex-start!important;
   }
 }
+
+/* V152 - page permissions edit button + popup modal */
+.pagePermissionButtonBox{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:12px!important;
+}
+.pagePermissionButtonHeader{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+}
+.pagePermissionButtonHeader strong{
+  margin-bottom:4px!important;
+}
+.pagePermissionButtonHeader small{
+  display:block!important;
+  color:#64748b!important;
+  font-size:12px!important;
+  font-weight:600!important;
+}
+.pagePermissionSummaryChips{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+}
+.pagePermissionChip{
+  display:inline-flex!important;
+  align-items:center!important;
+  min-height:30px!important;
+  padding:6px 10px!important;
+  border-radius:999px!important;
+  border:1px solid #dbe5f1!important;
+  background:#ffffff!important;
+  color:#1e3a5f!important;
+  font-size:12px!important;
+  font-weight:700!important;
+}
+.pagePermissionChip.muted{
+  background:#f8fafc!important;
+  color:#64748b!important;
+}
+.pagePermissionSummaryEmpty{
+  color:#94a3b8!important;
+  font-size:12px!important;
+  font-weight:600!important;
+}
+.pagePermissionEditBtn{
+  border:1px solid #cbd7e6!important;
+  background:#fff!important;
+  color:#1e3a5f!important;
+  min-height:38px!important;
+  padding:0 16px!important;
+  border-radius:12px!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+  box-shadow:0 6px 16px rgba(15,23,42,.04)!important;
+}
+.pagePermissionEditBtn:hover{
+  border-color:#9fb7ea!important;
+  color:#1d4ed8!important;
+}
+.pagePermissionCell{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  min-width:260px!important;
+}
+.pagePermissionsModal{
+  width:min(540px, calc(100vw - 24px))!important;
+}
+.pagePermissionModalBox{
+  margin-top:14px!important;
+  background:#f8fafc!important;
+}
+.pagePermissionModalGrid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+.pagePermissionModalActions{
+  margin-top:18px!important;
+}
+@media(max-width:900px){
+  .pagePermissionButtonHeader,
+  .pagePermissionCell{
+    flex-direction:column!important;
+    align-items:flex-start!important;
+  }
+  .pagePermissionModalGrid{
+    grid-template-columns:1fr!important;
+  }
+}
+
+/* V153 - compact cash anomaly card with same height as neighbor cards */
+.cashShuffleAnomalyCard{
+  min-height:214px!important;
+}
+.cashShuffleAnomalyCard .cashShuffleMetricBody{
+  display:flex!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+.cashShuffleAnomalyCarousel{
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
+  min-height:0!important;
+  flex:1 1 auto!important;
+  gap:12px!important;
+}
+.cashShuffleAnomalyToolbar{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+}
+.cashShuffleAnomalyCount{
+  color:#94a3b8!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+}
+.cashShuffleAnomalyDivider{
+  height:1px!important;
+  background:#e9eef5!important;
+  width:100%!important;
+}
+.cashShuffleAnomalyViewport{
+  display:grid!important;
+  grid-template-columns:32px minmax(0,1fr) 32px!important;
+  align-items:center!important;
+  gap:10px!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+.cashShuffleAnomalyNav{
+  width:32px!important;
+  min-width:32px!important;
+  height:32px!important;
+  min-height:32px!important;
+  border-radius:10px!important;
+  border:1px solid #dbe5f0!important;
+  background:#fff!important;
+  color:#64748b!important;
+  font-size:18px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  padding:0!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.03)!important;
+}
+.cashShuffleAnomalyNav:hover:not(:disabled){
+  border-color:#c7d2fe!important;
+  color:#4338ca!important;
+  background:#eef2ff!important;
+}
+.cashShuffleAnomalyNav:disabled{
+  opacity:.45!important;
+  cursor:default!important;
+}
+.cashShuffleAnomalyCard .cashShuffleAnomalyFilters{
+  margin-bottom:0!important;
+  flex:1 1 auto!important;
+  max-width:266px!important;
+}
+.cashShuffleAnomalyCard .cashShuffleAnomalyFilters button{
+  min-height:32px!important;
+  border-radius:10px!important;
+}
+.cashShuffleAnomalySlide,
+.cashShuffleAnomalySlideEmpty{
+  min-height:96px!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide,
+.cashShuffleAnomalyEmpty.cashShuffleAnomalySlideEmpty{
+  height:100%!important;
+  border-radius:14px!important;
+  padding:14px 16px!important;
+  background:#f8fafc!important;
+  border:1px solid #e7edf5!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85)!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide strong,
+.cashShuffleAnomalyEmpty.cashShuffleAnomalySlideEmpty strong{
+  font-size:14px!important;
+  line-height:1.25!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide small,
+.cashShuffleAnomalyEmpty.cashShuffleAnomalySlideEmpty small{
+  font-size:12px!important;
+  line-height:1.45!important;
+  margin-top:5px!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide b{
+  font-size:13px!important;
+  font-weight:900!important;
+  color:#0f172a!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide .cashShuffleAnomalyIcon,
+.cashShuffleAnomalyEmpty.cashShuffleAnomalySlideEmpty .cashShuffleAnomalyIcon{
+  width:38px!important;
+  height:38px!important;
+  border-radius:12px!important;
+  font-size:16px!important;
+  flex:0 0 38px!important;
+}
+.cashShuffleAnomalyPager{
+  align-self:center!important;
+  color:#94a3b8!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  line-height:1!important;
+}
+@media(max-width:1259px){
+  .cashShuffleAnomalyToolbar{
+    flex-direction:column!important;
+    align-items:stretch!important;
+  }
+  .cashShuffleAnomalyCard .cashShuffleAnomalyFilters{
+    max-width:none!important;
+  }
+}
+@media(max-width:820px){
+  .cashShuffleAnomalyViewport{
+    grid-template-columns:1fr!important;
+  }
+  .cashShuffleAnomalyNav{
+    display:none!important;
+  }
+}
+.cashShuffleAnomalyToolbar{
+  justify-content:flex-end!important;
+}

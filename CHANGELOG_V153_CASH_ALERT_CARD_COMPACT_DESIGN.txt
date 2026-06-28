@@ -1,0 +1,10 @@
+V153 - Dashboard Caisse anomaly alert card redesign
+
+- Redesigned the "Alertes anomalies" card in Dashboard Caisse.
+- Kept the card at the same visual height as neighboring cards such as "Tot. dépenses".
+- Reworked the alert card layout to match the provided reference more closely.
+- Added compact filter buttons for "Jour choisi" and "Mois choisi".
+- Replaced the scrolling list with a compact single-alert carousel view.
+- Added left/right navigation arrows to move through anomalies.
+- Preserved the current menu, footer, and all other pages.
+- Frontend build tested successfully.

@@ -43,6 +43,9 @@ const APP_ADMIN_PAGES = [
   {id:"platform", label:"Clients SaaS", icon:"platform"},
   {id:"dashboardAdmin", label:"Publicités", icon:"dashboardAdmin"}
 ];
+const ASSIGNABLE_EXTRA_PAGES = APP_ADMIN_PAGES.filter(p=>p.id==="cashAdmin");
+const ASSIGNABLE_PAGE_OPTIONS = [...APP_USER_PAGES, ...ASSIGNABLE_EXTRA_PAGES];
+const ASSIGNABLE_PAGE_IDS = ASSIGNABLE_PAGE_OPTIONS.map(p=>p.id);
 function defaultUserPages(){ return APP_USER_PAGES.map(p=>p.id); }
 function cleanPageList(pages, allowed=defaultUserPages()){
   const allowedSet = new Set(allowed);
@@ -51,6 +54,69 @@ function cleanPageList(pages, allowed=defaultUserPages()){
     if(allowedSet.has(p) && !next.includes(p)) next.push(p);
   });
   return next.length ? next : [...allowed];
+}
+function normalizePagePermissions(pages, allowed=defaultUserPages(), fallback=defaultUserPages()){
+  const source = Array.isArray(pages) && pages.length ? pages : fallback;
+  return cleanPageList(source, allowed);
+}
+function getPageLabelById(pageId, options=ASSIGNABLE_PAGE_OPTIONS){
+  return options.find(page=>page.id===pageId)?.label || pageId;
+}
+function PagePermissionSummaryChips({ids=[], options=ASSIGNABLE_PAGE_OPTIONS, max=3}){
+  const labels = cleanPageList(ids, options.map(page=>page.id)).map(id=>getPageLabelById(id, options));
+  if(!labels.length) return <span className="pagePermissionSummaryEmpty">Aucune page</span>;
+  const visible = labels.slice(0,max);
+  const extra = labels.length - visible.length;
+  return <div className="pagePermissionSummaryChips">{visible.map(label=><span key={label} className="pagePermissionChip">{label}</span>)}{extra > 0 ? <span className="pagePermissionChip muted">+{extra}</span> : null}</div>;
+}
+function PagePermissionsModalButton({
+  buttonLabel="Edit",
+  title="Pages visibles",
+  description="Cochez les pages visibles.",
+  options=ASSIGNABLE_PAGE_OPTIONS,
+  value=[],
+  onSave,
+  buttonClassName="pagePermissionEditBtn"
+}){
+  const [open,setOpen]=useState(false);
+  const optionIds = useMemo(()=>options.map(page=>page.id), [options]);
+  const [draft,setDraft]=useState(()=>cleanPageList(value, optionIds));
+
+  useEffect(()=>{
+    if(open) setDraft(cleanPageList(value, optionIds));
+  },[open, value, optionIds]);
+
+  function togglePage(pageId){
+    setDraft(prev=>prev.includes(pageId) ? prev.filter(id=>id!==pageId) : [...prev, pageId]);
+  }
+
+  async function handleSave(){
+    if(onSave) await onSave(cleanPageList(draft, optionIds));
+    setOpen(false);
+  }
+
+  return <>
+    <button type="button" className={buttonClassName} onClick={()=>setOpen(true)}>{buttonLabel}</button>
+    {open && <div className="modalOverlay" onClick={()=>setOpen(false)}>
+      <div className="scanModal pagePermissionsModal" onClick={e=>e.stopPropagation()}>
+        <button type="button" className="modalClose" onClick={()=>setOpen(false)}>×</button>
+        <h2>{title}</h2>
+        <p>{description}</p>
+        <div className="pagePermissionBox pagePermissionModalBox">
+          <div className="pagePermissionGrid pagePermissionModalGrid">
+            {options.map(page=><label key={page.id}>
+              <input type="checkbox" checked={draft.includes(page.id)} onChange={()=>togglePage(page.id)}/>
+              <span>{page.label}</span>
+            </label>)}
+          </div>
+        </div>
+        <div className="platformModalActions pagePermissionModalActions">
+          <button type="button" className="platformModalCancel" onClick={()=>setOpen(false)}>Annuler</button>
+          <button type="button" className="platformModalCreate" onClick={handleSave}>Enregistrer</button>
+        </div>
+      </div>
+    </div>}
+  </>;
 }
 
 function saveLS(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
@@ -303,7 +369,7 @@ function App(){
   useEffect(()=>{ if(token) axios.get(`${API}/me`,auth).then(r=>setMe(r.data)).catch(()=>logout()) },[token]);
   useEffect(()=>{
     if(!me) return;
-    const allowed = me.role==="platform_admin" ? [...defaultUserPages(), ...APP_ADMIN_PAGES.map(p=>p.id)] : cleanPageList(me.page_permissions || defaultUserPages());
+    const allowed = me.role==="platform_admin" ? [...defaultUserPages(), ...APP_ADMIN_PAGES.map(p=>p.id)] : normalizePagePermissions(me.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
     const fullAllowed = me.can_manage_users && me.role!=="platform_admin" ? [...allowed,"users"] : allowed;
     if(fullAllowed.length && !fullAllowed.includes(tab)) setTab(fullAllowed[0]);
   },[me?.username, me?.role, me?.can_manage_users, JSON.stringify(me?.page_permissions || []), tab]);
@@ -334,8 +400,13 @@ function App(){
     tab==="dashboardAdmin" ? "Publicités" : "Smart Inventory";
 
 
-  const userAllowedPages = me?.role==="platform_admin" ? defaultUserPages() : cleanPageList(me?.page_permissions || defaultUserPages());
+  const userAllowedPages = me?.role==="platform_admin"
+    ? [...defaultUserPages(), ...APP_ADMIN_PAGES.map(p=>p.id)]
+    : normalizePagePermissions(me?.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
   const menu = APP_USER_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p}));
+  if(me?.role!=="platform_admin"){
+    menu.push(...ASSIGNABLE_EXTRA_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p})));
+  }
   if(me?.can_manage_users && me?.role!=="platform_admin"){
     menu.push({id:"users",label:"Utilisateurs",icon:"platform"});
   }
@@ -1583,6 +1654,10 @@ function CashDashboardAdmin(){
   },[selectedDate]);
 
   useEffect(()=>{
+    setAnomalyIndex(0);
+  },[anomalyScope, selectedDate, selectedMonth, dayAnomalyAlerts.length, monthAnomalyAlerts.length]);
+
+  useEffect(()=>{
     setResultsDates(prev=>({
       totalSales: prev.totalSales && dashboardDates.includes(prev.totalSales) ? prev.totalSales : latestDate,
       closingCalculated: prev.closingCalculated && dashboardDates.includes(prev.closingCalculated) ? prev.closingCalculated : latestDate,
@@ -1616,6 +1691,7 @@ function CashDashboardAdmin(){
   const anomalyMetaText = anomalyScope === "month"
     ? `${monthAnomalyAlerts.length} alerte(s) du mois`
     : `${dayAnomalyAlerts.length} alerte(s) du jour`;
+  const [anomalyIndex,setAnomalyIndex] = useState(0);
 
   function cashNumber(cents, decimals=1){
     return ((Number(cents) || 0) / 100).toFixed(decimals);
@@ -1832,25 +1908,49 @@ function CashDashboardAdmin(){
     const emptyText = anomalyScope === "month"
       ? "Aucune anomalie détectée pour le mois sélectionné."
       : "Aucune anomalie détectée pour le jour choisi.";
-    return <div className="cashShuffleAnomalyList">
-      <div className="cashShuffleAnomalyFilters" role="group" aria-label="Filtrer les alertes anomalies">
-        <button type="button" className={anomalyScope === "day" ? "active" : ""} onClick={()=>setAnomalyScope("day")}>Jour choisi</button>
-        <button type="button" className={anomalyScope === "month" ? "active" : ""} onClick={()=>setAnomalyScope("month")}>Mois choisi</button>
-      </div>
-      {anomalyAlerts.length ? anomalyAlerts.slice(0, anomalyScope === "month" ? 8 : 4).map((alert,index)=><div key={`${alert.date}-${alert.label}-${index}`} className={`cashShuffleAnomalyItem ${alert.tone}`}>
-        <span className="cashShuffleAnomalyIcon" aria-hidden="true">!</span>
-        <div>
-          <strong>{alert.label}</strong>
-          <small>{formatCashDateLabel(alert.date)} · {alert.detail}</small>
+
+    const safeIndex = anomalyAlerts.length ? Math.min(anomalyIndex, anomalyAlerts.length - 1) : 0;
+    const currentAlert = anomalyAlerts[safeIndex] || null;
+    const canNavigate = anomalyAlerts.length > 1;
+    return <div className="cashShuffleAnomalyList cashShuffleAnomalyCarousel">
+      <div className="cashShuffleAnomalyToolbar">
+        <div className="cashShuffleAnomalyFilters" role="group" aria-label="Filtrer les alertes anomalies">
+          <button type="button" className={anomalyScope === "day" ? "active" : ""} onClick={()=>setAnomalyScope("day")}>Jour choisi</button>
+          <button type="button" className={anomalyScope === "month" ? "active" : ""} onClick={()=>setAnomalyScope("month")}>Mois choisi</button>
         </div>
-        <b>{formatDH(alert.amountCents)}</b>
-      </div>) : <div className="cashShuffleAnomalyEmpty">
+      </div>
+      <div className="cashShuffleAnomalyDivider" />
+      {currentAlert ? <div className="cashShuffleAnomalyViewport">
+        <button
+          type="button"
+          className="cashShuffleAnomalyNav"
+          onClick={()=>setAnomalyIndex(prev=>prev===0 ? anomalyAlerts.length - 1 : prev - 1)}
+          disabled={!canNavigate}
+          aria-label="Alerte précédente"
+        >‹</button>
+        <div className={`cashShuffleAnomalyItem cashShuffleAnomalySlide ${currentAlert.tone}`}>
+          <span className="cashShuffleAnomalyIcon" aria-hidden="true">!</span>
+          <div>
+            <strong>{currentAlert.label}</strong>
+            <small>{formatCashDateLabel(currentAlert.date)} · {currentAlert.detail}</small>
+          </div>
+          <b>{formatDH(currentAlert.amountCents)}</b>
+        </div>
+        <button
+          type="button"
+          className="cashShuffleAnomalyNav"
+          onClick={()=>setAnomalyIndex(prev=>prev===anomalyAlerts.length - 1 ? 0 : prev + 1)}
+          disabled={!canNavigate}
+          aria-label="Alerte suivante"
+        >›</button>
+      </div> : <div className="cashShuffleAnomalyEmpty cashShuffleAnomalySlideEmpty">
         <span className="cashShuffleAnomalyIcon ok" aria-hidden="true">✓</span>
         <div>
           <strong>Aucune anomalie détectée</strong>
           <small>{emptyText}</small>
         </div>
       </div>}
+      {anomalyAlerts.length > 1 ? <div className="cashShuffleAnomalyPager">{safeIndex + 1} / {anomalyAlerts.length}</div> : null}
     </div>;
   }
 
@@ -2736,8 +2836,13 @@ function Inventory({setTab=()=>{}, me, logout=()=>{}}){
     exportCSV("inventaire_reel.csv", rows, cols);
   }
 
-  const userAllowedPages = me?.role==="platform_admin" ? defaultUserPages() : cleanPageList(me?.page_permissions || defaultUserPages());
+  const userAllowedPages = me?.role==="platform_admin"
+    ? [...defaultUserPages(), ...APP_ADMIN_PAGES.map(p=>p.id)]
+    : normalizePagePermissions(me?.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
   const nav = APP_USER_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p}));
+  if(me?.role!=="platform_admin"){
+    nav.push(...ASSIGNABLE_EXTRA_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p})));
+  }
   if(me?.can_manage_users && me?.role!=="platform_admin"){
     nav.push({id:"users",label:"Utilisateurs",icon:"platform"});
   }
@@ -3012,8 +3117,8 @@ function LocalData(){
 
 
 function MyUsers({auth,me}){
-  const allowedPages = cleanPageList(me?.page_permissions || defaultUserPages());
-  const visiblePageOptions = APP_USER_PAGES.filter(p=>allowedPages.includes(p.id));
+  const allowedPages = normalizePagePermissions(me?.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
+  const visiblePageOptions = ASSIGNABLE_PAGE_OPTIONS.filter(p=>allowedPages.includes(p.id));
   const [users,setUsers]=useState([]);
   const [username,setUsername]=useState("");
   const [password,setPassword]=useState("");
@@ -3097,14 +3202,22 @@ function MyUsers({auth,me}){
       <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
       <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
       <input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)}/>
-      <div className="pagePermissionBox">
-        <strong>Pages visibles</strong>
-        <div className="pagePermissionGrid">
-          {visiblePageOptions.map(page=><label key={page.id}>
-            <input type="checkbox" checked={pages.includes(page.id)} onChange={()=>togglePage(page.id)}/>
-            <span>{page.label}</span>
-          </label>)}
+      <div className="pagePermissionBox pagePermissionButtonBox">
+        <div className="pagePermissionButtonHeader">
+          <div>
+            <strong>Pages visibles</strong>
+            <small>{pages.length} page(s) sélectionnée(s)</small>
+          </div>
+          <PagePermissionsModalButton
+            buttonLabel="Editer"
+            title="Pages visibles"
+            description="Choisissez les pages visibles pour cet utilisateur."
+            options={visiblePageOptions}
+            value={pages}
+            onSave={next=>setPages(next)}
+          />
         </div>
+        <PagePermissionSummaryChips ids={pages} options={visiblePageOptions} max={4}/>
       </div>
       <button onClick={createUser}>Créer utilisateur</button>
     </div>
@@ -3115,17 +3228,23 @@ function MyUsers({auth,me}){
       <thead><tr><th>Utilisateur</th><th>Nom</th><th>Pages visibles</th><th>Mot de passe</th><th>Statut</th><th>Delete</th></tr></thead>
       <tbody>
         {users.length ? users.map(u=>{
-          const currentPages=cleanPageList(u.page_permissions || [], allowedPages);
+          const currentPages=normalizePagePermissions(u.page_permissions, allowedPages, allowedPages);
           return <tr key={u.username}>
             <td>{u.username}</td>
             <td>{u.full_name}</td>
-            <td><div className="pagePermissionMiniGrid">{visiblePageOptions.map(page=>{
-              const checked=currentPages.includes(page.id);
-              return <label key={page.id}><input type="checkbox" checked={checked} onChange={e=>{
-                const next=e.target.checked ? [...currentPages,page.id] : currentPages.filter(x=>x!==page.id);
-                updatePages(u,next);
-              }}/><span>{page.label}</span></label>
-            })}</div></td>
+            <td>
+              <div className="pagePermissionCell">
+                <PagePermissionSummaryChips ids={currentPages} options={visiblePageOptions} max={2}/>
+                <PagePermissionsModalButton
+                  buttonLabel="Editer"
+                  title={`Pages visibles - ${u.username}`}
+                  description="Cochez les pages visibles pour cet utilisateur."
+                  options={visiblePageOptions}
+                  value={currentPages}
+                  onSave={next=>updatePages(u,next)}
+                />
+              </div>
+            </td>
             <td><button onClick={()=>changePassword(u)}>Changer mot de passe</button></td>
             <td><button onClick={()=>setActive(u,!u.active)}>{u.active ? "Désactiver" : "Activer"}</button></td>
             <td><button className="dangerBtn" onClick={()=>deleteUser(u)}>Delete</button></td>
@@ -3267,14 +3386,22 @@ return <section className="platformPage">
           <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
           <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Peut créer ses propres utilisateurs</label>
         </div>
-        <div className="pagePermissionBox">
-          <strong>Pages visibles pour ce client</strong>
-          <div className="pagePermissionGrid">
-            {APP_USER_PAGES.map(page=><label key={page.id}>
-              <input type="checkbox" checked={pagePermissions.includes(page.id)} onChange={()=>toggleCreatePage(page.id)}/>
-              <span>{page.label}</span>
-            </label>)}
+        <div className="pagePermissionBox pagePermissionButtonBox">
+          <div className="pagePermissionButtonHeader">
+            <div>
+              <strong>Pages visibles pour ce client</strong>
+              <small>{pagePermissions.length} page(s) sélectionnée(s)</small>
+            </div>
+            <PagePermissionsModalButton
+              buttonLabel="Editer"
+              title="Pages visibles du client"
+              description="Choisissez les pages visibles pour ce client."
+              options={ASSIGNABLE_PAGE_OPTIONS}
+              value={pagePermissions}
+              onSave={next=>setPagePermissions(next)}
+            />
           </div>
+          <PagePermissionSummaryChips ids={pagePermissions} options={ASSIGNABLE_PAGE_OPTIONS} max={4}/>
         </div>
         <div className="platformModalActions">
           <button type="button" className="platformModalCancel" onClick={()=>setShowCreateModal(false)}>Annuler</button>
@@ -3319,15 +3446,21 @@ return <section className="platformPage">
               ? <label className="checkLine compact"><input type="checkbox" checked disabled/> Activé</label>
               : <label className="checkLine compact"><input type="checkbox" checked={!!c.ai_premium} onChange={e=>toggleAiPremium(c.username,e.target.checked)}/> Activé</label>
             }</td>
-            <td>{isAdmin ? "Toutes" : <div className="pagePermissionMiniGrid">{APP_USER_PAGES.map(page=>{
-              const currentPages=cleanPageList(c.page_permissions || []);
-              const checked=currentPages.includes(page.id);
-              return <label key={page.id}><input type="checkbox" checked={checked} onChange={e=>{
-                const next=e.target.checked ? [...currentPages,page.id] : currentPages.filter(x=>x!==page.id);
-                updateClientAccess(c,next,c.can_manage_users);
-              }}/><span>{page.label}</span></label>
-            })}</div>}</td>
-            <td>{isAdmin ? "Oui" : <label className="checkLine compact"><input type="checkbox" checked={!!c.can_manage_users} onChange={e=>updateClientAccess(c,cleanPageList(c.page_permissions || []),e.target.checked)}/> Autorisé</label>}</td>
+            <td>{isAdmin ? "Toutes" : (()=>{
+              const currentPages=normalizePagePermissions(c.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
+              return <div className="pagePermissionCell">
+                <PagePermissionSummaryChips ids={currentPages} options={ASSIGNABLE_PAGE_OPTIONS} max={2}/>
+                <PagePermissionsModalButton
+                  buttonLabel="Editer"
+                  title={`Pages visibles - ${c.username}`}
+                  description="Choisissez les pages visibles pour ce client."
+                  options={ASSIGNABLE_PAGE_OPTIONS}
+                  value={currentPages}
+                  onSave={next=>updateClientAccess(c,next,c.can_manage_users)}
+                />
+              </div>;
+            })()}</td>
+            <td>{isAdmin ? "Oui" : <label className="checkLine compact"><input type="checkbox" checked={!!c.can_manage_users} onChange={e=>updateClientAccess(c,normalizePagePermissions(c.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages()),e.target.checked)}/> Autorisé</label>}</td>
             <td>{isAdmin ? "" : <button onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "Désactiver" : "Activer"}</button>}</td>
             <td>{isAdmin ? "" : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
           </tr>

@@ -1,0 +1,12 @@
+V152 - Page visibility popup editor + Dashboard Caisse permission
+
+- Added Dashboard Caisse to assignable visible pages.
+- Reworked visible pages UI to use an Edit button.
+- Clicking Edit opens a popup window with checkboxes for page selection.
+- Applied to:
+  - create user
+  - edit user pages in table
+  - create client/store
+  - edit client pages in table
+- Preserved current menu/footer and other functionality.
+- Frontend build tested successfully.
