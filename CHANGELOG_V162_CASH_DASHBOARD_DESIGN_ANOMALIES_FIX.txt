@@ -1,0 +1,18 @@
+V162 - Dashboard Caisse design anomaly fixes
+
+- Corrected the design of monthly cards in Dashboard Caisse.
+- Centered monthly values vertically and visually inside cards.
+- Applied consistent DH amount formatting without unnecessary decimal display.
+- Added empty-state messages for monthly shortage/surplus cards.
+- Improved Tot. dépenses card layout:
+  - centered progress section
+  - clearer limit badge formatting: "Limite : DH ..."
+  - text changed to percentage of monthly expense limit used.
+- Fixed Alertes anomalies card design:
+  - removed visible vertical scrollbar completely
+  - forced carousel-only navigation with left/right arrows
+  - compact fixed-height layout
+  - centered alert content
+  - reduced blue focus/hover border effect
+  - shortened withdrawal anomaly text.
+- Frontend build tested successfully.

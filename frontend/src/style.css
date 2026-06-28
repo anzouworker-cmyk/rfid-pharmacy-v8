@@ -10657,3 +10657,212 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
     margin-top:4px!important;
   }
 }
+
+/* V162 - Cash dashboard card polish: centered monthly cards + anomaly carousel without scrollbar */
+.cashShuffleContentV142 .cashShuffleMonthlyAmountCard .cashShuffleMetricBody,
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleMetricBody{
+  margin-top:0!important;
+  flex:1 1 auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:0!important;
+}
+.cashShuffleMonthlySummary{
+  width:100%!important;
+  min-height:118px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  gap:8px!important;
+}
+.cashShuffleMonthlySummary .cashShuffleAmount{
+  justify-content:center!important;
+  align-items:baseline!important;
+}
+.cashShuffleMonthlySummary .cashShuffleAmount em{
+  font-size:16px!important;
+}
+.cashShuffleMonthlySummary .cashShuffleAmount strong{
+  font-size:44px!important;
+  line-height:1!important;
+}
+.cashShuffleMonthlySummaryText{
+  color:#94a3b8!important;
+  font-size:13px!important;
+  line-height:1.35!important;
+  font-weight:800!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleProgressRow{
+  width:100%!important;
+  min-height:126px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:22px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleRing{
+  width:72px!important;
+  height:72px!important;
+  flex-basis:72px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleProgressRow span{
+  color:#94a3b8!important;
+  font-size:13px!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+  margin-bottom:6px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleProgressRow strong{
+  font-size:24px!important;
+  line-height:1.15!important;
+  letter-spacing:-.025em!important;
+}
+.cashShuffleExpensesLimitCard .cashLimitEditBtn{
+  margin-left:8px!important;
+  padding:0 12px!important;
+  min-height:30px!important;
+  border-radius:10px!important;
+  color:#334155!important;
+  background:#fff!important;
+}
+.cashShuffleContentV142 .cashShuffleCardMeta{
+  min-height:28px!important;
+}
+.cashShuffleContentV142 .cashShuffleCardMeta > span,
+.cashShuffleContentV142 .cashShuffleCardMeta .cashLimitEditBtn{
+  white-space:nowrap!important;
+}
+
+.cashShuffleAnomalyCard{
+  border-color:#e2e8f0!important;
+  box-shadow:0 2px 10px -3px rgba(6,81,237,.05)!important;
+  overflow:hidden!important;
+  min-height:214px!important;
+  max-height:214px!important;
+}
+.cashShuffleAnomalyCard:hover{
+  border-color:#e2e8f0!important;
+  box-shadow:0 2px 10px -3px rgba(6,81,237,.05)!important;
+}
+.cashShuffleAnomalyCard .cashShuffleCardTop{
+  margin-bottom:10px!important;
+}
+.cashShuffleAnomalyCard .cashShuffleMetricBody{
+  margin-top:0!important;
+  flex:1 1 auto!important;
+  display:flex!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+.cashShuffleAnomalyCard .cashShuffleAnomalyList,
+.cashShuffleAnomalyCard .cashShuffleAnomalyCarousel{
+  width:100%!important;
+  height:100%!important;
+  max-height:none!important;
+  overflow:hidden!important;
+  padding-right:0!important;
+  margin:0!important;
+  gap:8px!important;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+.cashShuffleAnomalyCard .cashShuffleAnomalyList::-webkit-scrollbar,
+.cashShuffleAnomalyCard .cashShuffleAnomalyCarousel::-webkit-scrollbar,
+.cashShuffleAnomalyCard *::-webkit-scrollbar{
+  width:0!important;
+  height:0!important;
+  display:none!important;
+}
+.cashShuffleAnomalyToolbar{
+  justify-content:flex-end!important;
+  flex:0 0 auto!important;
+}
+.cashShuffleAnomalyCard .cashShuffleAnomalyFilters{
+  width:min(100%,260px)!important;
+  max-width:260px!important;
+  margin:0!important;
+  flex:0 0 auto!important;
+}
+.cashShuffleAnomalyCard .cashShuffleAnomalyFilters button{
+  min-height:30px!important;
+  font-size:11px!important;
+  border-radius:10px!important;
+}
+.cashShuffleAnomalyDivider{
+  flex:0 0 1px!important;
+  margin:0!important;
+}
+.cashShuffleAnomalyViewport{
+  grid-template-columns:34px minmax(0,1fr) 34px!important;
+  gap:10px!important;
+  flex:1 1 auto!important;
+  min-height:74px!important;
+  max-height:88px!important;
+  align-items:center!important;
+  overflow:hidden!important;
+}
+.cashShuffleAnomalySlide,
+.cashShuffleAnomalySlideEmpty{
+  min-height:74px!important;
+  max-height:88px!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide,
+.cashShuffleAnomalyEmpty.cashShuffleAnomalySlideEmpty{
+  min-height:74px!important;
+  max-height:88px!important;
+  overflow:hidden!important;
+  padding:12px 14px!important;
+  border-radius:14px!important;
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:12px!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide .cashShuffleAnomalyIcon,
+.cashShuffleAnomalyEmpty.cashShuffleAnomalySlideEmpty .cashShuffleAnomalyIcon{
+  width:38px!important;
+  height:38px!important;
+  border-radius:12px!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide strong,
+.cashShuffleAnomalyEmpty.cashShuffleAnomalySlideEmpty strong{
+  font-size:13px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide small,
+.cashShuffleAnomalyEmpty.cashShuffleAnomalySlideEmpty small{
+  font-size:11px!important;
+  line-height:1.35!important;
+  margin-top:4px!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+}
+.cashShuffleAnomalyItem.cashShuffleAnomalySlide b{
+  font-size:12px!important;
+  white-space:nowrap!important;
+}
+.cashShuffleAnomalyNav{
+  align-self:center!important;
+}
+.cashShuffleAnomalyPager{
+  flex:0 0 auto!important;
+  font-size:11px!important;
+  padding-top:0!important;
+}
+@media(max-width:1259px){
+  .cashShuffleAnomalyCard{max-height:none!important;}
+  .cashShuffleAnomalyCard .cashShuffleAnomalyFilters{max-width:none!important;width:100%!important;}
+}
+@media(max-width:820px){
+  .cashShuffleExpensesLimitCard .cashShuffleProgressRow{flex-direction:column!important;gap:12px!important;text-align:center!important;}
+  .cashShuffleAnomalyCard{max-height:none!important;min-height:230px!important;}
+  .cashShuffleAnomalyViewport{grid-template-columns:1fr!important;max-height:none!important;}
+}
