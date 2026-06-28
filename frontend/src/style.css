@@ -9367,3 +9367,367 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   .dashRefShellV2 .dashRefContent{padding:16px!important;}
   .dashRefCashHero{display:block!important;}
 }
+
+/* V147 - Cash dashboard content redesigned from attached Shuffle reference only */
+.cashShuffleDashboard{
+  width:100%!important;
+  max-width:1600px!important;
+  margin:0 auto!important;
+  padding:12px 0 8px!important;
+  min-height:calc(100vh - 160px)!important;
+  color:#0f172a!important;
+  font-family:'Plus Jakarta Sans','Outfit',Inter,ui-sans-serif,system-ui,sans-serif!important;
+}
+.cashShuffleDashboard *{box-sizing:border-box!important;}
+.cashShuffleHeader{
+  margin:0 0 32px!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+}
+.cashShuffleHeader h1{
+  margin:0 0 8px!important;
+  color:#0f172a!important;
+  font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif!important;
+  font-size:30px!important;
+  line-height:1.15!important;
+  font-weight:800!important;
+  letter-spacing:-.035em!important;
+}
+.cashShuffleHeader p{
+  max-width:720px!important;
+  margin:0!important;
+  color:#64748b!important;
+  font-size:14px!important;
+  line-height:1.55!important;
+  font-weight:500!important;
+}
+.cashShuffleHeaderActions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+  flex-wrap:wrap!important;
+}
+.cashShuffleDateControl{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:12px!important;
+  padding:8px 10px!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)!important;
+}
+.cashShuffleDateControl>span{
+  color:#64748b!important;
+  font-size:12px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+.cashShuffleDateControl .cashAdminDatePicker{
+  gap:5px!important;
+}
+.cashShuffleDateControl .cashAdminDatePicker>button{
+  width:30px!important;
+  height:32px!important;
+  min-height:32px!important;
+  border-radius:8px!important;
+  border:1px solid #e2e8f0!important;
+  background:#f8fafc!important;
+  color:#64748b!important;
+  font-size:18px!important;
+  box-shadow:none!important;
+}
+.cashShuffleDateControl .cashAdminDatePickerDisplay{
+  min-width:132px!important;
+  min-height:32px!important;
+  padding:6px 9px!important;
+  border-radius:8px!important;
+  border:1px solid #e2e8f0!important;
+  background:#f8fafc!important;
+  color:#334155!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  box-shadow:none!important;
+}
+.cashShuffleRefresh{
+  width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:0!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:#94a3b8!important;
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:10px!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)!important;
+}
+.cashShuffleRefresh:hover{color:#334155!important;background:#f8fafc!important;box-shadow:0 2px 8px rgba(15,23,42,.06)!important;}
+.cashShuffleRefresh .invSvg{width:20px!important;height:20px!important;}
+.cashShuffleGrid{
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:20px!important;
+}
+.cashShuffleCard{
+  background:#fff!important;
+  border:1px solid rgba(226,232,240,.8)!important;
+  box-shadow:0 2px 10px -3px rgba(6,81,237,.05)!important;
+  color:#0f172a!important;
+  transition:border-color .15s ease, box-shadow .15s ease!important;
+}
+.cashShuffleCard:hover{border-color:#c7d2fe!important;box-shadow:0 8px 20px -12px rgba(79,70,229,.18)!important;}
+.cashShuffleCardTall{
+  grid-column:span 4 / span 4!important;
+  min-height:220px!important;
+  border-radius:16px!important;
+  padding:24px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+}
+.cashShuffleCardTop{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  margin:0 0 24px!important;
+}
+.cashShuffleCardTop h3,
+.cashShuffleMini h3,
+.cashShuffleWideTop h3{
+  margin:0!important;
+  color:#0f172a!important;
+  font-size:14px!important;
+  line-height:1.35!important;
+  font-weight:800!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+}
+.cashShuffleMini h3,
+.cashShuffleWideTop h3{
+  color:#64748b!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  text-transform:uppercase!important;
+  letter-spacing:.055em!important;
+}
+.cashShuffleCardTop p{
+  margin:4px 0 0!important;
+  color:#64748b!important;
+  font-size:12px!important;
+  line-height:1.4!important;
+  font-weight:500!important;
+}
+.cashShuffleCardTop small{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  height:24px!important;
+  padding:0 8px!important;
+  border-radius:6px!important;
+  background:#eef2ff!important;
+  color:#4f46e5!important;
+  font-size:10px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  letter-spacing:.08em!important;
+}
+.cashShuffleMore{
+  width:28px!important;
+  height:28px!important;
+  min-height:28px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#cbd5e1!important;
+  font-size:22px!important;
+  line-height:1!important;
+}
+.cashShuffleMore:hover{color:#64748b!important;background:transparent!important;box-shadow:none!important;}
+.cashShuffleProgressRow{
+  display:flex!important;
+  align-items:center!important;
+  gap:24px!important;
+}
+.cashShuffleRing{
+  position:relative!important;
+  width:80px!important;
+  height:80px!important;
+  flex:0 0 80px!important;
+}
+.cashShuffleRing svg{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+  transform:rotate(-90deg)!important;
+}
+.cashShuffleRing path{
+  fill:none!important;
+  stroke-width:3!important;
+}
+.cashShuffleRing .track{stroke:#f1f5f9!important;}
+.cashShuffleRing .value{stroke:#4f46e5!important;stroke-linecap:round!important;}
+.cashShuffleRing div{
+  position:absolute!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:#0f172a!important;
+  font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif!important;
+  font-size:14px!important;
+  line-height:1!important;
+  font-weight:800!important;
+}
+.cashShuffleProgressRow span{
+  display:block!important;
+  margin:0 0 6px!important;
+  color:#64748b!important;
+  font-size:12px!important;
+  line-height:1.2!important;
+  text-transform:uppercase!important;
+  letter-spacing:.08em!important;
+  font-weight:800!important;
+}
+.cashShuffleProgressRow strong{
+  display:block!important;
+  color:#0f172a!important;
+  font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif!important;
+  font-size:26px!important;
+  line-height:1.1!important;
+  font-weight:800!important;
+  letter-spacing:-.03em!important;
+}
+.cashShuffleProgressRow strong em{
+  color:#cbd5e1!important;
+  font-style:normal!important;
+  font-size:22px!important;
+}
+.cashShuffleDatePill{
+  margin-top:10px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  padding:6px 10px!important;
+  border-radius:6px!important;
+  background:rgba(248,250,252,.7)!important;
+  border:1px solid #f1f5f9!important;
+  color:#64748b!important;
+  font-size:12px!important;
+  line-height:1!important;
+  font-weight:700!important;
+}
+.cashShuffleDatePill .invSvg{width:14px!important;height:14px!important;color:#94a3b8!important;}
+.cashShuffleIconBox{
+  width:32px!important;
+  height:32px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:10px!important;
+  background:#f8fafc!important;
+  border:1px solid #f1f5f9!important;
+  color:#94a3b8!important;
+}
+.cashShuffleIconBox .invSvg{width:16px!important;height:16px!important;}
+.cashShuffleAmount{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:6px!important;
+  margin:0!important;
+}
+.cashShuffleAmount em{
+  color:#94a3b8!important;
+  font-style:normal!important;
+  font-size:14px!important;
+  line-height:1!important;
+  font-weight:700!important;
+}
+.cashShuffleAmount strong{
+  display:block!important;
+  color:#0f172a!important;
+  font-family:'Outfit','Plus Jakarta Sans',Inter,sans-serif!important;
+  font-size:26px!important;
+  line-height:1.05!important;
+  font-weight:800!important;
+  letter-spacing:-.035em!important;
+}
+.cashShuffleAmountLarge strong{font-size:40px!important;}
+.cashShuffleAmountLarge em{font-size:18px!important;}
+.cashShuffleAmountXL strong{font-size:34px!important;}
+.cashShuffleAmount.positive strong{color:#059669!important;}
+.cashShuffleAmount.negative strong{color:#e11d48!important;}
+.cashShuffleSplit{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:16px!important;
+}
+.cashShuffleSplit>div+div{
+  border-left:1px solid #f1f5f9!important;
+  padding-left:16px!important;
+}
+.cashShuffleSplit span{
+  display:block!important;
+  margin:0 0 8px!important;
+  color:#64748b!important;
+  font-size:12px!important;
+  line-height:1.2!important;
+  font-weight:600!important;
+}
+.cashShuffleMini{
+  grid-column:span 3 / span 3!important;
+  min-height:128px!important;
+  border-radius:12px!important;
+  padding:20px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+}
+.cashShuffleWide{
+  grid-column:span 4 / span 4!important;
+  min-height:150px!important;
+  border-radius:12px!important;
+  padding:20px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+}
+.cashShuffleWideTop{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+}
+.cashShuffleWideTop span{
+  width:8px!important;
+  height:8px!important;
+  border-radius:999px!important;
+  background:#cbd5e1!important;
+  flex:0 0 8px!important;
+}
+.cashShuffleWideTop span.indigo{background:#818cf8!important;}
+.cashShuffleWideTop span.amber{background:#f59e0b!important;}
+@media (max-width:1200px){
+  .cashShuffleCardTall{grid-column:span 6 / span 6!important;}
+  .cashShuffleMini{grid-column:span 6 / span 6!important;}
+  .cashShuffleWide{grid-column:span 6 / span 6!important;}
+}
+@media (max-width:820px){
+  .cashShuffleHeader{align-items:flex-start!important;flex-direction:column!important;}
+  .cashShuffleHeaderActions{width:100%!important;justify-content:flex-start!important;}
+  .cashShuffleDateControl{width:100%!important;align-items:flex-start!important;flex-direction:column!important;}
+  .cashShuffleDateControl .cashAdminDatePicker{width:100%!important;}
+  .cashShuffleDateControl .cashAdminDatePickerDisplay{flex:1!important;min-width:0!important;}
+  .cashShuffleCardTall,
+  .cashShuffleMini,
+  .cashShuffleWide{grid-column:span 12 / span 12!important;}
+  .cashShuffleSplit{grid-template-columns:1fr!important;}
+  .cashShuffleSplit>div+div{border-left:0!important;border-top:1px solid #f1f5f9!important;padding-left:0!important;padding-top:14px!important;}
+}

@@ -1549,6 +1549,8 @@ function CashDashboardAdmin(){
   const monthlyShortageCents = monthlyMetrics.reduce((sum,metric)=>sum + metric.shortageCents,0);
   const monthlySurplusCents = monthlyMetrics.reduce((sum,metric)=>sum + metric.surplusCents,0);
   const monthlyExpensesCents = monthlyMetrics.reduce((sum,metric)=>sum + metric.expensesCents,0);
+  const monthlyTotalSalesCents = monthlyMetrics.reduce((sum,metric)=>sum + metric.totalSalesCents,0);
+  const progressPercent = Math.max(0, Math.min(100, progressValue));
 
   function shiftDateValue(date, delta){
     if(!dashboardDates.length) return date || dashboardToday;
@@ -1578,51 +1580,93 @@ function CashDashboardAdmin(){
   }
   function resultDateMeta(key){ return <div className="cashAdminInlineDate"><DateOperationPicker compact value={resultsDates[key]} onChange={date=>updateResultDate(key,date)} onShift={delta=>shiftResultDate(key,delta)} ariaLabel={`Date enregistrée pour ${key}`} /></div>; }
 
-  return <section className="dashRefDashboard dashRefCashDashboard">
-    <div className="dashRefHeroBlock dashRefCashHero">
+  return <section className="cashShuffleDashboard">
+    <div className="cashShuffleHeader">
       <div>
-        <div className="dashRefStatusLine"><span className="dark">app.smartinventory.io/caisse</span><span>Mode stable</span><span className="success">Synchronisation active</span></div>
-        <h1>Dashboard caisse</h1>
-        <h2>Suivi financier en temps réel.</h2>
-        <p>Consultez les dates enregistrées, les soldes, les écarts et les performances de caisse avec le même langage visuel Shuffle que le reste de l'application.</p>
+        <h1>Cash register dashboard</h1>
+        <p>Vue admin pour consulter les dates enregistrées où des opérations de caisse existent, avec calendrier et flèches de navigation.</p>
       </div>
-      <div className="dashRefHeroActions dashRefCashHeroActions"><div className="dashRefCashHeaderDate"><span>Date enregistrée</span><DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date enregistrée principale" /></div></div>
-    </div>
-
-    <div className="dashRefKpiGrid dashRefCashKpiGrid">
-      <article className="dashRefKpi"><div><span className="dashRefIcon blue"><InvIcon name="cash"/></span><em>Équilibre</em></div><strong>{monthlyMetrics.length}</strong><b>Date(s) enregistrée(s)</b><small>{monthBalancedDays} jour(s) équilibré(s)</small></article>
-      <article className="dashRefKpi"><div><span className="dashRefIcon emerald"><InvIcon name="cash"/></span><em>Réel</em></div><strong>{formatDH(selectedMetrics.countedCents)}</strong><b>Solde réel du jour</b><small>{closestRegisteredDate(selectedDate)}</small></article>
-      <article className="dashRefKpi"><div><span className="dashRefIcon amber"><InvIcon name="warning"/></span><em>Manquant</em></div><strong>{formatDH(monthlyShortageCents)}</strong><b>Montant manquant total</b><small>{formatMonthLabel(selectedMonth)}</small></article>
-      <article className="dashRefKpi"><div><span className="dashRefIcon violet"><InvIcon name="list"/></span><em>Surplus</em></div><strong>{formatDH(monthlySurplusCents)}</strong><b>Montant surplus total</b><small>{formatMonthLabel(selectedMonth)}</small></article>
-    </div>
-
-    <div className="dashRefTwoColumns dashRefCashTwoColumns">
-      <section className="dashRefCoverageCard">
-        <div className="dashRefSectionHead"><div><b>Taux d'équilibre</b><span>Mesure la part des journées sans écart.</span></div><em>{Math.round(progressValue)}%</em></div>
-        <div className="dashRefCoverageBody"><div className="dashRefCircle"><span>{Math.round(progressValue)}%</span></div><div><h3>{monthBalancedDays===monthlyMetrics.length && monthlyMetrics.length ? "Toutes les journées sont équilibrées." : "Votre suivi de caisse peut être amélioré."}</h3><p>Suivez les soldes réels, les retraits, les dépenses et les différences entre caisse comptée et calculée. Utilisez la date sélectionnée pour parcourir les opérations disponibles.</p><div><button type="button" className="dashRefPrimary">Voir l'avancement</button><button type="button" className="dashRefSecondary">Consulter l'historique</button></div></div></div>
-      </section>
-      <aside className="dashRefAdCard dashRefCashSummaryCard"><span>RÉSUMÉ CAISSE</span><h3>Espace indicateurs financiers</h3><div className="dashRefPartnerLine"><i><InvIcon name="cash"/></i><b>Vue rapide</b></div><p>Date active : {closestRegisteredDate(selectedDate)}<br/>Tot. vente : {formatDH(resultMetrics.totalSales.totalSalesCents)}<br/>Tot. dépenses : {formatDH(monthlyExpensesCents)}<br/>Réserve cible : {formatDH(reserveCents)}</p><button type="button">Exporter le résumé</button></aside>
-    </div>
-
-    <div className="dashRefBottomGrid dashRefCashBottomGrid">
-      <section className="dashRefReportsBlock">
-        <div className="dashRefSectionHead"><div><b>Indicateurs journaliers</b><span>Mesures liées à la date sélectionnée.</span></div><button type="button">Exports sécurisés</button></div>
-        <div className="dashRefReportGrid">
-          <button type="button"><span className="dashRefIcon sky"><InvIcon name="cash"/></span><b>Balance due</b><strong className="dashRefCashCardValue">{formatDH(selectedMetrics.dueBalanceCents)}</strong><small>{closestRegisteredDate(selectedDate)}</small></button>
-          <button type="button"><span className="dashRefIcon red"><InvIcon name="warning"/></span><b>Montant manquant</b><strong className="dashRefCashCardValue">{formatDH(selectedMetrics.shortageCents)}</strong><small>{closestRegisteredDate(selectedDate)}</small></button>
-          <button type="button"><span className="dashRefIcon emerald"><InvIcon name="list"/></span><b>Montant surplus</b><strong className="dashRefCashCardValue">{formatDH(selectedMetrics.surplusCents)}</strong><small>{closestRegisteredDate(selectedDate)}</small></button>
-          <button type="button"><span className="dashRefIcon amber"><InvIcon name="upload"/></span><b>Retiré</b><strong className="dashRefCashCardValue">{formatDH(selectedMetrics.withdrawnCents)}</strong><small>{closestRegisteredDate(selectedDate)}</small></button>
+      <div className="cashShuffleHeaderActions">
+        <div className="cashShuffleDateControl">
+          <span>Date enregistrée</span>
+          <DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date enregistrée principale" />
         </div>
-      </section>
-      <section className="dashRefAlertsBlock">
-        <div className="dashRefSectionHead"><div><b>Résultats prioritaires</b><span>Points clés calculés à partir des dates enregistrées.</span></div><button type="button">{formatMonthLabel(selectedMonth)}</button></div>
-        <div className="dashRefAlertsCard">
-          <div className="dashRefAlert"><span className="dashRefIcon blue"><InvIcon name="sync"/></span><div><b>Tot. vente</b><small>{formatDH(resultMetrics.totalSales.totalSalesCents)}</small>{resultDateMeta("totalSales")}</div></div>
-          <div className="dashRefAlert"><span className="dashRefIcon violet"><InvIcon name="cash"/></span><div><b>C. fermeture (théorique)</b><small>{formatDH(resultMetrics.closingCalculated.closingCalculatedCents)}</small>{resultDateMeta("closingCalculated")}</div></div>
-          <div className="dashRefAlert"><span className="dashRefIcon emerald"><InvIcon name="cash"/></span><div><b>Nouvelle C. fermeture</b><small>{formatDH(resultMetrics.closingReal.closingRealCents)}</small>{resultDateMeta("closingReal")}</div></div>
-          <div className="dashRefAlert"><span className="dashRefIcon amber"><InvIcon name="warning"/></span><div><b>Écart cash comptée vs calculée</b><small>{formatDH(resultMetrics.gap.gapCents)}</small>{resultDateMeta("gap")}</div></div>
+        <button type="button" className="cashShuffleRefresh" onClick={()=>selectMainDate(latestDate)} aria-label="Actualiser la date"><InvIcon name="sync"/></button>
+      </div>
+    </div>
+
+    <div className="cashShuffleGrid">
+      <article className="cashShuffleCard cashShuffleCardTall">
+        <div className="cashShuffleCardTop">
+          <div>
+            <h3>Balance due progress</h3>
+            <p>{monthlyMetrics.length} date(s) enregistrée(s)</p>
+          </div>
+          <button type="button" className="cashShuffleMore" aria-label="Options">⋮</button>
         </div>
-      </section>
+        <div className="cashShuffleProgressRow">
+          <div className="cashShuffleRing">
+            <svg viewBox="0 0 36 36" aria-hidden="true">
+              <path className="track" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path className="value" strokeDasharray={`${progressPercent}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            </svg>
+            <div>{progressPercent.toFixed(1)}%</div>
+          </div>
+          <div>
+            <span>Jours équilibrés</span>
+            <strong>{monthBalancedDays} <em>/ {monthlyMetrics.length}</em></strong>
+          </div>
+        </div>
+      </article>
+
+      <article className="cashShuffleCard cashShuffleCardTall">
+        <div className="cashShuffleCardTop">
+          <div>
+            <h3>Real time CR balance</h3>
+            <div className="cashShuffleDatePill"><InvIcon name="cash"/><span>{closestRegisteredDate(selectedDate)}</span></div>
+          </div>
+          <small>SD</small>
+        </div>
+        <div className="cashShuffleAmount cashShuffleAmountLarge"><em>DH</em><strong>{formatDH(selectedMetrics.countedCents)}</strong></div>
+      </article>
+
+      <article className="cashShuffleCard cashShuffleCardTall">
+        <div className="cashShuffleCardTop">
+          <div>
+            <h3>Ventes vs Dépenses</h3>
+            <p>{formatMonthLabel(selectedMonth)}</p>
+          </div>
+          <span className="cashShuffleIconBox"><InvIcon name="grid"/></span>
+        </div>
+        <div className="cashShuffleSplit">
+          <div>
+            <span>Tot. vente</span>
+            <div className="cashShuffleAmount positive"><em>DH</em><strong>{formatDH(monthlyTotalSalesCents)}</strong></div>
+          </div>
+          <div>
+            <span>Tot. dépenses</span>
+            <div className="cashShuffleAmount negative"><em>DH</em><strong>{formatDH(monthlyExpensesCents)}</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <article className="cashShuffleCard cashShuffleMini"><h3>Balance due</h3><div className="cashShuffleAmount"><em>DH</em><strong>{formatDH(selectedMetrics.dueBalanceCents)}</strong></div></article>
+      <article className="cashShuffleCard cashShuffleMini"><h3>Montant manquant</h3><div className="cashShuffleAmount negative"><em>DH</em><strong>{formatDH(selectedMetrics.shortageCents)}</strong></div></article>
+      <article className="cashShuffleCard cashShuffleMini"><h3>Montant surplus</h3><div className="cashShuffleAmount positive"><em>DH</em><strong>{formatDH(selectedMetrics.surplusCents)}</strong></div></article>
+      <article className="cashShuffleCard cashShuffleMini"><h3>Retiré</h3><div className="cashShuffleAmount"><em>DH</em><strong>{formatDH(selectedMetrics.withdrawnCents)}</strong></div></article>
+
+      <article className="cashShuffleCard cashShuffleWide">
+        <div className="cashShuffleWideTop"><h3>C. fermeture (théorique)</h3><span></span></div>
+        <div className="cashShuffleAmount cashShuffleAmountXL"><em>DH</em><strong>{formatDH(selectedMetrics.closingCalculatedCents)}</strong></div>
+      </article>
+      <article className="cashShuffleCard cashShuffleWide">
+        <div className="cashShuffleWideTop"><h3>Nouvelle C. fermeture</h3><span className="indigo"></span></div>
+        <div className="cashShuffleAmount cashShuffleAmountXL"><em>DH</em><strong>{formatDH(selectedMetrics.closingRealCents)}</strong></div>
+      </article>
+      <article className="cashShuffleCard cashShuffleWide">
+        <div className="cashShuffleWideTop"><h3>Ecart cash comptée vs calculée</h3><span className="amber"></span></div>
+        <div className="cashShuffleAmount cashShuffleAmountXL"><em>DH</em><strong>{formatDH(selectedMetrics.gapCents)}</strong></div>
+      </article>
     </div>
   </section>;
 }

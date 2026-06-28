@@ -1,0 +1,8 @@
+V147 - Cash dashboard Shuffle content redesign
+
+- Redesigned only the content area of Dashboard Caisse from the attached Shuffle cash dashboard reference.
+- Kept the current top menu unchanged.
+- Kept the current footer unchanged.
+- Did not modify other application pages.
+- Preserved cash dashboard calculations and registered-date navigation.
+- Production build was tested successfully before removing local node_modules/dist from the delivery zip.
