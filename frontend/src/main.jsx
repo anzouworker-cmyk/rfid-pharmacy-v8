@@ -1437,24 +1437,26 @@ function hasCashDayActivity(dayData){
   return quantityActivity || managementActivity || expenseActivity;
 }
 
-function buildCashDayMetrics(date, dayData, store={}){
+function buildCashDayMetrics(date, dayData, store={}, reserveCents=300000){
   const day = { ...defaultCashDay(), ...(dayData || {}), management:{...defaultCashDay().management, ...((dayData || {}).management || {})}, quantities:{...((dayData || {}).quantities || {})}, expenses:Array.isArray((dayData || {}).expenses) ? (dayData || {}).expenses.map(normalizeExpenseRow) : [] };
+  const safeDate = date || todayISO();
+  const safeReserveCents = Math.max(0, Number(reserveCents || 0));
   const countedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(day.quantities[d.cents] || 0) * d.cents),0);
   const expensesCents = day.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
   const totalSalesCents = Number(day.management.totalDailySalesCents || 0);
   const salesCashCents = totalSalesCents - Number(day.management.creditSalesCents || 0) - Number(day.management.atmSalesCents || 0);
-  const autoToWithdrawCents = Math.max(0, countedCents - 300000);
-  const closingRealCents = getClosingRealCentsForDate(store, date);
-  const previousClosingRealCents = getCalculatedCashBalanceCents((store || {})[shiftISODate(date,-1)]);
+  const autoToWithdrawCents = Math.max(0, countedCents - safeReserveCents);
+  const closingRealCents = getClosingRealCentsForDate(store, safeDate);
+  const previousClosingRealCents = getCalculatedCashBalanceCents((store || {})[shiftISODate(safeDate,-1)]);
   const sameDayClosingRealCents = countedCents;
-  const closingCalculatedCents = getTheoreticalClosingCentsForDate(store, date);
+  const closingCalculatedCents = getTheoreticalClosingCentsForDate(store, safeDate);
   const shortageCents = Math.max(0, closingCalculatedCents - sameDayClosingRealCents);
   const surplusCents = Math.max(0, sameDayClosingRealCents - closingCalculatedCents);
   const gapCents = sameDayClosingRealCents - closingCalculatedCents;
   const dueBalanceCents = Math.max(0, autoToWithdrawCents - Number(day.management.withdrawnCents || 0));
   const isBalanced = shortageCents===0 && surplusCents===0;
   return {
-    date,
+    date:safeDate,
     countedCents,
     expensesCents,
     previousClosingRealCents,
@@ -1474,6 +1476,12 @@ function buildCashDayMetrics(date, dayData, store={}){
     salesCashCents,
     isBalanced
   };
+}
+
+function computeCashDayMetrics(store={}, date=todayISO(), reserveCents=300000){
+  const safeStore = store || {};
+  const safeDate = date || todayISO();
+  return buildCashDayMetrics(safeDate, safeStore[safeDate], safeStore, reserveCents);
 }
 
 function CashProgressRing({value,label,subLabel}){

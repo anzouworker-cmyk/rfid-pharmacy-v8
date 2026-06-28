@@ -1,0 +1,8 @@
+Smart Inventory V146 - Cash dashboard runtime fix
+
+Corrections incluses:
+- Correction du crash de la page Dashboard Caisse: ajout de computeCashDayMetrics(), qui était appelé mais non défini.
+- buildCashDayMetrics accepte maintenant la réserve de caisse configurable pour le calcul À retirer / balance due.
+- Conservation de la barre de menu uniquement en haut de page; aucun menu vertical gauche sur les pages principales.
+- Conservation de la page d'accueil restaurée depuis V142.
+- Build frontend vérifié avec npm run build.
