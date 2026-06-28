@@ -1,0 +1,11 @@
+V155 - Dashboard Caisse expense card wording and alignment
+
+- Corrected the "Tot. dépenses" empty state wording:
+  - Replaced "Aucune vente" with "Aucune dépense enregistrée".
+- Kept the ratio text only when expenses exist and monthly sales allow a percentage.
+- Centered the content in monthly KPI cards:
+  - Tot. montant manquant
+  - Tot. montant surplus
+  - Tot. dépenses
+- Kept the current menu, footer, alert card redesign, and other pages unchanged.
+- Frontend build tested successfully.

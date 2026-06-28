@@ -1979,16 +1979,16 @@ function CashDashboardAdmin(){
         <CashShuffleAmount cents={selectedMetrics.countedCents} large />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall">
+      <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall cashShuffleCenteredMetric">
         <CashShuffleAmount cents={monthlyShortageCents} tone="negative" xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall">
+      <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall cashShuffleCenteredMetric">
         <CashShuffleAmount cents={monthlySurplusCents} tone="positive" xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. dépenses" meta={cardMeta("Total mensuel")} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="amber">
-        <CashShuffleProgress value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Aucune vente"} />
+      <CashShuffleCard title="Tot. dépenses" meta={cardMeta("Total mensuel")} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleCenteredMetric cashShuffleExpenseCard" dotTone="amber">
+        <CashShuffleProgress value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthlyExpensesCents > 0 ? (monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Ratio ventes indisponible") : "Aucune dépense enregistrée"} />
       </CashShuffleCard>
 
       <CashShuffleCard title="Alertes anomalies" meta={cardMeta(anomalyMetaText)} className="cashShuffleCardTall cashShuffleAnomalyCard" dotTone={anomalyAlerts.length ? "amber" : "emerald"}>
