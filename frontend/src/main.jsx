@@ -1,10 +1,9 @@
 
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {createRoot} from "react-dom/client";
 import axios from "axios";
 import Papa from "papaparse";
 import "./style.css";
-import ShuffleOperationsPage from "./ShuffleOperationsPage.jsx";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 function mediaUrl(url){
@@ -43,9 +42,6 @@ const APP_ADMIN_PAGES = [
   {id:"platform", label:"Clients SaaS", icon:"platform"},
   {id:"dashboardAdmin", label:"Publicités", icon:"dashboardAdmin"}
 ];
-const ASSIGNABLE_EXTRA_PAGES = APP_ADMIN_PAGES.filter(p=>p.id==="cashAdmin");
-const ASSIGNABLE_PAGE_OPTIONS = [...APP_USER_PAGES, ...ASSIGNABLE_EXTRA_PAGES];
-const ASSIGNABLE_PAGE_IDS = ASSIGNABLE_PAGE_OPTIONS.map(p=>p.id);
 function defaultUserPages(){ return APP_USER_PAGES.map(p=>p.id); }
 function cleanPageList(pages, allowed=defaultUserPages()){
   const allowedSet = new Set(allowed);
@@ -54,69 +50,6 @@ function cleanPageList(pages, allowed=defaultUserPages()){
     if(allowedSet.has(p) && !next.includes(p)) next.push(p);
   });
   return next.length ? next : [...allowed];
-}
-function normalizePagePermissions(pages, allowed=defaultUserPages(), fallback=defaultUserPages()){
-  const source = Array.isArray(pages) && pages.length ? pages : fallback;
-  return cleanPageList(source, allowed);
-}
-function getPageLabelById(pageId, options=ASSIGNABLE_PAGE_OPTIONS){
-  return options.find(page=>page.id===pageId)?.label || pageId;
-}
-function PagePermissionSummaryChips({ids=[], options=ASSIGNABLE_PAGE_OPTIONS, max=3}){
-  const labels = cleanPageList(ids, options.map(page=>page.id)).map(id=>getPageLabelById(id, options));
-  if(!labels.length) return <span className="pagePermissionSummaryEmpty">Aucune page</span>;
-  const visible = labels.slice(0,max);
-  const extra = labels.length - visible.length;
-  return <div className="pagePermissionSummaryChips">{visible.map(label=><span key={label} className="pagePermissionChip">{label}</span>)}{extra > 0 ? <span className="pagePermissionChip muted">+{extra}</span> : null}</div>;
-}
-function PagePermissionsModalButton({
-  buttonLabel="Edit",
-  title="Pages visibles",
-  description="Cochez les pages visibles.",
-  options=ASSIGNABLE_PAGE_OPTIONS,
-  value=[],
-  onSave,
-  buttonClassName="pagePermissionEditBtn"
-}){
-  const [open,setOpen]=useState(false);
-  const optionIds = useMemo(()=>options.map(page=>page.id), [options]);
-  const [draft,setDraft]=useState(()=>cleanPageList(value, optionIds));
-
-  useEffect(()=>{
-    if(open) setDraft(cleanPageList(value, optionIds));
-  },[open, value, optionIds]);
-
-  function togglePage(pageId){
-    setDraft(prev=>prev.includes(pageId) ? prev.filter(id=>id!==pageId) : [...prev, pageId]);
-  }
-
-  async function handleSave(){
-    if(onSave) await onSave(cleanPageList(draft, optionIds));
-    setOpen(false);
-  }
-
-  return <>
-    <button type="button" className={buttonClassName} onClick={()=>setOpen(true)}>{buttonLabel}</button>
-    {open && <div className="modalOverlay" onClick={()=>setOpen(false)}>
-      <div className="scanModal pagePermissionsModal" onClick={e=>e.stopPropagation()}>
-        <button type="button" className="modalClose" onClick={()=>setOpen(false)}>×</button>
-        <h2>{title}</h2>
-        <p>{description}</p>
-        <div className="pagePermissionBox pagePermissionModalBox">
-          <div className="pagePermissionGrid pagePermissionModalGrid">
-            {options.map(page=><label key={page.id}>
-              <input type="checkbox" checked={draft.includes(page.id)} onChange={()=>togglePage(page.id)}/>
-              <span>{page.label}</span>
-            </label>)}
-          </div>
-        </div>
-        <div className="platformModalActions pagePermissionModalActions">
-          <button type="button" className="platformModalCancel" onClick={()=>setOpen(false)}>Annuler</button>
-          <button type="button" className="platformModalCreate" onClick={handleSave}>Enregistrer</button>
-        </div>
-      </div>
-    </div>}
-  </>;
 }
 
 function saveLS(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
@@ -369,7 +302,7 @@ function App(){
   useEffect(()=>{ if(token) axios.get(`${API}/me`,auth).then(r=>setMe(r.data)).catch(()=>logout()) },[token]);
   useEffect(()=>{
     if(!me) return;
-    const allowed = me.role==="platform_admin" ? [...defaultUserPages(), ...APP_ADMIN_PAGES.map(p=>p.id)] : normalizePagePermissions(me.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
+    const allowed = me.role==="platform_admin" ? [...defaultUserPages(), ...APP_ADMIN_PAGES.map(p=>p.id)] : cleanPageList(me.page_permissions || defaultUserPages());
     const fullAllowed = me.can_manage_users && me.role!=="platform_admin" ? [...allowed,"users"] : allowed;
     if(fullAllowed.length && !fullAllowed.includes(tab)) setTab(fullAllowed[0]);
   },[me?.username, me?.role, me?.can_manage_users, JSON.stringify(me?.page_permissions || []), tab]);
@@ -400,29 +333,15 @@ function App(){
     tab==="dashboardAdmin" ? "Publicités" : "Smart Inventory";
 
 
-  const userAllowedPages = me?.role==="platform_admin"
-    ? [...defaultUserPages(), ...APP_ADMIN_PAGES.map(p=>p.id)]
-    : normalizePagePermissions(me?.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
+  const userAllowedPages = me?.role==="platform_admin" ? defaultUserPages() : cleanPageList(me?.page_permissions || defaultUserPages());
   const menu = APP_USER_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p}));
-  if(me?.role!=="platform_admin"){
-    menu.push(...ASSIGNABLE_EXTRA_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p})));
-  }
   if(me?.can_manage_users && me?.role!=="platform_admin"){
     menu.push({id:"users",label:"Utilisateurs",icon:"platform"});
   }
   if(me?.role==="platform_admin"){
     menu.push(...APP_ADMIN_PAGES.map(p=>({...p})));
   }
-  if(tab==="dashboard") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Dashboard setTab={setTab} me={me} menu={menu} logout={logout}/></InventoryLikePageShell>;
-  if(tab==="operations") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Operations me={me} setTab={setTab} logout={logout} hideChrome={true}/></InventoryLikePageShell>;
-  if(tab==="association") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Association setTab={setTab} me={me} logout={logout}/></InventoryLikePageShell>;
-  if(tab==="inventory") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Inventory setTab={setTab} me={me} logout={logout}/></InventoryLikePageShell>;
-  if(tab==="cash") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashRegister/></InventoryLikePageShell>;
-  if(tab==="ai") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><AIAssistant/></InventoryLikePageShell>;
-  if(tab==="users") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><MyUsers auth={auth} me={me}/></InventoryLikePageShell>;
-  if(tab==="cashAdmin") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashDashboardAdmin/></InventoryLikePageShell>;
-  if(tab==="platform") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Platform auth={auth}/></InventoryLikePageShell>;
-  if(tab==="dashboardAdmin") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><DashboardAdmin auth={auth}/></InventoryLikePageShell>;
+  if(tab==="dashboard") return <Dashboard setTab={setTab} me={me} menu={menu} logout={logout}/>;
 
   return <div className={sidebarCollapsed ? "appShell whiteShell sidebarIsCollapsed" : "appShell whiteShell"}>
     <aside className="sidebar whiteSidebar">
@@ -477,86 +396,8 @@ function App(){
   </div>
 }
 
-function ShuffleUnifiedShell({tab,setTab,menu=[],me,logout,children}){
-  const accountInitials = String(me?.pharmacy_name || me?.username || "PI").trim().slice(0,2).toUpperCase() || "PI";
-  const nav = Array.isArray(menu) && menu.length ? menu : APP_USER_PAGES;
-  return <div className="shuffleUnifiedShell">
-    <header className="shuffleUnifiedNav">
-      <div className="shuffleUnifiedNavInner">
-        <button type="button" className="shuffleUnifiedBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory Dashboard">
-          <span className="shuffleUnifiedLogo"><SidebarBrandIcon/></span>
-          <b>Smart Inventory</b>
-        </button>
-        <nav className="shuffleUnifiedLinks" aria-label="Navigation principale">
-          {nav.map(item=><button key={item.id} type="button" className={tab===item.id ? "active" : ""} onClick={()=>setTab(item.id)}>{item.label}{item.id==="ai" && <span>NEW</span>}</button>)}
-        </nav>
-        <div className="shuffleUnifiedAccount">
-          <button type="button" className="shuffleUnifiedGhost" onClick={logout}>Log out</button>
-          <span className="shuffleUnifiedAvatar">{accountInitials}</span>
-        </div>
-      </div>
-    </header>
-    <main className="shuffleUnifiedMain">
-      {children}
-    </main>
-  </div>;
-}
 
-function inventoryChromeIcon(pageId){
-  const map={
-    dashboard:"home",
-    operations:"sync",
-    association:"link",
-    inventory:"list",
-    cash:"cash",
-    ai:"lab",
-    users:"users",
-    cashAdmin:"cash",
-    platform:"store",
-    dashboardAdmin:"grid"
-  };
-  return map[pageId] || "cube";
-}
-
-function InventoryLikePageShell({tab,setTab,menu=[],me,logout,children}){
-  const initials = String(me?.username || me?.pharmacy_name || "AD").trim().slice(0,2).toUpperCase() || "AD";
-  const accountName = me?.pharmacy_name || "Smart Inventory";
-  const roleName = me?.username || (me?.role==="platform_admin" ? "admin@smartinv.com" : "officine@smartinv.com");
-  const nav = Array.isArray(menu) && menu.length ? menu : APP_USER_PAGES;
-  const topItems = nav.map(item=>({
-    ...item,
-    label: item.id==="inventory" ? "Inventaire" : item.id==="cash" ? "Caisses" : item.id==="cashAdmin" ? "Dashboard Caisse" : item.label,
-    icon: inventoryChromeIcon(item.id)
-  }));
-  return <div className="dashRefShell dashRefShellV2 dashRefTopOnlyShell">
-    <main className="dashRefMain dashRefMainTopOnly">
-      <header className="dashRefGlobalHeader dashRefTopOnlyHeader">
-        <button type="button" className="dashRefHeaderBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory Dashboard">
-          <span className="dashRefBrandIcon"><InvIcon name="cube"/></span>
-          <b>Smart Inventory</b>
-        </button>
-        <nav className="dashRefHeaderNav dashRefHeaderNavTopOnly" aria-label="Navigation principale">
-          {topItems.map(item=><button key={item.id} type="button" className={tab===item.id ? "active" : ""} onClick={()=>setTab(item.id)}>
-            <InvIcon name={item.icon}/><span>{item.label}</span>{item.id==="ai" && <em>NEW</em>}
-          </button>)}
-        </nav>
-        <div className="dashRefHeaderAccount">
-          <div className="dashRefHeaderUserText"><b>{accountName}</b><small>{roleName}</small></div>
-          <span className="dashRefAvatar">{initials}</span>
-        </div>
-      </header>
-      <div className="dashRefContent dashRefContentTopOnly">{children}</div>
-      <footer className="dashRefFooter">
-        <div><span className="dashRefFooterLogo"><InvIcon name="cube"/></span><b>Smart Inventory</b></div>
-        <p>© 2026 Smart Inventory. Tous droits réservés.</p>
-        <div><button type="button">Aide</button><button type="button">Conditions</button><button type="button">Confidentialité</button><button type="button" onClick={logout}>Logout</button></div>
-      </footer>
-    </main>
-  </div>;
-}
-
-
-function Operations({me,setTab,logout,hideChrome=false}){
+function Operations({me}){
   const {products,associations,detectedEpcs,setProducts,setAssociations,setDetectedEpcs}=useLocalStore();
   const [scanModal,setScanModal]=useState(null);
   const [barcode,setBarcode]=useState("");
@@ -697,9 +538,9 @@ function Operations({me,setTab,logout,hideChrome=false}){
   const withdrawnCents = Number(cashCurrent.management.withdrawnCents || 0);
   const depositsCents = Number(cashCurrent.management.depositsCents || 0);
   const newCashBalanceCents = getClosingRealCentsForDate(cashStore, cashDate);
-  const cashToWithdrawCents = Math.max(0, cashCountedCents - reserveCents);
+  const cashToWithdrawCents = Math.max(0, cashCountedCents - 300000);
   const closingTheoreticalCents = getTheoreticalClosingCentsForDate(cashStore, cashDate);
-  const currentCashMetrics = useMemo(()=>buildCashDayMetrics(cashDate, cashCurrent, cashStore, reserveCents),[cashDate,cashCurrent,cashStore,reserveCents]);
+  const currentCashMetrics = useMemo(()=>buildCashDayMetrics(cashDate, cashCurrent, cashStore),[cashDate,cashCurrent,cashStore]);
 
   function saveCashDay(day){
     const updated={...cashStore,[cashDate]:day};
@@ -756,67 +597,106 @@ function Operations({me,setTab,logout,hideChrome=false}){
     {key:"depositsCents", title:"Dépôts / ajouts", value:depositsCents, description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"creditSettlementCents", title:"Règlement de crédit", value:creditSettlementCents, description:"Saisir le règlement de crédit.", type:"+", editable:true, tone:"indigo", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"},
-    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - réserve configurable, minimum 0.", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
+    {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - 3000 DH, minimum 0.", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"withdrawnCents", title:"Retiré (réel)", value:withdrawnCents, description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"closingRealCents", title:"Nouvelle C. fermeture", value:newCashBalanceCents, description:"Calcul Excel : C. fermeture (compté) - Retiré (réel).", type:"=", editable:false, tone:"blue", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"counted", title:"C. fermeture (compté)", value:cashCountedCents, description:"Saisir le comptage réel de fermeture avec les mêmes données que Monnaie stock.", type:"=", editable:true, tone:"blue", cta:"Compter la caisse", valueLabel:"Valeur comptée"},
     {key:"closingCalculatedCents", title:"C. fermeture (théorique)", value:closingTheoreticalCents, description:"Calcul Excel : max(0, Nouvelle C. fermeture de hier + Dépôt/ajout + Tot. vente en espèce + Règlement crédit - Dépenses).", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"}
   ];
-  const cashCardByKey = key => cashOperationCards.find(card=>card.key===key);
-  const openCashMetric = key => {
-    const card = cashCardByKey(key);
-    if(card?.isExpense) return openExpenseModal();
-    if(card?.editable) return setCashOpModal(card);
-    if(card) return setCashOpModal(card);
-  };
-  const makeCustomCashCard = (key,title,value,description,type="+",tone="blue") => ({key,title,value,description,type,editable:true,tone,cta:"Retour valeur",valueLabel:"Valeur entrée"});
-  const inventoryActions = [
-    {icon:"plus", tone:"violet", badge:"C1", badgeClass:"text-violet-600 bg-violet-50", title:"Importer quantités inventaire", desc:"Importer le stock/quantité produits.", label:"Importer", file:".csv", onFile:importProducts},
-    {icon:"sync", tone:"blue", badge:"B1", badgeClass:"text-blue-600 bg-blue-50", title:"Importer associations", desc:"Importer, associer le lot paquet...", label:"Importer", file:".csv", onFile:importAssociations},
-    {icon:"doc", tone:"emerald", badge:"B1", badgeClass:"text-emerald-600 bg-emerald-50", title:"Scanner code-barres produit", desc:"Rechercher un lot et son historique.", label:"Scanner", onClick:openBarcode},
-    {icon:"warn", tone:"amber", badge:"A2", badgeClass:"text-amber-600 bg-amber-50", title:"Scanner un ticket", desc:"Accéder à la fiche du ticket scanné.", label:"Scanner", onClick:openBarcode},
-    {icon:"card", tone:"rose", badge:"B1", badgeClass:"text-rose-600 bg-rose-50", title:"Importer bon d'achat", desc:"Importer un bon d'achat (TIN à IT) rapide.", label:"Importer", file:".csv,.txt", onFile:importDetectedEpc},
-    {icon:"eye", tone:"teal", badge:"Voir", badgeClass:"text-teal-600 bg-teal-50", title:"Contrôler les résultats", desc:"Inspecter les résultats associations...", label:"Contrôler", onClick:exportCoverageReport}
-  ];
-  const cashMetrics = [
-    {icon:"money", tone:"green", label:"Ticket vente en cours", value:`- ${formatDH(totalDailySalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("totalDailySalesCents")},
-    {icon:"wallet", tone:"sky", label:"Paiement par espèce", value:`- ${formatDH(salesCashCalculatedCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("salesCashCents")},
-    {icon:"card", tone:"violet", label:"Paiement par TPE", value:`- ${formatDH(atmSalesCents)}`, actionLabel:"Consulter historique", muted:true, onClick:()=>openCashMetric("atmSalesCents")},
-    {icon:"receipt", tone:"amber", label:"Ticket autre remise", value:`- ${formatDH(creditSalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("creditSalesCents")},
-    {icon:"return", tone:"rose", label:"Produits chèque", value:`+ ${formatDH(creditSettlementCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("creditSettlementCents")},
-    {icon:"calc", tone:"teal", label:"Remboursement espèce", value:`+ ${formatDH(Number(cashCurrent.management.refundsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("refundsCents","Remboursement espèce",Number(cashCurrent.management.refundsCents || 0),"Saisir les remboursements en espèce.","+","green"))},
-    {icon:"box", tone:"indigo", label:"Approvisionnement", value:`- ${formatDH(depositsCents)}`, actionLabel:"Retour résultats", onClick:()=>openCashMetric("depositsCents")},
-    {icon:"image", tone:"fuchsia", label:"Dépenses caisse", value:`+ ${formatDH(expensesCents)}`, actionLabel:"Retour valeur", onClick:openExpenseModal},
-    {icon:"warn", tone:"amber", label:"Limite tolérance écart", value:`= ${formatDH(cashSettings.toleranceLimitCents || 0)}`, actionLabel:"Modifier limite", onClick:()=>setCashOpModal({key:"toleranceLimitCents", title:"Limite tolérance écart", description:"Définir la limite de tolérance utilisée pour la progression de l’écart caisse.", isSetting:true})},
-    {icon:"chart", tone:"indigo", label:"Limite dépenses mois", value:`= ${formatDH(cashSettings.monthlyExpenseLimitCents || 0)}`, actionLabel:"Modifier limite", onClick:()=>setCashOpModal({key:"monthlyExpenseLimitCents", title:"Limite dépenses mensuelles", description:"Définir la limite mensuelle utilisée pour la progression des dépenses.", isSetting:true})},
-    {icon:"cart", tone:"orange", label:"Avoirs retournés", value:`- ${formatDH(Number(cashCurrent.management.returnsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("returnsCents","Avoirs retournés",Number(cashCurrent.management.returnsCents || 0),"Saisir les avoirs retournés.","+","blue"))},
-    {icon:"calendar", tone:"cyan", label:"Bons de commandes", value:`= ${formatDH(Number(cashCurrent.management.purchaseOrdersCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("purchaseOrdersCents","Bons de commandes",Number(cashCurrent.management.purchaseOrdersCents || 0),"Saisir les bons de commandes.","=","blue"))},
-    {icon:"shield", tone:"lime", label:"C encaissements", value:`= ${formatDH(newCashBalanceCents)}`, actionLabel:"Consulter liste", onClick:()=>openCashMetric("closingRealCents")},
-    {icon:"chart", tone:"pink", label:"C virement bancaire", value:`+ ${formatDH(Number(cashCurrent.management.bankTransferCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("bankTransferCents","C virement bancaire",Number(cashCurrent.management.bankTransferCents || 0),"Saisir le virement bancaire.","+","blue"))}
-  ];
-  const exportActions = [
-    {icon:"doc", tone:"violet", title:"Produits locaux", desc:"Exporter la liste des produits en local.", label:"Exporter CSV", onClick:exportProducts},
-    {icon:"shield", tone:"emerald", title:"Associations", desc:"Exporter les informations et l'index des lots associés...", label:"Exporter CSV", onClick:exportAssociations},
-    {icon:"money", tone:"sky", title:"Produits sans association", desc:"Exporter la liste de tous les produits non associés.", label:"Exporter CSV", onClick:exportProductsWithoutRfid},
-    {icon:"chart", tone:"amber", title:"Taux de couverture", desc:"Exporter les taux de Cᵖ et d'obtention des résultats simples.", label:"Exporter CSV", onClick:exportCoverageReport},
-    {icon:"db", tone:"rose", title:"Backup complet", desc:"Créer une sauvegarde complète de toutes les données.", label:"Charger Backup", onClick:backupProject}
-  ];
-  return <>
-    <ShuffleOperationsPage
-      setTab={setTab}
-      logout={logout}
-      cashDate={cashDate}
-      canChangeCashDate={canChangeCashDate}
-      onCashDateChange={(next)=>canChangeCashDate && setCashDate(next || todayISO())}
-      headerSolde={formatDH(newCashBalanceCents)}
-      headerCash={formatDH(salesCashCalculatedCents)}
-      shortageText={formatDH(currentCashMetrics.shortageCents)}
-      surplusText={formatDH(currentCashMetrics.surplusCents)}
-      inventoryActions={inventoryActions}
-      cashMetrics={cashMetrics}
-      exportActions={exportActions}
-      hideChrome={hideChrome}
-    />
+  return <section className="operationsPage">
+    <h1>Opérations</h1>
+    <p>Import, scan, associations, identifiants détectés, exports et sauvegardes locales.</p>
+
+    <div className="operationsActionPanel">
+      <h2>Actions inventaire</h2>
+      <p className="notice">Lancez les opérations principales de gestion d’inventaire.</p>
+      <div className="operationGrid workflowGrid">
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon"><DashIcon name="upload"/></div><h3>Importer CSV pharmacie</h3><p>Importer le catalogue produits.</p><span>Choisir CSV</span>
+        <input type="file" accept=".csv" onChange={e=>importProducts(e.target.files[0])}/>
+      </label>
+
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon"><DashIcon name="link"/></div><h3>Importer associations</h3><p>Importer les associations Produit ↔ identifiant.</p><span>Choisir CSV</span>
+        <input type="file" accept=".csv" onChange={e=>importAssociations(e.target.files[0])}/>
+      </label>
+
+      <button className="operationCard blue" onClick={openBarcode}>
+        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Scanner code-barres produit</h3><p>Ouvrir une fenêtre pour saisir le code-barres.</p><span>Scanner</span>
+      </button>
+
+      <button className="operationCard green" onClick={openEpc}>
+        <div className="opIcon"><DashIcon name="rfid"/></div><h3>Scanner identifiant</h3><p>Ouvrir une fenêtre pour saisir un identifiant.</p><span>Scanner</span>
+      </button>
+
+      <label className="operationCard white fileCardOp">
+        <div className="opIcon"><DashIcon name="barcode"/></div><h3>Importer identifiants détectés</h3><p>Importer un CSV/TXT d’identifiants détectés.</p><span>Choisir fichier</span>
+        <input type="file" accept=".csv,.txt" onChange={e=>importDetectedEpc(e.target.files[0])}/>
+      </label>
+
+      <button className="operationCard dangerOp" onClick={clearAssociations}>
+        <div className="opIcon"><DashIcon name="trash"/></div><h3>Vider toutes associations</h3><p>Supprimer toutes les associations locales.</p><span>Vider</span>
+      </button>
+    </div>
+    </div>
+
+    <div className="exportsPanel cashOpsPanel">
+      <div className="cashOpsHeader">
+        <div className="cashOpsIntro">
+          <h2>Opérations de caisse</h2>
+          <p className="notice">Ces opérations ont été déplacées ici. Cliquez sur une carte pour saisir ou modifier la valeur.</p>
+        </div>
+        <div className="cashOpsIndicators">
+          <div className="cashOpsIndicator cashOpsIndicatorShortage">
+            <div className="cashOpsIndicatorIcon"><DashIcon name="warning"/></div>
+            <div className="cashOpsIndicatorContent">
+              <span>Montant manquant</span>
+              <strong>{formatDH(currentCashMetrics.shortageCents)}</strong>
+              <small>{currentCashMetrics.shortageCents>0 ? "À vérifier" : "Équilibré"}</small>
+            </div>
+          </div>
+          <div className="cashOpsIndicator cashOpsIndicatorSurplus">
+            <div className="cashOpsIndicatorIcon"><DashIcon name="check"/></div>
+            <div className="cashOpsIndicatorContent">
+              <span>Montant surplus</span>
+              <strong>{formatDH(currentCashMetrics.surplusCents)}</strong>
+              <small>{currentCashMetrics.surplusCents>0 ? "Excédent" : "Équilibré"}</small>
+            </div>
+          </div>
+        </div>
+        <div className="cashOpsDateBox">
+          <span>Date de caisse {canChangeCashDate ? "" : "(admin seulement)"}</span>
+          <input
+            type="date"
+            value={cashDate}
+            disabled={!canChangeCashDate}
+            title={canChangeCashDate ? "Changer la date de caisse" : "Seul un administrateur peut changer cette date"}
+            onChange={e=>canChangeCashDate && setCashDate(e.target.value || todayISO())}
+          />
+        </div>
+      </div>
+      <div className="exportOperationGrid cashOpsGrid">
+        {cashOperationCards.map(card=><button key={card.key} type="button" className={`exportOperationCard cashOperationCard ${card.tone || ""} ${card.cardClass || ""} ${card.editable ? "" : "cashOperationCardReadOnly"}`} onClick={()=>card.isExpense ? openExpenseModal() : (card.editable ? setCashOpModal(card) : null)}>
+          <div className="opIcon"><DashIcon name={card.icon || "cash"}/></div>
+          <h3>{card.title}</h3>
+          <strong className="cashOpCardAmount">{card.type} {formatDH(card.value)}</strong>
+          <span>{card.cta}</span>
+        </button>)}
+      </div>
+    </div>
+
+    <div className="exportsPanel">
+      <h2>Exports et sauvegardes locales</h2>
+      <p className="notice">Exportez vos tableaux, rapports d’inventaire et sauvegardes locales.</p>
+      <div className="exportOperationGrid">
+        <button className="exportOperationCard" onClick={exportProducts}><div className="opIcon"><DashIcon name="box"/></div><h3>Produits locaux</h3><p>Exporter le catalogue importé complet.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportAssociations}><div className="opIcon"><DashIcon name="link"/></div><h3>Associations</h3><p>Exporter les produits liés aux identifiants.</p><span>Exporter</span></button>
+        <button className="exportOperationCard" onClick={exportProductsWithoutRfid}><div className="opIcon"><DashIcon name="tag"/></div><h3>Produits sans association</h3><p>Exporter les articles à associer.</p><span>Exporter</span></button>
+        <button className="exportOperationCard blue" onClick={exportCoverageReport}><div className="opIcon"><DashIcon name="chart"/></div><h3>Taux de couverture</h3><p>Exporter les KPI de couverture.</p><span>Exporter</span></button>
+        <button className="exportOperationCard green" onClick={backupProject}><div className="opIcon"><DashIcon name="save"/></div><h3>Sauvegarde projet</h3><p>Créer un backup JSON complet.</p><span>Backup</span></button>
+        <label className="exportOperationCard fileCard"><div className="opIcon"><DashIcon name="restore"/></div><h3>Restaurer projet</h3><p>Importer un backup JSON local.</p><span>Choisir fichier</span><input type="file" accept=".json" onChange={e=>restoreProject(e.target.files[0])}/></label>
+      </div>
+    </div>
 
     {msg && <p className="success opMessage">{msg}</p>}
 
@@ -847,14 +727,7 @@ function Operations({me,setTab,logout,hideChrome=false}){
         <h2>{cashOpModal.title}</h2>
         <p>{cashOpModal.description}</p>
         <div className="foundProduct"><b>Date de caisse</b><small>{cashDate}</small></div>
-        {cashOpModal.isSetting ? <>
-          <div className="foundProduct"><b>Paramètre de caisse</b><small>Valeur utilisée dans Dashboard Caisse.</small></div>
-          <input autoFocus value={moneyInputValue(cashSettings[cashOpModal.key] || 0)} onChange={e=>updateCashSetting(cashOpModal.key,e.target.value)} placeholder="0"/>
-          <div className="cashModalTotalBar">
-            <span>Valeur actuelle</span>
-            <strong>{formatDH(cashSettings[cashOpModal.key] || 0)}</strong>
-          </div>
-        </> : cashOpModal.key==="counted" ? <>
+        {cashOpModal.key==="counted" ? <>
           <div className="cashModalTableWrap">
             <table className="cashMiniTable">
               <thead><tr><th>Quantité</th><th>Bill</th></tr></thead>
@@ -904,7 +777,8 @@ function Operations({me,setTab,logout,hideChrome=false}){
       </div>
     </div>}
 
-  </>
+    <div className="pageFooterLikeDashboard">© 2026 Smart Inventory. Tous droits réservés.</div>
+  </section>
 }
 
 
@@ -948,14 +822,6 @@ function formatMonthLabel(isoMonth){
   const [year,month] = String(isoMonth || todayMonthISO()).split("-").map(Number);
   const d = new Date(year || new Date().getFullYear(), (month || 1) - 1, 1);
   return new Intl.DateTimeFormat("fr-FR", {year:"numeric", month:"long"}).format(d);
-}
-
-function formatCashDateLabel(isoDate, options={}){
-  const safe = String(isoDate || todayISO());
-  const [year,month,day] = safe.split("-").map(Number);
-  const d = new Date(year || new Date().getFullYear(), (month || 1) - 1, day || 1);
-  const withDay = options.day !== false;
-  return new Intl.DateTimeFormat("fr-FR", withDay ? {day:"numeric", month:"long", year:"numeric"} : {month:"long", year:"numeric"}).format(d);
 }
 
 function parseMoneyToCents(value){
@@ -1003,11 +869,7 @@ function defaultCashDay(){
 }
 
 function defaultCashSettings(){
-  return {
-    reserveCents: 300000,
-    toleranceLimitCents: 50000,
-    monthlyExpenseLimitCents: 1000000
-  };
+  return { reserveCents: 300000 };
 }
 
 function getCountedCentsForDate(store, date){
@@ -1351,6 +1213,7 @@ function CashRegister(){
                   <button type="button" onClick={()=>setManagementMonth(shiftISOMonth(managementMonth,-1))}>‹</button>
                   <div className="expenseMonthValue">{formatMonthLabel(managementMonth)}</div>
                   <button type="button" onClick={()=>setManagementMonth(shiftISOMonth(managementMonth,1))}>›</button>
+                  <input type="month" value={managementMonth} onChange={e=>setManagementMonth(e.target.value || todayMonthISO())}/>
                 </div>
               </div>
 
@@ -1403,6 +1266,7 @@ function CashRegister(){
                   <button type="button" onClick={()=>setExpensesMonth(shiftISOMonth(expensesMonth,-1))}>‹</button>
                   <div className="expenseMonthValue">{formatMonthLabel(expensesMonth)}</div>
                   <button type="button" onClick={()=>setExpensesMonth(shiftISOMonth(expensesMonth,1))}>›</button>
+                  <input type="month" value={expensesMonth} onChange={e=>setExpensesMonth(e.target.value || todayMonthISO())}/>
                 </div>
               </div>
 
@@ -1526,28 +1390,24 @@ function hasCashDayActivity(dayData){
   return quantityActivity || managementActivity || expenseActivity;
 }
 
-function buildCashDayMetrics(date, dayData, store={}, reserveCents=300000){
+function buildCashDayMetrics(date, dayData, store={}){
   const day = { ...defaultCashDay(), ...(dayData || {}), management:{...defaultCashDay().management, ...((dayData || {}).management || {})}, quantities:{...((dayData || {}).quantities || {})}, expenses:Array.isArray((dayData || {}).expenses) ? (dayData || {}).expenses.map(normalizeExpenseRow) : [] };
-  const safeDate = date || todayISO();
-  const safeReserveCents = Math.max(0, Number(reserveCents || 0));
   const countedCents = CASH_DENOMINATIONS.reduce((sum,d)=>sum + (Number(day.quantities[d.cents] || 0) * d.cents),0);
   const expensesCents = day.expenses.reduce((sum,e)=>sum + (Number(e.amountCents) || 0),0);
   const totalSalesCents = Number(day.management.totalDailySalesCents || 0);
   const salesCashCents = totalSalesCents - Number(day.management.creditSalesCents || 0) - Number(day.management.atmSalesCents || 0);
-  const autoToWithdrawCents = Math.max(0, countedCents - safeReserveCents);
-  const closingRealCents = getClosingRealCentsForDate(store, safeDate);
-  const previousClosingRealCents = getCalculatedCashBalanceCents((store || {})[shiftISODate(safeDate,-1)]);
+  const autoToWithdrawCents = Math.max(0, countedCents - 300000);
+  const closingRealCents = getClosingRealCentsForDate(store, date);
+  const previousClosingRealCents = getCalculatedCashBalanceCents((store || {})[shiftISODate(date,-1)]);
   const sameDayClosingRealCents = countedCents;
-  const closingCalculatedCents = getTheoreticalClosingCentsForDate(store, safeDate);
+  const closingCalculatedCents = getTheoreticalClosingCentsForDate(store, date);
   const shortageCents = Math.max(0, closingCalculatedCents - sameDayClosingRealCents);
   const surplusCents = Math.max(0, sameDayClosingRealCents - closingCalculatedCents);
   const gapCents = sameDayClosingRealCents - closingCalculatedCents;
-  const withdrawalDueCents = Math.max(0, autoToWithdrawCents - Number(day.management.withdrawnCents || 0));
-  const signedBalanceDueCents = gapCents > 0 ? surplusCents : shortageCents > 0 ? -shortageCents : 0;
-  const dueBalanceCents = Math.abs(signedBalanceDueCents);
+  const dueBalanceCents = Math.max(0, autoToWithdrawCents - Number(day.management.withdrawnCents || 0));
   const isBalanced = shortageCents===0 && surplusCents===0;
   return {
-    date:safeDate,
+    date,
     countedCents,
     expensesCents,
     previousClosingRealCents,
@@ -1560,8 +1420,6 @@ function buildCashDayMetrics(date, dayData, store={}, reserveCents=300000){
     surplusCents,
     gapCents,
     dueBalanceCents,
-    signedBalanceDueCents,
-    withdrawalDueCents,
     withdrawnCents:Number(day.management.withdrawnCents || 0),
     depositsCents:Number(day.management.depositsCents || 0),
     creditSalesCents:Number(day.management.creditSalesCents || 0),
@@ -1569,33 +1427,6 @@ function buildCashDayMetrics(date, dayData, store={}, reserveCents=300000){
     salesCashCents,
     isBalanced
   };
-}
-
-function computeCashDayMetrics(store={}, date=todayISO(), reserveCents=300000){
-  const safeStore = store || {};
-  const safeDate = date || todayISO();
-  return buildCashDayMetrics(safeDate, safeStore[safeDate], safeStore, reserveCents);
-}
-
-function buildCashAnomalyAlerts(metrics){
-  const items = Array.isArray(metrics) ? metrics : [metrics].filter(Boolean);
-  return items.flatMap(item=>{
-    if(!item) return [];
-    const alerts = [];
-    if(item.shortageCents > 0){
-      alerts.push({tone:"critical", label:"Montant manquant", date:item.date, amountCents:item.shortageCents, detail:"Caisse comptée inférieure au théorique"});
-    }
-    if(item.surplusCents > 0){
-      alerts.push({tone:"warning", label:"Montant surplus", date:item.date, amountCents:item.surplusCents, detail:"Caisse comptée supérieure au théorique"});
-    }
-    if(item.withdrawalDueCents > 0){
-      alerts.push({tone:"info", label:"Retrait à vérifier", date:item.date, amountCents:item.withdrawalDueCents, detail:"Retrait théorique non enregistré"});
-    }
-    if(item.totalSalesCents > 0 && item.expensesCents > item.totalSalesCents * 0.35){
-      alerts.push({tone:"warning", label:"Dépenses élevées", date:item.date, amountCents:item.expensesCents, detail:"Dépenses élevées vs ventes"});
-    }
-    return alerts;
-  }).sort((a,b)=>b.date.localeCompare(a.date) || Math.abs(b.amountCents) - Math.abs(a.amountCents));
 }
 
 function CashProgressRing({value,label,subLabel}){
@@ -1631,10 +1462,8 @@ function CashAdminCard({title, children, meta, right}){
 
 function CashDashboardAdmin(){
   const [store] = useState(()=>loadLS(LS_CASH_REGISTER,{}));
-  const [cashSettings,setCashSettings] = useState(()=>({ ...defaultCashSettings(), ...(loadLS(LS_CASH_SETTINGS,{}) || {}) }));
+  const [cashSettings] = useState(()=>({ ...defaultCashSettings(), ...(loadLS(LS_CASH_SETTINGS,{}) || {}) }));
   const reserveCents = Number(cashSettings.reserveCents || 0);
-  const toleranceLimitCents = Math.max(0, Number(cashSettings.toleranceLimitCents || 0));
-  const monthlyExpenseLimitCents = Math.max(0, Number(cashSettings.monthlyExpenseLimitCents || 0));
   const dashboardToday = todayISO();
   const allDates = useMemo(()=>Object.keys(store).sort(),[store]);
   const dashboardDates = useMemo(()=>allDates.filter(date=>hasCashDayActivity(store[date])),[allDates,store]);
@@ -1642,7 +1471,6 @@ function CashDashboardAdmin(){
   const latestDate = dashboardDates.length ? dashboardDates[dashboardDates.length-1] : dashboardToday;
   const earliestDate = dashboardDates.length ? dashboardDates[0] : dashboardToday;
   const [selectedDate,setSelectedDate] = useState(latestDate);
-  const [anomalyScope,setAnomalyScope] = useState("day");
   const selectedMonth = selectedDate.slice(0,7);
   const [resultsDates,setResultsDates] = useState(()=>({
     totalSales: latestDate,
@@ -1672,7 +1500,6 @@ function CashDashboardAdmin(){
     syncAllResultDates(selectedDate);
   },[selectedDate]);
 
-
   useEffect(()=>{
     setResultsDates(prev=>({
       totalSales: prev.totalSales && dashboardDates.includes(prev.totalSales) ? prev.totalSales : latestDate,
@@ -1682,63 +1509,27 @@ function CashDashboardAdmin(){
     }));
   },[latestDate, store, dashboardDates]);
 
-  const selectedMetrics = useMemo(()=>computeCashDayMetrics(store, selectedDate, reserveCents),[selectedDate,store,reserveCents]);
+  const selectedMetrics = useMemo(()=>buildCashDayMetrics(selectedDate, store[selectedDate], store),[selectedDate,store]);
   const resultMetrics = useMemo(()=>({
-    totalSales: computeCashDayMetrics(store, resultsDates.totalSales, reserveCents),
-    closingCalculated: computeCashDayMetrics(store, resultsDates.closingCalculated, reserveCents),
-    closingReal: computeCashDayMetrics(store, resultsDates.closingReal, reserveCents),
-    gap: computeCashDayMetrics(store, resultsDates.gap, reserveCents)
-  }),[resultsDates, store, reserveCents]);
-  const monthMetrics = useMemo(()=>dashboardDates
-    .filter(date=>date.startsWith(selectedMonth))
-    .map(date=>computeCashDayMetrics(store, date, reserveCents))
-    .sort((a,b)=>b.date.localeCompare(a.date)), [dashboardDates,store,selectedMonth,reserveCents]);
+    totalSales: buildCashDayMetrics(resultsDates.totalSales, store[resultsDates.totalSales], store),
+    closingCalculated: buildCashDayMetrics(resultsDates.closingCalculated, store[resultsDates.closingCalculated], store),
+    closingReal: buildCashDayMetrics(resultsDates.closingReal, store[resultsDates.closingReal], store),
+    gap: buildCashDayMetrics(resultsDates.gap, store[resultsDates.gap], store)
+  }),[resultsDates, store]);
+  const monthMetrics = useMemo(()=>Object.entries(store)
+    .filter(([date,day])=>date.startsWith(selectedMonth) && hasCashDayActivity(day))
+    .map(([date,day])=>buildCashDayMetrics(date, day, store))
+    .sort((a,b)=>b.date.localeCompare(a.date)), [store,selectedMonth]);
 
   const monthlyShortageCents = monthMetrics.reduce((sum,x)=>sum + x.shortageCents,0);
   const monthlySurplusCents = monthMetrics.reduce((sum,x)=>sum + x.surplusCents,0);
   const monthlyExpensesCents = monthMetrics.reduce((sum,x)=>sum + x.expensesCents,0);
-  const monthlyAccumulatedGapCents = monthMetrics.reduce((sum,x)=>sum + Math.abs(Number(x.dueBalanceCents || 0)),0);
-  const selectedBalanceDueSignedCents = Number(selectedMetrics.signedBalanceDueCents || 0);
-  const selectedBalanceDueAbsCents = Math.abs(selectedBalanceDueSignedCents);
-  const balanceDueProgressValue = toleranceLimitCents > 0 ? Math.min(100, (monthlyAccumulatedGapCents / toleranceLimitCents) * 100) : 0;
-  const expensesProgress = monthlyExpenseLimitCents > 0 ? Math.min(100, (monthlyExpensesCents / monthlyExpenseLimitCents) * 100) : 0;
-  const balanceDueActionTitle = selectedBalanceDueSignedCents > 0
-    ? "Montant à retirer de la caisse"
-    : selectedBalanceDueSignedCents < 0
-      ? "Montant à ajouter à la caisse"
-      : "Aucune action requise";
-  const balanceDueTone = selectedBalanceDueSignedCents > 0 ? "positive" : selectedBalanceDueSignedCents < 0 ? "negative" : "";
-  const dayAnomalyAlerts = useMemo(()=>buildCashAnomalyAlerts(selectedMetrics),[selectedMetrics]);
-  const monthAnomalyAlerts = useMemo(()=>buildCashAnomalyAlerts(monthMetrics),[monthMetrics]);
-  const anomalyAlerts = anomalyScope === "month" ? monthAnomalyAlerts : dayAnomalyAlerts;
-  const anomalyMetaText = anomalyScope === "month"
-    ? `${monthAnomalyAlerts.length} alerte(s) du mois`
-    : `${dayAnomalyAlerts.length} alerte(s) du jour`;
-  const [anomalyIndex,setAnomalyIndex] = useState(0);
-
-  useEffect(()=>{
-    setAnomalyIndex(0);
-  },[anomalyScope, selectedDate, selectedMonth, dayAnomalyAlerts.length, monthAnomalyAlerts.length]);
-
-  function updateDashboardCashSetting(key,value){
-    const updated={...cashSettings,[key]:parseMoneyToCents(value)};
-    setCashSettings(updated);
-    saveLS(LS_CASH_SETTINGS,updated);
-  }
-
-  function promptDashboardCashSetting(key,label,currentCents){
-    const next=prompt(`${label} (DH):`, moneyInputValue(currentCents));
-    if(next===null) return;
-    updateDashboardCashSetting(key,next);
-  }
-
-  function limitMeta(label,key,currentCents){
-    return <><span>{label}</span><button type="button" className="cashLimitEditBtn" onClick={()=>promptDashboardCashSetting(key,label,currentCents)}>Limite : <span className="cashLimitAmount">{formatDH(currentCents).replace(/\u202f|\u00a0/g," ")}</span></button></>;
-  }
-
-  function cashNumber(cents, decimals=1){
-    return ((Number(cents) || 0) / 100).toFixed(decimals);
-  }
+  const monthlyWithdrawnCents = monthMetrics.reduce((sum,x)=>sum + x.withdrawnCents,0);
+  const monthlyDueBalanceCents = monthMetrics.reduce((sum,x)=>sum + x.dueBalanceCents,0);
+  const monthBalancedDays = monthMetrics.filter(x=>x.isBalanced).length;
+  const progressValue = monthMetrics.length ? (monthBalancedDays / monthMetrics.length) * 100 : 0;
+  const monthSalesCents = monthMetrics.reduce((sum,x)=>sum + x.totalSalesCents,0);
+  const expensesProgress = monthSalesCents>0 ? Math.min(100, (monthlyExpensesCents / monthSalesCents) * 100) : 0;
 
   function closestRegisteredDate(date){
     if(!dashboardDates.length) return date || dashboardToday;
@@ -1772,13 +1563,13 @@ function CashDashboardAdmin(){
   }
 
   function selectMainDate(date){
-    const nextDate = date || dashboardToday;
+    const nextDate = closestRegisteredDate(date);
     setSelectedDate(nextDate);
     syncAllResultDates(nextDate);
   }
 
   function shiftSelectedDate(delta){
-    const nextDate = shiftISODate(selectedDate || dashboardToday, delta);
+    const nextDate = shiftDateValue(selectedDate, delta);
     setSelectedDate(nextDate);
     syncAllResultDates(nextDate);
   }
@@ -1840,10 +1631,9 @@ function CashDashboardAdmin(){
     function buildCalendarCells(){
       const [year, month] = viewMonth.split("-").map(Number);
       const firstDay = new Date(year, month - 1, 1).getDay();
-      const mondayFirstDay = (firstDay + 6) % 7;
       const daysInMonth = new Date(year, month, 0).getDate();
       const cells = [];
-      for(let i=0;i<mondayFirstDay;i++) cells.push({type:"blank", key:`blank-${i}`});
+      for(let i=0;i<firstDay;i++) cells.push({type:"blank", key:`blank-${i}`});
       for(let day=1; day<=daysInMonth; day++){
         const isoDate = `${viewMonth}-${String(day).padStart(2,"0")}`;
         cells.push({
@@ -1870,9 +1660,9 @@ function CashDashboardAdmin(){
         aria-label={ariaLabel}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        title="Choisir une date enregistrée."
+        title="Cliquer pour ouvrir le calendrier des dates enregistrées."
       >
-        <span>{formatCashDateLabel(activeDate)}</span>
+        <span>{activeDate}</span>
         <span className="cashAdminDatePickerIcon">📅</span>
       </button>
       <button type="button" onClick={()=>onShift ? onShift(1) : onChange(shiftDateValue(activeDate,1))} disabled={nextDisabled} aria-label="Date enregistrée suivante">›</button>
@@ -1883,7 +1673,7 @@ function CashDashboardAdmin(){
           <button type="button" onClick={()=>changeMonth(1)} disabled={!canNextMonth} aria-label="Mois suivant">›</button>
         </div>
         <div className="cashAdminCalendarWeekdays">
-          {["Lu","Ma","Me","Je","Ve","Sa","Di"].map(day=><span key={day}>{day}</span>)}
+          {["Su","Mo","Tu","We","Th","Fr","Sa"].map(day=><span key={day}>{day}</span>)}
         </div>
         <div className="cashAdminCalendarGrid">
           {calendarCells.map(cell=>{
@@ -1907,245 +1697,98 @@ function CashDashboardAdmin(){
     </div>;
   }
 
-  function cardMeta(text){
-    return text ? <span>{text}</span> : null;
-  }
-
-  function CashShuffleAmount({cents, decimals=1, tone="", large=false, xl=false, children}){
-    return <div className={`cashShuffleAmount ${tone} ${large ? "cashShuffleAmountLarge" : ""} ${xl ? "cashShuffleAmountXL" : ""}`.trim()}>
-      <em>DH</em><strong>{children ?? cashNumber(cents, decimals)}</strong>
+  function resultDateMeta(key){
+    return <div className="cashAdminInlineDate">
+      <DateOperationPicker compact value={resultsDates[key]} onChange={date=>updateResultDate(key,date)} onShift={delta=>shiftResultDate(key,delta)} ariaLabel={`Date enregistrée pour ${key}`} />
     </div>;
   }
 
-  function CashShuffleSignedAmount({cents, decimals=1, tone="", large=false, xl=false}){
-    const safe = Number(cents || 0);
-    const sign = safe > 0 ? "+" : safe < 0 ? "-" : "";
-    return <CashShuffleAmount tone={tone} large={large} xl={xl}>{`${sign}${cashNumber(Math.abs(safe), decimals)}`}</CashShuffleAmount>;
-  }
-
-  function CashShuffleActionNote({text}){
-    return <div className="cashShuffleActionNote">{text}</div>;
-  }
-
-  function CashShuffleMonthlySummary({cents,tone="",emptyText=""}){
-    return <div className="cashShuffleMonthlySummary">
-      <CashShuffleAmount cents={cents} tone={tone} xl decimals={0} />
-      <div className="cashShuffleMonthlySummaryText">{Number(cents || 0) > 0 ? "Total du mois enregistré" : emptyText}</div>
+  function selectedDateMeta(label){
+    return <div className="cashAdminInlineDate">
+      <DateOperationPicker compact value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel={label} />
     </div>;
   }
 
-  function CashShuffleInsightProgress({value, amountLabel, headline, description, tone="indigo", className=""}){
-    const safe = Math.max(0, Math.min(100, Number(value) || 0));
-    const radius = 52;
-    const circumference = 2 * Math.PI * radius;
-    const dashOffset = circumference - (safe / 100) * circumference;
-    return <div className={`cashShuffleInsightMetric ${className}`.trim()}>
-      <div className={`cashShuffleSvgRing ${tone}`.trim()}>
-        <svg viewBox="0 0 128 128" aria-hidden="true">
-          <circle className="cashShuffleSvgRingTrack" cx="64" cy="64" r={radius}></circle>
-          <circle
-            className="cashShuffleSvgRingProgress"
-            cx="64"
-            cy="64"
-            r={radius}
-            style={{strokeDasharray:`${circumference} ${circumference}`, strokeDashoffset:dashOffset}}
-          ></circle>
-        </svg>
-        <div className="cashShuffleSvgRingValue"><span>{safe.toFixed(1)}%</span></div>
-      </div>
-      <div className="cashShuffleInsightText">
-        <small>{amountLabel}</small>
-        <strong>{headline}</strong>
-        <p>{description}</p>
-      </div>
-    </div>;
-  }
-
-  function CashShuffleProgress({value,label,subLabel,description}){
-    return <CashShuffleInsightProgress
-      value={value}
-      amountLabel={label}
-      headline={subLabel}
-      description={description}
-      tone="indigo"
-      className="cashShuffleInsightMetricProgress"
-    />;
-  }
-
-  function CashShuffleExpenseProgress({value,cents,limitCents}){
-    const safe = Math.max(0, Math.min(100, Number(value) || 0));
-    const description = limitCents
-      ? `${Math.round(safe)}% de la limite utilisée`
-      : "Limite mensuelle non définie";
-    return <CashShuffleInsightProgress
-      value={safe}
-      amountLabel={formatDH(cents)}
-      headline={Number(cents || 0) > 0 ? "Dépenses enregistrées" : "Aucune dépense enregistrée"}
-      description={description}
-      tone="amber"
-      className="cashShuffleInsightMetricExpense"
-    />;
-  }
-
-  function CashShuffleCard({title,meta,badge,badgeClassName="",children,className="cashShuffleMetricCard",dotTone=""}){
-    return <article className={`cashShuffleCard ${className}`.trim()}>
-      <div className="cashShuffleCardTop">
-        <div>
-          <h3>{title}</h3>
-          {meta && <div className="cashShuffleCardMeta">{meta}</div>}
-        </div>
-        {badge ? <span className={`cashShuffleBadge ${badgeClassName}`.trim()}>{badge}</span> : <span className={`cashShuffleDot ${dotTone}`.trim()} />}
-      </div>
-      <div className="cashShuffleMetricBody">{children}</div>
-    </article>;
-  }
-
-  function CashAnomalyList(){
-    const emptyText = anomalyScope === "month"
-      ? "Aucune anomalie détectée pour le mois sélectionné."
-      : "Aucune anomalie détectée pour le jour choisi.";
-
-    const safeIndex = anomalyAlerts.length ? Math.min(anomalyIndex, anomalyAlerts.length - 1) : 0;
-    const currentAlert = anomalyAlerts[safeIndex] || null;
-    const canNavigate = anomalyAlerts.length > 1;
-    return <div className="cashShuffleAnomalyList cashShuffleAnomalyCarousel">
-      <div className="cashShuffleAnomalyToolbar">
-        <div className="cashShuffleAnomalyFilters" role="group" aria-label="Filtrer les alertes anomalies">
-          <button type="button" className={anomalyScope === "day" ? "active" : ""} onClick={()=>setAnomalyScope("day")}>Jour choisi</button>
-          <button type="button" className={anomalyScope === "month" ? "active" : ""} onClick={()=>setAnomalyScope("month")}>Mois choisi</button>
-        </div>
-      </div>
-      <div className="cashShuffleAnomalyDivider" />
-      {currentAlert ? <div className="cashShuffleAnomalyViewport">
-        <button
-          type="button"
-          className="cashShuffleAnomalyNav"
-          onClick={()=>setAnomalyIndex(prev=>prev===0 ? anomalyAlerts.length - 1 : prev - 1)}
-          disabled={!canNavigate}
-          aria-label="Alerte précédente"
-        >‹</button>
-        <div className={`cashShuffleAnomalyItem cashShuffleAnomalySlide ${currentAlert.tone}`}>
-          <span className="cashShuffleAnomalyIcon" aria-hidden="true">!</span>
-          <div>
-            <strong>{currentAlert.label}</strong>
-            <small>{formatCashDateLabel(currentAlert.date)} · {currentAlert.detail}</small>
-          </div>
-          <b>{formatDH(currentAlert.amountCents)}</b>
-        </div>
-        <button
-          type="button"
-          className="cashShuffleAnomalyNav"
-          onClick={()=>setAnomalyIndex(prev=>prev===anomalyAlerts.length - 1 ? 0 : prev + 1)}
-          disabled={!canNavigate}
-          aria-label="Alerte suivante"
-        >›</button>
-      </div> : <div className="cashShuffleAnomalyEmpty cashShuffleAnomalySlideEmpty">
-        <span className="cashShuffleAnomalyIcon ok" aria-hidden="true">✓</span>
-        <div>
-          <strong>Aucune anomalie détectée</strong>
-          <small>{emptyText}</small>
-        </div>
-      </div>}
-      {anomalyAlerts.length > 1 ? <div className="cashShuffleAnomalyPager">{safeIndex + 1} / {anomalyAlerts.length}</div> : null}
-    </div>;
-  }
-
-  return <section className="cashShuffleDashboard">
-    <div className="cashShuffleHeader">
+  return <section className="cashAdminDashboardPage">
+    <div className="cashAdminDashboardHeader">
       <div>
-        <h1>Gestion de caisse</h1>
-        <p>Consultez les indicateurs de caisse à partir d’une seule date sélectionnée.</p>
+        <h1>Cash register dashboard</h1>
+        <p>Vue admin pour consulter les dates enregistrées où des opérations de caisse existent, avec calendrier et flèches de navigation.</p>
       </div>
-      <div className="cashShuffleHeaderActions">
-        <div className="cashDateBar cashShuffleExchangeDateBar" aria-label="Barre de date de gestion de caisse">
-          <div className="cashDateBarGroup">
-            <span>Date de caisse</span>
-            <button type="button" className="cashDateArrowBtn" onClick={()=>shiftSelectedDate(-1)} aria-label="Jour précédent">‹</button>
-            <input type="date" value={selectedDate || dashboardToday} onChange={e=>selectMainDate(e.target.value || dashboardToday)} aria-label="Choisir la date de caisse" />
-            <button type="button" className="cashDateArrowBtn" onClick={()=>shiftSelectedDate(1)} aria-label="Jour suivant">›</button>
-            <button type="button" className="cashDateResetBtn" onClick={()=>selectMainDate(dashboardToday)} aria-label="Revenir à aujourd’hui">↻</button>
-          </div>
+      <div className="cashAdminToolbar cashAdminToolbarSingle">
+        <label className="cashAdminPrimaryDateControl">
+          <span>Date temps réel</span>
+          <DateOperationPicker value={selectedDate} onChange={selectMainDate} onShift={shiftSelectedDate} ariaLabel="Date temps réel enregistrée" />
+        </label>
+      </div>
+    </div>
+
+    <div className="cashAdminGrid cashAdminGridTop">
+      <CashAdminCard title="Balance due progress" meta={<span>{monthMetrics.length} date(s) enregistrée(s)</span>}>
+        <CashProgressRing value={progressValue} label="Jours équilibrés" subLabel={`${monthBalancedDays}/${monthMetrics.length || 0}`} />
+      </CashAdminCard>
+
+      <CashAdminCard title="Real time CR balance" meta={selectedDateMeta("Date temps réel enregistrée pour Real time CR balance")} right="SD">
+        <div className="cashAdminBigMetric">
+          <small>DH</small>
+          <b>{((selectedMetrics.countedCents || 0) / 100).toFixed(1)}</b>
         </div>
-      </div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Tot. montant manquant" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>} right="📅">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(monthlyShortageCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Tot. montant surplus" meta={<span>dates enregistrées · {formatMonthLabel(selectedMonth)}</span>} right="📅">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(monthlySurplusCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Tot. dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
+        <CashProgressRing value={expensesProgress} label={formatDH(monthlyExpensesCents)} subLabel={monthSalesCents ? `${Math.round(expensesProgress)}% des ventes` : "Aucune vente"} />
+      </CashAdminCard>
     </div>
 
-    <div className="cashShuffleGrid cashShuffleContentV142">
-      <div className="cashShuffleSection cashShuffleSectionTop">
-      <CashShuffleCard title="Progression écart de caisse" meta={limitMeta("Tolérance écart", "toleranceLimitCents", toleranceLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleInsightCard" dotTone="indigo">
-        <CashShuffleProgress
-          value={balanceDueProgressValue}
-          label={formatDH(monthlyAccumulatedGapCents)}
-          subLabel={`${Math.round(balanceDueProgressValue)}% de la limite`}
-          description={monthlyAccumulatedGapCents > 0
-            ? `La tolérance d’écart configurée est de ${formatDH(toleranceLimitCents || 0)} pour le mois sélectionné.`
-            : `Aucun écart enregistré pour le mois sélectionné. La tolérance active est de ${formatDH(toleranceLimitCents || 0)}.`}
-        />
-      </CashShuffleCard>
+    <div className="cashAdminGrid cashAdminGridBottom">
+      <CashAdminCard title="Balance due" meta={selectedDateMeta("Date enregistrée pour Balance due")} right="SD">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.dueBalanceCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
 
-      <CashShuffleCard title="Real time CR balance" meta={cardMeta("Jour sélectionné")} badge="SD" badgeClassName="cashShuffleBadgePill" className="cashShuffleCardTall cashShuffleBalanceCard">
-        <CashShuffleAmount cents={selectedMetrics.countedCents} large />
-      </CashShuffleCard>
+      <CashAdminCard title="Montant manquant" meta={selectedDateMeta("Date enregistrée pour Montant manquant")} right="SD">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.shortageCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
 
-      <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeDanger" className="cashShuffleCardTall cashShuffleMonthlyAmountCard cashShuffleMonthlyShortageCard">
-        <CashShuffleMonthlySummary cents={monthlyShortageCents} tone="negative" emptyText="Aucun montant manquant enregistré" />
-      </CashShuffleCard>
+      <CashAdminCard title="Montant surplus" meta={selectedDateMeta("Date enregistrée pour Montant surplus")} right="SD">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.surplusCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
 
-      <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge={<InvIcon name="sync" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeSuccess" className="cashShuffleCardTall cashShuffleMonthlyAmountCard cashShuffleMonthlySurplusCard">
-        <CashShuffleMonthlySummary cents={monthlySurplusCents} tone="positive" emptyText="Aucun surplus enregistré" />
-      </CashShuffleCard>
+      <CashAdminCard title="Retiré" meta={selectedDateMeta("Date enregistrée pour Retiré")}>
+        <div className="cashAdminMainValue"><small>DH</small><b>{(selectedMetrics.withdrawnCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
 
-      <CashShuffleCard title="Tot. dépenses" meta={limitMeta("Total mensuel", "monthlyExpenseLimitCents", monthlyExpenseLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleExpensesLimitCard cashShuffleInsightCard" dotTone="amber">
-        <CashShuffleExpenseProgress value={expensesProgress} cents={monthlyExpensesCents} limitCents={monthlyExpenseLimitCents} />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="Alertes anomalies" meta={cardMeta(anomalyMetaText)} className="cashShuffleCardTall cashShuffleAnomalyCard" dotTone={anomalyAlerts.length ? "amber" : "emerald"}>
-        <CashAnomalyList />
-      </CashShuffleCard>
-
-      </div>
-
-      <div className="cashShuffleSection cashShuffleSectionBottom">
-      <CashShuffleCard title="Balance due" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleMini cashShuffleBalanceDueActionCard">
-        <CashShuffleSignedAmount cents={selectedBalanceDueSignedCents} tone={balanceDueTone} />
-        <CashShuffleActionNote text={balanceDueActionTitle} />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="Montant manquant" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeDanger" className="cashShuffleMini">
-        <CashShuffleAmount cents={selectedMetrics.shortageCents} tone="negative" />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="Montant surplus" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="sync" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeSuccess" className="cashShuffleMini">
-        <CashShuffleAmount cents={selectedMetrics.surplusCents} tone="positive" />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="Retiré" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="upload" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeBlue" className="cashShuffleMini">
-        <CashShuffleAmount cents={selectedMetrics.withdrawnCents} />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="Dépenses" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="list" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeAmber" className="cashShuffleMini">
-        <CashShuffleAmount cents={selectedMetrics.expensesCents} />
-      </CashShuffleCard>
-
-      </div>
-
-      <div className="cashShuffleSection cashShuffleSectionResults">
-      <CashShuffleCard title="Tot. vente" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
-        <CashShuffleAmount cents={selectedMetrics.totalSalesCents} xl />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="C. fermeture (théorique)" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="grid" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
-        <CashShuffleAmount cents={selectedMetrics.closingCalculatedCents} xl />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="Nouvelle C. fermeture" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
-        <CashShuffleAmount cents={selectedMetrics.closingRealCents} xl />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="Écart cash comptée vs calculée" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide cashShuffleWideDelta">
-        <CashShuffleAmount cents={selectedMetrics.gapCents} xl />
-      </CashShuffleCard>
-      </div>
+      <CashAdminCard title="Dépenses" meta={<span>{formatMonthLabel(selectedMonth)}</span>}>
+        <div className="cashAdminMainValue"><small>DH</small><b>{Math.round(monthlyExpensesCents/100)}</b></div>
+      </CashAdminCard>
     </div>
+
+    <div className="cashAdminGrid cashAdminGridResults">
+      <CashAdminCard title="Tot. vente" meta={resultDateMeta("totalSales")} right="=">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.totalSales.totalSalesCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="C. fermeture (théorique)" meta={resultDateMeta("closingCalculated")} right="=">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingCalculated.closingCalculatedCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Nouvelle C. fermeture" meta={resultDateMeta("closingReal")} right="=">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.closingReal.closingRealCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+
+      <CashAdminCard title="Écart cash comptée vs calculée" meta={resultDateMeta("gap")} right="Δ">
+        <div className="cashAdminMainValue"><small>DH</small><b>{(resultMetrics.gap.gapCents/100).toFixed(1)}</b></div>
+      </CashAdminCard>
+    </div>
+
+    <div className="cashAdminBottomNote">© 2026 Smart Inventory. Tous droits réservés.</div>
   </section>;
 }
 
@@ -2732,168 +2375,35 @@ function AIAssistant(){
 }
 
 
-function Association({setTab=()=>{}, me, logout=()=>{}}){
+function Association(){
   const {associations}=useLocalStore();
   const [q,setQ]=useState("");
+
   const rows = associations.filter(a=>{
     const s = `${a.PID||""} ${a.Produit||""} ${a.EPC||""} ${a["Code barre 1"]||""} ${a["Code barre 2"]||""}`.toLowerCase();
     return s.includes(q.toLowerCase());
   });
-  const total = rows.length;
-  const startIndex = total ? 1 : 0;
-  const endIndex = total;
-  const initials = String(me?.username || "AD").slice(0,2).toUpperCase();
-  function exportRows(){ exportCSV("associations.csv", rows, ["PID","Produit","Code barre 1","Code barre 2","EPC","Date"]); }
-  const nav = [
-    {id:"dashboard", label:"Dashboard", icon:"home"},
-    {id:"operations", label:"Opérations", icon:"sync"},
-    {id:"association", label:"Associations", icon:"link"},
-    {id:"inventory", label:"Inventaire", icon:"list"},
-    {id:"cash", label:"Caisses", icon:"cash"},
-    {id:"ai", label:"Assistant IA", icon:"lab"},
-    {id:"users", label:"Utilisateurs", icon:"users"}
-  ];
-  return <div className="shuffleAssocPage">
-    <nav className="shuffleAssocNav">
-      <div className="shuffleAssocNavInner">
-        <div className="shuffleAssocNavLeft">
-          <button type="button" className="shuffleAssocBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
-            <span className="shuffleAssocBrandIcon"><AssocIcon name="cube"/></span>
-            <span>Smart Inventory</span>
-          </button>
-          <div className="shuffleAssocLinks">
-            {nav.map(item=><button type="button" key={item.id} className={item.id==="association" ? "shuffleAssocNavItem active" : "shuffleAssocNavItem"} onClick={()=>setTab(item.id)}>
-              <AssocIcon name={item.icon}/>
-              {item.label}
-            </button>)}
-          </div>
-        </div>
-        <div className="shuffleAssocProfileWrap">
-          <span className="shuffleAssocTrial">PRO TRIAL</span>
-          <div className="shuffleAssocUserText">
-            <p>{me?.pharmacy_name || "Pharmacie Démo"}</p>
-            <small>{me?.username || "Utilisateur"}</small>
-          </div>
-          <div className="shuffleAssocAvatar">{initials}</div>
-        </div>
-      </div>
-    </nav>
 
-    <main className="shuffleAssocMain">
-      <div className="shuffleAssocHeader">
-        <div>
-          <h1>Associations</h1>
-          <p>Tableau de consultation des associations Produit — identifiant enregistrées localement.</p>
-        </div>
-        <div className="shuffleAssocActions">
-          <button type="button" className="shuffleAssocBtn secondary" onClick={exportRows}><AssocIcon name="upload"/>Exporter</button>
-          <button type="button" className="shuffleAssocBtn primary"><AssocIcon name="plus"/>Nouvelle association</button>
-        </div>
-      </div>
+  return <section className="tableOnlyPage">
+    <p className="notice">Tableau de consultation des associations Produit ↔ identifiant enregistrées localement.</p>
 
-      <section className="shuffleAssocCard">
-        <div className="shuffleAssocToolbar">
-          <div className="shuffleAssocSearch">
-            <AssocIcon name="search"/>
-            <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans les associations..." />
-          </div>
-          <div className="shuffleAssocTotal">
-            <span>Total :</span>
-            <b>{rows.length} association(s)</b>
-          </div>
-        </div>
+    <div className="tableToolbar">
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans les associations..."/>
+      <span>{rows.length} association(s)</span>
+    </div>
 
-        <div className="shuffleAssocTableWrap">
-          <table className="shuffleAssocTable">
-            <thead>
-              <tr>
-                <th>PID</th>
-                <th>Produit</th>
-                <th>Code Barres 1</th>
-                <th>Code Barres 2</th>
-                <th>EPC</th>
-                <th>Date</th>
-                <th className="right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length===0 ? <tr>
-                <td colSpan={7} className="shuffleAssocEmptyCell">
-                  <div className="shuffleAssocEmpty">
-                    <div className="shuffleAssocEmptyIcon"><AssocIcon name="link"/></div>
-                    <div>
-                      <p>Aucune association trouvée</p>
-                      <small>Créez votre première association produit pour commencer</small>
-                    </div>
-                    <button type="button" className="shuffleAssocAddEmpty"><AssocIcon name="plus"/>Ajouter une association</button>
-                  </div>
-                </td>
-              </tr> : rows.map((r,i)=><tr key={`${r.PID||""}-${r.EPC||""}-${i}`}>
-                <td>{r.PID || "—"}</td>
-                <td>{r.Produit || "—"}</td>
-                <td>{r["Code barre 1"] || "—"}</td>
-                <td>{r["Code barre 2"] || "—"}</td>
-                <td><code>{r.EPC || "—"}</code></td>
-                <td>{r.Date || "—"}</td>
-                <td className="right"><button type="button" className="shuffleAssocRowAction">Voir</button></td>
-              </tr>)}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="shuffleAssocPagination">
-          <p>Affichage de {startIndex} à {endIndex} sur {total} résultats</p>
-          <div>
-            <button type="button" disabled>Précédent</button>
-            <button type="button" className="active">1</button>
-            <button type="button" disabled>Suivant</button>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer className="shuffleAssocFooter">
-      <div className="shuffleAssocFooterInner">
-        <div className="shuffleAssocFooterBrand">
-          <span><AssocIcon name="cube"/></span>
-          <small>© 2026 Smart Inventory. Tous droits réservés.</small>
-        </div>
-        <div className="shuffleAssocFooterLinks">
-          <a href="#">Aide</a>
-          <a href="#">Conditions</a>
-          <a href="#">Confidentialité</a>
-          <button type="button" onClick={logout}><AssocIcon name="logout"/>Logout</button>
-        </div>
-      </div>
-    </footer>
-  </div>
-}
-
-function AssocIcon({name}){
-  const icons={
-    cube:<path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />,
-    home:<path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" />,
-    sync:<path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />,
-    link:<path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />,
-    list:<path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />,
-    cash:<path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />,
-    lab:<path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.591-.659L5 14.5m14 0V17a2 2 0 01-2 2H7a2 2 0 01-2-2v-2.5" />,
-    users:<path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />,
-    upload:<path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />,
-    plus:<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />,
-    search:<path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />,
-    logout:<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-  };
-  return <svg className="assocSvg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icons[name] || icons.link}</svg>
+    <Table rows={rows} cols={["PID","Produit","Code barre 1","Code barre 2","EPC","Date"]}/>
+  </section>
 }
 
 
 
-function Inventory({setTab=()=>{}, me, logout=()=>{}}){
+
+
+function Inventory(){
   const {products,associations,detectedEpcs}=useLocalStore();
   const [q,setQ]=useState("");
   const [statusFilter,setStatusFilter]=useState("all");
-  const initials = String(me?.username || "AD").slice(0,2).toUpperCase();
 
   const associatedByPid = new Map();
   associations.forEach(a=>{
@@ -2905,18 +2415,20 @@ function Inventory({setTab=()=>{}, me, logout=()=>{}}){
   });
   const detectedSet = new Set((detectedEpcs||[]).map(norm).filter(Boolean));
 
+  // Statut réel = Catalogue produits + Associations Produit/Identifiant + CSV des identifiants détectés.
+  // Les associations seules ne rendent plus un produit "Présent".
   function getStatus(p){
     const epcs=associatedByPid.get(String(p.PID)) || [];
     if(epcs.length===0) return "Non associé";
     return epcs.some(epc=>detectedSet.has(epc)) ? "Présent" : "Manquant";
   }
 
-  const allRows = products.map(p=>{
+  const rows = products.map(p=>{
     const epcs=associatedByPid.get(String(p.PID)) || [];
     const status=getStatus(p);
     return {
-      PID:p.PID || "",
-      Produit:p.Produit || "",
+      PID:p.PID,
+      Produit:p.Produit,
       Catégorie:p["Catégorie"] || p.Catégorie || "",
       Zone:p.Zone || "",
       Stock:p.Stock || "",
@@ -2924,11 +2436,9 @@ function Inventory({setTab=()=>{}, me, logout=()=>{}}){
       "Code barre 2":p["Code barre 2"] || "",
       "Identifiant associé":epcs.join(", "),
       "Statut": status,
-      _rowClass: status==="Présent" ? "present" : status==="Manquant" ? "missing" : "unassociated"
+      _rowClass: status==="Présent" ? "rowPresent" : status==="Manquant" ? "rowMissing" : "rowUnassociated"
     };
-  });
-
-  const rows = allRows.filter(r=>{
+  }).filter(r=>{
     const s = Object.values(r).join(" ").toLowerCase();
     const matchText = s.includes(q.toLowerCase());
     const matchStatus = statusFilter==="all" || r["Statut"]===statusFilter;
@@ -2940,171 +2450,48 @@ function Inventory({setTab=()=>{}, me, logout=()=>{}}){
   const missingCount=products.filter(p=>getStatus(p)==="Manquant").length;
   const unassociatedCount=products.filter(p=>getStatus(p)==="Non associé").length;
 
-  function exportRows(){
-    const cols=["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Identifiant associé","Statut"];
-    exportCSV("inventaire_reel.csv", rows, cols);
-  }
+  return <section className="tableOnlyPage inventoryStatusPage">
+    <p className="notice">Stock calculé avec le catalogue produits + les associations Produit/Identifiant + le dernier CSV des identifiants détectés importé.</p>
 
-  const userAllowedPages = me?.role==="platform_admin"
-    ? [...defaultUserPages(), ...APP_ADMIN_PAGES.map(p=>p.id)]
-    : normalizePagePermissions(me?.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
-  const nav = APP_USER_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p}));
-  if(me?.role!=="platform_admin"){
-    nav.push(...ASSIGNABLE_EXTRA_PAGES.filter(p=>userAllowedPages.includes(p.id)).map(p=>({...p})));
-  }
-  if(me?.can_manage_users && me?.role!=="platform_admin"){
-    nav.push({id:"users",label:"Utilisateurs",icon:"platform"});
-  }
-  if(me?.role==="platform_admin"){
-    nav.push(...APP_ADMIN_PAGES.map(p=>({...p})));
-  }
-  const topNav = nav.filter(item => item.id === "dashboard" || item.id === "cashAdmin");
-  const sideNav = nav.filter(item => item.id !== "dashboard" && item.id !== "cashAdmin");
+    <div className="statusSummaryGrid">
+      <div className="statusSummary present"><b>{presentCount}</b><span>Présents</span></div>
+      <div className="statusSummary missing"><b>{missingCount}</b><span>Manquants</span></div>
+      <div className="statusSummary unassociated"><b>{unassociatedCount}</b><span>Non associés</span></div>
+      <div className="statusSummary total"><b>{total}</b><span>Total</span></div>
+    </div>
 
-  return <div className="shuffleInvPage withInternalTopNav">
-    <header className="internalTopDashNav" aria-label="Navigation dashboard">
-      <div className="internalTopDashNavInner">
-        <button type="button" className="internalTopDashBrand" onClick={()=>setTab("dashboard")} aria-label="Smart Inventory dashboard">
-          <span><InvIcon name="cube"/></span>
-          <b>Smart Inventory</b>
-        </button>
-        <div className="internalTopDashLinks">
-          {topNav.map(item=><button type="button" key={item.id} className={item.id==="inventory" ? "active" : ""} onClick={()=>setTab(item.id)}>
-            <InvIcon name={inventoryChromeIcon(item.id)}/>
-            <span>{item.label}</span>
-          </button>)}
-        </div>
-        <div className="internalTopDashAccount">
-          <div className="shuffleInvStoreBadge"><InvIcon name="store"/><span>{me?.pharmacy_name || "Pharmacie Démo"}</span></div>
-          <div className="shuffleInvAvatar">{initials}</div>
-        </div>
-      </div>
-    </header>
+    <div className="tableToolbar inventoryToolbar">
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Rechercher dans l’inventaire..."/>
+      <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
+        <option value="all">Tous les statuts</option>
+        <option value="Présent">Présent</option>
+        <option value="Manquant">Manquant</option>
+        <option value="Non associé">Non associé</option>
+      </select>
+      <span>{rows.length} produit(s) · {detectedSet.size} Identifiant détecté(s)</span>
+    </div>
 
-    <nav className="shuffleInvNav internalSideNav">
-      <div className="shuffleInvNavInner">
-        <div className="shuffleInvLinks">
-          {sideNav.map(item=><button type="button" key={item.id} className={item.id==="inventory" ? "shuffleInvNavItem active" : "shuffleInvNavItem"} onClick={()=>setTab(item.id)}>
-            <InvIcon name={inventoryChromeIcon(item.id)}/>
-            <span>{item.label}</span>
-          </button>)}
-        </div>
-        <div className="shuffleInvRight sideNavBottomOnly">
-          <button type="button" className="internalSideLogout" onClick={logout}>Logout</button>
-        </div>
-      </div>
-    </nav>
-
-    <main className="shuffleInvMain">
-      <section className="shuffleInvHeaderSection">
-        <div className="shuffleInvHeaderRow">
-          <div>
-            <h1>Inventaire réel</h1>
-            <p>Suivi en temps réel de votre stock et identifiants</p>
-          </div>
-          <div className="shuffleInvHeaderActions">
-            <button type="button" className="shuffleInvBtn secondary" onClick={exportRows}><InvIcon name="upload"/>Exporter</button>
-            <button type="button" className="shuffleInvBtn primary" onClick={()=>setTab("operations")}><InvIcon name="plus"/>Nouveau scan</button>
-          </div>
-        </div>
-        <div className="shuffleInvNotice">
-          <InvIcon name="warning"/>
-          <p>Stock scanné avec le catalogue produits + les associations Produit/Identifiant + le dernier CSV des identifiants détectés/importés.</p>
-        </div>
-        <div className="shuffleInvStatsGrid">
-          <div className="shuffleInvStatCard present">
-            <div className="shuffleInvStatTop"><span><InvIcon name="check"/></span><em>OK</em></div>
-            <b>{presentCount}</b><small>Présents</small>
-          </div>
-          <div className="shuffleInvStatCard missing">
-            <div className="shuffleInvStatTop"><span><InvIcon name="warning"/></span><em>Alerte</em></div>
-            <b>{missingCount}</b><small>Manquants</small>
-          </div>
-          <div className="shuffleInvStatCard unassociated">
-            <div className="shuffleInvStatTop"><span><InvIcon name="ban"/></span><em>Erreur</em></div>
-            <b>{unassociatedCount}</b><small>Non associés</small>
-          </div>
-          <div className="shuffleInvStatCard total">
-            <div className="shuffleInvStatTop"><span><InvIcon name="grid"/></span></div>
-            <b>{total}</b><small>Total</small>
-          </div>
-        </div>
-      </section>
-
-      <section className="shuffleInvTableCard">
-        <div className="shuffleInvToolbar">
-          <label className="shuffleInvSearch"><InvIcon name="search"/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Recherchez dans l'inventaire..." /></label>
-          <div className="shuffleInvFilters">
-            <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
-              <option value="all">Tous les statuts</option>
-              <option value="Présent">Présent</option>
-              <option value="Manquant">Manquant</option>
-              <option value="Non associé">Non associé</option>
-            </select>
-            <span>{rows.length} produit(s) · {detectedSet.size} identifiant(s) détecté(s)</span>
-          </div>
-        </div>
-        <div className="shuffleInvTableWrap">
-          <table className="shuffleInvTable">
-            <thead>
-              <tr>{["PID","Produit","Catégorie","Zone","Stock","Code Barre 1","Code Barre 2","Identifiant associé","Statut"].map(c=><th key={c}>{c}</th>)}</tr>
-            </thead>
-            <tbody>
-              {rows.length===0 ? <tr><td colSpan={9}>
-                <div className="shuffleInvEmpty">
-                  <div><InvIcon name="cube"/></div>
-                  <p>Aucun produit dans l'inventaire</p>
-                  <small>Lancez un scan ou importez un fichier CSV pour commencer</small>
-                  <button type="button" onClick={()=>setTab("operations")}><InvIcon name="upload"/>Importer CSV</button>
-                </div>
-              </td></tr> : rows.map((r,i)=><tr key={`${r.PID}-${i}`} className={`shuffleInvRow ${r._rowClass}`}>
-                <td>{r.PID || "—"}</td>
-                <td><b>{r.Produit || "—"}</b></td>
-                <td>{r.Catégorie || "—"}</td>
-                <td>{r.Zone || "—"}</td>
-                <td>{r.Stock || "—"}</td>
-                <td>{r["Code barre 1"] || "—"}</td>
-                <td>{r["Code barre 2"] || "—"}</td>
-                <td><code>{r["Identifiant associé"] || "—"}</code></td>
-                <td><span className={`shuffleInvStatus ${r._rowClass}`}>{r.Statut}</span></td>
-              </tr>)}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-
-    <footer className="shuffleInvFooter">
-      <div className="shuffleInvFooterInner">
-        <div className="shuffleInvFooterBrand"><span><InvIcon name="cube"/></span><b>Smart Inventory</b></div>
-        <p>© 2026 Smart Inventory. Tous droits réservés.</p>
-        <div><button type="button" onClick={logout}>Logout</button><button type="button">Aide</button></div>
-      </div>
-    </footer>
-  </div>
-}
-
-function InvIcon({name}){
-  const icons={
-    cube:<path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />,
-    home:<path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />,
-    sync:<path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />,
-    link:<path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />,
-    list:<path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />,
-    cash:<path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />,
-    lab:<path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.591-.659L5 14.5m14 0V17a2 2 0 01-2 2H7a2 2 0 01-2-2v-2.5" />,
-    users:<path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />,
-    store:<path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />,
-    menu:<path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />,
-    upload:<path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />,
-    plus:<path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />,
-    warning:<path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />,
-    check:<path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
-    ban:<path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />,
-    grid:<path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />,
-    search:<path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-  };
-  return <svg className="invSvg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icons[name] || icons.cube}</svg>
+    <div className="smartTableWrap">
+      <table className="smartTable statusTable">
+        <thead>
+          <tr>{["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Identifiant associé","Statut"].map(c=><th key={c}>{c}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((r,i)=><tr key={i} className={r._rowClass}>
+            <td>{r.PID}</td>
+            <td>{r.Produit}</td>
+            <td>{r.Catégorie}</td>
+            <td>{r.Zone}</td>
+            <td>{r.Stock}</td>
+            <td>{r["Code barre 1"]}</td>
+            <td>{r["Code barre 2"]}</td>
+            <td>{r["Identifiant associé"]}</td>
+            <td><span className={`statusBadge ${r._rowClass}`}>{r["Statut"]}</span></td>
+          </tr>)}
+        </tbody>
+      </table>
+    </div>
+  </section>
 }
 
 
@@ -3226,17 +2613,14 @@ function LocalData(){
 
 
 function MyUsers({auth,me}){
-  const allowedPages = normalizePagePermissions(me?.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
-  const visiblePageOptions = ASSIGNABLE_PAGE_OPTIONS.filter(p=>allowedPages.includes(p.id));
+  const allowedPages = cleanPageList(me?.page_permissions || defaultUserPages());
+  const visiblePageOptions = APP_USER_PAGES.filter(p=>allowedPages.includes(p.id));
   const [users,setUsers]=useState([]);
   const [username,setUsername]=useState("");
   const [password,setPassword]=useState("");
   const [fullName,setFullName]=useState("");
   const [pages,setPages]=useState(()=>visiblePageOptions.map(p=>p.id));
   const [msg,setMsg]=useState("");
-  const [search,setSearch]=useState("");
-  const [statusFilter,setStatusFilter]=useState("all");
-  const [showCreateModal,setShowCreateModal]=useState(false);
 
   async function load(){
     try{
@@ -3251,18 +2635,14 @@ function MyUsers({auth,me}){
     setPages(prev=>cleanPageList(prev, visiblePageOptions.map(p=>p.id)));
   },[me?.username]);
 
-  function resetCreateForm(){
-    setUsername("");
-    setPassword("");
-    setFullName("");
-    setPages(visiblePageOptions.map(p=>p.id));
+  function togglePage(pageId){
+    setPages(prev=>prev.includes(pageId) ? prev.filter(x=>x!==pageId) : [...prev,pageId]);
   }
 
   async function createUser(){
     try{
       await axios.post(`${API}/users/create`,{username,password,full_name:fullName,page_permissions:pages},auth);
-      resetCreateForm();
-      setShowCreateModal(false);
+      setUsername(""); setPassword(""); setFullName(""); setPages(visiblePageOptions.map(p=>p.id));
       setMsg("Utilisateur créé.");
       await load();
     }catch(e){
@@ -3302,133 +2682,60 @@ function MyUsers({auth,me}){
   }
 
   async function deleteUser(user){
-    if(!user?.username) return;
     if(!confirm(`Supprimer l’utilisateur ${user.username} ?`)) return;
     try{
       await axios.delete(`${API}/users/delete/${encodeURIComponent(user.username)}`,auth);
-      setUsers(prev=>prev.filter(x=>x.username!==user.username));
       setMsg("Utilisateur supprimé.");
-      load().catch(()=>{});
+      await load();
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur suppression utilisateur");
     }
   }
 
-  const filteredUsers = users.filter(u=>{
-    const q=search.trim().toLowerCase();
-    if(q && !`${u.username || ""} ${u.full_name || ""}`.toLowerCase().includes(q)) return false;
-    if(statusFilter !== "all" && String(!!u.active) !== statusFilter) return false;
-    return true;
-  });
-
-  const avatarText = u => (u.username || "U").slice(0,1).toUpperCase();
-
   return <section className="platformPage myUsersPage">
-    <div className="platformUsersTitle">
-      <div className="platformUsersIcon"><InvIcon name="users" /></div>
-      <div>
-        <h2>Utilisateurs</h2>
-        <p>Gérez les comptes utilisateurs et leurs accès.</p>
+    <div className="card userAccessCard">
+      <h3>Créer un utilisateur pour ce compte</h3>
+      <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
+      <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
+      <input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)}/>
+      <div className="pagePermissionBox">
+        <strong>Pages visibles</strong>
+        <div className="pagePermissionGrid">
+          {visiblePageOptions.map(page=><label key={page.id}>
+            <input type="checkbox" checked={pages.includes(page.id)} onChange={()=>togglePage(page.id)}/>
+            <span>{page.label}</span>
+          </label>)}
+        </div>
       </div>
-      <button type="button" className="platformAddStoreBtn" onClick={()=>{resetCreateForm(); setShowCreateModal(true);}}>Ajouter User</button>
+      <button onClick={createUser}>Créer utilisateur</button>
     </div>
-
-    {showCreateModal && <div className="modalOverlay platformCreateOverlay" onClick={()=>setShowCreateModal(false)}>
-      <div className="scanModal platformStoreModal platformCreateUserModal myUsersCreateModal" onClick={e=>e.stopPropagation()} role="dialog" aria-label="Créer un utilisateur">
-        <button type="button" className="modalClose" onClick={()=>setShowCreateModal(false)}>×</button>
-        <div className="platformCreateModalHeader">
-          <h2>Créer un utilisateur</h2>
-          <p>Créez un utilisateur pour ce compte avec ses accès pages.</p>
-        </div>
-        <div className="platformCreateModalBody">
-          <section className="platformCreateSection">
-            <h3>Identifiants</h3>
-            <div className="platformCreateGrid">
-              <label><span>Username *</span><input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)} /></label>
-              <label><span>Password *</span><input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} /></label>
-              <label className="full"><span>Nom utilisateur *</span><input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)} /></label>
-            </div>
-          </section>
-          <section className="platformCreateSection platformCreatePagesSection">
-            <div className="pagePermissionBox pagePermissionButtonBox platformCreatePagesCompact">
-              <div className="pagePermissionButtonHeader">
-                <div>
-                  <strong>Pages visibles</strong>
-                  <small>{pages.length} page(s) sélectionnée(s)</small>
-                </div>
-                <PagePermissionsModalButton
-                  buttonLabel="Editer"
-                  title="Pages visibles"
-                  description="Choisissez les pages visibles pour cet utilisateur."
-                  options={visiblePageOptions}
-                  value={pages}
-                  onSave={next=>setPages(next)}
-                />
-              </div>
-              <PagePermissionSummaryChips ids={pages} options={visiblePageOptions} max={4}/>
-            </div>
-          </section>
-        </div>
-        <div className="platformModalActions platformCreateFooter">
-          <button type="button" className="platformModalCancel" onClick={()=>setShowCreateModal(false)}>Annuler</button>
-          <button type="button" className="platformModalCreate" onClick={createUser}>Créer utilisateur</button>
-        </div>
-      </div>
-    </div>}
 
     <p className={msg.includes("Erreur") || msg.includes("not") ? "err" : "success"}>{msg}</p>
 
-    <div className="platformUsersPanel myUsersPanel">
-      <div className="platformUsersFilters">
-        <div className="platformSearchBox"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un utilisateur..." /></div>
-        <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
-          <option value="all">Status — Tous</option>
-          <option value="true">Activé</option>
-          <option value="false">Désactivé</option>
-        </select>
-      </div>
-      <table className="platformUsersTable myUsersTable">
-        <thead>
-          <tr>
-            <th>Utilisateur</th>
-            <th>Nom</th>
-            <th>Pages visibles</th>
-            <th>Mot de passe</th>
-            <th>Statut</th>
-            <th>Delete</th>
+    <table>
+      <thead><tr><th>Utilisateur</th><th>Nom</th><th>Pages visibles</th><th>Mot de passe</th><th>Statut</th><th>Delete</th></tr></thead>
+      <tbody>
+        {users.length ? users.map(u=>{
+          const currentPages=cleanPageList(u.page_permissions || [], allowedPages);
+          return <tr key={u.username}>
+            <td>{u.username}</td>
+            <td>{u.full_name}</td>
+            <td><div className="pagePermissionMiniGrid">{visiblePageOptions.map(page=>{
+              const checked=currentPages.includes(page.id);
+              return <label key={page.id}><input type="checkbox" checked={checked} onChange={e=>{
+                const next=e.target.checked ? [...currentPages,page.id] : currentPages.filter(x=>x!==page.id);
+                updatePages(u,next);
+              }}/><span>{page.label}</span></label>
+            })}</div></td>
+            <td><button onClick={()=>changePassword(u)}>Changer mot de passe</button></td>
+            <td><button onClick={()=>setActive(u,!u.active)}>{u.active ? "Désactiver" : "Activer"}</button></td>
+            <td><button className="dangerBtn" onClick={()=>deleteUser(u)}>Delete</button></td>
           </tr>
-        </thead>
-        <tbody>
-          {filteredUsers.length ? filteredUsers.map(u=>{
-            const currentPages=normalizePagePermissions(u.page_permissions, allowedPages, allowedPages);
-            return <tr key={u.username}>
-              <td><div className="platformUserIdentity"><span className="platformAvatar">{avatarText(u)}</span><span>{u.username}</span></div></td>
-              <td>{u.full_name}</td>
-              <td>
-                <div className="pagePermissionCell myUsersPageCell">
-                  <PagePermissionSummaryChips ids={currentPages} options={visiblePageOptions} max={2}/>
-                  <PagePermissionsModalButton
-                    buttonLabel="Editer"
-                    title={`Pages visibles - ${u.username}`}
-                    description="Cochez les pages visibles pour cet utilisateur."
-                    options={visiblePageOptions}
-                    value={currentPages}
-                    onSave={next=>updatePages(u,next)}
-                  />
-                </div>
-              </td>
-              <td><button type="button" className="platformSoftPill" onClick={()=>changePassword(u)}>Changer mot de passe</button></td>
-              <td><button type="button" className={`platformStatusPill ${u.active ? "active" : "inactive"}`} onClick={()=>setActive(u,!u.active)}>{u.active ? "● Activé" : "○ Désactivé"}<span>⌄</span></button></td>
-              <td><button type="button" className="dangerBtn" onClick={()=>deleteUser(u)}>Delete</button></td>
-            </tr>
-          }) : <tr><td colSpan="6" className="expenseHistoryEmpty">Aucun utilisateur créé pour ce compte.</td></tr>}
-        </tbody>
-      </table>
-      <div className="platformUsersFooter">Affichage de {filteredUsers.length ? 1 : 0} à {filteredUsers.length} sur {users.length} utilisateurs</div>
-    </div>
+        }) : <tr><td colSpan="6" className="expenseHistoryEmpty">Aucun utilisateur créé pour ce compte.</td></tr>}
+      </tbody>
+    </table>
   </section>;
 }
-
 
 
 function Platform({auth}){
@@ -3440,22 +2747,8 @@ function Platform({auth}){
   const [aiPremium,setAiPremium]=useState(false);
   const [pagePermissions,setPagePermissions]=useState(()=>defaultUserPages());
   const [canManageUsers,setCanManageUsers]=useState(true);
-  const [createActive,setCreateActive]=useState(true);
-  const [createPhone,setCreatePhone]=useState("");
-  const [createEmail,setCreateEmail]=useState("");
-  const [createAddress,setCreateAddress]=useState("");
-  const [createNotes,setCreateNotes]=useState("");
-  const [createExpiresAt,setCreateExpiresAt]=useState(()=>shiftISODate(todayISO(),30));
   const [msg,setMsg]=useState("");
   const [showCreateModal,setShowCreateModal]=useState(false);
-  const [search,setSearch]=useState("");
-  const [statusFilter,setStatusFilter]=useState("all");
-  const [premiumFilter,setPremiumFilter]=useState("all");
-  const [manageFilter,setManageFilter]=useState("all");
-  const [expireFilter,setExpireFilter]=useState("all");
-  const [infoClient,setInfoClient]=useState(null);
-  const [infoDraft,setInfoDraft]=useState(null);
-  const [deletingUser,setDeletingUser]=useState("");
 
   async function load(){
     try{
@@ -3467,73 +2760,15 @@ function Platform({auth}){
   }
   useEffect(()=>{ load(); },[]);
 
-  function normalizeClientDraft(c){
-    return {
-      originalUsername:c.username,
-      username:c.username || "",
-      pharmacy_name:c.pharmacy_name || "",
-      phone:c.phone || "",
-      email:c.email || "",
-      address:c.address || "",
-      notes:c.notes || "",
-      expires_at:c.expires_at ? c.expires_at.slice(0,10) : "",
-      ai_premium:!!c.ai_premium,
-      can_manage_users:!!c.can_manage_users,
-      active:!!c.active,
-      created_at:c.created_at || ""
-    };
-  }
-
-  function openClientInfo(c){
-    setInfoClient(c);
-    setInfoDraft(normalizeClientDraft(c));
-  }
-
-  function resetCreateForm(){
-    setUsername("");
-    setPassword("");
-    setPharmacy("");
-    setDays(30);
-    setCreateExpiresAt(shiftISODate(todayISO(),30));
-    setCreatePhone("");
-    setCreateEmail("");
-    setCreateAddress("");
-    setCreateNotes("");
-    setAiPremium(false);
-    setPagePermissions(defaultUserPages());
-    setCanManageUsers(true);
-    setCreateActive(true);
-  }
-
   async function create(){
-    const cleanUser = username.trim();
-    const cleanPharmacy = pharmacy.trim();
-    if(!cleanUser || !password || !cleanPharmacy || !createExpiresAt){
-      setMsg("Erreur création user: User, password, User name et date d’expiration sont obligatoires.");
-      return;
-    }
     try{
-      await axios.post(`${API}/platform/create-client`,{
-        username: cleanUser,
-        password,
-        pharmacy_name: cleanPharmacy,
-        days:Number(days),
-        expires_at:createExpiresAt,
-        phone:createPhone,
-        email:createEmail,
-        address:createAddress,
-        notes:createNotes,
-        ai_premium:aiPremium,
-        page_permissions:pagePermissions,
-        can_manage_users:canManageUsers,
-        active:createActive
-      },auth);
-      resetCreateForm();
+      await axios.post(`${API}/platform/create-client`,{username,password,pharmacy_name:pharmacy,days:Number(days),ai_premium:aiPremium,page_permissions:pagePermissions,can_manage_users:canManageUsers},auth);
+      setUsername(""); setPassword(""); setPharmacy(""); setDays(30); setAiPremium(false); setPagePermissions(defaultUserPages()); setCanManageUsers(true);
       setShowCreateModal(false);
-      setMsg("User créé.");
+      setMsg("Client créé.");
       await load();
     }catch(e){
-      setMsg(e.response?.data?.detail || "Erreur création user");
+      setMsg(e.response?.data?.detail || "Erreur création client");
     }
   }
 
@@ -3548,44 +2783,13 @@ function Platform({auth}){
   }
 
   async function deleteClient(u){
-    if(!u) return;
-    if(!confirm(`Supprimer définitivement le user ${u} ?`)) return;
-    const previousClients = clients;
-    const previousInfoClient = infoClient;
-    const previousInfoDraft = infoDraft;
-    setDeletingUser(u);
-    setMsg("");
-    // Suppression optimiste: la ligne disparaît immédiatement et le bouton ne reste plus bloqué sur "Suppression...".
-    setClients(prev=>prev.filter(client=>client.username !== u));
-    if(infoDraft?.originalUsername === u || infoDraft?.username === u){
-      setInfoClient(null);
-      setInfoDraft(null);
-    }
-    const cfg = {...(auth || {}), timeout: 10000};
-    const encoded = encodeURIComponent(u);
+    if(!confirm(`Supprimer définitivement le client ${u} ?`)) return;
     try{
-      try{
-        await axios.post(`${API}/platform/client-delete/${encoded}`,{},cfg);
-      }catch(firstError){
-        const status = firstError?.response?.status;
-        if(status === 404 || status === 405){
-          await axios.delete(`${API}/platform/delete-client/${encoded}`,cfg);
-        }else{
-          throw firstError;
-        }
-      }
-      setMsg("User supprimé.");
-      load().catch(()=>{});
+      await axios.post(`${API}/platform/client-delete/${encodeURIComponent(u)}`,{},auth);
+      setMsg("Client supprimé.");
+      await load();
     }catch(e){
-      setClients(previousClients);
-      setInfoClient(previousInfoClient);
-      setInfoDraft(previousInfoDraft);
-      const detail = e?.code === "ECONNABORTED"
-        ? "Erreur suppression client: délai dépassé. La ligne a été restaurée. Réessayez."
-        : (e.response?.data?.detail || "Erreur suppression client. La ligne a été restaurée.");
-      setMsg(detail);
-    }finally{
-      setDeletingUser("");
+      setMsg(e.response?.data?.detail || "Erreur suppression client");
     }
   }
 
@@ -3600,6 +2804,19 @@ function Platform({auth}){
     }
   }
 
+  async function changeExpiry(u, currentDate){
+    const d=prompt(`Nouvelle date expiration pour ${u} (YYYY-MM-DD):`, currentDate || "");
+    if(!d) return;
+    try{
+      await axios.post(`${API}/platform/client-update-expiry/${encodeURIComponent(u)}`,{expires_at:d},auth);
+      setMsg(`Date expiration changée pour ${u}.`);
+      await load();
+    }catch(e){
+      setMsg(e.response?.data?.detail || "Erreur changement date expiration");
+    }
+  }
+
+  
   async function toggleAiPremium(u, enabled){
     try{
       await axios.post(`${API}/platform/client-ai-premium/${encodeURIComponent(u)}?enabled=${enabled}`,{},auth);
@@ -3608,6 +2825,10 @@ function Platform({auth}){
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur Premium AI");
     }
+  }
+
+  function toggleCreatePage(pageId){
+    setPagePermissions(prev=>prev.includes(pageId) ? prev.filter(x=>x!==pageId) : [...prev,pageId]);
   }
 
   async function updateClientAccess(client,nextPages,nextCanManage){
@@ -3623,186 +2844,101 @@ function Platform({auth}){
     }
   }
 
-  async function saveClientInfo(){
-    if(!infoDraft) return;
-    try{
-      await axios.post(`${API}/platform/client-info/${encodeURIComponent(infoDraft.originalUsername)}`, infoDraft, auth);
-      setMsg("Informations utilisateur enregistrées.");
-      setInfoClient(null);
-      setInfoDraft(null);
-      await load();
-    }catch(e){
-      setMsg(e.response?.data?.detail || "Erreur sauvegarde informations client");
-    }
-  }
-
-  function resetFilters(){
-    setSearch(""); setStatusFilter("all"); setPremiumFilter("all"); setManageFilter("all"); setExpireFilter("all");
-  }
-
-  function isExpired(c){
-    if(!c.expires_at) return false;
-    return new Date(c.expires_at) < new Date();
-  }
-
-  const filteredClients = clients.filter(c=>{
-    const q = search.trim().toLowerCase();
-    if(q && !`${c.username || ""} ${c.pharmacy_name || ""} ${c.email || ""}`.toLowerCase().includes(q)) return false;
-    if(statusFilter !== "all" && String(!!c.active) !== statusFilter) return false;
-    if(premiumFilter !== "all" && String(!!c.ai_premium) !== premiumFilter) return false;
-    if(manageFilter !== "all" && String(!!c.can_manage_users) !== manageFilter) return false;
-    if(expireFilter === "expired" && !isExpired(c)) return false;
-    if(expireFilter === "valid" && isExpired(c)) return false;
-    return true;
-  });
-
-  const avatarText = c => (c.username || "U").slice(0,2).toUpperCase();
-  const createdLabel = d => d ? new Date(d).toLocaleString("fr-FR", {year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit"}) : "—";
-
-return <section className="platformPage platformUsersPage">
-    <div className="platformUsersTitle">
-      <div className="platformUsersIcon"><InvIcon name="users" /></div>
+return <section className="platformPage">
+    <div className="platformHeaderBar">
       <div>
-        <h2>Utilisateurs</h2>
-        <p>Gérez les comptes utilisateurs et leurs accès.</p>
+        <h2>Stores / clients pharmacie</h2>
+        <p>Gérez les comptes clients, leurs accès et leurs permissions.</p>
       </div>
-      <button type="button" className="platformAddStoreBtn" onClick={()=>{resetCreateForm(); setShowCreateModal(true);}}>Ajouter User</button>
+      <button type="button" className="platformAddStoreBtn" onClick={()=>setShowCreateModal(true)}>Ajouter Store</button>
     </div>
 
-    {showCreateModal && <div className="modalOverlay platformCreateOverlay" onClick={()=>setShowCreateModal(false)}>
-      <div className="scanModal platformStoreModal platformCreateUserModal" onClick={e=>e.stopPropagation()} role="dialog" aria-label="Créer un utilisateur">
+    {showCreateModal && <div className="modalOverlay" onClick={()=>setShowCreateModal(false)}>
+      <div className="scanModal platformStoreModal" onClick={e=>e.stopPropagation()}>
         <button type="button" className="modalClose" onClick={()=>setShowCreateModal(false)}>×</button>
-        <div className="platformCreateModalHeader">
-          <h2>Créer un utilisateur</h2>
-          <p>Créer un utilisateur avec ses accès et permissions.</p>
+        <h2>Ajouter Store</h2>
+        <p>Créer un client pharmacie avec ses accès et permissions.</p>
+        <div className="platformCreateGrid">
+          <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
+          <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
+          <input placeholder="nom pharmacie" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/>
+          <input placeholder="jours" value={days} onChange={e=>setDays(e.target.value)}/>
         </div>
-        <div className="platformCreateModalBody">
-          <section className="platformCreateSection">
-            <h3>Identifiants</h3>
-            <div className="platformCreateGrid">
-              <label><span>User *</span><input placeholder="ex: pharma" value={username} onChange={e=>setUsername(e.target.value)}/></label>
-              <label><span>Password *</span><input placeholder="Mot de passe" type="password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
-              <label><span>User name *</span><input placeholder="ex: pharma Tanger" value={pharmacy} onChange={e=>setPharmacy(e.target.value)}/></label>
-              <label><span>Expire le *</span><input type="date" value={createExpiresAt} onChange={e=>setCreateExpiresAt(e.target.value)}/></label>
-            </div>
-          </section>
-          <section className="platformCreateSection">
-            <h3>Informations utilisateur</h3>
-            <div className="platformCreateGrid">
-              <label><span>Téléphone</span><input placeholder="+212 6 12 34 56 78" value={createPhone} onChange={e=>setCreatePhone(e.target.value)}/></label>
-              <label><span>Email</span><input placeholder="contact@example.com" type="email" value={createEmail} onChange={e=>setCreateEmail(e.target.value)}/></label>
-              <label className="full"><span>Adresse</span><input placeholder="Adresse complète" value={createAddress} onChange={e=>setCreateAddress(e.target.value)}/></label>
-              <label className="full"><span>Notes</span><textarea placeholder="Notes utilisateur" value={createNotes} onChange={e=>setCreateNotes(e.target.value)} /></label>
-            </div>
-          </section>
-          <section className="platformCreateSection">
-            <h3>Accès et permissions</h3>
-            <div className="platformCreateChecks platformCreateChecksCompact">
-              <label className="checkLine"><input type="checkbox" checked={createActive} onChange={e=>setCreateActive(e.target.checked)}/> Status activé</label>
-              <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
-              <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Gestion users autorisée</label>
-            </div>
-          </section>
-          <section className="platformCreateSection platformCreatePagesSection">
-            <div className="pagePermissionBox pagePermissionButtonBox platformCreatePagesCompact">
-              <div className="pagePermissionButtonHeader">
-                <div>
-                  <strong>Pages visibles</strong>
-                  <small>{pagePermissions.length} page(s) sélectionnée(s)</small>
-                </div>
-                <PagePermissionsModalButton
-                  buttonLabel="Editer"
-                  title="Pages visibles du user"
-                  description="Choisissez les pages visibles pour ce user."
-                  options={ASSIGNABLE_PAGE_OPTIONS}
-                  value={pagePermissions}
-                  onSave={next=>setPagePermissions(next)}
-                />
-              </div>
-            </div>
-          </section>
+        <div className="platformCreateChecks">
+          <label className="checkLine"><input type="checkbox" checked={aiPremium} onChange={e=>setAiPremium(e.target.checked)}/> Premium AI Assistant</label>
+          <label className="checkLine"><input type="checkbox" checked={canManageUsers} onChange={e=>setCanManageUsers(e.target.checked)}/> Peut créer ses propres utilisateurs</label>
         </div>
-        <div className="platformModalActions platformCreateFooter">
+        <div className="pagePermissionBox">
+          <strong>Pages visibles pour ce client</strong>
+          <div className="pagePermissionGrid">
+            {APP_USER_PAGES.map(page=><label key={page.id}>
+              <input type="checkbox" checked={pagePermissions.includes(page.id)} onChange={()=>toggleCreatePage(page.id)}/>
+              <span>{page.label}</span>
+            </label>)}
+          </div>
+        </div>
+        <div className="platformModalActions">
           <button type="button" className="platformModalCancel" onClick={()=>setShowCreateModal(false)}>Annuler</button>
-          <button type="button" className="platformModalCreate" onClick={create}>Créer utilisateur</button>
+          <button type="button" className="platformModalCreate" onClick={create}>Créer client</button>
         </div>
       </div>
     </div>}
 
     <p className={msg.includes("Erreur") || msg.includes("not") ? "err" : "success"}>{msg}</p>
 
-    <div className="platformUsersPanel">
-      <div className="platformUsersFilters">
-        <div className="platformSearchBox"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un utilisateur..." /></div>
-        <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="all">Status — Tous</option><option value="true">Activé</option><option value="false">Désactivé</option></select>
-        <select value={premiumFilter} onChange={e=>setPremiumFilter(e.target.value)}><option value="all">Premium AI — Tous</option><option value="true">Activé</option><option value="false">Désactivé</option></select>
-        <select value={manageFilter} onChange={e=>setManageFilter(e.target.value)}><option value="all">Gestion users — Tous</option><option value="true">Autorisé</option><option value="false">Non autorisé</option></select>
-        <select value={expireFilter} onChange={e=>setExpireFilter(e.target.value)}><option value="all">Expires — Tous</option><option value="valid">Valide</option><option value="expired">Expiré</option></select>
-        <button type="button" className="platformResetFilter" onClick={resetFilters}>↻ Réinitialiser</button>
-      </div>
-      <table className="platformUsersTable">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>User name</th>
-            <th>Abonnement</th>
-            <th>Mot de passe</th>
-            <th>Pages visibles</th>
-            <th>Status</th>
-            <th>Infos</th>
-            <th>Delete</th>
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Pharmacie</th>
+          <th>Abonnement</th>
+          <th>Compte</th>
+          <th>Expire</th>
+          <th>Mot de passe</th>
+          <th>Premium AI</th>
+          <th>Pages visibles</th>
+          <th>Gestion users</th>
+          <th>Statut</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {clients.map(c=>{
+          const isAdmin=c.username==="admin" || c.role==="platform_admin";
+          const expDate=c.expires_at ? c.expires_at.slice(0,10) : "";
+          return <tr key={c.username}>
+            <td>{c.username}</td>
+            <td>{c.pharmacy_name}</td>
+            <td>{c.subscription_status}</td>
+            <td>{c.active ? "active" : "inactive"}</td>
+            <td>
+              {isAdmin ? "N/A" : expDate}
+              {!isAdmin && <><br/><button onClick={()=>changeExpiry(c.username, expDate)}>Changer date</button></>}
+            </td>
+            <td><button onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
+            <td>{isAdmin
+              ? <label className="checkLine compact"><input type="checkbox" checked disabled/> Activé</label>
+              : <label className="checkLine compact"><input type="checkbox" checked={!!c.ai_premium} onChange={e=>toggleAiPremium(c.username,e.target.checked)}/> Activé</label>
+            }</td>
+            <td>{isAdmin ? "Toutes" : <div className="pagePermissionMiniGrid">{APP_USER_PAGES.map(page=>{
+              const currentPages=cleanPageList(c.page_permissions || []);
+              const checked=currentPages.includes(page.id);
+              return <label key={page.id}><input type="checkbox" checked={checked} onChange={e=>{
+                const next=e.target.checked ? [...currentPages,page.id] : currentPages.filter(x=>x!==page.id);
+                updateClientAccess(c,next,c.can_manage_users);
+              }}/><span>{page.label}</span></label>
+            })}</div>}</td>
+            <td>{isAdmin ? "Oui" : <label className="checkLine compact"><input type="checkbox" checked={!!c.can_manage_users} onChange={e=>updateClientAccess(c,cleanPageList(c.page_permissions || []),e.target.checked)}/> Autorisé</label>}</td>
+            <td>{isAdmin ? "" : <button onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "Désactiver" : "Activer"}</button>}</td>
+            <td>{isAdmin ? "" : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
           </tr>
-        </thead>
-        <tbody>
-          {filteredClients.map(c=>{
-            const isAdmin=c.username==="admin" || c.role==="platform_admin";
-            const currentPages=normalizePagePermissions(c.page_permissions, ASSIGNABLE_PAGE_IDS, defaultUserPages());
-            return <tr key={c.username}>
-              <td><div className="platformUserIdentity"><span className="platformAvatar">{avatarText(c)}</span><span>{c.username}</span></div></td>
-              <td>{c.pharmacy_name}</td>
-              <td>{c.subscription_status}</td>
-              <td><button className="platformSoftPill" onClick={()=>changePassword(c.username)}>Changer mot de passe</button></td>
-              <td>{isAdmin ? <PagePermissionsModalButton buttonLabel="Editer" title={`Pages visibles - ${c.username}`} description="Compte admin : toutes les pages restent disponibles." options={ASSIGNABLE_PAGE_OPTIONS} value={ASSIGNABLE_PAGE_IDS} onSave={()=>{}} /> : <PagePermissionsModalButton
-                    buttonLabel="Editer"
-                    title={`Pages visibles - ${c.username}`}
-                    description="Choisissez les pages visibles pour ce user."
-                    options={ASSIGNABLE_PAGE_OPTIONS}
-                    value={currentPages}
-                    onSave={next=>updateClientAccess(c,next,c.can_manage_users)}
-                  />}</td>
-              <td>{isAdmin ? <span className="platformStatusPill active">● Activé</span> : <button type="button" className={`platformStatusPill ${c.active ? "active" : "inactive"}`} onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "● Activé" : "○ Désactivé"}<span>⌄</span></button>}</td>
-              <td><button type="button" className="platformInfoBtn" onClick={()=>openClientInfo(c)}>ⓘ Voir infos</button></td>
-              <td>{isAdmin ? <button className="dangerBtn disabled" disabled>Delete</button> : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
-            </tr>
-          })}
-          {!filteredClients.length && <tr><td colSpan="8" className="expenseHistoryEmpty">Aucun utilisateur trouvé.</td></tr>}
-        </tbody>
-      </table>
-      <div className="platformUsersFooter">Affichage de {filteredClients.length ? 1 : 0} à {filteredClients.length} sur {clients.length} utilisateurs</div>
-    </div>
-
-    {infoDraft && <aside className="platformInfoDrawer" role="dialog" aria-label="Infos utilisateur">
-      <div className="platformInfoDrawerHeader">
-        <span className="platformAvatar">{avatarText(infoDraft)}</span>
-        <div><h3>Infos utilisateur</h3><p>{infoDraft.pharmacy_name} ({infoDraft.username})</p></div>
-        <button type="button" onClick={()=>{setInfoClient(null);setInfoDraft(null);}}>×</button>
-      </div>
-      <div className="platformInfoForm">
-        <label><span>Téléphone</span><input value={infoDraft.phone} onChange={e=>setInfoDraft({...infoDraft,phone:e.target.value})} placeholder="+212 6 12 34 56 78" /></label>
-        <label><span>Email</span><input value={infoDraft.email} onChange={e=>setInfoDraft({...infoDraft,email:e.target.value})} placeholder="contact@example.com" /></label>
-        <label className="full"><span>User</span><input value={infoDraft.username} onChange={e=>setInfoDraft({...infoDraft,username:e.target.value})} /></label>
-        <label className="full"><span>Pharmacie / User name</span><input value={infoDraft.pharmacy_name} onChange={e=>setInfoDraft({...infoDraft,pharmacy_name:e.target.value})} /></label>
-        <label className="full"><span>Adresse</span><input value={infoDraft.address} onChange={e=>setInfoDraft({...infoDraft,address:e.target.value})} placeholder="Adresse" /></label>
-        <label className="full"><span>Expire le</span><input type="date" value={infoDraft.expires_at} onChange={e=>setInfoDraft({...infoDraft,expires_at:e.target.value})} /></label>
-        <label><span>Premium AI</span><div className="platformDrawerCheck"><input type="checkbox" checked={!!infoDraft.ai_premium} onChange={e=>setInfoDraft({...infoDraft,ai_premium:e.target.checked})}/> Activé</div></label>
-        <label><span>Gestion users</span><div className="platformDrawerCheck"><input type="checkbox" checked={!!infoDraft.can_manage_users} onChange={e=>setInfoDraft({...infoDraft,can_manage_users:e.target.checked})}/> Autorisé</div></label>
-        <label className="full"><span>Notes</span><textarea value={infoDraft.notes} onChange={e=>setInfoDraft({...infoDraft,notes:e.target.value})} placeholder="Notes utilisateur" /></label>
-      </div>
-      <div className="platformInfoMeta"><span><small>ID utilisateur</small>{infoDraft.originalUsername}</span><span><small>Créé le</small>{createdLabel(infoDraft.created_at)}</span></div>
-      <div className="platformInfoActions"><button type="button" onClick={()=>{setInfoClient(null);setInfoDraft(null);}}>Annuler</button><button type="button" onClick={saveClientInfo}>Enregistrer</button></div>
-    </aside>}
+        })}
+      </tbody>
+    </table>
   </section>
 }
+
+
 
 
 
@@ -3836,8 +2972,14 @@ function Dashboard({setTab, me, menu=[], logout}){
   const coverage=products.length ? Math.round((productsWithRfid/products.length)*100) : 0;
   const detectedEpcCount=(detectedEpcs||[]).length;
   const epcCounts={};
-  associations.forEach(a=>{ const e=norm(a.EPC || a.Identifiant); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
+  associations.forEach(a=>{ const e=norm(a.EPC); if(e) epcCounts[e]=(epcCounts[e]||0)+1; });
   const duplicateEpcs=Object.values(epcCounts).filter(x=>x>1).length;
+  const accountName=me?.pharmacy_name || me?.username || "Pharmacie Démo";
+  const roleName=me?.role==="platform_admin" ? "Administrateur" : "Utilisateur";
+  const initials=String(accountName || "AD").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase() || "AD";
+  const radius=70;
+  const circumference=2*Math.PI*radius;
+  const dash=(coverage/100)*circumference;
   const activeDashboardAd=dashboardAds.length ? dashboardAds[dashboardAdIndex % dashboardAds.length] : null;
 
   function exportDashboardReport(){
@@ -3853,99 +2995,173 @@ function Dashboard({setTab, me, menu=[], logout}){
     }];
     exportCSV("rapport_dashboard.csv",rows,Object.keys(rows[0]));
   }
+
   function exportProductsWithoutRfid(){
     const rows=products.filter(p=>!associatedPids.has(String(p.PID))).map(p=>({...p,"Statut":"Sans association"}));
     exportCSV("produits_sans_tag.csv",rows,["PID","Produit","Catégorie","Zone","Stock","Code barre 1","Code barre 2","Statut"]);
   }
+
   function exportScanHistory(){
     const rows=associations.length ? associations : [{message:"Aucune donnée d'association"}];
     exportCSV("historique_scans.csv",rows,Object.keys(rows[0]||{message:""}));
   }
 
+  const navItems = [
+    {id:"dashboard", label:"Dashboard"},
+    {id:"operations", label:"Opérations"},
+    {id:"association", label:"Associations"},
+    {id:"inventory", label:"Inventaire"},
+    {id:"cash", label:"Caisse"},
+    {id:"ai", label:"Assistant IA"},
+    {id:"users", label:"Utilisateur"}
+  ].filter(item=> item.id==="dashboard" || !menu.length || menu.some(m=>m.id===item.id));
+
   const kpis=[
-    {label:"Produits enregistrés", value:products.length, sub:products.length ? "Catalogue importé" : "Aucun catalogue importé", tag:"Stock", tone:"blue", icon:"cube", action:()=>setTab("operations")},
-    {label:"Produits tagués", value:productsWithRfid, sub:productsWithRfid ? "Associés tag RFID" : "Aucun tag détecté", tag:"RFID", tone:"emerald", icon:"link", action:()=>setTab("association")},
-    {label:"Transactions", value:detectedEpcCount, sub:detectedEpcCount ? "Automatiquement détectées" : "Automatiquement détectées", tag:"Caisse", tone:"sky", icon:"cash", action:()=>setTab("inventory")},
-    {label:"Produits sans tag", value:productsWithoutRfid, sub:productsWithoutRfid ? "Nécessitent association" : "Nécessitent association", tag:"À traiter", tone:"amber", icon:"warning", action:()=>setTab("operations")}
+    {label:"Produits enregistrés", value:products.length, sub:products.length ? "Catalogue importé" : "Aucun catalogue importé", tag:"Stock", tone:"blue", icon:"box", action:()=>setTab("operations")},
+    {label:"Produits tagués", value:productsWithRfid, sub:productsWithRfid ? "Avec association" : "Aucun tag détecté", tag:"RFID", tone:"emerald", icon:"tag", action:()=>setTab("association")},
+    {label:"Transactions", value:detectedEpcCount, sub:detectedEpcCount ? "Identifiants détectés importés" : "Aucune transaction", tag:"Caisse", tone:"indigo", icon:"rfid", action:()=>setTab("inventory")},
+    {label:"Produits sans tag", value:productsWithoutRfid, sub:productsWithoutRfid ? "À taguer en priorité" : "Synchronisés", tag:"À traiter", tone:"amber", icon:"warning", action:()=>setTab("operations")}
   ];
+
   const reports=[
-    {label:"Taux de couverture", tone:"violet", icon:"grid", action:exportDashboardReport},
-    {label:"Produits avec tag", tone:"sky", icon:"link", action:exportDashboardReport},
-    {label:"Produits sans tag", tone:"emerald", icon:"list", action:exportProductsWithoutRfid},
-    {label:"Historique scans", tone:"amber", icon:"cash", action:exportScanHistory}
-  ];
-  const alerts=[
-    {tone:"red", icon:"warning", title:`${detectedEpcCount} scan détecté`, text:"Importez les CSV des instruments détectés pour calculer le stock réel."},
-    {tone:"amber", icon:"warning", title:productsWithoutRfid>0 ? `${productsWithoutRfid} produits sans association` : "Aucune association détectée pour ces produits", text:"Ajoutez un rapport pour améliorer votre suivi."}
+    {label:"Taux de couverture", tone:"blue", icon:"doc", action:exportDashboardReport},
+    {label:"Produits avec tag", tone:"emerald", icon:"tag", action:exportDashboardReport},
+    {label:"Produits sans tag", tone:"amber", icon:"warning", action:exportProductsWithoutRfid},
+    {label:"Historique scans", tone:"violet", icon:"clock", action:exportScanHistory}
   ];
 
-  return <section className="dashRefDashboard">
-    <div className="dashRefHeroBlock">
-      <div>
-        <div className="dashRefStatusLine">
-          <span className="dark">app.smart-inventory.io/dashboard</span>
-          <span>Mode stable</span>
-          <span className="success">Synchronisation active</span>
-        </div>
-        <h1>Dashboard pharmacie</h1>
-        <h2>suivi RFID en temps réel.</h2>
-        <p>Suivi en temps réel de la couverture de l'activité de votre pharmacie, avec une lecture claire des produits tagués, des transactions et des alertes à traiter.</p>
-      </div>
-      <div className="dashRefHeroActions">
-        <button type="button" className="dashRefPrimary" onClick={()=>setTab("inventory")}>Accéder à l'inventaire</button>
-        <button type="button" className="dashRefSecondary" onClick={exportDashboardReport}>Exporter</button>
-      </div>
-    </div>
+  const alerts=[];
+  alerts.push({tone:"blue", icon:"rfid", title:`${detectedEpcCount} scan${detectedEpcCount>1 ? "s" : ""} détecté${detectedEpcCount>1 ? "s" : ""}`, text:"Importez les CSV des instruments détectés pour calculer le stock réel."});
+  if(productsWithoutRfid>0){
+    alerts.push({tone:"amber", icon:"warning", title:`${productsWithoutRfid} produits sans association`, text:"Ajoutez un rapport pour améliorer votre suivi."});
+  }else{
+    alerts.push({tone:"amber", icon:"warning", title:"Aucune association détectée pour ces produits.", text:"Ajoutez un rapport pour améliorer votre suivi."});
+  }
+  if(duplicateEpcs>0) alerts.push({tone:"rose", icon:"warning", title:`${duplicateEpcs} doublon(s) identifiant détecté(s)`, text:"Vérifier les associations en double."});
 
-    <div className="dashRefKpiGrid">
-      {kpis.map(k=><button type="button" key={k.label} className="dashRefKpi" onClick={k.action}>
-        <div><span className={`dashRefIcon ${k.tone}`}><InvIcon name={k.icon}/></span><em>{k.tag}</em></div>
-        <strong>{k.value}</strong>
-        <b>{k.label}</b>
-        <small>{k.sub}</small>
-      </button>)}
-    </div>
-
-    <div className="dashRefTwoColumns">
-      <section className="dashRefCoverageCard">
-        <div className="dashRefSectionHead"><div><b>Taux de couverture</b><span>Pourcentage de produits avec étiquette RFID active sur le total</span></div><em>À améliorer</em></div>
-        <div className="dashRefCoverageBody">
-          <div className="dashRefCircle"><span>{coverage}%</span></div>
-          <div>
-            <h3>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture progresse." : "Votre couverture doit être améliorée."}</h3>
-            <p>Vous avez étiqueté {coverage}% de vos produits en pharmacie. Commencez ou continuez l'étiquetage pour améliorer votre suivi d'inventaire et fiabiliser les sorties de caisse.</p>
-            <div><button type="button" className="dashRefPrimary" onClick={()=>setTab("association")}>Lancer l'association</button><button type="button" className="dashRefSecondary" onClick={()=>setTab("operations")}>Lancer un scan</button></div>
-          </div>
-        </div>
-      </section>
-      <section className="dashRefAdCard">
-        <span>Espace partenaire</span>
-        <h3>Espace partenaire officine</h3>
-        <div className="dashRefPartnerLine"><i><InvIcon name="sync"/></i><b>Prodecys</b></div>
-        {activeDashboardAd?.image_url ? <img src={mediaUrl(activeDashboardAd.image_url)} alt="Publicité"/> : <p>Accédez à vos outils partenaires, gérez vos clients pharmacies et suivez les performances de vos installations RFID.</p>}
-        <button type="button">Accéder à l'espace</button>
-      </section>
-    </div>
-
-    <div className="dashRefBottomGrid">
-      <section className="dashRefReportsBlock">
-        <div className="dashRefSectionHead"><div><b>Rapports et exports</b><span>Vérifiez les données et créez vos outils de gestion</span></div><button type="button">Voir tout</button></div>
-        <div className="dashRefReportGrid">
-          {reports.map(r=><button type="button" key={r.label} onClick={r.action}>
-            <span className={`dashRefIcon ${r.tone}`}><InvIcon name={r.icon}/></span><b>{r.label}</b><small>Télécharger →</small>
+  return <div className="shuffleDashExactPage">
+    <nav className="shuffleDashNav">
+      <div className="shuffleDashNavInner">
+        <button type="button" className="shuffleDashBrand" onClick={()=>setTab("dashboard")}>
+          <span className="shuffleDashBrandIcon"><DashIcon name="box"/></span>
+          <span>Smart Inventory</span>
+        </button>
+        <div className="shuffleDashNavLinks">
+          {navItems.map(item=><button key={item.id} type="button" className={item.id==="dashboard" ? "active" : ""} onClick={()=>setTab(item.id)}>
+            {item.id==="dashboard" && <DashIcon name="box"/>}
+            <span>{item.label}</span>
           </button>)}
         </div>
-      </section>
-      <section className="dashRefAlertsBlock">
-        <div className="dashRefSectionHead"><div><b>Alertes prioritaires</b><span>Points à vérifier quand la pharmacie est active</span></div></div>
-        <div className="dashRefAlertsCard">
-          {alerts.map((a,i)=><div className={`dashRefAlert ${a.tone}`} key={i}><span className={`dashRefIcon ${a.tone}`}><InvIcon name={a.icon}/></span><div><b>{a.title}</b><small>{a.text}</small></div></div>)}
+        <div className="shuffleDashAccount">
+          <span>{initials}</span>
+          <div><b>{accountName}</b><small>{roleName}</small></div>
         </div>
-      </section>
-    </div>
-  </section>;
-}
+      </div>
+    </nav>
 
+    <main className="shuffleDashMain">
+      <div className="shuffleDashGlowOne" aria-hidden="true"></div>
+      <div className="shuffleDashGlowTwo" aria-hidden="true"></div>
+      <section className="shuffleDashGrid">
+        <header className="shuffleDashHero shuffleDashSpan12">
+          <div>
+            <div className="shuffleDashPills">
+              <span className="dark">app.smart-inventory.io/dashboard</span>
+              <span>Mode stable</span>
+              <span className="success">Synchronisation active</span>
+            </div>
+            <h1>Dashboard pharmacie <span>suivi RFID en temps réel.</span></h1>
+            <p>Suivi en temps réel de la couverture et de l'activité de votre pharmacie, avec une lecture claire des produits tagués, des transactions et des alertes à traiter.</p>
+          </div>
+          <div className="shuffleDashHeroActions">
+            <button type="button" className="primary" onClick={()=>setTab("operations")}>Accéder à l’avancement <span>→</span></button>
+            <button type="button" className="secondary" onClick={exportDashboardReport}>Exporter</button>
+          </div>
+        </header>
+
+        {kpis.map(k=><button key={k.label} type="button" className="shuffleDashKpi" onClick={k.action}>
+          <div className="shuffleDashKpiTop">
+            <span className={`shuffleDashMiniIcon ${k.tone}`}><DashIcon name={k.icon}/></span>
+            <em className={k.tone}>{k.tag}</em>
+          </div>
+          <strong>{k.value}</strong>
+          <b>{k.label}</b>
+          <small>{k.sub}</small>
+        </button>)}
+
+        <section className="shuffleDashCoverage shuffleDashSpan7">
+          <div className="shuffleDashSectionTitle">
+            <div><b>Taux de couverture</b><span>Mesure la part des produits déjà reliés à un tag RFID.</span></div>
+            <em>À améliorer</em>
+          </div>
+          <div className="shuffleDashCoverageBody">
+            <div className="shuffleDashGauge" aria-label={`Taux de couverture ${coverage}%`}>
+              <svg viewBox="0 0 188 188">
+                <circle cx="94" cy="94" r={radius} fill="none" stroke="#eaf0f7" strokeWidth="20"/>
+                {coverage>0 && <circle cx="94" cy="94" r={radius} fill="none" stroke="#4f46e5" strokeWidth="20" strokeDasharray={`${dash} ${circumference}`} strokeLinecap="round" transform="rotate(-90 94 94)"/>}
+              </svg>
+              <strong>{coverage}%</strong>
+            </div>
+            <div className="shuffleDashCoverageCopy">
+              <h2>{coverage>=80 ? "Votre pharmacie est bien équipée." : coverage>=50 ? "Votre couverture progresse." : "Votre couverture doit être améliorée."}</h2>
+              <p>Vous avez étiqueté {coverage}% de vos produits en pharmacie. Commencez ou continuez l’étiquetage pour améliorer votre suivi d’inventaire et fiabiliser les sorties caisse.</p>
+              <div>
+                <button type="button" className="primary" onClick={()=>setTab("operations")}>Voir l’avancement <span>→</span></button>
+                <button type="button" className="secondary" onClick={()=>setTab("operations")}>Lancer un scan</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="shuffleDashAd shuffleDashSpan5">
+          <div className="shuffleDashAdGlow"></div>
+          <div className="shuffleDashAdTop"><div><span>PUBLICITÉ</span><h2>Espace partenaire officine</h2></div><i></i><i></i></div>
+          <div className="shuffleDashAdPanel">
+            {activeDashboardAd?.image_url ? <img src={mediaUrl(activeDashboardAd.image_url)} alt="Publicité"/> : <p>Un emplacement visuel sobre pour les annonces réseau, les rappels de campagne ou les communications internes de la pharmacie.</p>}
+          </div>
+        </section>
+
+        <section className="shuffleDashReports shuffleDashSpan8">
+          <div className="shuffleDashSectionTitle">
+            <div><b>Rapports et exports</b><span>Téléchargez les états utiles au suivi quotidien.</span></div>
+            <small>Exports sécurisés</small>
+          </div>
+          <div className="shuffleDashReportGrid">
+            {reports.map(r=><button key={r.label} type="button" onClick={r.action}>
+              <span className={`shuffleDashMiniIcon ${r.tone}`}><DashIcon name={r.icon}/></span>
+              <b>{r.label}</b>
+              <small>Télécharger ↓</small>
+            </button>)}
+          </div>
+        </section>
+
+        <section className="shuffleDashAlerts shuffleDashSpan4">
+          <div className="shuffleDashSectionTitle compact">
+            <div><b>Alertes prioritaires</b><span>Points à surveiller avant la prochaine session.</span></div>
+            <span className="shuffleDashSpinner"><DashIcon name="dots"/></span>
+          </div>
+          <div className="shuffleDashAlertList">
+            {alerts.map((a,i)=><div key={i} className={`shuffleDashAlert ${a.tone}`}>
+              <span className={`shuffleDashMiniIcon ${a.tone}`}><DashIcon name={a.icon}/></span>
+              <div><b>{a.title}</b><small>{a.text}</small></div>
+            </div>)}
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer className="shuffleDashFooter">
+      <div>
+        <button type="button" className="shuffleDashBrand" onClick={()=>setTab("dashboard")}><span className="shuffleDashBrandIcon"><DashIcon name="box"/></span><span>Smart Inventory</span></button>
+        <p>© 2026 Smart Inventory. Tous droits réservés.</p>
+      </div>
+      <div className="shuffleDashFooterLinks">
+        {navItems.map(item=><button key={item.id} type="button" onClick={()=>setTab(item.id)}>{item.label}</button>)}
+      </div>
+      <button type="button" className="shuffleDashLogout" onClick={logout}>Log out <span>↪</span></button>
+    </footer>
+  </div>
+}
 
 function DashboardAdmin({auth}){
   const [items,setItems]=useState([]);
@@ -4070,17 +3286,12 @@ function DashboardAdmin({auth}){
   const previewSrc = imageFile ? URL.createObjectURL(imageFile) : mediaUrl(imageUrl);
 
   return <section className="simpleAdAdmin dynamicAdAdmin">
-    <div className="adAdminPageHeader">
-      <div>
-        <h1>Publicité Dashboard</h1>
-        <p>Gérez l’espace publicitaire du dashboard. L’image peut avoir une dimension dynamique; le bouton et son lien sont configurables.</p>
-      </div>
-    </div>
+    <p className="notice">Gérez l’espace publicitaire du dashboard. L’image peut avoir une dimension dynamique; le bouton et son lien sont configurables.</p>
     <p className="mutedText">Pour une image externe, il faut une URL directe d'image. Une page Pixabay/Unsplash ne fonctionne pas comme image directe.</p>
 
     <div className="adAdminGrid">
       <div className="adEditorPanel">
-        <h2>Configuration publicité</h2>
+        <h2>Publicité Dashboard</h2>
         <p className="mutedText">Image recommandée : 1200 × 800 px, mais les dimensions sont acceptées dynamiquement. Utilisez PNG, JPG ou WEBP.</p>
 
         <div className="adFormGrid simpleAdForm">
