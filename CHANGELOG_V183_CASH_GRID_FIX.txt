@@ -1,0 +1,12 @@
+V183 - Correction Dashboard Caisse grid layout
+
+- Fixed Dashboard Caisse cards appearing one per row.
+- Removed previous grid-column spans that conflicted with the requested reference design.
+- Restored content layout:
+  - 3 large cards on top row
+  - 3 large cards on second row
+  - 5 compact KPI cards
+  - 4 result cards
+- Kept title and date bar unchanged.
+- Kept V182 Utilisateurs redesign.
+- Frontend build successful.

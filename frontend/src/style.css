@@ -14001,3 +14001,43 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   .cashShuffleInsightMetric{grid-template-columns:1fr!important;}
   .cashShuffleInsightRing{margin:0 auto!important;}
 }
+
+/* V183 - hard fix Dashboard Caisse content grid: remove old grid-column spans */
+.cashShuffleContentV142 .cashShuffleSectionTop > .cashShuffleCardTall,
+.cashShuffleContentV142 .cashShuffleSectionBottom > .cashShuffleMini,
+.cashShuffleContentV142 .cashShuffleSectionResults > .cashShuffleWide{
+  grid-column:auto!important;
+}
+.cashShuffleContentV142 .cashShuffleSectionTop,
+.cashShuffleContentV142 .cashShuffleSectionBottom,
+.cashShuffleContentV142 .cashShuffleSectionResults{
+  width:100%!important;
+  min-width:0!important;
+}
+@media (min-width:1101px){
+  .cashShuffleContentV142 .cashShuffleSectionTop{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .cashShuffleContentV142 .cashShuffleSectionBottom{
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  }
+  .cashShuffleContentV142 .cashShuffleSectionResults{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+}
+@media (max-width:1100px) and (min-width:721px){
+  .cashShuffleContentV142 .cashShuffleSectionTop,
+  .cashShuffleContentV142 .cashShuffleSectionResults{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .cashShuffleContentV142 .cashShuffleSectionBottom{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+@media (max-width:720px){
+  .cashShuffleContentV142 .cashShuffleSectionTop,
+  .cashShuffleContentV142 .cashShuffleSectionBottom,
+  .cashShuffleContentV142 .cashShuffleSectionResults{
+    grid-template-columns:1fr!important;
+  }
+}
