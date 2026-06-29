@@ -1,0 +1,16 @@
+V200 - Cash recap panel model design
+
+Base: V199_MODAL_HORIZONTAL_SCROLL_FIX
+
+Changes:
+- Kept all V199/V198/V197 logic unchanged.
+- Redesigned only the cash counting recap panel to match the approved generated model.
+- Centered the recap header with the icon above the “Récapitulatif” title.
+- Made recap rows more balanced with equal spacing, stronger hierarchy, and cleaner alignment.
+- Forced DH amounts to stay on one line to avoid awkward wrapping such as “DH” and “0” on separate lines.
+- Kept the expenses row visually highlighted with a warm, subtle border while keeping the amount readable.
+- Kept the zero-gap “Écart” row neutral for “Caisse équilibrée”.
+
+Validation:
+- Frontend production build succeeds.
+- Backend main.py compiles successfully.

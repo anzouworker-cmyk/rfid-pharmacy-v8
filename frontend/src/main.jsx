@@ -779,9 +779,10 @@ function Operations({me,setTab,logout,hideChrome=false}){
   const cashCardByKey = key => cashOperationCards.find(card=>card.key===key);
   const openCashMetric = key => {
     const card = cashCardByKey(key);
-    if(card?.isExpense) return openExpenseModal();
-    if(card?.editable) return setCashOpModal(card);
-    if(card) return setCashOpModal(card);
+    if(!card) return;
+    if(card.isExpense) return openExpenseModal();
+    if(card.editable || card.key === "toWithdraw") return setCashOpModal(card);
+    return;
   };
   const makeCustomCashCard = (key,title,value,description,type="+",tone="blue") => ({key,title,value,description,type,editable:true,tone,cta:"Retour valeur",valueLabel:"Valeur entrée"});
   const inventoryActions = [
@@ -796,15 +797,15 @@ function Operations({me,setTab,logout,hideChrome=false}){
     {icon:"money", tone:"green", label:"Total de vente par jour", value:`= ${formatDH(totalDailySalesCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("totalDailySalesCents")},
     {icon:"card", tone:"sky", label:"Tot. vente type crédit", value:`- ${formatDH(creditSalesCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("creditSalesCents")},
     {icon:"card", tone:"indigo", label:"Tot. vente type ATM", value:`- ${formatDH(atmSalesCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("atmSalesCents")},
-    {icon:"wallet", tone:"green", label:"Tot. vente en espèce", value:`= ${formatDH(salesCashCalculatedCents)}`, actionLabel:"Automatique", onClick:()=>openCashMetric("salesCashCents")},
+    {icon:"wallet", tone:"green", label:"Tot. vente en espèce", value:`= ${formatDH(salesCashCalculatedCents)}`, actionLabel:"Automatique", muted:true, readOnly:true},
     {icon:"box", tone:"violet", label:"Dépôts / ajouts", value:`+ ${formatDH(depositsCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("depositsCents")},
     {icon:"receipt", tone:"rose", label:"Règlement de crédit", value:`+ ${formatDH(creditSettlementCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("creditSettlementCents")},
     {icon:"receipt", tone:"rose", label:"Ajouter dépense", value:`- ${formatDH(expensesCents)}`, actionLabel:"Ajouter dépense", onClick:openExpenseModal},
     {icon:"card", tone:"indigo", label:"À retirer", value:`= ${formatDH(cashToWithdrawCents)}`, actionLabel:"Automatique", onClick:()=>openCashMetric("toWithdraw")},
     {icon:"card", tone:"sky", label:"Retiré (réel)", value:`- ${formatDH(withdrawnCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("withdrawnCents")},
-    {icon:"card", tone:"sky", label:"Nouvelle C. fermeture", value:`= ${formatDH(newCashBalanceCents)}`, actionLabel:"Automatique", onClick:()=>openCashMetric("closingRealCents")},
+    {icon:"card", tone:"sky", label:"Nouvelle C. fermeture", value:`= ${formatDH(newCashBalanceCents)}`, actionLabel:"Automatique", muted:true, readOnly:true},
     {icon:"card", tone:"sky", label:"C. fermeture (compté)", value:`= ${formatDH(cashCountedCents)}`, actionLabel:"Compter la caisse", onClick:()=>openCashMetric("counted")},
-    {icon:"card", tone:"indigo", label:"C. fermeture (théorique)", value:`= ${formatDH(closingTheoreticalCents)}`, actionLabel:"Automatique", onClick:()=>openCashMetric("closingCalculatedCents")}
+    {icon:"card", tone:"indigo", label:"C. fermeture (théorique)", value:`= ${formatDH(closingTheoreticalCents)}`, actionLabel:"Automatique", muted:true, readOnly:true}
   ];
   const exportActions = [
     {icon:"doc", tone:"violet", title:"Produits locaux", desc:"Exporter la liste des produits en local.", label:"Exporter CSV", onClick:exportProducts},

@@ -1,0 +1,21 @@
+SmartInventory V201 - Automatic cash operation cards readonly
+
+Base: V200_RECAP_PANEL_MODEL_DESIGN
+
+Changes:
+- Kept all V200 logic and recap design unchanged.
+- Cash operation cards that are calculated automatically no longer open a popup and are not editable:
+  - Tot. vente en espèce
+  - Nouvelle C. fermeture
+  - C. fermeture (théorique)
+- Kept the requested exception: À retirer still opens its popup.
+- Added a read-only rendering path for automatic operation cards so they keep the same visual design but no longer behave like clickable buttons.
+- Added read-only CSS treatment: normal cursor, no clickable hover emphasis, no modal opening.
+
+Files modified:
+- frontend/src/main.jsx
+- frontend/src/ShuffleOperationsPage.jsx
+
+Validation:
+- npm run build
+- python3 -m py_compile backend/main.py

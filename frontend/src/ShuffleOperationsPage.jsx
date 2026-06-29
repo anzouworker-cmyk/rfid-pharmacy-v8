@@ -70,6 +70,13 @@ const OPS_INTERNAL_LAYOUT_CSS = `
     border-color:#dbe5f1!important;
     box-shadow:0 8px 18px rgba(15,23,42,.05)!important;
   }
+  .opsInAppRoot .opsMetricCardReadOnly,
+  .opsInAppRoot .opsMetricCardReadOnly:hover{
+    cursor:default!important;
+    border-color:#e8edf4!important;
+    box-shadow:0 4px 14px rgba(15,23,42,.03)!important;
+    transform:none!important;
+  }
   .opsInAppRoot .opsActionCard{
     min-height:162px!important;
     border-radius:18px!important;
@@ -264,14 +271,18 @@ function InventoryActionCard({icon,tone,badge,badgeClass,title,desc,label,onClic
   return <button type="button" onClick={onClick} className={`${cls} text-left cursor-pointer`}>{inner}</button>;
 }
 
-function CashMetric({icon,tone,label,value,actionLabel,onClick,muted=false,wide=false}){
+function CashMetric({icon,tone,label,value,actionLabel,onClick,muted=false,wide=false,readOnly=false}){
   const bg = {green:"bg-green-50", sky:"bg-sky-50", violet:"bg-violet-50", amber:"bg-amber-50", rose:"bg-rose-50", teal:"bg-teal-50", indigo:"bg-indigo-50", fuchsia:"bg-fuchsia-50", orange:"bg-orange-50", cyan:"bg-cyan-50", lime:"bg-lime-50", pink:"bg-pink-50"}[tone] || "bg-indigo-50";
   const text = {green:"text-green-600", sky:"text-sky-600", violet:"text-violet-600", amber:"text-amber-600", rose:"text-rose-600", teal:"text-teal-600", indigo:"text-indigo-600", fuchsia:"text-fuchsia-600", orange:"text-orange-600", cyan:"text-cyan-600", lime:"text-lime-600", pink:"text-pink-600"}[tone] || "text-indigo-600";
-  return <button type="button" onClick={onClick} className={`opsMetricCard ${wide ? "opsMetricCardWide" : ""} text-left cursor-pointer`}>
+  const interactive = typeof onClick === "function" && !readOnly;
+  const content = <>
     <div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}><SimpleIcon type={icon} className={`w-5 h-5 ${text}`}/></div><p className="text-[13px] font-medium leading-[1.25] text-slate-500 mb-0">{label}</p></div>
     <p className="font-heading text-[18px] leading-none font-bold text-slate-900">{value}</p>
     <span className={`inline-block text-[13px] font-semibold ${muted ? "text-slate-400" : text.includes("green") || text.includes("lime") ? "text-emerald-600" : "text-indigo-600"}`}>{actionLabel}</span>
-  </button>;
+  </>;
+  const className = `opsMetricCard ${wide ? "opsMetricCardWide" : ""} ${interactive ? "cursor-pointer" : "opsMetricCardReadOnly cursor-default"} text-left`;
+  if(!interactive) return <div className={className} aria-label={`${label} - lecture seule`}>{content}</div>;
+  return <button type="button" onClick={onClick} className={className}>{content}</button>;
 }
 
 function ExportCard({icon,tone,title,desc,label,onClick,file,onFile}){
