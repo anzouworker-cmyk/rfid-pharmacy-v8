@@ -15991,3 +15991,56 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
     max-width:none!important;
   }
 }
+
+
+/* V206 - Fix recap card shrink issue after narrow responsive rules */
+.cashTotalCard.cashRecapCard,
+.cashRecapCard{
+  align-items:stretch!important;
+  text-align:left!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+.cashRecapCard .cashRecapHeader{
+  width:100%!important;
+  align-items:center!important;
+  text-align:center!important;
+}
+.cashRecapCard .cashRecapBody{
+  width:100%!important;
+  max-width:100%!important;
+  align-self:stretch!important;
+  align-items:stretch!important;
+}
+.cashRecapCard .cashRecapRow,
+.cashRecapCard .cashRecapGapCard{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  align-self:stretch!important;
+  justify-self:stretch!important;
+  box-sizing:border-box!important;
+}
+.cashRecapCard .cashRecapRow > div,
+.cashRecapCard .cashRecapGapCard > div{
+  min-width:0!important;
+  max-width:100%!important;
+}
+@container (max-width:430px){
+  .cashRecapCard .cashRecapRow,
+  .cashRecapCard .cashRecapGapCard{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    justify-items:stretch!important;
+  }
+  .cashRecapCard .cashRecapRow strong,
+  .cashRecapCard .cashRecapGapCard strong,
+  .cashRecapCard .cashRecapExpenseAmount{
+    justify-self:end!important;
+    text-align:right!important;
+    max-width:100%!important;
+    white-space:nowrap!important;
+  }
+}

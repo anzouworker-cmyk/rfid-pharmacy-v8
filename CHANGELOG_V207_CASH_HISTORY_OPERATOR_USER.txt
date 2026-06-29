@@ -1,0 +1,15 @@
+V207 - Cash history operator user
+
+Base: V206.
+Changes:
+- Kept V206/V205 logic and design unchanged.
+- Added the logged-in username automatically to cash day operations.
+- Added an "Utilisateur" column in the Gestion de caisse / Historique de caisse table.
+- The user does not enter this value manually; it is taken from the logged-in account.
+- Cash operation updates from the Operations page and CashRegister page now stamp the day with operationUserName and operationUpdatedAt.
+- Added "Utilisateur" to the cash CSV export.
+- Preserved backward compatibility: old cash days without a recorded user display "—".
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.

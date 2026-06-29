@@ -425,7 +425,7 @@ function App(){
   if(tab==="operations") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Operations me={me} setTab={setTab} logout={logout} hideChrome={true}/></InventoryLikePageShell>;
   if(tab==="association") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Association setTab={setTab} me={me} logout={logout}/></InventoryLikePageShell>;
   if(tab==="inventory") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><Inventory setTab={setTab} me={me} logout={logout}/></InventoryLikePageShell>;
-  if(tab==="cash") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashRegister/></InventoryLikePageShell>;
+  if(tab==="cash") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashRegister me={me}/></InventoryLikePageShell>;
   if(tab==="ai") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><AIAssistant/></InventoryLikePageShell>;
   if(tab==="users") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><MyUsers auth={auth} me={me}/></InventoryLikePageShell>;
   if(tab==="cashAdmin") return <InventoryLikePageShell tab={tab} setTab={setTab} menu={menu} me={me} logout={logout}><CashDashboardAdmin/></InventoryLikePageShell>;
@@ -474,7 +474,7 @@ function App(){
         {tab==="ai" && <AIAssistant/>}
         {tab==="association" && <Association/>}
         {tab==="inventory" && <Inventory/>}
-        {tab==="cash" && <CashRegister/>}
+        {tab==="cash" && <CashRegister me={me}/>}
         {tab==="users" && <MyUsers auth={auth} me={me}/>} 
         {tab==="cashAdmin" && <CashDashboardAdmin/>}
         {tab==="platform" && <Platform auth={auth}/>}
@@ -710,7 +710,8 @@ function Operations({me,setTab,logout,hideChrome=false}){
   const currentCashMetrics = useMemo(()=>buildCashDayMetrics(cashDate, cashCurrent, cashStore, reserveCents),[cashDate,cashCurrent,cashStore,reserveCents]);
 
   function saveCashDay(day){
-    const updated={...cashStore,[cashDate]:day};
+    const dayWithOperator = stampCashDayOperator(day, me);
+    const updated={...cashStore,[cashDate]:dayWithOperator};
     setCashStore(updated);
     saveLS(LS_CASH_REGISTER,updated);
   }
@@ -757,7 +758,7 @@ function Operations({me,setTab,logout,hideChrome=false}){
       return;
     }
     const existing=(Array.isArray(cashCurrent.expenses) ? cashCurrent.expenses : []).filter(e=>e.label || e.amountCents || e.type || e.employeeId || e.invoiceId || e.note);
-    saveCashDay({...cashCurrent, expenses:[...existing, normalizeExpenseRow(expenseDraft)]});
+    saveCashDay({...cashCurrent, expenses:[...existing, normalizeExpenseRow({...expenseDraft, operationUserName:getLoggedInUserName(me)})]});
     setExpenseModalOpen(false);
     setMsg(`Dépense ajoutée pour le ${cashDate}.`);
   }
@@ -1029,6 +1030,24 @@ function formatExpenseDH(cents){
   return value > 0 ? `- ${formatDH(value)}` : formatDH(0);
 }
 
+function getLoggedInUserName(me){
+  const name = String(me?.full_name || me?.username || me?.pharmacy_name || "Utilisateur").trim();
+  return name || "Utilisateur";
+}
+
+function stampCashDayOperator(day, me){
+  const userName = getLoggedInUserName(me);
+  return {
+    ...day,
+    management:{
+      ...defaultCashDay().management,
+      ...((day || {}).management || {}),
+      operationUserName:userName,
+      operationUpdatedAt:new Date().toISOString()
+    }
+  };
+}
+
 function createExpenseRow(){
   return {id:Date.now()+Math.random(), label:"", amountCents:0, note:"", type:"", employeeId:"", invoiceId:""};
 }
@@ -1041,14 +1060,15 @@ function normalizeExpenseRow(expense){
     note: expense?.note ?? "",
     type: expense?.type ?? "",
     employeeId: expense?.employeeId ?? "",
-    invoiceId: expense?.invoiceId ?? ""
+    invoiceId: expense?.invoiceId ?? "",
+    operationUserName: expense?.operationUserName ?? ""
   };
 }
 
 function defaultCashDay(){
   return {
     quantities:{},
-    management:{openingCents:0, totalDailySalesCents:0, salesCashCents:0, depositsCents:0, withdrawalsCents:0, refundsCents:0, toWithdrawCents:0, withdrawnCents:0, creditSalesCents:0, atmSalesCents:0, creditSettlementCents:0, creditSettlementClientName:"", closingRealCents:0},
+    management:{openingCents:0, totalDailySalesCents:0, salesCashCents:0, depositsCents:0, withdrawalsCents:0, refundsCents:0, toWithdrawCents:0, withdrawnCents:0, creditSalesCents:0, atmSalesCents:0, creditSettlementCents:0, creditSettlementClientName:"", closingRealCents:0, operationUserName:"", operationUpdatedAt:""},
     expenses:[createExpenseRow()]
   };
 }
@@ -1106,7 +1126,7 @@ function getNextDayCountedAsClosingRealCents(store, date){
   return getClosingRealCentsForDate(store, date);
 }
 
-function CashRegister(){
+function CashRegister({me}={}){
   const [active,setActive]=useState("exchange");
   const [cashDate,setCashDate]=useState(()=>todayISO());
   const [managementMonth,setManagementMonth]=useState(()=>todayMonthISO());
@@ -1129,7 +1149,8 @@ function CashRegister(){
   }),[store,cashDate]);
 
   function saveDay(next){
-    const updated={...store,[cashDate]:next};
+    const dayWithOperator = stampCashDayOperator(next, me);
+    const updated={...store,[cashDate]:dayWithOperator};
     setStore(updated);
     saveLS(LS_CASH_REGISTER,updated);
   }
@@ -1146,13 +1167,13 @@ function CashRegister(){
   }
 
   function updateExpense(id,key,value){
-    const expenses=current.expenses.map(x=>x.id===id ? {...x,[key]: key==="amountCents" ? parseMoneyToCents(value) : value} : x);
+    const expenses=current.expenses.map(x=>x.id===id ? {...x,[key]: key==="amountCents" ? parseMoneyToCents(value) : value, operationUserName:getLoggedInUserName(me)} : x);
     saveDay({...current, expenses});
     setMsg("");
   }
 
   function addExpense(){
-    saveDay({...current, expenses:[...current.expenses,createExpenseRow()]});
+    saveDay({...current, expenses:[...current.expenses,{...createExpenseRow(), operationUserName:getLoggedInUserName(me)}]});
   }
 
   function removeExpense(id){
@@ -1171,9 +1192,10 @@ function CashRegister(){
 
   function exportCashCSV(){
     const rows=[];
+    const currentOperationUser = String(current.management?.operationUserName || getLoggedInUserName(me) || "").trim();
     CASH_DENOMINATIONS.forEach(d=>{
       const qty=Number(current.quantities[d.cents] || 0);
-      rows.push({Date:cashDate, Onglet:"Monnaie stock", Libellé:d.label, Quantité:qty, Somme:formatDH(qty*d.cents)});
+      rows.push({Date:cashDate, Onglet:"Monnaie stock", Utilisateur:currentOperationUser, Libellé:d.label, Quantité:qty, Somme:formatDH(qty*d.cents)});
     });
     const m=current.management;
     const sCaisseCompteeCents = countedCents;
@@ -1186,23 +1208,23 @@ function CashRegister(){
     const closingCalculatedCents = getTheoreticalClosingCentsForDate(store, cashDate);
     const shortageCents = Math.max(0, closingCalculatedCents - sameDayClosingRealCents);
     const surplusCents = Math.max(0, sameDayClosingRealCents - closingCalculatedCents);
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"C. fermeture (compté)", Quantité:"", Somme:formatDH(sCaisseCompteeCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"À retirer", Quantité:"", Somme:formatDH(autoToWithdrawCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Retiré (réel)", Quantité:"", Somme:formatDH(m.withdrawnCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Dépôt / ajout", Quantité:"", Somme:formatDH(m.depositsCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"TOTAL DE VENTE PAR JOUR", Quantité:"", Somme:formatDH(totalSalesCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente en espèce", Quantité:"", Somme:formatDH(salesCashCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente type crédit", Quantité:"", Somme:formatDH(m.creditSalesCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente type ATM", Quantité:"", Somme:formatDH(m.atmSalesCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Réglement crédit", Client:m.creditSettlementClientName || "", Quantité:"", Somme:formatDH(m.creditSettlementCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Dépenses enregistrées", Quantité:"", Somme:formatDH(expensesCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Nouvelle C. fermeture", Quantité:"", Somme:formatDH(closingRealCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Nouvelle C. fermeture de hier", Quantité:"", Somme:formatDH(previousClosingRealCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"C. fermeture (théorique)", Quantité:"", Somme:formatDH(closingCalculatedCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant manquant", Quantité:"", Somme:formatDH(shortageCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant surplus", Quantité:"", Somme:formatDH(surplusCents)});
-    current.expenses.forEach(e=>rows.push({Date:cashDate, Onglet:"Dépenses", Libellé:e.label || "Dépense", Type:e.type || "", EmployeId:e.employeeId || "", FactureId:e.invoiceId || "", Quantité:e.note || "", Somme:formatDH(e.amountCents)}));
-    exportCSV(`caisse_${cashDate}.csv`,rows,["Date","Onglet","Libellé","Client","Type","EmployeId","FactureId","Quantité","Somme"]);
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"C. fermeture (compté)", Quantité:"", Somme:formatDH(sCaisseCompteeCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"À retirer", Quantité:"", Somme:formatDH(autoToWithdrawCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Retiré (réel)", Quantité:"", Somme:formatDH(m.withdrawnCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Dépôt / ajout", Quantité:"", Somme:formatDH(m.depositsCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"TOTAL DE VENTE PAR JOUR", Quantité:"", Somme:formatDH(totalSalesCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Tot. vente en espèce", Quantité:"", Somme:formatDH(salesCashCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Tot. vente type crédit", Quantité:"", Somme:formatDH(m.creditSalesCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Tot. vente type ATM", Quantité:"", Somme:formatDH(m.atmSalesCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Réglement crédit", Client:m.creditSettlementClientName || "", Quantité:"", Somme:formatDH(m.creditSettlementCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Dépenses enregistrées", Quantité:"", Somme:formatDH(expensesCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Nouvelle C. fermeture", Quantité:"", Somme:formatDH(closingRealCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Nouvelle C. fermeture de hier", Quantité:"", Somme:formatDH(previousClosingRealCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"C. fermeture (théorique)", Quantité:"", Somme:formatDH(closingCalculatedCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Montant manquant", Quantité:"", Somme:formatDH(shortageCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Utilisateur:currentOperationUser, Libellé:"Montant surplus", Quantité:"", Somme:formatDH(surplusCents)});
+    current.expenses.forEach(e=>rows.push({Date:cashDate, Onglet:"Dépenses", Utilisateur:e.operationUserName || currentOperationUser, Libellé:e.label || "Dépense", Type:e.type || "", EmployeId:e.employeeId || "", FactureId:e.invoiceId || "", Quantité:e.note || "", Somme:formatDH(e.amountCents)}));
+    exportCSV(`caisse_${cashDate}.csv`,rows,["Date","Onglet","Utilisateur","Libellé","Client","Type","EmployeId","FactureId","Quantité","Somme"]);
     setMsg("Export CSV de la caisse généré.");
   }
 
@@ -1240,6 +1262,8 @@ function CashRegister(){
       const dayClosingCalculated = getTheoreticalClosingCentsForDate(store, date);
       return {
         date,
+        operationUserName:String(management.operationUserName || management.updatedBy || day?.operationUserName || "").trim(),
+        operationUpdatedAt:String(management.operationUpdatedAt || "").trim(),
         openingCents:daySCaisseCompteeCents,
         toWithdrawCents:dayToWithdrawCents,
         withdrawnCents:Number(management.withdrawnCents || 0),
@@ -1410,10 +1434,11 @@ function CashRegister(){
 
               <div className="cashWideTableWrap">
                 <table className="cashTable managementHistoryTable">
-                  <thead><tr><th>Date</th><th>Dépôt / ajout</th><th>Dépenses</th><th>Total de Vente par jour</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>Client</th><th>À retirer (théorique)</th><th>Retiré (réel)</th><th>Nouvelle C. fermeture</th><th>Montant manquant</th><th>Montant surplus</th><th>C. fermeture (compté)</th><th>C. fermeture (théorique)</th></tr></thead>
+                  <thead><tr><th>Date</th><th>Utilisateur</th><th>Dépôt / ajout</th><th>Dépenses</th><th>Total de Vente par jour</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>Client</th><th>À retirer (théorique)</th><th>Retiré (réel)</th><th>Nouvelle C. fermeture</th><th>Montant manquant</th><th>Montant surplus</th><th>C. fermeture (compté)</th><th>C. fermeture (théorique)</th></tr></thead>
                   <tbody>
                     {pagedManagementHistory.length ? pagedManagementHistory.map(item=><tr key={item.date}>
                       <td>{item.date}</td>
+                      <td>{item.operationUserName || "—"}</td>
                       <td>{formatDH(item.depositsCents)}</td>
                       <td>{formatDH(item.expensesCents)}</td>
                       <td>{formatDH(item.totalSalesCents)}</td>
@@ -1429,7 +1454,7 @@ function CashRegister(){
                       <td>{formatDH(item.surplusCents)}</td>
                       <td>{formatDH(item.openingCents)}</td>
                       <td>{formatDH(item.closingCalculatedCents)}</td>
-                    </tr>) : <tr><td colSpan="16" className="expenseHistoryEmpty">Aucune valeur différente de 0 dans l’historique de gestion de caisse pour ce mois.</td></tr>}
+                    </tr>) : <tr><td colSpan="17" className="expenseHistoryEmpty">Aucune valeur différente de 0 dans l’historique de gestion de caisse pour ce mois.</td></tr>}
                   </tbody>
                 </table>
               </div>

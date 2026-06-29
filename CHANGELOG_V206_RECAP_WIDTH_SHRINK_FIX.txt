@@ -1,0 +1,14 @@
+V206 - Cash recap row width shrink fix
+
+Base: V205.
+Changes:
+- Kept V205/V204 logic unchanged.
+- Fixed the cash counting "Récapitulatif" panel issue where rows became extremely narrow inside the card.
+- The recap card now stretches internal rows to full card width.
+- The header remains centered, but the body rows use the full available width.
+- Narrow layouts still keep DH amounts on one line and align amounts safely to the right.
+- Associations and Inventaire width changes from V205 are preserved.
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.
