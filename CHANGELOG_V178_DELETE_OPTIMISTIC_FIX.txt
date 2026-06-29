@@ -1,0 +1,14 @@
+V178 - Correction définitive du bouton Delete user bloqué
+
+Corrections:
+- Le bouton Delete n'affiche plus jamais "Suppression..." dans le tableau.
+- La ligne utilisateur est retirée immédiatement après confirmation.
+- Si le backend confirme la suppression, la liste est rechargée en arrière-plan.
+- Si le backend échoue ou dépasse le délai, la ligne est restaurée et un message d'erreur clair est affiché.
+- Le drawer Infos utilisateur se ferme si l'utilisateur supprimé était ouvert.
+- Le compte admin reste protégé contre la suppression.
+
+Validation:
+- npm install exécuté
+- build frontend réussi
+- compilation backend Python réussie

@@ -76,11 +76,66 @@ const OPS_INTERNAL_LAYOUT_CSS = `
     padding:14px 16px!important;
   }
   .opsInAppRoot .opsMetricCardWide{min-height:96px!important;}
+
   .opsInAppRoot .opsExportCard{
-    min-height:168px!important;
+    min-height:162px!important;
     border-radius:18px!important;
-    padding:18px!important;
+    padding:18px 18px 16px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:space-between!important;
+    gap:18px!important;
   }
+  .opsInAppRoot .opsExportCardTop{
+    display:flex!important;
+    align-items:flex-start!important;
+    gap:14px!important;
+    min-height:80px!important;
+  }
+  .opsInAppRoot .opsExportIcon{
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    border-radius:14px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    box-shadow:0 6px 18px rgba(15,23,42,.05)!important;
+  }
+  .opsInAppRoot .opsExportText{display:flex!important;flex-direction:column!important;gap:8px!important;min-width:0!important;}
+  .opsInAppRoot .opsExportText h3{
+    margin:0!important;
+    font-family:Outfit,"Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;
+    font-size:15px!important;
+    line-height:1.25!important;
+    font-weight:800!important;
+    color:#162447!important;
+  }
+  .opsInAppRoot .opsExportText p{
+    margin:0!important;
+    font-size:13px!important;
+    line-height:1.5!important;
+    font-weight:500!important;
+    color:#718096!important;
+  }
+  .opsInAppRoot .opsExportButton{
+    width:100%!important;
+    min-height:44px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:10px!important;
+    border-radius:12px!important;
+    border:1.5px solid currentColor!important;
+    font-size:14px!important;
+    font-weight:800!important;
+    line-height:1!important;
+    transition:all .16s ease!important;
+    background:#fff!important;
+  }
+  .opsInAppRoot .opsExportCard:hover .opsExportButton{transform:translateY(-1px)!important;}
+  .opsInAppRoot .opsExportButton.bg-rose-600{background:#f43f5e!important;color:#fff!important;border-color:#f43f5e!important;}
+  .opsInAppRoot .opsExportButton.bg-rose-600:hover{background:#e11d48!important;border-color:#e11d48!important;}
   .opsInAppRoot .opsChip{
     display:inline-flex!important;
     align-items:center!important;
@@ -213,12 +268,16 @@ function CashMetric({icon,tone,label,value,actionLabel,onClick,muted=false,wide=
 function ExportCard({icon,tone,title,desc,label,onClick,file,onFile}){
   const bg={violet:"from-violet-100 to-violet-50",emerald:"from-emerald-100 to-emerald-50",sky:"from-sky-100 to-sky-50",amber:"from-amber-100 to-amber-50",rose:"from-rose-100 to-rose-50"}[tone]||"from-indigo-100 to-indigo-50";
   const text={violet:"text-violet-600",emerald:"text-emerald-600",sky:"text-sky-600",amber:"text-amber-600",rose:"text-rose-600"}[tone]||"text-indigo-600";
-  const btnTone={violet:"text-violet-600 border-violet-300 hover:bg-violet-50",emerald:"text-emerald-600 border-emerald-300 hover:bg-emerald-50",sky:"text-sky-600 border-sky-300 hover:bg-sky-50",amber:"text-amber-600 border-amber-300 hover:bg-amber-50",rose:"bg-rose-600 hover:bg-rose-700 text-white border-rose-600"}[tone]||"text-indigo-600 border-indigo-300 hover:bg-indigo-50";
+  const btnTone={violet:"text-violet-600 border-violet-300 hover:bg-violet-50",emerald:"text-emerald-600 border-emerald-300 hover:bg-emerald-50",sky:"text-sky-600 border-sky-300 hover:bg-sky-50",amber:"text-amber-600 border-amber-300 hover:bg-amber-50",rose:"bg-rose-600 hover:bg-rose-700 text-white border-rose-600 shadow-[0_10px_24px_rgba(244,63,94,0.18)]"}[tone]||"text-indigo-600 border-indigo-300 hover:bg-indigo-50";
   const content = <>
-    <div className={`w-[60px] h-[60px] rounded-[16px] bg-gradient-to-br ${bg} flex items-center justify-center mb-5`}><SimpleIcon type={icon} className={`w-7 h-7 ${text}`}/></div>
-    <h3 className="font-heading font-semibold text-[16px] leading-[1.3] text-slate-900 mb-2">{title}</h3>
-    <p className="text-[13px] leading-[1.55] text-slate-500 mb-6 grow min-h-[40px]">{desc}</p>
-    <span className={`w-full py-3 rounded-[12px] border text-[15px] font-semibold text-center block ${btnTone}`}>{label}</span>
+    <div className="opsExportCardTop">
+      <div className={`opsExportIcon bg-gradient-to-br ${bg}`}><SimpleIcon type={icon} className={`w-7 h-7 ${text}`}/></div>
+      <div className="opsExportText">
+        <h3>{title}</h3>
+        <p>{desc}</p>
+      </div>
+    </div>
+    <span className={`opsExportButton ${btnTone}`}>{label}</span>
   </>;
   const cls="opsExportCard group flex flex-col";
   if(file) return <label className={`${cls} ops-file-label cursor-pointer`}>{content}<input type="file" accept={file} onChange={e=>onFile?.(e.target.files?.[0])}/></label>;

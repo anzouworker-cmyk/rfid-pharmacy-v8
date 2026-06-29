@@ -3379,15 +3379,6 @@ function Platform({auth}){
   const [infoDraft,setInfoDraft]=useState(null);
   const [deletingUser,setDeletingUser]=useState("");
 
-  useEffect(()=>{
-    if(!deletingUser) return undefined;
-    const id = setTimeout(()=>{
-      setDeletingUser("");
-      setMsg(prev=>prev || "Suppression non confirmée. Réessayez.");
-    }, 12000);
-    return ()=>clearTimeout(id);
-  },[deletingUser]);
-
   async function load(){
     try{
       const r = await axios.get(`${API}/platform/clients`,auth);
@@ -3479,11 +3470,20 @@ function Platform({auth}){
   }
 
   async function deleteClient(u){
-    if(!u || deletingUser) return;
+    if(!u) return;
     if(!confirm(`Supprimer définitivement le user ${u} ?`)) return;
+    const previousClients = clients;
+    const previousInfoClient = infoClient;
+    const previousInfoDraft = infoDraft;
     setDeletingUser(u);
     setMsg("");
-    const cfg = {...(auth || {}), timeout: 8000};
+    // Suppression optimiste: la ligne disparaît immédiatement et le bouton ne reste plus bloqué sur "Suppression...".
+    setClients(prev=>prev.filter(client=>client.username !== u));
+    if(infoDraft?.originalUsername === u || infoDraft?.username === u){
+      setInfoClient(null);
+      setInfoDraft(null);
+    }
+    const cfg = {...(auth || {}), timeout: 10000};
     const encoded = encodeURIComponent(u);
     try{
       try{
@@ -3496,17 +3496,15 @@ function Platform({auth}){
           throw firstError;
         }
       }
-      setClients(prev=>prev.filter(client=>client.username !== u));
-      if(infoDraft?.originalUsername === u || infoDraft?.username === u){
-        setInfoClient(null);
-        setInfoDraft(null);
-      }
       setMsg("User supprimé.");
       load().catch(()=>{});
     }catch(e){
+      setClients(previousClients);
+      setInfoClient(previousInfoClient);
+      setInfoDraft(previousInfoDraft);
       const detail = e?.code === "ECONNABORTED"
-        ? "Erreur suppression client: délai dépassé. Le bouton est réinitialisé, réessayez."
-        : (e.response?.data?.detail || "Erreur suppression client");
+        ? "Erreur suppression client: délai dépassé. La ligne a été restaurée. Réessayez."
+        : (e.response?.data?.detail || "Erreur suppression client. La ligne a été restaurée.");
       setMsg(detail);
     }finally{
       setDeletingUser("");
@@ -3696,7 +3694,7 @@ return <section className="platformPage platformUsersPage">
                   />}</td>
               <td>{isAdmin ? <span className="platformStatusPill active">● Activé</span> : <button type="button" className={`platformStatusPill ${c.active ? "active" : "inactive"}`} onClick={()=>setClientActive(c.username,!c.active)}>{c.active ? "● Activé" : "○ Désactivé"}<span>⌄</span></button>}</td>
               <td><button type="button" className="platformInfoBtn" onClick={()=>openClientInfo(c)}>ⓘ Voir infos</button></td>
-              <td>{isAdmin ? <button className="dangerBtn disabled" disabled>Delete</button> : <button className={`dangerBtn ${deletingUser===c.username ? "disabled" : ""}`} disabled={deletingUser===c.username} onClick={()=>deleteClient(c.username)}>{deletingUser===c.username ? "Suppression..." : "Delete"}</button>}</td>
+              <td>{isAdmin ? <button className="dangerBtn disabled" disabled>Delete</button> : <button className="dangerBtn" onClick={()=>deleteClient(c.username)}>Delete</button>}</td>
             </tr>
           })}
           {!filteredClients.length && <tr><td colSpan="8" className="expenseHistoryEmpty">Aucun utilisateur trouvé.</td></tr>}
