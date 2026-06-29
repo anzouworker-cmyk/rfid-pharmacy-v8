@@ -890,7 +890,7 @@ table button{padding:8px 10px;font-size:13px}
 }
 
 
-/* V31 professional RFID dashboard */
+/* V31 professional tag dashboard */
 .proDashboardV31{max-width:1500px;margin:0 auto}
 .pageIntro{font-size:18px;color:#526078;margin:0 0 28px}
 .dashKpiGrid{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:24px;margin-bottom:28px}
@@ -2471,7 +2471,7 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
 .figmaGauge svg{width:214px!important;height:214px!important;overflow:visible;}
 .figmaGauge svg circle:first-child{stroke:#edf1f7!important;stroke-width:16!important;}
 .figmaGauge b{font-size:44px!important;font-weight:800!important;color:#071227!important;}
-.figmaGauge:after{content:"Couverture RFID";position:absolute;left:0;right:0;top:124px;text-align:center;font-size:14px;font-weight:500;color:#69758c;}
+.figmaGauge:after{content:"Couverture tags";position:absolute;left:0;right:0;top:124px;text-align:center;font-size:14px;font-weight:500;color:#69758c;}
 .figmaCoverageText h3{font-size:20px!important;font-weight:800!important;color:#071227!important;margin-bottom:14px!important;letter-spacing:-.02em!important;}
 .figmaCoverageText p{font-size:16px!important;color:#53627c!important;line-height:1.65!important;max-width:560px!important;}
 .figmaCoverageText button{
@@ -2896,7 +2896,7 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   .aiContextPanel{grid-template-columns:1fr!important;}
 }
 
-/* V39 - Powerful local RFID agent */
+/* V39 - Powerful local tag agent */
 .aiChatBadge{
   background:#eef7f1!important;
   color:#1f6b3e!important;
@@ -4527,7 +4527,7 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   }
 }
 
-/* V92 - cash tables redesigned to match the Associations RFID table style */
+/* V92 - cash tables redesigned to match the Associations tags table style */
 .cashRegisterPage{
   max-width:1600px!important;
   margin:0 auto!important;

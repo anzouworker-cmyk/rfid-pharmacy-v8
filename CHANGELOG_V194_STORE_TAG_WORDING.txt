@@ -1,0 +1,17 @@
+V194 - Store wording and neutral tag terminology
+
+Base version:
+- Started from V193_KEEP_CARD_DESIGN_GRID_FIX.
+
+Changes:
+- Replaced visible pharmacy/pharmacie wording with Store/store in the frontend and backend display text.
+- Replaced visible RFID wording with neutral tag/identifiant wording so the interface does not reveal the underlying technology.
+- Updated dashboard labels: Dashboard store, suivi des tags, tag actif, produits tagués, produits sans tag.
+- Updated association table/export display from EPC to Identifiant.
+- Kept internal compatibility for old association data that may still use EPC/Tag/Identifiant fields.
+- Renamed exported filenames where needed: identifiants_detectes, rapport_doublons_identifiants, audit_complet_smartinventory.
+- Kept V193 cash operations layout/design logic unchanged.
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.

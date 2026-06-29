@@ -46,7 +46,7 @@ engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread":
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-app = FastAPI(title="Smart Inventory Pharmacy Web SaaS Licence API")
+app = FastAPI(title="Smart Inventory Store Web SaaS Licence API")
 
 # Storage local pour les images publicitaires quand Cloudinary n'est pas configuré.
 # IMPORTANT: le mount doit être fait après la création de `app`.
@@ -300,7 +300,7 @@ def ensure_demo():
             s.add(demo)
         if settings.RESET_BOOTSTRAP_ACCOUNTS:
             demo.password_hash = hpw(demo_password)
-            demo.pharmacy_name = "Pharmacie Démo"
+            demo.pharmacy_name = "Store Démo"
             demo.role = "client"
             demo.subscription_status = "active"
             demo.expires_at = datetime.utcnow() + timedelta(days=365)
@@ -686,7 +686,7 @@ def create_dashboard_content(data: DashboardContentIn, acc: Account = Depends(cu
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
     if data.scope not in ("global", "pharmacy"):
-        raise HTTPException(400, "scope must be global or pharmacy")
+        raise HTTPException(400, "scope must be global or store")
     if data.scope == "pharmacy" and not data.target_username:
         raise HTTPException(400, "target_username required")
 
@@ -766,8 +766,8 @@ def delete_dashboard_content(content_id: str, acc: Account = Depends(current_use
 class AIAnalyzeIn(BaseModel):
     products_count: int = 0
     associations_count: int = 0
-    products_with_rfid: int = 0
-    products_without_rfid: int = 0
+    products_with_tag: int = 0
+    products_without_tag: int = 0
     coverage: int = 0
     detected_epc_count: int = 0
     present_count: int = 0
@@ -780,7 +780,7 @@ def ai_analyze(data: AIAnalyzeIn, acc: Account = Depends(current_user)):
     fallback = {
         "score": max(0, min(100, int(data.coverage))),
         "niveau": "Analyse locale",
-        "resume": f"Taux de couverture {data.coverage}%. {data.products_without_rfid} produits restent sans association.",
+        "resume": f"Taux de couverture {data.coverage}%. {data.products_without_tag} produits restent sans association.",
         "recommandations": [
             "Associer les produits à forte rotation en priorité.",
             "Sauvegarder le projet JSON après chaque session.",
@@ -798,13 +798,13 @@ def ai_analyze(data: AIAnalyzeIn, acc: Account = Depends(current_user)):
         return {"mode": "local-fallback", "analysis": fallback}
 
     prompt = f"""
-Tu es un assistant professionnel pour une application SaaS de gestion d’inventaire destinée aux pharmacies.
+Tu es un assistant professionnel pour une application SaaS de gestion d’inventaire destinée aux stores.
 Réponds uniquement en JSON valide.
 Données:
 produits={data.products_count}
 associations={data.associations_count}
-produits_avec_rfid={data.products_with_rfid}
-produits_sans_rfid={data.products_without_rfid}
+produits_avec_tag={data.products_with_tag}
+produits_sans_tag={data.products_without_tag}
 couverture={data.coverage}%
 epc_detectes={data.detected_epc_count}
 presents={data.present_count}
