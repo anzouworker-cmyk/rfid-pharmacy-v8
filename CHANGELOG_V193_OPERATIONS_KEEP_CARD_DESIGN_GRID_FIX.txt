@@ -1,0 +1,15 @@
+V193 - Operations cash cards grid anomaly fix
+
+Base: V191_OPERATIONS_V127_LOGIC_KEEP_V190_DESIGN
+
+Changes:
+- Kept the current V191 cash operations logic and V190/V191 card visual design.
+- Corrected only the cash operations card arrangement.
+- Replaced the split 6-card + secondary grid layout with one unified 12-card grid.
+- Desktop layout now renders 12 cards as 6 columns x 2 rows with equal card width.
+- Forced all operation cards to use the same height so long titles do not create uneven cards.
+- Removed the second-row empty gap caused by opsCashGridSecondary using 8 columns.
+- Responsive fallback: 3 columns on medium screens, 1 column on small screens.
+
+Modified file:
+- frontend/src/ShuffleOperationsPage.jsx

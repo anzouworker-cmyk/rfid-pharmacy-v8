@@ -45,8 +45,13 @@ const OPS_INTERNAL_LAYOUT_CSS = `
   .opsInAppRoot .opsCashGridSecondary,
   .opsInAppRoot .opsExportGrid{width:100%!important;display:grid!important;}
   .opsInAppRoot .opsActionGrid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:22px!important;}
-  .opsInAppRoot .opsCashGrid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:18px!important;}
-  .opsInAppRoot .opsCashGridSecondary{grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:16px!important;}
+  .opsInAppRoot .opsCashGrid{
+    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    gap:18px!important;
+    align-items:stretch!important;
+    grid-auto-rows:1fr!important;
+  }
+  .opsInAppRoot .opsCashGridSecondary{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:18px!important;}
   .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:18px!important;}
   .opsInAppRoot .opsActionGrid > *,
   .opsInAppRoot .opsCashGrid > *,
@@ -71,11 +76,15 @@ const OPS_INTERNAL_LAYOUT_CSS = `
     padding:18px 18px 16px!important;
   }
   .opsInAppRoot .opsMetricCard{
-    min-height:104px!important;
+    min-height:132px!important;
+    height:132px!important;
     border-radius:16px!important;
     padding:14px 16px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:space-between!important;
   }
-  .opsInAppRoot .opsMetricCardWide{min-height:96px!important;}
+  .opsInAppRoot .opsMetricCardWide{min-height:132px!important;height:132px!important;}
 
   .opsInAppRoot .opsExportCard{
     min-height:162px!important;
@@ -164,7 +173,7 @@ const OPS_INTERNAL_LAYOUT_CSS = `
   @media (max-width:1500px){
     .opsInAppRoot .opsActionGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
     .opsInAppRoot .opsCashGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
-    .opsInAppRoot .opsCashGridSecondary{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+    .opsInAppRoot .opsCashGridSecondary{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
     .opsInAppRoot .opsExportGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
   }
   @media (max-width:900px){
@@ -259,9 +268,9 @@ function CashMetric({icon,tone,label,value,actionLabel,onClick,muted=false,wide=
   const bg = {green:"bg-green-50", sky:"bg-sky-50", violet:"bg-violet-50", amber:"bg-amber-50", rose:"bg-rose-50", teal:"bg-teal-50", indigo:"bg-indigo-50", fuchsia:"bg-fuchsia-50", orange:"bg-orange-50", cyan:"bg-cyan-50", lime:"bg-lime-50", pink:"bg-pink-50"}[tone] || "bg-indigo-50";
   const text = {green:"text-green-600", sky:"text-sky-600", violet:"text-violet-600", amber:"text-amber-600", rose:"text-rose-600", teal:"text-teal-600", indigo:"text-indigo-600", fuchsia:"text-fuchsia-600", orange:"text-orange-600", cyan:"text-cyan-600", lime:"text-lime-600", pink:"text-pink-600"}[tone] || "text-indigo-600";
   return <button type="button" onClick={onClick} className={`opsMetricCard ${wide ? "opsMetricCardWide" : ""} text-left cursor-pointer`}>
-    <div className="flex items-center gap-3 mb-4"><div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}><SimpleIcon type={icon} className={`w-5 h-5 ${text}`}/></div><p className="text-[13px] font-medium leading-[1.25] text-slate-500 mb-0">{label}</p></div>
+    <div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}><SimpleIcon type={icon} className={`w-5 h-5 ${text}`}/></div><p className="text-[13px] font-medium leading-[1.25] text-slate-500 mb-0">{label}</p></div>
     <p className="font-heading text-[18px] leading-none font-bold text-slate-900">{value}</p>
-    <span className={`inline-block mt-4 text-[13px] font-semibold ${muted ? "text-slate-400" : text.includes("green") || text.includes("lime") ? "text-emerald-600" : "text-indigo-600"}`}>{actionLabel}</span>
+    <span className={`inline-block text-[13px] font-semibold ${muted ? "text-slate-400" : text.includes("green") || text.includes("lime") ? "text-emerald-600" : "text-indigo-600"}`}>{actionLabel}</span>
   </button>;
 }
 
@@ -333,11 +342,8 @@ export default function ShuffleOperationsPage({
                 </div>
               </div>
             </div>
-            <div className="opsCashGrid mb-4">
-              {cashMetrics.slice(0,6).map(m=><CashMetric key={m.label} {...m} />)}
-            </div>
-            <div className="opsCashGridSecondary">
-              {cashMetrics.slice(6).map(m=><CashMetric key={m.label} {...m} wide />)}
+            <div className="opsCashGrid">
+              {cashMetrics.map(m=><CashMetric key={m.label} {...m} />)}
             </div>
           </div>
         </div>
