@@ -15559,3 +15559,72 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
     font-size:19px!important;
   }
 }
+
+/* V199 - Remove horizontal scrollbar from operation modals/cards */
+.modalOverlay{
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  padding:16px!important;
+}
+.scanModal,
+.cashValueModal.scanModal,
+.scanModal.cashValueModal,
+.expenseValueModal.scanModal,
+.scanModal.expenseValueModal{
+  box-sizing:border-box!important;
+  max-width:calc(100vw - 32px)!important;
+  overflow-x:hidden!important;
+}
+.scanModal *,
+.cashValueModal.scanModal *,
+.scanModal.cashValueModal *,
+.expenseValueModal.scanModal *,
+.scanModal.expenseValueModal *{
+  box-sizing:border-box!important;
+}
+.scanModal > *,
+.cashValueModal.scanModal > *,
+.scanModal.cashValueModal > *,
+.expenseValueModal.scanModal > *,
+.scanModal.expenseValueModal > *{
+  max-width:100%!important;
+}
+.scanModal input,
+.scanModal select,
+.scanModal textarea,
+.cashValueModal.scanModal input,
+.scanModal.cashValueModal input,
+.expenseValueModal.scanModal input,
+.scanModal.expenseValueModal input,
+.cashValueModal .cashCreditSettlementFields,
+.cashValueModal .cashCreditSettlementFields label,
+.expenseValueModal .expenseModalFields,
+.expenseValueModal .expenseModalActions,
+.cashCountModal .cashModalTableWrap,
+.cashValueModal.scanModal .cashModalTotalBar,
+.scanModal.cashValueModal .cashModalTotalBar,
+.scanModal .primaryBtn{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin-left:0!important;
+  margin-right:0!important;
+}
+.cashCountModal .cashModalTableWrap{
+  overflow-x:hidden!important;
+}
+.cashCountModal .cashMiniTable{
+  width:100%!important;
+  max-width:100%!important;
+  table-layout:fixed!important;
+}
+@media (max-width:640px){
+  .modalOverlay{padding:10px!important;}
+  .scanModal,
+  .cashValueModal.scanModal,
+  .scanModal.cashValueModal,
+  .expenseValueModal.scanModal,
+  .scanModal.expenseValueModal{
+    max-width:calc(100vw - 20px)!important;
+  }
+}

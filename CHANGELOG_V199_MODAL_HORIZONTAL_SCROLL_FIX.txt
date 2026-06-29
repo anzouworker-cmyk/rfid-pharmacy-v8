@@ -1,0 +1,14 @@
+# V199 - Modal horizontal scrollbar fix
+
+Base: V198_MODAL_CLOSE_BUTTON_POLISH
+
+Changes:
+- Kept all V198/V197 logic and design unchanged.
+- Removed the unwanted horizontal scrollbar shown at the bottom of operation popups/cards.
+- Added CSS safeguards to prevent modal content from exceeding the popup width.
+- Forced cash/expense modal inputs, buttons, total bars, credit settlement client fields, and cash count table wrappers to stay within 100% width.
+- Kept vertical scrolling available only when the popup content is too tall.
+
+Validation:
+- Frontend production build passed.
+- Backend Python compilation passed.
