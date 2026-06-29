@@ -1,0 +1,24 @@
+V191 - Opérations de caisse : logique V127 conservant le design V190
+
+- Remplacement de la liste des cartes d'opérations V190 par les 12 opérations de caisse V127.
+- Conservation du design V190 / ShuffleOperationsPage : aucune modification CSS ou structure visuelle globale.
+- Cartes affichées :
+  1. Total de vente par jour
+  2. Tot. vente type crédit
+  3. Tot. vente type ATM
+  4. Tot. vente en espèce
+  5. Dépôts / ajouts
+  6. Règlement de crédit
+  7. Ajouter dépense
+  8. À retirer
+  9. Retiré (réel)
+  10. Nouvelle C. fermeture
+  11. C. fermeture (compté)
+  12. C. fermeture (théorique)
+- Les calculs restent alignés sur la logique V127 / Excel :
+  Tot. vente en espèce = Total de Vente par jour - Tot. vente type crédit - Tot. vente type ATM
+  À retirer = max(0, C. fermeture (compté) - réserve)
+  Nouvelle C. fermeture = C. fermeture (compté) - Retiré (réel)
+  C. fermeture (théorique) = max(0, Nouvelle C. fermeture de hier + Dépôt / ajout du jour + Tot. vente en espèce + Règlement crédit - Dépenses)
+  Montant manquant = max(0, C. fermeture (théorique) - C. fermeture (compté))
+  Montant surplus = max(0, C. fermeture (compté) - C. fermeture (théorique))

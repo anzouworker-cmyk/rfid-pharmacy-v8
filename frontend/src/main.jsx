@@ -779,20 +779,18 @@ function Operations({me,setTab,logout,hideChrome=false}){
     {icon:"eye", tone:"teal", badge:"Voir", badgeClass:"text-teal-600 bg-teal-50", title:"Contrôler les résultats", desc:"Inspecter les résultats associations...", label:"Contrôler", onClick:exportCoverageReport}
   ];
   const cashMetrics = [
-    {icon:"money", tone:"green", label:"Ticket vente en cours", value:`- ${formatDH(totalDailySalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("totalDailySalesCents")},
-    {icon:"wallet", tone:"sky", label:"Paiement par espèce", value:`- ${formatDH(salesCashCalculatedCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("salesCashCents")},
-    {icon:"card", tone:"violet", label:"Paiement par TPE", value:`- ${formatDH(atmSalesCents)}`, actionLabel:"Consulter historique", muted:true, onClick:()=>openCashMetric("atmSalesCents")},
-    {icon:"receipt", tone:"amber", label:"Ticket autre remise", value:`- ${formatDH(creditSalesCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("creditSalesCents")},
-    {icon:"return", tone:"rose", label:"Produits chèque", value:`+ ${formatDH(creditSettlementCents)}`, actionLabel:"Retour valeur", onClick:()=>openCashMetric("creditSettlementCents")},
-    {icon:"calc", tone:"teal", label:"Remboursement espèce", value:`+ ${formatDH(Number(cashCurrent.management.refundsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("refundsCents","Remboursement espèce",Number(cashCurrent.management.refundsCents || 0),"Saisir les remboursements en espèce.","+","green"))},
-    {icon:"box", tone:"indigo", label:"Approvisionnement", value:`- ${formatDH(depositsCents)}`, actionLabel:"Retour résultats", onClick:()=>openCashMetric("depositsCents")},
-    {icon:"image", tone:"fuchsia", label:"Dépenses caisse", value:`+ ${formatDH(expensesCents)}`, actionLabel:"Retour valeur", onClick:openExpenseModal},
-    {icon:"warn", tone:"amber", label:"Limite tolérance écart", value:`= ${formatDH(cashSettings.toleranceLimitCents || 0)}`, actionLabel:"Modifier limite", onClick:()=>setCashOpModal({key:"toleranceLimitCents", title:"Limite tolérance écart", description:"Définir la limite de tolérance utilisée pour la progression de l’écart caisse.", isSetting:true})},
-    {icon:"chart", tone:"indigo", label:"Limite dépenses mois", value:`= ${formatDH(cashSettings.monthlyExpenseLimitCents || 0)}`, actionLabel:"Modifier limite", onClick:()=>setCashOpModal({key:"monthlyExpenseLimitCents", title:"Limite dépenses mensuelles", description:"Définir la limite mensuelle utilisée pour la progression des dépenses.", isSetting:true})},
-    {icon:"cart", tone:"orange", label:"Avoirs retournés", value:`- ${formatDH(Number(cashCurrent.management.returnsCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("returnsCents","Avoirs retournés",Number(cashCurrent.management.returnsCents || 0),"Saisir les avoirs retournés.","+","blue"))},
-    {icon:"calendar", tone:"cyan", label:"Bons de commandes", value:`= ${formatDH(Number(cashCurrent.management.purchaseOrdersCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("purchaseOrdersCents","Bons de commandes",Number(cashCurrent.management.purchaseOrdersCents || 0),"Saisir les bons de commandes.","=","blue"))},
-    {icon:"shield", tone:"lime", label:"C encaissements", value:`= ${formatDH(newCashBalanceCents)}`, actionLabel:"Consulter liste", onClick:()=>openCashMetric("closingRealCents")},
-    {icon:"chart", tone:"pink", label:"C virement bancaire", value:`+ ${formatDH(Number(cashCurrent.management.bankTransferCents || 0))}`, actionLabel:"Retour valeur", onClick:()=>setCashOpModal(makeCustomCashCard("bankTransferCents","C virement bancaire",Number(cashCurrent.management.bankTransferCents || 0),"Saisir le virement bancaire.","+","blue"))}
+    {icon:"money", tone:"green", label:"Total de vente par jour", value:`= ${formatDH(totalDailySalesCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("totalDailySalesCents")},
+    {icon:"card", tone:"sky", label:"Tot. vente type crédit", value:`- ${formatDH(creditSalesCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("creditSalesCents")},
+    {icon:"card", tone:"indigo", label:"Tot. vente type ATM", value:`- ${formatDH(atmSalesCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("atmSalesCents")},
+    {icon:"wallet", tone:"green", label:"Tot. vente en espèce", value:`= ${formatDH(salesCashCalculatedCents)}`, actionLabel:"Automatique", onClick:()=>openCashMetric("salesCashCents")},
+    {icon:"box", tone:"violet", label:"Dépôts / ajouts", value:`+ ${formatDH(depositsCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("depositsCents")},
+    {icon:"receipt", tone:"rose", label:"Règlement de crédit", value:`+ ${formatDH(creditSettlementCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("creditSettlementCents")},
+    {icon:"receipt", tone:"rose", label:"Ajouter dépense", value:`- ${formatDH(expensesCents)}`, actionLabel:"Ajouter dépense", onClick:openExpenseModal},
+    {icon:"card", tone:"indigo", label:"À retirer", value:`= ${formatDH(cashToWithdrawCents)}`, actionLabel:"Automatique", onClick:()=>openCashMetric("toWithdraw")},
+    {icon:"card", tone:"sky", label:"Retiré (réel)", value:`- ${formatDH(withdrawnCents)}`, actionLabel:"Entrer valeur", onClick:()=>openCashMetric("withdrawnCents")},
+    {icon:"card", tone:"sky", label:"Nouvelle C. fermeture", value:`= ${formatDH(newCashBalanceCents)}`, actionLabel:"Automatique", onClick:()=>openCashMetric("closingRealCents")},
+    {icon:"card", tone:"sky", label:"C. fermeture (compté)", value:`= ${formatDH(cashCountedCents)}`, actionLabel:"Compter la caisse", onClick:()=>openCashMetric("counted")},
+    {icon:"card", tone:"indigo", label:"C. fermeture (théorique)", value:`= ${formatDH(closingTheoreticalCents)}`, actionLabel:"Automatique", onClick:()=>openCashMetric("closingCalculatedCents")}
   ];
   const exportActions = [
     {icon:"doc", tone:"violet", title:"Produits locaux", desc:"Exporter la liste des produits en local.", label:"Exporter CSV", onClick:exportProducts},
