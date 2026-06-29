@@ -1,0 +1,28 @@
+V188 - Dashboard Caisse exact-model refinement
+
+Requested scope
+- Rework the dashboard caisse content to target the approved visual model more closely.
+- Do not change the page title area.
+- Do not change the date bar.
+
+Applied updates
+1. Kept header/title and date bar untouched.
+2. Refined the cash dashboard content grid only:
+   - top section stays 3 cards
+   - middle section stays 3 cards
+   - KPI section stays 5 cards
+   - results section stays 4 cards
+3. Increased visual fidelity of the cards to the approved model:
+   - more coherent heights and spacing
+   - refined paddings and border radius
+   - refined typography hierarchy
+   - refined progress-ring sizing
+   - refined monthly amount card positioning
+   - refined anomaly card layout and carousel spacing
+   - refined KPI mini-card sizing and icon positioning
+   - refined results-card sizing
+4. Added a hard CSS override block (V188) at the end of frontend/src/style.css so older dashboard caisse rules no longer distort the approved structure.
+5. Verified frontend build successfully with Vite.
+
+Primary edited file
+- frontend/src/style.css
