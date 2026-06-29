@@ -1,0 +1,18 @@
+Smart Inventory V195 - Cash dashboard labels and formula update
+
+Base version: V194_STORE_TAG_WORDING
+
+Changes:
+- Kept V194/V193 operations design, card grid, and wording updates unchanged.
+- Replaced the cash dashboard result card title:
+  "Écart cash comptée vs calculée" -> "C. fermeture (comptée)".
+- Updated that card to display the counted closing cash value instead of the gap value.
+- Replaced the cash dashboard result card title:
+  "Tot. vente" -> "Vente en espèce + règlement de crédit".
+- Updated that card formula to display:
+  Tot. vente en espèce + Règlement de crédit.
+- Added creditSettlementCents to selected day dashboard metrics so the new combined card can calculate correctly.
+
+Validation:
+- Frontend production build succeeded with npm run build.
+- Backend main.py compiled successfully with python3 -m py_compile.

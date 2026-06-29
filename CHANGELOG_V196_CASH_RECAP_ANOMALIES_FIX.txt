@@ -1,0 +1,22 @@
+SmartInventory V196 - Cash recap anomalies fix
+
+Base version: V195_CASH_DASHBOARD_LABELS_FORMULA
+
+Changes:
+- Kept V195 cash dashboard formulas, V194 store/tag wording, and V193 operations layout/design unchanged.
+- Updated the cash counting recap labels:
+  - "Total caisse" -> "C. fermeture (comptée)"
+  - "Total attendu" -> "C. fermeture (théorique)"
+- Clarified recap subtitles:
+  - "Somme des billets et pièces comptés"
+  - "Montant attendu en caisse"
+- Updated expenses display in the recap to show as an outgoing amount with a minus sign.
+- Fixed the gap status logic:
+  - gap = 0 -> "Caisse équilibrée" with neutral styling
+  - gap > 0 -> "Surplus de caisse" with positive styling
+  - gap < 0 -> "Manquant de caisse" with warning styling
+- Added signed DH display for the gap (+ DH, - DH, or DH 0).
+
+Validation:
+- Frontend production build succeeded with npm run build.
+- Backend Python compilation succeeded with python3 -m py_compile backend/main.py.

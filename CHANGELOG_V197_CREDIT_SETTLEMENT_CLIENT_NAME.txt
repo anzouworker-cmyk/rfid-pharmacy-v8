@@ -1,0 +1,16 @@
+V197 - Nom du client sur règlement de crédit
+
+Base : V196_CASH_RECAP_ANOMALIES_FIX
+
+Changements :
+- Ajout d'un champ "Nom du client" dans le popup "Règlement de crédit".
+- Le champ permet d'indiquer le client qui a payé sa dette.
+- Le montant du règlement de crédit reste utilisé dans les formules existantes sans changement.
+- Le nom du client est sauvegardé dans la journée de caisse sous management.creditSettlementClientName.
+- Ajout d'une colonne "Client" dans l'historique de caisse pour le règlement de crédit.
+- Ajout du client dans l'export CSV de caisse.
+- Ajout du style du nouveau bloc de champs sans changer le design général V196.
+
+Validation :
+- Frontend build réussi.
+- Backend main.py compilé avec succès.

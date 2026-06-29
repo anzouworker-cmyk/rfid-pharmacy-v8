@@ -721,6 +721,12 @@ function Operations({me,setTab,logout,hideChrome=false}){
     setMsg(`Opération de caisse mise à jour pour le ${cashDate}.`);
   }
 
+  function updateCashManagementText(key,value){
+    const management={...cashCurrent.management,[key]:value};
+    saveCashDay({...cashCurrent, management});
+    setMsg(`Opération de caisse mise à jour pour le ${cashDate}.`);
+  }
+
   function updateCashQuantity(cents,value){
     const qty=Math.max(0, parseInt(value || 0, 10) || 0);
     const quantities={...cashCurrent.quantities,[cents]:qty};
@@ -762,7 +768,7 @@ function Operations({me,setTab,logout,hideChrome=false}){
     {key:"atmSalesCents", title:"Tot. vente type ATM", value:atmSalesCents, description:"Saisir le total des ventes ATM.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"salesCashCents", title:"Tot. vente en espèce", value:salesCashCalculatedCents, description:"Calcul automatique : total vente par jour - crédit - ATM.", type:"=", editable:false, tone:"indigo", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"depositsCents", title:"Dépôts / ajouts", value:depositsCents, description:"Saisir les dépôts ou ajouts.", type:"+", editable:true, tone:"green", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
-    {key:"creditSettlementCents", title:"Règlement de crédit", value:creditSettlementCents, description:"Saisir le règlement de crédit.", type:"+", editable:true, tone:"indigo", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
+    {key:"creditSettlementCents", title:"Règlement de crédit", value:creditSettlementCents, description:"Saisir le règlement de crédit et le nom du client qui a payé sa dette.", type:"+", editable:true, tone:"indigo", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
     {key:"expenseEntry", title:"Ajouter dépense", value:expensesCents, description:"Saisir une dépense et l’ajouter à l’historique.", type:"-", editable:true, tone:"danger", cta:"Ajouter dépense", isExpense:true, valueLabel:"Total des dépenses"},
     {key:"toWithdraw", title:"À retirer", value:cashToWithdrawCents, description:"Calcul automatique : S. caisse (compté) - réserve configurable, minimum 0.", type:"=", editable:false, tone:"neutral", cta:"Automatique", valueLabel:"Valeur calculée"},
     {key:"withdrawnCents", title:"Retiré (réel)", value:withdrawnCents, description:"Saisir le montant retiré.", type:"-", editable:true, tone:"blue", cta:"Entrer valeur", valueLabel:"Valeur entrée"},
@@ -886,6 +892,32 @@ function Operations({me,setTab,logout,hideChrome=false}){
             <span>À retirer calculé</span>
             <strong>{formatDH(cashToWithdrawCents)}</strong>
           </div>
+        </> : cashOpModal.key==="creditSettlementCents" ? <>
+          <div className="cashCreditSettlementFields">
+            <label>
+              <span>Nom du client</span>
+              <input
+                autoFocus
+                className="cashClientNameInput"
+                value={cashCurrent.management.creditSettlementClientName || ""}
+                onChange={e=>updateCashManagementText("creditSettlementClientName",e.target.value)}
+                placeholder="Nom du client qui a payé sa dette"
+              />
+            </label>
+            <label>
+              <span>Montant réglé</span>
+              <input
+                className="cashSettlementAmountInput"
+                value={moneyInputValue(cashCurrent.management.creditSettlementCents || 0)}
+                onChange={e=>updateCashOperation("creditSettlementCents",e.target.value)}
+                placeholder="0"
+              />
+            </label>
+          </div>
+          <div className="cashModalTotalBar">
+            <span>Règlement enregistré</span>
+            <strong>{formatDH(creditSettlementCents)}</strong>
+          </div>
         </> : <input autoFocus value={moneyInputValue(cashCurrent.management[cashOpModal.key] || 0)} onChange={e=>updateCashOperation(cashOpModal.key,e.target.value)} placeholder="0"/>}
         <button className="primaryBtn" onClick={()=>setCashOpModal(null)}>Fermer</button>
       </div>
@@ -984,6 +1016,18 @@ function formatDH(cents){
   return `DH ${formatted}`;
 }
 
+function formatSignedDH(cents){
+  const value = Number(cents) || 0;
+  if(value > 0) return `+ ${formatDH(value)}`;
+  if(value < 0) return `- ${formatDH(Math.abs(value))}`;
+  return formatDH(0);
+}
+
+function formatExpenseDH(cents){
+  const value = Math.abs(Number(cents) || 0);
+  return value > 0 ? `- ${formatDH(value)}` : formatDH(0);
+}
+
 function createExpenseRow(){
   return {id:Date.now()+Math.random(), label:"", amountCents:0, note:"", type:"", employeeId:"", invoiceId:""};
 }
@@ -1003,7 +1047,7 @@ function normalizeExpenseRow(expense){
 function defaultCashDay(){
   return {
     quantities:{},
-    management:{openingCents:0, totalDailySalesCents:0, salesCashCents:0, depositsCents:0, withdrawalsCents:0, refundsCents:0, toWithdrawCents:0, withdrawnCents:0, creditSalesCents:0, atmSalesCents:0, creditSettlementCents:0, closingRealCents:0},
+    management:{openingCents:0, totalDailySalesCents:0, salesCashCents:0, depositsCents:0, withdrawalsCents:0, refundsCents:0, toWithdrawCents:0, withdrawnCents:0, creditSalesCents:0, atmSalesCents:0, creditSettlementCents:0, creditSettlementClientName:"", closingRealCents:0},
     expenses:[createExpenseRow()]
   };
 }
@@ -1149,7 +1193,7 @@ function CashRegister(){
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente en espèce", Quantité:"", Somme:formatDH(salesCashCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente type crédit", Quantité:"", Somme:formatDH(m.creditSalesCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Tot. vente type ATM", Quantité:"", Somme:formatDH(m.atmSalesCents)});
-    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Réglement crédit", Quantité:"", Somme:formatDH(m.creditSettlementCents)});
+    rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Réglement crédit", Client:m.creditSettlementClientName || "", Quantité:"", Somme:formatDH(m.creditSettlementCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Dépenses enregistrées", Quantité:"", Somme:formatDH(expensesCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Nouvelle C. fermeture", Quantité:"", Somme:formatDH(closingRealCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Nouvelle C. fermeture de hier", Quantité:"", Somme:formatDH(previousClosingRealCents)});
@@ -1157,7 +1201,7 @@ function CashRegister(){
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant manquant", Quantité:"", Somme:formatDH(shortageCents)});
     rows.push({Date:cashDate, Onglet:"Gestion de caisse", Libellé:"Montant surplus", Quantité:"", Somme:formatDH(surplusCents)});
     current.expenses.forEach(e=>rows.push({Date:cashDate, Onglet:"Dépenses", Libellé:e.label || "Dépense", Type:e.type || "", EmployeId:e.employeeId || "", FactureId:e.invoiceId || "", Quantité:e.note || "", Somme:formatDH(e.amountCents)}));
-    exportCSV(`caisse_${cashDate}.csv`,rows,["Date","Onglet","Libellé","Type","EmployeId","FactureId","Quantité","Somme"]);
+    exportCSV(`caisse_${cashDate}.csv`,rows,["Date","Onglet","Libellé","Client","Type","EmployeId","FactureId","Quantité","Somme"]);
     setMsg("Export CSV de la caisse généré.");
   }
 
@@ -1174,6 +1218,8 @@ function CashRegister(){
   const surplusCents = Math.max(0, sameDayClosingRealCents - closingCalculatedCents);
   const expectedCents = closingCalculatedCents;
   const gapCents = sameDayClosingRealCents - expectedCents;
+  const recapGapTone = gapCents > 0 ? "surplus" : gapCents < 0 ? "shortage" : "balanced";
+  const recapGapLabel = gapCents > 0 ? "Surplus de caisse" : gapCents < 0 ? "Manquant de caisse" : "Caisse équilibrée";
   const billDenominations = CASH_DENOMINATIONS.filter(d=>d.cents >= 2000);
   const coinDenominations = CASH_DENOMINATIONS.filter(d=>d.cents < 2000);
 
@@ -1206,6 +1252,7 @@ function CashRegister(){
         creditSalesCents:Number(management.creditSalesCents || 0),
         atmSalesCents:Number(management.atmSalesCents || 0),
         creditSettlementCents:Number(management.creditSettlementCents || 0),
+        creditSettlementClientName:String(management.creditSettlementClientName || "").trim(),
         closingCalculatedCents:dayClosingCalculated,
         shortageCents:Math.max(0, dayClosingCalculated - daySameClosingRealCents),
         surplusCents:Math.max(0, daySameClosingRealCents - dayClosingCalculated)
@@ -1226,7 +1273,7 @@ function CashRegister(){
       item.closingCalculatedCents,
       item.shortageCents,
       item.surplusCents
-    ].some(value=>Math.abs(Number(value) || 0) > 0))
+    ].some(value=>Math.abs(Number(value) || 0) > 0) || Boolean(item.creditSettlementClientName))
     .sort((a,b)=>b.date.localeCompare(a.date)), [store,managementMonth]);
 
   const managementRowsPerPage = 5;
@@ -1362,7 +1409,7 @@ function CashRegister(){
 
               <div className="cashWideTableWrap">
                 <table className="cashTable managementHistoryTable">
-                  <thead><tr><th>Date</th><th>Dépôt / ajout</th><th>Dépenses</th><th>Total de Vente par jour</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>À retirer (théorique)</th><th>Retiré (réel)</th><th>Nouvelle C. fermeture</th><th>Montant manquant</th><th>Montant surplus</th><th>C. fermeture (compté)</th><th>C. fermeture (théorique)</th></tr></thead>
+                  <thead><tr><th>Date</th><th>Dépôt / ajout</th><th>Dépenses</th><th>Total de Vente par jour</th><th>Tot. vente en espèce</th><th>Tot. vente type crédit</th><th>Tot. vente type ATM</th><th>Réglement crédit</th><th>Client</th><th>À retirer (théorique)</th><th>Retiré (réel)</th><th>Nouvelle C. fermeture</th><th>Montant manquant</th><th>Montant surplus</th><th>C. fermeture (compté)</th><th>C. fermeture (théorique)</th></tr></thead>
                   <tbody>
                     {pagedManagementHistory.length ? pagedManagementHistory.map(item=><tr key={item.date}>
                       <td>{item.date}</td>
@@ -1373,6 +1420,7 @@ function CashRegister(){
                       <td>{formatDH(item.creditSalesCents)}</td>
                       <td>{formatDH(item.atmSalesCents)}</td>
                       <td>{formatDH(item.creditSettlementCents)}</td>
+                      <td>{item.creditSettlementClientName || "—"}</td>
                       <td>{formatDH(item.toWithdrawCents)}</td>
                       <td>{formatDH(item.withdrawnCents)}</td>
                       <td>{formatDH(item.closingRealCents)}</td>
@@ -1380,7 +1428,7 @@ function CashRegister(){
                       <td>{formatDH(item.surplusCents)}</td>
                       <td>{formatDH(item.openingCents)}</td>
                       <td>{formatDH(item.closingCalculatedCents)}</td>
-                    </tr>) : <tr><td colSpan="15" className="expenseHistoryEmpty">Aucune valeur différente de 0 dans l’historique de gestion de caisse pour ce mois.</td></tr>}
+                    </tr>) : <tr><td colSpan="16" className="expenseHistoryEmpty">Aucune valeur différente de 0 dans l’historique de gestion de caisse pour ce mois.</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1470,31 +1518,31 @@ function CashRegister(){
           <div className="cashRecapBody">
             <div className="cashRecapRow">
               <div>
-                <em>Total caisse</em>
-                <small>Somme des billets et pièces</small>
+                <em>C. fermeture (comptée)</em>
+                <small>Somme des billets et pièces comptés</small>
               </div>
               <strong>{formatDH(countedCents)}</strong>
             </div>
             <div className="cashRecapRow">
               <div>
-                <em>Total attendu</em>
-                <small>Montant de référence</small>
+                <em>C. fermeture (théorique)</em>
+                <small>Montant attendu en caisse</small>
               </div>
               <strong>{formatDH(expectedCents)}</strong>
             </div>
-            <div className="cashRecapRow">
+            <div className="cashRecapRow cashRecapExpenseRow">
               <div>
                 <em>Dépenses</em>
                 <small>Total des dépenses enregistrées</small>
               </div>
-              <strong>{formatDH(expensesCents)}</strong>
+              <strong className="cashRecapExpenseAmount">{formatExpenseDH(expensesCents)}</strong>
             </div>
-            <div className={`cashRecapGapCard ${gapCents>=0 ? "ok" : "warn"}`}>
+            <div className={`cashRecapGapCard ${recapGapTone}`}>
               <div>
                 <em>Écart</em>
-                <small>{gapCents>=0 ? "Excédent de caisse" : "Montant à vérifier"}</small>
+                <small>{recapGapLabel}</small>
               </div>
-              <strong>{formatDH(gapCents)}</strong>
+              <strong>{formatSignedDH(gapCents)}</strong>
             </div>
           </div>
         </aside>}
@@ -1524,7 +1572,7 @@ function hasCashDayActivity(dayData){
     "creditSettlementCents",
     "closingRealCents"
   ];
-  const managementActivity = managementKeys.some(key => Math.abs(Number(day.management[key] || 0)) > 0);
+  const managementActivity = managementKeys.some(key => Math.abs(Number(day.management[key] || 0)) > 0) || Boolean(String(day.management.creditSettlementClientName || "").trim());
   const expenseActivity = day.expenses.some(e =>
     Math.abs(Number(e.amountCents || 0)) > 0 ||
     Boolean(String(e.label || e.note || e.type || e.employeeId || e.invoiceId || "").trim())
@@ -1573,6 +1621,7 @@ function buildCashDayMetrics(date, dayData, store={}, reserveCents=300000){
     creditSalesCents:Number(day.management.creditSalesCents || 0),
     atmSalesCents:Number(day.management.atmSalesCents || 0),
     salesCashCents,
+    creditSettlementCents:Number(day.management.creditSettlementCents || 0),
     isBalanced
   };
 }
@@ -2135,8 +2184,8 @@ function CashDashboardAdmin(){
       </div>
 
       <div className="cashShuffleSection cashShuffleSectionResults">
-      <CashShuffleCard title="Tot. vente" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
-        <CashShuffleAmount cents={selectedMetrics.totalSalesCents} xl />
+      <CashShuffleCard title="Vente en espèce + règlement de crédit" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
+        <CashShuffleAmount cents={Number(selectedMetrics.salesCashCents || 0) + Number(selectedMetrics.creditSettlementCents || 0)} xl />
       </CashShuffleCard>
 
       <CashShuffleCard title="C. fermeture (théorique)" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="grid" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
@@ -2147,8 +2196,8 @@ function CashDashboardAdmin(){
         <CashShuffleAmount cents={selectedMetrics.closingRealCents} xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Écart cash comptée vs calculée" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide cashShuffleWideDelta">
-        <CashShuffleAmount cents={selectedMetrics.gapCents} xl />
+      <CashShuffleCard title="C. fermeture (comptée)" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide cashShuffleWideDelta">
+        <CashShuffleAmount cents={selectedMetrics.countedCents} xl />
       </CashShuffleCard>
       </div>
     </div>

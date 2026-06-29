@@ -5585,9 +5585,22 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
   padding:18px 20px!important;
   gap:16px!important;
 }
-.cashRecapGapCard.ok{background:#edf9f1!important;border:1px solid #bce7c8!important;}
+.cashRecapExpenseRow{
+  background:#fffdfa!important;
+  border-color:#f4dec4!important;
+}
+.cashRecapExpenseAmount{
+  color:#d64a3a!important;
+}
+.cashRecapGapCard.balanced,
+.cashRecapGapCard.ok{background:#f8fbff!important;border:1px solid #dce6f2!important;}
+.cashRecapGapCard.surplus{background:#edf9f1!important;border:1px solid #bce7c8!important;}
+.cashRecapGapCard.shortage,
 .cashRecapGapCard.warn{background:#fff3f1!important;border:1px solid #f6c8c3!important;}
-.cashRecapGapCard.ok strong{color:#239a4a!important;}
+.cashRecapGapCard.balanced strong,
+.cashRecapGapCard.ok strong{color:#0f2340!important;}
+.cashRecapGapCard.surplus strong{color:#239a4a!important;}
+.cashRecapGapCard.shortage strong,
 .cashRecapGapCard.warn strong{color:#d64a3a!important;}
 .cashRecapGapCard strong{font-size:28px!important;}
 .cashSectionHeadingHistory{
@@ -15429,5 +15442,120 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   }
   .cashShuffleDashboard .cashShuffleContentV142 .cashShuffleInsightText{
     align-items:center!important;
+  }
+}
+
+/* V197 - credit settlement client name field */
+.cashValueModal .cashCreditSettlementFields{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:12px!important;
+  margin:0!important;
+}
+.cashValueModal .cashCreditSettlementFields label{
+  display:grid!important;
+  gap:7px!important;
+  margin:0!important;
+}
+.cashValueModal .cashCreditSettlementFields label span{
+  font-size:13px!important;
+  font-weight:800!important;
+  color:#475569!important;
+}
+.cashValueModal .cashCreditSettlementFields input{
+  width:100%!important;
+  min-height:48px!important;
+  padding:12px 16px!important;
+  border-radius:16px!important;
+  border:1px solid #cbd5e1!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  font-size:16px!important;
+  line-height:1.3!important;
+  font-weight:600!important;
+  box-shadow:0 0 0 1px transparent!important;
+}
+.cashValueModal .cashCreditSettlementFields .cashClientNameInput{
+  text-align:left!important;
+}
+.cashValueModal .cashCreditSettlementFields .cashSettlementAmountInput{
+  text-align:right!important;
+  font-size:28px!important;
+  line-height:1.1!important;
+  font-weight:800!important;
+}
+.cashValueModal .cashCreditSettlementFields input::placeholder{
+  color:#94a3b8!important;
+  opacity:1!important;
+}
+.cashValueModal .cashCreditSettlementFields input:focus{
+  outline:none!important;
+  border-color:#a5b4fc!important;
+  box-shadow:0 0 0 3px rgba(99,102,241,.16)!important;
+}
+
+
+/* V198 - Cleaner modal close button: circular, discreet, not card-like */
+.modalClose,
+.cashValueModal.scanModal .modalClose,
+.scanModal.cashValueModal .modalClose,
+.expenseValueModal.scanModal .modalClose,
+.scanModal.expenseValueModal .modalClose{
+  position:absolute!important;
+  right:18px!important;
+  top:18px!important;
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  min-height:36px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  border-radius:999px!important;
+  border:1px solid #e2e8f0!important;
+  background:#f8fafc!important;
+  color:#334155!important;
+  box-shadow:none!important;
+  outline:none!important;
+  font-family:Inter,Segoe UI,Arial,sans-serif!important;
+  font-size:20px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+  transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease!important;
+}
+.modalClose:hover,
+.cashValueModal.scanModal .modalClose:hover,
+.scanModal.cashValueModal .modalClose:hover,
+.expenseValueModal.scanModal .modalClose:hover,
+.scanModal.expenseValueModal .modalClose:hover{
+  background:#eef2ff!important;
+  border-color:#c7d2fe!important;
+  color:#4338ca!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+.modalClose:focus-visible,
+.cashValueModal.scanModal .modalClose:focus-visible,
+.scanModal.cashValueModal .modalClose:focus-visible,
+.expenseValueModal.scanModal .modalClose:focus-visible,
+.scanModal.expenseValueModal .modalClose:focus-visible{
+  border-color:#818cf8!important;
+  box-shadow:0 0 0 3px rgba(99,102,241,.18)!important;
+}
+@media (max-width: 640px){
+  .modalClose,
+  .cashValueModal.scanModal .modalClose,
+  .scanModal.cashValueModal .modalClose,
+  .expenseValueModal.scanModal .modalClose,
+  .scanModal.expenseValueModal .modalClose{
+    right:14px!important;
+    top:14px!important;
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    min-height:34px!important;
+    font-size:19px!important;
   }
 }

@@ -1,0 +1,12 @@
+SmartInventory V198 - Modal close button polish
+
+Base: V197_CREDIT_SETTLEMENT_CLIENT_NAME
+
+Changes:
+- Kept all V197 logic/design unchanged.
+- Polished the popup close button (.modalClose) so it no longer looks like a small card.
+- Close button is now circular, lighter, more discreet, and better aligned in the popup corner.
+- Added hover/focus states while keeping a clean SaaS style.
+
+Files changed:
+- frontend/src/style.css
