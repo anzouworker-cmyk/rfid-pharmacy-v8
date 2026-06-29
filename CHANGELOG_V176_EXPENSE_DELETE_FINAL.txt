@@ -1,0 +1,22 @@
+V176 - Correction finale des deux points reportés
+
+1) Carte Dashboard Caisse - Tot. dépenses
+- refonte des proportions de la carte avec override CSS fort
+- cercle réduit et recentré dans le bloc
+- texte 0.0% mieux centré dans le cercle
+- DH 0 réduit à une taille cohérente
+- message Aucune dépense enregistrée réduit
+- texte 0% de la limite utilisée réduit
+- contenu centré comme un groupe cohérent dans la carte
+
+2) Table Utilisateurs - Delete
+- ajout d'un timeout de 8 secondes sur la requête de suppression
+- ajout d'un reset automatique de sécurité après 12 secondes
+- fallback backend: POST /platform/client-delete puis DELETE /platform/delete-client si nécessaire
+- le bouton ne doit plus rester bloqué sur Suppression...
+- l'utilisateur est retiré immédiatement de la liste après succès
+- le drawer Infos est fermé si l'utilisateur supprimé était ouvert
+- rechargement de la liste en arrière-plan
+
+Validation:
+- build frontend réussi

@@ -3367,6 +3367,15 @@ function Platform({auth}){
   const [infoDraft,setInfoDraft]=useState(null);
   const [deletingUser,setDeletingUser]=useState("");
 
+  useEffect(()=>{
+    if(!deletingUser) return undefined;
+    const id = setTimeout(()=>{
+      setDeletingUser("");
+      setMsg(prev=>prev || "Suppression non confirmée. Réessayez.");
+    }, 12000);
+    return ()=>clearTimeout(id);
+  },[deletingUser]);
+
   async function load(){
     try{
       const r = await axios.get(`${API}/platform/clients`,auth);
@@ -3462,19 +3471,31 @@ function Platform({auth}){
     if(!confirm(`Supprimer définitivement le user ${u} ?`)) return;
     setDeletingUser(u);
     setMsg("");
+    const cfg = {...(auth || {}), timeout: 8000};
+    const encoded = encodeURIComponent(u);
     try{
-      await axios.post(`${API}/platform/client-delete/${encodeURIComponent(u)}`,{},auth);
+      try{
+        await axios.post(`${API}/platform/client-delete/${encoded}`,{},cfg);
+      }catch(firstError){
+        const status = firstError?.response?.status;
+        if(status === 404 || status === 405){
+          await axios.delete(`${API}/platform/delete-client/${encoded}`,cfg);
+        }else{
+          throw firstError;
+        }
+      }
       setClients(prev=>prev.filter(client=>client.username !== u));
       if(infoDraft?.originalUsername === u || infoDraft?.username === u){
         setInfoClient(null);
         setInfoDraft(null);
       }
       setMsg("User supprimé.");
-      setDeletingUser("");
       load().catch(()=>{});
-      return;
     }catch(e){
-      setMsg(e.response?.data?.detail || "Erreur suppression client");
+      const detail = e?.code === "ECONNABORTED"
+        ? "Erreur suppression client: délai dépassé. Le bouton est réinitialisé, réessayez."
+        : (e.response?.data?.detail || "Erreur suppression client");
+      setMsg(detail);
     }finally{
       setDeletingUser("");
     }
