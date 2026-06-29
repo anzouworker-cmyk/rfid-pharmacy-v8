@@ -1732,7 +1732,7 @@ function CashDashboardAdmin(){
   }
 
   function limitMeta(label,key,currentCents){
-    return <><span>{label}</span><button type="button" className="cashLimitEditBtn" onClick={()=>promptDashboardCashSetting(key,label,currentCents)}>Limite : {formatDH(currentCents).replace(/\u202f|\u00a0/g," ")}</button></>;
+    return <><span>{label}</span><button type="button" className="cashLimitEditBtn" onClick={()=>promptDashboardCashSetting(key,label,currentCents)}>Limite : <span className="cashLimitAmount">{formatDH(currentCents).replace(/\u202f|\u00a0/g," ")}</span></button></>;
   }
 
   function cashNumber(cents, decimals=1){
@@ -2041,10 +2041,10 @@ function CashDashboardAdmin(){
         <div className="cashDateBar cashShuffleExchangeDateBar" aria-label="Barre de date de gestion de caisse">
           <div className="cashDateBarGroup">
             <span>Date de caisse</span>
-            <button type="button" onClick={()=>shiftSelectedDate(-1)} aria-label="Jour précédent">‹</button>
-            <input type="date" value={selectedDate || dashboardToday} onChange={e=>selectMainDate(e.target.value || dashboardToday)} />
-            <button type="button" onClick={()=>shiftSelectedDate(1)} aria-label="Jour suivant">›</button>
-            <button type="button" className="cashDateTodayBtn" onClick={()=>selectMainDate(dashboardToday)}>Aujourd’hui</button>
+            <button type="button" className="cashDateArrowBtn" onClick={()=>shiftSelectedDate(-1)} aria-label="Jour précédent">‹</button>
+            <input type="date" value={selectedDate || dashboardToday} onChange={e=>selectMainDate(e.target.value || dashboardToday)} aria-label="Choisir la date de caisse" />
+            <button type="button" className="cashDateArrowBtn" onClick={()=>shiftSelectedDate(1)} aria-label="Jour suivant">›</button>
+            <button type="button" className="cashDateResetBtn" onClick={()=>selectMainDate(dashboardToday)} aria-label="Revenir à aujourd’hui">↻</button>
           </div>
         </div>
       </div>
