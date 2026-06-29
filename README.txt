@@ -1,11 +1,11 @@
-Smart Inventory V110 - Shuffle SaaS Design Integration
+Inventory Connect V110 - Shuffle Design Integration
 
 Corrections incluses:
 - Application du design Shuffle/design.md sur le frontend React + CSS classique.
-- Palette SaaS indigo/slate: fond #fafbfe, surfaces blanches, états succès/alerte/danger.
+- Palette application indigo/slate: fond #fafbfe, surfaces blanches, états succès/alerte/danger.
 - Typographie modernisée: Outfit pour titres, Plus Jakarta Sans pour contenu.
 - Redesign global: sidebar, topbar sticky, cards, boutons, tableaux, modals, pages opérations/caisse/dashboard/admin.
-- Assistant IA stylé comme panneau SaaS sombre avec accent indigo.
+- Assistant IA stylé comme panneau application sombre avec accent indigo.
 - Logique métier conservée: routes React, API calls, inventaire, caisse, permissions, exports et localStorage inchangés.
 - Build frontend vérifié avec `npm run build`.
 - /health backend aligné sur V110_SHUFFLE_DESIGN_INTEGRATION.
@@ -23,10 +23,10 @@ Déploiement backend Render:
 
 ---
 
-Smart Inventory V33.11 - Logo long en React/CSS (sans image)
+Inventory Connect V33.11 - Logo long en React/CSS (sans image)
 
 Corrections incluses:
-- Logo Smart Inventory reformé comme le modèle fourni: texte horizontal long, Smart en bleu marine, Inventory en bleu-vert.
+- Logo Inventory Connect reformé comme le modèle fourni: texte horizontal long, Inventory en bleu marine, Connect en bleu-vert.
 - Sous-titre en majuscules espacées: INVENTORY MANAGEMENT PLATFORM avec lignes horizontales.
 - Logo codé directement en React + CSS, pas une image PNG.
 - Logo appliqué sur l'écran de connexion et dans la sidebar.
@@ -45,7 +45,7 @@ version attendue: V33.11_CODE_LONG_LOGO
 
 ---
 
-Smart Inventory V33.10 - Carousel publicités dashboard
+Inventory Connect V33.10 - Carousel publicités dashboard
 
 Corrections incluses:
 - Suppression du texte/icône “Couverture globale” au centre du donut, seul le pourcentage reste affiché.
@@ -67,7 +67,7 @@ version attendue: V33.10_DASHBOARD_AD_CAROUSEL
 
 ---
 
-Smart Inventory V33.8 - Correction finale module publicité + diagnostic API
+Inventory Connect V33.8 - Correction finale module publicité + diagnostic API
 
 Corrections incluses:
 - FRONTEND_ORIGINS n'est PAS "*" par défaut.

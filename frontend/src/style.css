@@ -15871,3 +15871,123 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
     max-width:none!important;
   }
 }
+
+/* V205 - Recap narrow-card stability + Associations/Inventory width matches cash dashboard */
+.cashRecapBody{
+  container-type:inline-size!important;
+}
+.cashRecapRow strong,
+.cashRecapGapCard strong,
+.cashRecapGapCard.balanced strong,
+.cashRecapGapCard.ok strong,
+.cashRecapGapCard.surplus strong,
+.cashRecapGapCard.shortage strong,
+.cashRecapGapCard.warn strong,
+.cashRecapExpenseAmount{
+  white-space:nowrap!important;
+  word-spacing:.08em!important;
+  flex-shrink:0!important;
+}
+@container (max-width: 430px){
+  .cashRecapRow,
+  .cashRecapGapCard{
+    grid-template-columns:minmax(0,1fr)!important;
+    align-items:start!important;
+    min-height:auto!important;
+    padding:20px 24px!important;
+    gap:14px!important;
+  }
+  .cashRecapRow > div,
+  .cashRecapGapCard > div{
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .cashRecapRow em,
+  .cashRecapGapCard em{
+    font-size:clamp(17px,5.2vw,20px)!important;
+    line-height:1.14!important;
+    max-width:100%!important;
+  }
+  .cashRecapRow small,
+  .cashRecapGapCard small{
+    font-size:clamp(13px,4vw,15px)!important;
+    line-height:1.22!important;
+    max-width:100%!important;
+  }
+  .cashRecapRow strong,
+  .cashRecapGapCard strong,
+  .cashRecapGapCard.balanced strong,
+  .cashRecapGapCard.ok strong,
+  .cashRecapGapCard.surplus strong,
+  .cashRecapGapCard.shortage strong,
+  .cashRecapGapCard.warn strong,
+  .cashRecapExpenseAmount{
+    justify-self:end!important;
+    min-width:0!important;
+    width:auto!important;
+    max-width:100%!important;
+    font-size:clamp(30px,9vw,40px)!important;
+    line-height:1!important;
+    text-align:right!important;
+    white-space:nowrap!important;
+  }
+}
+@container (max-width: 330px){
+  .cashRecapRow,
+  .cashRecapGapCard{
+    padding:18px 20px!important;
+  }
+  .cashRecapRow strong,
+  .cashRecapGapCard strong,
+  .cashRecapGapCard.balanced strong,
+  .cashRecapGapCard.ok strong,
+  .cashRecapGapCard.surplus strong,
+  .cashRecapGapCard.shortage strong,
+  .cashRecapGapCard.warn strong,
+  .cashRecapExpenseAmount{
+    font-size:clamp(28px,8.4vw,34px)!important;
+  }
+}
+
+.shuffleAssocMain,
+.shuffleInvMain,
+.withInternalTopNav .shuffleInvMain{
+  width:100%!important;
+  max-width:1600px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  box-sizing:border-box!important;
+}
+.dashRefContent .shuffleAssocMain,
+.dashRefContent .shuffleInvMain{
+  width:100%!important;
+  max-width:1600px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  padding-left:0!important;
+  padding-right:0!important;
+}
+.shuffleAssocMain > *,
+.shuffleInvMain > *,
+.withInternalTopNav .shuffleInvMain > *,
+.dashRefContent .shuffleAssocMain > *,
+.dashRefContent .shuffleInvMain > *{
+  width:100%!important;
+  max-width:1600px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+@media (max-width:1024px){
+  .shuffleAssocMain,
+  .shuffleInvMain,
+  .withInternalTopNav .shuffleInvMain,
+  .dashRefContent .shuffleAssocMain,
+  .dashRefContent .shuffleInvMain,
+  .shuffleAssocMain > *,
+  .shuffleInvMain > *,
+  .withInternalTopNav .shuffleInvMain > *,
+  .dashRefContent .shuffleAssocMain > *,
+  .dashRefContent .shuffleInvMain > *{
+    max-width:none!important;
+  }
+}

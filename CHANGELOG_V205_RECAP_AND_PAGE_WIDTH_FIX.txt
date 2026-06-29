@@ -1,0 +1,10 @@
+V205 - Recap design stability + Associations/Inventory content width matching cash dashboard
+
+Base: V204.
+Changes:
+- Kept V204/V203 logic unchanged.
+- Fixed the cash counting Récapitulatif panel for narrow cards/side panels using container-based responsive CSS.
+- Recap rows now switch to an internal vertical layout when the card itself is narrow, preventing titles and subtitles from being squeezed beside DH amounts.
+- DH amounts remain on one line, aligned right, with safer spacing for 3+ digit values and negative values.
+- Updated Associations and Inventaire content width to match the cash dashboard width: centered max-width 1600px instead of the previous narrower cap.
+- Kept mobile layouts full-width.
