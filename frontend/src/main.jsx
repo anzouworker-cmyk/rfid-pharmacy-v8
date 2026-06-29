@@ -1973,14 +1973,14 @@ function CashDashboardAdmin(){
     />;
   }
 
-  function CashShuffleCard({title,meta,badge,children,className="cashShuffleMetricCard",dotTone=""}){
+  function CashShuffleCard({title,meta,badge,badgeClassName="",children,className="cashShuffleMetricCard",dotTone=""}){
     return <article className={`cashShuffleCard ${className}`.trim()}>
       <div className="cashShuffleCardTop">
         <div>
           <h3>{title}</h3>
           {meta && <div className="cashShuffleCardMeta">{meta}</div>}
         </div>
-        {badge ? <span className="cashShuffleBadge">{badge}</span> : <span className={`cashShuffleDot ${dotTone}`.trim()} />}
+        {badge ? <span className={`cashShuffleBadge ${badgeClassName}`.trim()}>{badge}</span> : <span className={`cashShuffleDot ${dotTone}`.trim()} />}
       </div>
       <div className="cashShuffleMetricBody">{children}</div>
     </article>;
@@ -2068,15 +2068,15 @@ function CashDashboardAdmin(){
         />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Real time CR balance" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleCardTall cashShuffleBalanceCard">
+      <CashShuffleCard title="Real time CR balance" meta={cardMeta("Jour sélectionné")} badge="SD" badgeClassName="cashShuffleBadgePill" className="cashShuffleCardTall cashShuffleBalanceCard">
         <CashShuffleAmount cents={selectedMetrics.countedCents} large />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall cashShuffleMonthlyAmountCard">
+      <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeDanger" className="cashShuffleCardTall cashShuffleMonthlyAmountCard cashShuffleMonthlyShortageCard">
         <CashShuffleMonthlySummary cents={monthlyShortageCents} tone="negative" emptyText="Aucun montant manquant enregistré" />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge="📅" className="cashShuffleCardTall cashShuffleMonthlyAmountCard">
+      <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge={<InvIcon name="sync" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeSuccess" className="cashShuffleCardTall cashShuffleMonthlyAmountCard cashShuffleMonthlySurplusCard">
         <CashShuffleMonthlySummary cents={monthlySurplusCents} tone="positive" emptyText="Aucun surplus enregistré" />
       </CashShuffleCard>
 
@@ -2091,43 +2091,43 @@ function CashDashboardAdmin(){
       </div>
 
       <div className="cashShuffleSection cashShuffleSectionBottom">
-      <CashShuffleCard title="Balance due" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleMini cashShuffleBalanceDueActionCard">
+      <CashShuffleCard title="Balance due" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleMini cashShuffleBalanceDueActionCard">
         <CashShuffleSignedAmount cents={selectedBalanceDueSignedCents} tone={balanceDueTone} />
         <CashShuffleActionNote text={balanceDueActionTitle} />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Montant manquant" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleMini">
+      <CashShuffleCard title="Montant manquant" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeDanger" className="cashShuffleMini">
         <CashShuffleAmount cents={selectedMetrics.shortageCents} tone="negative" />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Montant surplus" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleMini">
+      <CashShuffleCard title="Montant surplus" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="sync" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeSuccess" className="cashShuffleMini">
         <CashShuffleAmount cents={selectedMetrics.surplusCents} tone="positive" />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Retiré" meta={cardMeta("Jour sélectionné")} className="cashShuffleMini">
+      <CashShuffleCard title="Retiré" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="upload" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeBlue" className="cashShuffleMini">
         <CashShuffleAmount cents={selectedMetrics.withdrawnCents} />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Dépenses" meta={cardMeta("Jour sélectionné")} className="cashShuffleMini" dotTone="amber">
+      <CashShuffleCard title="Dépenses" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="list" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeAmber" className="cashShuffleMini">
         <CashShuffleAmount cents={selectedMetrics.expensesCents} />
       </CashShuffleCard>
 
       </div>
 
       <div className="cashShuffleSection cashShuffleSectionResults">
-      <CashShuffleCard title="Tot. vente" meta={cardMeta("Jour sélectionné")} badge="=" className="cashShuffleWide">
+      <CashShuffleCard title="Tot. vente" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
         <CashShuffleAmount cents={selectedMetrics.totalSalesCents} xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="C. fermeture (théorique)" meta={cardMeta("Jour sélectionné")} badge="=" className="cashShuffleWide">
+      <CashShuffleCard title="C. fermeture (théorique)" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="grid" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
         <CashShuffleAmount cents={selectedMetrics.closingCalculatedCents} xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Nouvelle C. fermeture" meta={cardMeta("Jour sélectionné")} badge="=" className="cashShuffleWide">
+      <CashShuffleCard title="Nouvelle C. fermeture" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
         <CashShuffleAmount cents={selectedMetrics.closingRealCents} xl />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Écart cash comptée vs calculée" meta={cardMeta("Jour sélectionné")} badge="Δ" className="cashShuffleWide cashShuffleWideDelta" dotTone="amber">
+      <CashShuffleCard title="Écart cash comptée vs calculée" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide cashShuffleWideDelta">
         <CashShuffleAmount cents={selectedMetrics.gapCents} xl />
       </CashShuffleCard>
       </div>
@@ -3220,6 +3220,9 @@ function MyUsers({auth,me}){
   const [fullName,setFullName]=useState("");
   const [pages,setPages]=useState(()=>visiblePageOptions.map(p=>p.id));
   const [msg,setMsg]=useState("");
+  const [search,setSearch]=useState("");
+  const [statusFilter,setStatusFilter]=useState("all");
+  const [showCreateModal,setShowCreateModal]=useState(false);
 
   async function load(){
     try{
@@ -3234,14 +3237,18 @@ function MyUsers({auth,me}){
     setPages(prev=>cleanPageList(prev, visiblePageOptions.map(p=>p.id)));
   },[me?.username]);
 
-  function togglePage(pageId){
-    setPages(prev=>prev.includes(pageId) ? prev.filter(x=>x!==pageId) : [...prev,pageId]);
+  function resetCreateForm(){
+    setUsername("");
+    setPassword("");
+    setFullName("");
+    setPages(visiblePageOptions.map(p=>p.id));
   }
 
   async function createUser(){
     try{
       await axios.post(`${API}/users/create`,{username,password,full_name:fullName,page_permissions:pages},auth);
-      setUsername(""); setPassword(""); setFullName(""); setPages(visiblePageOptions.map(p=>p.id));
+      resetCreateForm();
+      setShowCreateModal(false);
       setMsg("Utilisateur créé.");
       await load();
     }catch(e){
@@ -3293,64 +3300,121 @@ function MyUsers({auth,me}){
     }
   }
 
+  const filteredUsers = users.filter(u=>{
+    const q=search.trim().toLowerCase();
+    if(q && !`${u.username || ""} ${u.full_name || ""}`.toLowerCase().includes(q)) return false;
+    if(statusFilter !== "all" && String(!!u.active) !== statusFilter) return false;
+    return true;
+  });
+
+  const avatarText = u => (u.username || "U").slice(0,1).toUpperCase();
+
   return <section className="platformPage myUsersPage">
-    <div className="card userAccessCard">
-      <h3>Créer un utilisateur pour ce compte</h3>
-      <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)}/>
-      <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
-      <input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)}/>
-      <div className="pagePermissionBox pagePermissionButtonBox">
-        <div className="pagePermissionButtonHeader">
-          <div>
-            <strong>Pages visibles</strong>
-            <small>{pages.length} page(s) sélectionnée(s)</small>
-          </div>
-          <PagePermissionsModalButton
-            buttonLabel="Editer"
-            title="Pages visibles"
-            description="Choisissez les pages visibles pour cet utilisateur."
-            options={visiblePageOptions}
-            value={pages}
-            onSave={next=>setPages(next)}
-          />
-        </div>
-        <PagePermissionSummaryChips ids={pages} options={visiblePageOptions} max={4}/>
+    <div className="platformUsersTitle">
+      <div className="platformUsersIcon"><InvIcon name="users" /></div>
+      <div>
+        <h2>Utilisateurs</h2>
+        <p>Gérez les comptes utilisateurs et leurs accès.</p>
       </div>
-      <button onClick={createUser}>Créer utilisateur</button>
+      <button type="button" className="platformAddStoreBtn" onClick={()=>{resetCreateForm(); setShowCreateModal(true);}}>Ajouter User</button>
     </div>
+
+    {showCreateModal && <div className="modalOverlay platformCreateOverlay" onClick={()=>setShowCreateModal(false)}>
+      <div className="scanModal platformStoreModal platformCreateUserModal myUsersCreateModal" onClick={e=>e.stopPropagation()} role="dialog" aria-label="Créer un utilisateur">
+        <button type="button" className="modalClose" onClick={()=>setShowCreateModal(false)}>×</button>
+        <div className="platformCreateModalHeader">
+          <h2>Créer un utilisateur</h2>
+          <p>Créez un utilisateur pour ce compte avec ses accès pages.</p>
+        </div>
+        <div className="platformCreateModalBody">
+          <section className="platformCreateSection">
+            <h3>Identifiants</h3>
+            <div className="platformCreateGrid">
+              <label><span>Username *</span><input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)} /></label>
+              <label><span>Password *</span><input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} /></label>
+              <label className="full"><span>Nom utilisateur *</span><input placeholder="nom utilisateur" value={fullName} onChange={e=>setFullName(e.target.value)} /></label>
+            </div>
+          </section>
+          <section className="platformCreateSection platformCreatePagesSection">
+            <div className="pagePermissionBox pagePermissionButtonBox platformCreatePagesCompact">
+              <div className="pagePermissionButtonHeader">
+                <div>
+                  <strong>Pages visibles</strong>
+                  <small>{pages.length} page(s) sélectionnée(s)</small>
+                </div>
+                <PagePermissionsModalButton
+                  buttonLabel="Editer"
+                  title="Pages visibles"
+                  description="Choisissez les pages visibles pour cet utilisateur."
+                  options={visiblePageOptions}
+                  value={pages}
+                  onSave={next=>setPages(next)}
+                />
+              </div>
+              <PagePermissionSummaryChips ids={pages} options={visiblePageOptions} max={4}/>
+            </div>
+          </section>
+        </div>
+        <div className="platformModalActions platformCreateFooter">
+          <button type="button" className="platformModalCancel" onClick={()=>setShowCreateModal(false)}>Annuler</button>
+          <button type="button" className="platformModalCreate" onClick={createUser}>Créer utilisateur</button>
+        </div>
+      </div>
+    </div>}
 
     <p className={msg.includes("Erreur") || msg.includes("not") ? "err" : "success"}>{msg}</p>
 
-    <table>
-      <thead><tr><th>Utilisateur</th><th>Nom</th><th>Pages visibles</th><th>Mot de passe</th><th>Statut</th><th>Delete</th></tr></thead>
-      <tbody>
-        {users.length ? users.map(u=>{
-          const currentPages=normalizePagePermissions(u.page_permissions, allowedPages, allowedPages);
-          return <tr key={u.username}>
-            <td>{u.username}</td>
-            <td>{u.full_name}</td>
-            <td>
-              <div className="pagePermissionCell">
-                <PagePermissionSummaryChips ids={currentPages} options={visiblePageOptions} max={2}/>
-                <PagePermissionsModalButton
-                  buttonLabel="Editer"
-                  title={`Pages visibles - ${u.username}`}
-                  description="Cochez les pages visibles pour cet utilisateur."
-                  options={visiblePageOptions}
-                  value={currentPages}
-                  onSave={next=>updatePages(u,next)}
-                />
-              </div>
-            </td>
-            <td><button onClick={()=>changePassword(u)}>Changer mot de passe</button></td>
-            <td><button onClick={()=>setActive(u,!u.active)}>{u.active ? "Désactiver" : "Activer"}</button></td>
-            <td><button className="dangerBtn" onClick={()=>deleteUser(u)}>Delete</button></td>
+    <div className="platformUsersPanel myUsersPanel">
+      <div className="platformUsersFilters">
+        <div className="platformSearchBox"><span>⌕</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un utilisateur..." /></div>
+        <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
+          <option value="all">Status — Tous</option>
+          <option value="true">Activé</option>
+          <option value="false">Désactivé</option>
+        </select>
+      </div>
+      <table className="platformUsersTable myUsersTable">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Nom</th>
+            <th>Pages visibles</th>
+            <th>Mot de passe</th>
+            <th>Statut</th>
+            <th>Delete</th>
           </tr>
-        }) : <tr><td colSpan="6" className="expenseHistoryEmpty">Aucun utilisateur créé pour ce compte.</td></tr>}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {filteredUsers.length ? filteredUsers.map(u=>{
+            const currentPages=normalizePagePermissions(u.page_permissions, allowedPages, allowedPages);
+            return <tr key={u.username}>
+              <td><div className="platformUserIdentity"><span className="platformAvatar">{avatarText(u)}</span><span>{u.username}</span></div></td>
+              <td>{u.full_name}</td>
+              <td>
+                <div className="pagePermissionCell myUsersPageCell">
+                  <PagePermissionSummaryChips ids={currentPages} options={visiblePageOptions} max={2}/>
+                  <PagePermissionsModalButton
+                    buttonLabel="Editer"
+                    title={`Pages visibles - ${u.username}`}
+                    description="Cochez les pages visibles pour cet utilisateur."
+                    options={visiblePageOptions}
+                    value={currentPages}
+                    onSave={next=>updatePages(u,next)}
+                  />
+                </div>
+              </td>
+              <td><button type="button" className="platformSoftPill" onClick={()=>changePassword(u)}>Changer mot de passe</button></td>
+              <td><button type="button" className={`platformStatusPill ${u.active ? "active" : "inactive"}`} onClick={()=>setActive(u,!u.active)}>{u.active ? "● Activé" : "○ Désactivé"}<span>⌄</span></button></td>
+              <td><button type="button" className="dangerBtn" onClick={()=>deleteUser(u)}>Delete</button></td>
+            </tr>
+          }) : <tr><td colSpan="6" className="expenseHistoryEmpty">Aucun utilisateur créé pour ce compte.</td></tr>}
+        </tbody>
+      </table>
+      <div className="platformUsersFooter">Affichage de {filteredUsers.length ? 1 : 0} à {filteredUsers.length} sur {users.length} utilisateurs</div>
+    </div>
   </section>;
 }
+
 
 
 function Platform({auth}){

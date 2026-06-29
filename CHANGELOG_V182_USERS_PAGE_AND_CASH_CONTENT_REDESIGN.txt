@@ -1,0 +1,8 @@
+V182 - Users page redesign + cash dashboard content redesign
+
+- Redesigned store-level Utilisateurs page to follow the Clients SaaS visual structure.
+- Added modern page header, add-user modal, filters panel, and styled users table.
+- Kept existing user creation / page permissions / status / delete logic.
+- Redesigned Dashboard Caisse content cards to match the provided reference image more closely.
+- Kept the page title and date bar structure as requested.
+- Updated card layout, typography, icon badges, progress rings, anomaly card, and lower KPI cards.
