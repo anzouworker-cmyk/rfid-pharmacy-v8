@@ -3269,11 +3269,13 @@ function MyUsers({auth,me}){
   }
 
   async function deleteUser(user){
+    if(!user?.username) return;
     if(!confirm(`Supprimer l’utilisateur ${user.username} ?`)) return;
     try{
       await axios.delete(`${API}/users/delete/${encodeURIComponent(user.username)}`,auth);
+      setUsers(prev=>prev.filter(x=>x.username!==user.username));
       setMsg("Utilisateur supprimé.");
-      await load();
+      load().catch(()=>{});
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur suppression utilisateur");
     }
@@ -3459,14 +3461,18 @@ function Platform({auth}){
     if(!u || deletingUser) return;
     if(!confirm(`Supprimer définitivement le user ${u} ?`)) return;
     setDeletingUser(u);
+    setMsg("");
     try{
       await axios.post(`${API}/platform/client-delete/${encodeURIComponent(u)}`,{},auth);
+      setClients(prev=>prev.filter(client=>client.username !== u));
       if(infoDraft?.originalUsername === u || infoDraft?.username === u){
         setInfoClient(null);
         setInfoDraft(null);
       }
       setMsg("User supprimé.");
-      await load();
+      setDeletingUser("");
+      load().catch(()=>{});
+      return;
     }catch(e){
       setMsg(e.response?.data?.detail || "Erreur suppression client");
     }finally{

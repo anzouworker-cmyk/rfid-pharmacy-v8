@@ -13044,3 +13044,98 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   .platformCreateFooter .platformModalCancel,
   .platformCreateFooter .platformModalCreate{width:100%!important;}
 }
+
+/* V175 - Fix Tot. dépenses proportions + robust user delete UX */
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleCardMeta{
+  gap:12px!important;
+  align-items:center!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleCardMeta .cashLimitEditBtn,
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleCardMeta .cashShuffleLimitBadge{
+  padding:10px 16px!important;
+  border-radius:14px!important;
+  font-size:13px!important;
+  line-height:1.1!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleMetricBody{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  min-height:214px!important;
+  padding:10px 18px 18px!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseProgress{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:120px minmax(0, 1fr)!important;
+  align-items:center!important;
+  gap:26px!important;
+  padding:4px 6px 4px 2px!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing,
+.cashShuffleExpensesLimitCard .cashShuffleExpenseRing.cashShuffleRing{
+  width:108px!important;
+  min-width:108px!important;
+  height:108px!important;
+  margin-left:0!important;
+  justify-self:start!important;
+  align-self:center!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing > div{
+  font-size:17px!important;
+  font-weight:800!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  gap:10px!important;
+  text-align:left!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText strong{
+  font-size:32px!important;
+  line-height:1!important;
+  letter-spacing:-0.02em!important;
+  margin:0!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText span{
+  font-size:17px!important;
+  line-height:1.25!important;
+  font-weight:500!important;
+  color:#5f7495!important;
+  max-width:270px!important;
+  margin:0!important;
+}
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText small{
+  font-size:14px!important;
+  line-height:1.2!important;
+  font-weight:600!important;
+  color:#92a0bb!important;
+  margin:0!important;
+}
+.platformUsersTable .dangerBtn{
+  min-width:122px!important;
+}
+.platformUsersTable .dangerBtn.disabled{
+  cursor:wait!important;
+}
+@media (max-width: 760px){
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleMetricBody{
+    min-height:auto!important;
+    padding:12px 16px 18px!important;
+  }
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseProgress{
+    grid-template-columns:1fr!important;
+    justify-items:center!important;
+    gap:16px!important;
+    text-align:center!important;
+  }
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText{
+    align-items:center!important;
+    text-align:center!important;
+  }
+  .cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleExpenseText span{
+    max-width:none!important;
+  }
+}
