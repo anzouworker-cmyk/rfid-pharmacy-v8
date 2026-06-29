@@ -1,0 +1,16 @@
+V202 - Cash recap responsive amount layout fix
+
+Base: V201_AUTOMATIC_CARDS_READONLY
+
+Changes:
+- Kept all V201 logic and read-only automatic card behavior unchanged.
+- Updated only the cash counting "Récapitulatif" panel CSS.
+- Reserved a stable right-side amount column on normal widths.
+- Reduced mobile amount/title sizing slightly to prevent awkward wrapping.
+- On very narrow screens, recap rows switch to a vertical internal layout: text above, amount below aligned right.
+- Forced DH amounts to remain on one line with tabular numeric rendering.
+- Improved spacing so 3+ digit values such as DH 120, DH 999, - DH 1500 stay readable without breaking the card.
+
+Validation:
+- Frontend production build completed successfully.
+- Backend main.py compiled successfully.

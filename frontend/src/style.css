@@ -15758,3 +15758,90 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   .cashRecapRow,
   .cashRecapGapCard{min-height:96px!important;padding:18px 20px!important;border-radius:20px!important;gap:12px!important;}
 }
+
+/* V202 - Cash recap responsive amount layout fix */
+.cashRecapRow,
+.cashRecapGapCard{
+  grid-template-columns:minmax(0,1fr) minmax(120px,max-content)!important;
+}
+.cashRecapRow strong,
+.cashRecapGapCard strong,
+.cashRecapGapCard.balanced strong,
+.cashRecapGapCard.ok strong,
+.cashRecapGapCard.surplus strong,
+.cashRecapGapCard.shortage strong,
+.cashRecapGapCard.warn strong,
+.cashRecapExpenseAmount{
+  display:block!important;
+  justify-self:end!important;
+  min-width:120px!important;
+  max-width:100%!important;
+  letter-spacing:-.035em!important;
+  font-variant-numeric:tabular-nums!important;
+  overflow:visible!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+}
+@media (max-width:520px){
+  .cashRecapRow,
+  .cashRecapGapCard{
+    grid-template-columns:minmax(0,1fr) minmax(92px,max-content)!important;
+    column-gap:14px!important;
+    row-gap:8px!important;
+    padding:18px 20px!important;
+  }
+  .cashRecapRow em,
+  .cashRecapGapCard em{
+    font-size:clamp(15px,4.45vw,18px)!important;
+    line-height:1.15!important;
+    letter-spacing:-.02em!important;
+  }
+  .cashRecapRow small,
+  .cashRecapGapCard small{
+    font-size:clamp(12px,3.65vw,14px)!important;
+    line-height:1.18!important;
+  }
+  .cashRecapRow strong,
+  .cashRecapGapCard strong,
+  .cashRecapGapCard.balanced strong,
+  .cashRecapGapCard.ok strong,
+  .cashRecapGapCard.surplus strong,
+  .cashRecapGapCard.shortage strong,
+  .cashRecapGapCard.warn strong,
+  .cashRecapExpenseAmount{
+    min-width:92px!important;
+    font-size:clamp(25px,7.1vw,30px)!important;
+    letter-spacing:-.03em!important;
+    white-space:nowrap!important;
+  }
+}
+@media (max-width:390px){
+  .cashRecapRow,
+  .cashRecapGapCard{
+    grid-template-columns:minmax(0,1fr)!important;
+    align-items:start!important;
+    min-height:auto!important;
+    padding:18px 20px!important;
+    gap:12px!important;
+  }
+  .cashRecapRow > div,
+  .cashRecapGapCard > div{
+    width:100%!important;
+  }
+  .cashRecapRow strong,
+  .cashRecapGapCard strong,
+  .cashRecapGapCard.balanced strong,
+  .cashRecapGapCard.ok strong,
+  .cashRecapGapCard.surplus strong,
+  .cashRecapGapCard.shortage strong,
+  .cashRecapGapCard.warn strong,
+  .cashRecapExpenseAmount{
+    justify-self:end!important;
+    min-width:0!important;
+    width:auto!important;
+    max-width:100%!important;
+    font-size:clamp(28px,9vw,36px)!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+}
