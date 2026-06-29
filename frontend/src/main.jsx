@@ -1933,39 +1933,44 @@ function CashDashboardAdmin(){
     </div>;
   }
 
-  function CashShuffleProgress({value,label,subLabel}){
+  function CashShuffleInsightProgress({value, amountLabel, headline, description, tone="indigo", className=""}){
     const safe = Math.max(0, Math.min(100, Number(value) || 0));
-    return <div className="cashShuffleProgressRow">
-      <div className="cashShuffleRing">
-        <svg viewBox="0 0 36 36" aria-hidden="true">
-          <path className="track" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-          <path className="value" strokeDasharray={`${safe}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-        </svg>
-        <div>{safe.toFixed(1)}%</div>
+    return <div className={`cashShuffleInsightMetric ${className}`.trim()}>
+      <div className={`cashShuffleInsightRing ${tone}`.trim()} style={{"--progress": `${safe}%`}}>
+        <div><span>{safe.toFixed(1)}%</span></div>
       </div>
-      <div>
-        <span>{label}</span>
-        <strong>{subLabel}</strong>
+      <div className="cashShuffleInsightText">
+        <small>{amountLabel}</small>
+        <strong>{headline}</strong>
+        <p>{description}</p>
       </div>
     </div>;
   }
 
+  function CashShuffleProgress({value,label,subLabel,description}){
+    return <CashShuffleInsightProgress
+      value={value}
+      amountLabel={label}
+      headline={subLabel}
+      description={description}
+      tone="indigo"
+      className="cashShuffleInsightMetricProgress"
+    />;
+  }
+
   function CashShuffleExpenseProgress({value,cents,limitCents}){
     const safe = Math.max(0, Math.min(100, Number(value) || 0));
-    return <div className="cashShuffleExpenseProgress">
-      <div className="cashShuffleRing cashShuffleExpenseRing">
-        <svg viewBox="0 0 36 36" aria-hidden="true">
-          <path className="track" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-          <path className="value" strokeDasharray={`${safe}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-        </svg>
-        <div>{safe.toFixed(1)}%</div>
-      </div>
-      <div className="cashShuffleExpenseText">
-        <strong>{formatDH(cents)}</strong>
-        <span>{Number(cents || 0) > 0 ? "Dépenses enregistrées" : "Aucune dépense enregistrée"}</span>
-        <small>{limitCents ? `${Math.round(safe)}% de la limite utilisée` : "Limite non définie"}</small>
-      </div>
-    </div>;
+    const description = limitCents
+      ? `${Math.round(safe)}% de la limite utilisée`
+      : "Limite mensuelle non définie";
+    return <CashShuffleInsightProgress
+      value={safe}
+      amountLabel={formatDH(cents)}
+      headline={Number(cents || 0) > 0 ? "Dépenses enregistrées" : "Aucune dépense enregistrée"}
+      description={description}
+      tone="amber"
+      className="cashShuffleInsightMetricExpense"
+    />;
   }
 
   function CashShuffleCard({title,meta,badge,children,className="cashShuffleMetricCard",dotTone=""}){
@@ -2052,8 +2057,15 @@ function CashDashboardAdmin(){
 
     <div className="cashShuffleGrid cashShuffleContentV142">
       <div className="cashShuffleSection cashShuffleSectionTop">
-      <CashShuffleCard title="Progression écart de caisse" meta={limitMeta("Tolérance écart", "toleranceLimitCents", toleranceLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard" dotTone="indigo">
-        <CashShuffleProgress value={balanceDueProgressValue} label={formatDH(selectedBalanceDueAbsCents)} subLabel={`${Math.round(balanceDueProgressValue)}% de la limite`} />
+      <CashShuffleCard title="Progression écart de caisse" meta={limitMeta("Tolérance écart", "toleranceLimitCents", toleranceLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleInsightCard" dotTone="indigo">
+        <CashShuffleProgress
+          value={balanceDueProgressValue}
+          label={formatDH(selectedBalanceDueAbsCents)}
+          subLabel={`${Math.round(balanceDueProgressValue)}% de la limite`}
+          description={selectedBalanceDueAbsCents > 0
+            ? `La tolérance d’écart configurée est de ${formatDH(toleranceLimitCents || 0)} pour la période suivie.`
+            : `Aucun écart enregistré pour la période suivie. La tolérance active est de ${formatDH(toleranceLimitCents || 0)}.`}
+        />
       </CashShuffleCard>
 
       <CashShuffleCard title="Real time CR balance" meta={cardMeta("Jour sélectionné")} badge="SD" className="cashShuffleCardTall cashShuffleBalanceCard">
@@ -2068,7 +2080,7 @@ function CashDashboardAdmin(){
         <CashShuffleMonthlySummary cents={monthlySurplusCents} tone="positive" emptyText="Aucun surplus enregistré" />
       </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. dépenses" meta={limitMeta("Total mensuel", "monthlyExpenseLimitCents", monthlyExpenseLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleExpensesLimitCard" dotTone="amber">
+      <CashShuffleCard title="Tot. dépenses" meta={limitMeta("Total mensuel", "monthlyExpenseLimitCents", monthlyExpenseLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleExpensesLimitCard cashShuffleInsightCard" dotTone="amber">
         <CashShuffleExpenseProgress value={expensesProgress} cents={monthlyExpensesCents} limitCents={monthlyExpenseLimitCents} />
       </CashShuffleCard>
 

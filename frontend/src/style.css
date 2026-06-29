@@ -13232,3 +13232,116 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
     text-align:center!important;
   }
 }
+
+/* V177 - use dashboard coverage model for Progression écart de caisse + Tot. dépenses */
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleMetricBody{
+  min-height:210px!important;
+  display:flex!important;
+  align-items:center!important;
+  padding:18px 22px 24px!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightMetric{
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:28px!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing{
+  --ringColor:#4f46e5;
+  --ringTrack:#eef2f7;
+  width:128px!important;
+  min-width:128px!important;
+  height:128px!important;
+  border-radius:999px!important;
+  background:conic-gradient(var(--ringColor) var(--progress), var(--ringTrack) 0)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:relative!important;
+  flex:0 0 128px!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing.indigo{--ringColor:#4f46e5!important;}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing.amber{--ringColor:#6366f1!important;}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing::before{
+  content:""!important;
+  position:absolute!important;
+  inset:10px!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  box-shadow:inset 0 0 0 1px #e2e8f0!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing > div{
+  position:relative!important;
+  z-index:1!important;
+  width:82px!important;
+  height:82px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#fff!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing > div > span{
+  font-size:18px!important;
+  font-weight:900!important;
+  color:#0f172a!important;
+  line-height:1!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightText{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  gap:8px!important;
+  flex:1!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightText small{
+  margin:0!important;
+  font-size:16px!important;
+  line-height:1.1!important;
+  font-weight:700!important;
+  color:#7c8aa5!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightText strong{
+  margin:0!important;
+  font-size:18px!important;
+  line-height:1.2!important;
+  font-weight:900!important;
+  color:#0f172a!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightText p{
+  margin:0!important;
+  font-size:14px!important;
+  line-height:1.55!important;
+  color:#64748b!important;
+  max-width:360px!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleCardMeta{
+  align-items:center!important;
+  gap:10px!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleCardMeta > span{
+  font-size:14px!important;
+}
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleCardMeta .cashLimitEditBtn,
+.cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleCardMeta .cashShuffleLimitBadge{
+  min-height:36px!important;
+  padding:8px 14px!important;
+  border-radius:14px!important;
+  font-size:13px!important;
+}
+.cashShuffleContentV142 .cashShuffleProgressCard .cashShuffleDot.indigo,
+.cashShuffleContentV142 .cashShuffleExpensesLimitCard .cashShuffleDot.amber{
+  width:10px!important;height:10px!important;border-radius:999px!important;
+}
+@media (max-width: 900px){
+  .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightMetric{gap:20px!important;}
+  .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing{width:112px!important;min-width:112px!important;height:112px!important;flex-basis:112px!important;}
+  .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing > div{width:72px!important;height:72px!important;}
+}
+@media (max-width: 720px){
+  .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleMetricBody{padding:18px!important;}
+  .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightMetric{flex-direction:column!important;align-items:center!important;text-align:center!important;}
+  .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightText{align-items:center!important;}
+  .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightText p{max-width:none!important;}
+}
