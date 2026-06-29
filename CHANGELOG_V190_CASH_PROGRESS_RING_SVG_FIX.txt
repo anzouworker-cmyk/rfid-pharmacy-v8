@@ -1,0 +1,9 @@
+V190 - CASH PROGRESS RING SVG FIX
+
+Corrections:
+- Replaced the CSS conic-gradient circular progress with an SVG stroke-based ring.
+- Progression écart de caisse now shows a clearly visible indigo progress arc.
+- Tot. dépenses now shows a clearly visible amber progress arc.
+- Kept V189 logic: Progression écart de caisse uses the accumulated monthly gap for the selected month.
+- Kept V189 cleanup: decorative blue/green waves removed.
+- Frontend build completed successfully.

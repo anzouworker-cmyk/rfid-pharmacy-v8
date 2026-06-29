@@ -1936,9 +1936,22 @@ function CashDashboardAdmin(){
 
   function CashShuffleInsightProgress({value, amountLabel, headline, description, tone="indigo", className=""}){
     const safe = Math.max(0, Math.min(100, Number(value) || 0));
+    const radius = 52;
+    const circumference = 2 * Math.PI * radius;
+    const dashOffset = circumference - (safe / 100) * circumference;
     return <div className={`cashShuffleInsightMetric ${className}`.trim()}>
-      <div className={`cashShuffleInsightRing ${tone}`.trim()} style={{"--progress": `${safe}%`}}>
-        <div><span>{safe.toFixed(1)}%</span></div>
+      <div className={`cashShuffleSvgRing ${tone}`.trim()}>
+        <svg viewBox="0 0 128 128" aria-hidden="true">
+          <circle className="cashShuffleSvgRingTrack" cx="64" cy="64" r={radius}></circle>
+          <circle
+            className="cashShuffleSvgRingProgress"
+            cx="64"
+            cy="64"
+            r={radius}
+            style={{strokeDasharray:`${circumference} ${circumference}`, strokeDashoffset:dashOffset}}
+          ></circle>
+        </svg>
+        <div className="cashShuffleSvgRingValue"><span>{safe.toFixed(1)}%</span></div>
       </div>
       <div className="cashShuffleInsightText">
         <small>{amountLabel}</small>
