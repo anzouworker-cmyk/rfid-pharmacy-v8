@@ -1697,9 +1697,10 @@ function CashDashboardAdmin(){
   const monthlyShortageCents = monthMetrics.reduce((sum,x)=>sum + x.shortageCents,0);
   const monthlySurplusCents = monthMetrics.reduce((sum,x)=>sum + x.surplusCents,0);
   const monthlyExpensesCents = monthMetrics.reduce((sum,x)=>sum + x.expensesCents,0);
+  const monthlyAccumulatedGapCents = monthMetrics.reduce((sum,x)=>sum + Math.abs(Number(x.dueBalanceCents || 0)),0);
   const selectedBalanceDueSignedCents = Number(selectedMetrics.signedBalanceDueCents || 0);
   const selectedBalanceDueAbsCents = Math.abs(selectedBalanceDueSignedCents);
-  const balanceDueProgressValue = toleranceLimitCents > 0 ? Math.min(100, (selectedBalanceDueAbsCents / toleranceLimitCents) * 100) : 0;
+  const balanceDueProgressValue = toleranceLimitCents > 0 ? Math.min(100, (monthlyAccumulatedGapCents / toleranceLimitCents) * 100) : 0;
   const expensesProgress = monthlyExpenseLimitCents > 0 ? Math.min(100, (monthlyExpensesCents / monthlyExpenseLimitCents) * 100) : 0;
   const balanceDueActionTitle = selectedBalanceDueSignedCents > 0
     ? "Montant à retirer de la caisse"
@@ -2060,11 +2061,11 @@ function CashDashboardAdmin(){
       <CashShuffleCard title="Progression écart de caisse" meta={limitMeta("Tolérance écart", "toleranceLimitCents", toleranceLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleInsightCard" dotTone="indigo">
         <CashShuffleProgress
           value={balanceDueProgressValue}
-          label={formatDH(selectedBalanceDueAbsCents)}
+          label={formatDH(monthlyAccumulatedGapCents)}
           subLabel={`${Math.round(balanceDueProgressValue)}% de la limite`}
-          description={selectedBalanceDueAbsCents > 0
-            ? `La tolérance d’écart configurée est de ${formatDH(toleranceLimitCents || 0)} pour la période suivie.`
-            : `Aucun écart enregistré pour la période suivie. La tolérance active est de ${formatDH(toleranceLimitCents || 0)}.`}
+          description={monthlyAccumulatedGapCents > 0
+            ? `La tolérance d’écart configurée est de ${formatDH(toleranceLimitCents || 0)} pour le mois sélectionné.`
+            : `Aucun écart enregistré pour le mois sélectionné. La tolérance active est de ${formatDH(toleranceLimitCents || 0)}.`}
         />
       </CashShuffleCard>
 

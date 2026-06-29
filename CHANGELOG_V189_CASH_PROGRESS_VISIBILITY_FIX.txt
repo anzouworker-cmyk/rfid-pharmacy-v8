@@ -1,0 +1,8 @@
+V189 - CASH PROGRESS VISIBILITY FIX
+
+Applied fixes:
+1. Removed the decorative blue wave line from the "Real time CR balance" card.
+2. Removed the decorative green wave line from the "Tot. montant surplus" card.
+3. Increased visibility of the circular progress ring in "Progression écart de caisse".
+4. Changed "Progression écart de caisse" to use the accumulated monthly gap of the selected month instead of the selected day only.
+5. Increased visibility of the circular progress ring in "Tot. dépenses".

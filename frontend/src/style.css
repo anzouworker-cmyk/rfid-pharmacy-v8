@@ -15323,3 +15323,30 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
     margin:0 auto!important;
   }
 }
+
+/* V189 - cash dashboard progress visibility + remove decorative waves */
+.cashShuffleDashboard .cashShuffleContentV142 .cashShuffleBalanceCard::after,
+.cashShuffleDashboard .cashShuffleContentV142 .cashShuffleMonthlySurplusCard::after{
+  content:none!important;
+  display:none!important;
+  background:none!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing{
+  --ringTrack:#e9edf5!important;
+  box-shadow:none!important;
+}
+.cashShuffleDashboard .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing.indigo{
+  --ringColor:#5b5cf6!important;
+}
+.cashShuffleDashboard .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing.amber{
+  --ringColor:#f59e0b!important;
+}
+.cashShuffleDashboard .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing::before{
+  inset:8px!important;
+  background:#ffffff!important;
+}
+.cashShuffleDashboard .cashShuffleContentV142 .cashShuffleInsightCard .cashShuffleInsightRing > div{
+  width:84px!important;
+  height:84px!important;
+}
