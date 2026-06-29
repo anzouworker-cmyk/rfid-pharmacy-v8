@@ -88,6 +88,10 @@ class Account(Base):
     parent_username = Column(String, nullable=True)
     page_permissions = Column(Text, default="")
     can_manage_users = Column(Boolean, default=False)
+    phone = Column(String, default="")
+    email = Column(String, default="")
+    address = Column(Text, default="")
+    notes = Column(Text, default="")
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
@@ -108,8 +112,8 @@ class DashboardContent(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
-CLIENT_PAGE_IDS = ["dashboard", "operations", "association", "inventory", "cash", "ai"]
-ADMIN_PAGE_IDS = CLIENT_PAGE_IDS + ["cashAdmin", "platform", "dashboardAdmin"]
+CLIENT_PAGE_IDS = ["dashboard", "operations", "association", "inventory", "cash", "ai", "cashAdmin"]
+ADMIN_PAGE_IDS = CLIENT_PAGE_IDS + ["platform", "dashboardAdmin"]
 
 
 def normalize_page_permissions(pages=None):
@@ -182,9 +186,15 @@ class ClientIn(BaseModel):
     password: str
     pharmacy_name: str
     days: int = 30
+    expires_at: str = ""
+    phone: str = ""
+    email: str = ""
+    address: str = ""
+    notes: str = ""
     ai_premium: bool = False
     page_permissions: List[str] = []
     can_manage_users: bool = False
+    active: bool = True
 
 class PasswordIn(BaseModel):
     password: str
@@ -196,6 +206,19 @@ class ExpiryIn(BaseModel):
 class PagePermissionsIn(BaseModel):
     page_permissions: List[str] = []
     can_manage_users: bool = False
+
+
+class ClientInfoIn(BaseModel):
+    username: str = ""
+    pharmacy_name: str = ""
+    phone: str = ""
+    email: str = ""
+    address: str = ""
+    notes: str = ""
+    expires_at: str = ""
+    ai_premium: bool = False
+    can_manage_users: bool = False
+    active: bool = True
 
 
 class StoreUserIn(BaseModel):
@@ -237,6 +260,10 @@ def ensure_schema():
         ("accounts", "parent_username", "ALTER TABLE accounts ADD COLUMN parent_username VARCHAR"),
         ("accounts", "page_permissions", "ALTER TABLE accounts ADD COLUMN page_permissions TEXT DEFAULT ''"),
         ("accounts", "can_manage_users", "ALTER TABLE accounts ADD COLUMN can_manage_users BOOLEAN DEFAULT FALSE"),
+        ("accounts", "phone", "ALTER TABLE accounts ADD COLUMN phone VARCHAR DEFAULT ''"),
+        ("accounts", "email", "ALTER TABLE accounts ADD COLUMN email VARCHAR DEFAULT ''"),
+        ("accounts", "address", "ALTER TABLE accounts ADD COLUMN address TEXT DEFAULT ''"),
+        ("accounts", "notes", "ALTER TABLE accounts ADD COLUMN notes TEXT DEFAULT ''"),
         ("dashboard_content", "ai_premium", "ALTER TABLE dashboard_content ADD COLUMN ai_premium BOOLEAN DEFAULT FALSE"),
         ("dashboard_content", "image_url", "ALTER TABLE dashboard_content ADD COLUMN image_url VARCHAR DEFAULT ''"),
         ("dashboard_content", "extra_config", "ALTER TABLE dashboard_content ADD COLUMN extra_config VARCHAR DEFAULT 'contain'"),
@@ -319,7 +346,7 @@ def health():
     return {
         "ok": True,
         "service": "Smart Inventory API",
-        "version": "V127_EXACT_SHUFFLE_DASHBOARD_ISOLATED",
+        "version":"V142_GLOBAL_CHROME_DUPLICATE_FIX",
         "cors_origins": allowed_origins,
         "cors_origin_regex": allow_origin_regex or "",
         "db": db_status,
@@ -385,22 +412,48 @@ def me(acc: Account = Depends(current_user)):
 def create_client(data: ClientIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
     if acc.role != "platform_admin":
         raise HTTPException(403, "Platform admin only")
-    if s.get(Account, data.username):
+
+    username = (data.username or "").strip()
+    password = data.password or ""
+    pharmacy_name = (data.pharmacy_name or "").strip()
+    if not username:
+        raise HTTPException(400, "Username required")
+    if not password:
+        raise HTTPException(400, "Password required")
+    if not pharmacy_name:
+        raise HTTPException(400, "User name required")
+    if s.get(Account, username):
         raise HTTPException(400, "Username exists")
+
+    if data.expires_at:
+        try:
+            expiry = datetime.strptime(data.expires_at[:10], "%Y-%m-%d")
+        except Exception:
+            raise HTTPException(400, "Invalid date format. Use YYYY-MM-DD")
+    else:
+        expiry = datetime.utcnow() + timedelta(days=max(int(data.days or 30), 1))
+
+    active = bool(data.active)
     s.add(Account(
-        username=data.username,
-        password_hash=hpw(data.password),
-        pharmacy_name=data.pharmacy_name,
+        username=username,
+        password_hash=hpw(password),
+        pharmacy_name=pharmacy_name,
         role="client",
-        ai_premium=data.ai_premium,
+        ai_premium=bool(data.ai_premium),
         parent_username=None,
         page_permissions=serialize_pages(data.page_permissions),
         can_manage_users=bool(data.can_manage_users),
-        subscription_status="active",
-        expires_at=datetime.utcnow() + timedelta(days=data.days)
+        subscription_status="active" if expiry >= datetime.utcnow() else "expired",
+        expires_at=expiry,
+        active=active,
+        phone=(data.phone or "").strip(),
+        email=(data.email or "").strip(),
+        address=(data.address or "").strip(),
+        notes=(data.notes or "").strip(),
+        created_at=datetime.utcnow()
     ))
     s.commit()
-    return {"ok": True}
+    return {"ok": True, "username": username}
 
 @app.get("/platform/clients")
 def clients(acc: Account = Depends(current_user), s: Session = Depends(db)):
@@ -417,7 +470,12 @@ def clients(acc: Account = Depends(current_user), s: Session = Depends(db)):
             "ai_premium": getattr(x, "ai_premium", False),
             "parent_username": getattr(x, "parent_username", None),
             "page_permissions": account_pages(x),
-            "can_manage_users": bool(getattr(x, "can_manage_users", False))
+            "can_manage_users": bool(getattr(x, "can_manage_users", False)),
+            "phone": getattr(x, "phone", "") or "",
+            "email": getattr(x, "email", "") or "",
+            "address": getattr(x, "address", "") or "",
+            "notes": getattr(x, "notes", "") or "",
+            "created_at": x.created_at.isoformat() if getattr(x, "created_at", None) else None
         }
         for x in s.query(Account).order_by(Account.created_at.desc()).all()
     ]
@@ -776,6 +834,45 @@ score, niveau, resume, recommandations, alertes, prochaine_action
     except Exception as e:
         return {"mode": "fallback-error", "error": str(e), "analysis": fallback}
 
+
+
+@app.post("/platform/client-info/{username}")
+def client_update_info(username: str, data: ClientInfoIn, acc: Account = Depends(current_user), s: Session = Depends(db)):
+    if acc.role != "platform_admin":
+        raise HTTPException(403, "Platform admin only")
+    obj = s.get(Account, username)
+    if not obj:
+        raise HTTPException(404, "Client not found")
+
+    requested_username = (data.username or username).strip()
+    if not requested_username:
+        raise HTTPException(400, "Username required")
+    if requested_username != username:
+        if username == "admin":
+            raise HTTPException(400, "Admin username cannot be changed")
+        if s.get(Account, requested_username):
+            raise HTTPException(400, "Username exists")
+        obj.username = requested_username
+
+    if data.pharmacy_name:
+        obj.pharmacy_name = data.pharmacy_name.strip()
+    obj.phone = (data.phone or "").strip()
+    obj.email = (data.email or "").strip()
+    obj.address = (data.address or "").strip()
+    obj.notes = (data.notes or "").strip()
+    obj.ai_premium = bool(data.ai_premium)
+    obj.can_manage_users = bool(data.can_manage_users)
+    if username != "admin" and requested_username != "admin":
+        obj.active = bool(data.active)
+        if data.expires_at:
+            try:
+                new_date = datetime.strptime(data.expires_at[:10], "%Y-%m-%d")
+            except Exception:
+                raise HTTPException(400, "Invalid date format. Use YYYY-MM-DD")
+            obj.expires_at = new_date
+            obj.subscription_status = "active" if new_date >= datetime.utcnow() else "expired"
+    s.commit()
+    return {"ok": True, "username": requested_username}
 
 @app.post("/platform/client-ai-premium/{username}")
 def client_ai_premium(username: str, enabled: bool, acc: Account = Depends(current_user), s: Session = Depends(db)):
