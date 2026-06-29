@@ -1,0 +1,16 @@
+V203 - Inventory Connect rebrand
+
+Base: V202_RECAP_RESPONSIVE_AMOUNTS
+
+Changements:
+- Remplacement du nom visible de l'application "Smart Inventory" par "Inventory Connect" dans les écrans principaux, menus, headers, footers, pages d'accueil/login, opérations, associations, inventaire et rapports.
+- Remplacement du logo texte en deux lignes: "Inventory" + "Connect" au lieu de "Smart" + "Inventory".
+- Suppression du mot visible "SaaS" dans l'application et remplacement par des termes neutres comme "application", "plateforme" ou "gestion".
+- Remplacement de "Clients SaaS" par "Clients" dans le menu/admin.
+- Mise à jour des libellés d'URL affichés vers app.inventoryconnect.app.
+- Mise à jour du titre API/service vers "Inventory Connect".
+- Conservation volontaire des clés techniques internes existantes (ex.: localStorage / base SQLite) pour éviter de casser les données existantes.
+
+Validation:
+- Frontend: npm run build réussi.
+- Backend: python3 -m py_compile backend/main.py réussi.

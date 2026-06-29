@@ -46,7 +46,7 @@ engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread":
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-app = FastAPI(title="Smart Inventory Store Web SaaS Licence API")
+app = FastAPI(title="Inventory Connect Store Web Licence API")
 
 # Storage local pour les images publicitaires quand Cloudinary n'est pas configuré.
 # IMPORTANT: le mount doit être fait après la création de `app`.
@@ -345,7 +345,7 @@ def health():
         db_status = {"ok": False, "error": str(e)}
     return {
         "ok": True,
-        "service": "Smart Inventory API",
+        "service": "Inventory Connect API",
         "version":"V142_GLOBAL_CHROME_DUPLICATE_FIX",
         "cors_origins": allowed_origins,
         "cors_origin_regex": allow_origin_regex or "",
@@ -798,7 +798,7 @@ def ai_analyze(data: AIAnalyzeIn, acc: Account = Depends(current_user)):
         return {"mode": "local-fallback", "analysis": fallback}
 
     prompt = f"""
-Tu es un assistant professionnel pour une application SaaS de gestion d’inventaire destinée aux stores.
+Tu es un assistant professionnel pour une application de gestion d’inventaire destinée aux stores.
 Réponds uniquement en JSON valide.
 Données:
 produits={data.products_count}

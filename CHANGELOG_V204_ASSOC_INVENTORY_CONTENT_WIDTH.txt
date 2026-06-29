@@ -1,0 +1,10 @@
+V204 - Associations + Inventaire content width aligned with cash dashboard
+
+Base: V203.
+Changes:
+- Kept all V203 logic, Inventory Connect rebrand, read-only automatic cards, and recap responsiveness unchanged.
+- Updated only frontend CSS in frontend/src/style.css.
+- Centered the Associations page content and Inventory page content within a bounded max width, so they no longer stretch too far to the left/right edges.
+- Aligned the visual content width behavior with the cash dashboard style.
+- Applied the width cap to both normal and internal-top-nav/dashboard reference contexts.
+- Kept mobile behavior full-width for smaller screens.

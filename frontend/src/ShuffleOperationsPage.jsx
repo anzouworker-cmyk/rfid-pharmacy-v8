@@ -241,7 +241,7 @@ function OpsNav({setTab, logout}){
     <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center"><CubeIcon className="w-5 h-5 text-white"/></div>
-        <span className="font-heading font-bold text-lg text-slate-900 tracking-tight">Smart Inventory</span>
+        <span className="font-heading font-bold text-lg text-slate-900 tracking-tight">Inventory Connect</span>
       </div>
       <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
         {nav.map(([id,label])=><button key={label} type="button" onClick={()=>setTab?.(id)} className={(id==="operations"?"text-indigo-600 border-b-2 border-indigo-600 pb-0.5":"hover:text-slate-900 transition-colors")+" ops-nav-button"}>{label}</button>)}
@@ -376,8 +376,8 @@ export default function ShuffleOperationsPage({
 
       {!hideChrome && <footer className="bg-white border-t border-slate-200/80 py-8 px-6 mt-6">
         <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3"><div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center"><CubeIcon className="w-4 h-4 text-white"/></div><span className="font-heading font-semibold text-sm text-slate-900">Smart Inventory</span></div>
-          <p className="text-xs text-slate-400">© 2026 Smart Inventory. Tous droits réservés.</p>
+          <div className="flex items-center gap-3"><div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center"><CubeIcon className="w-4 h-4 text-white"/></div><span className="font-heading font-semibold text-sm text-slate-900">Inventory Connect</span></div>
+          <p className="text-xs text-slate-400">© 2026 Inventory Connect. Tous droits réservés.</p>
           <div className="flex items-center gap-4"><button onClick={logout} className="flex items-center gap-2 text-xs text-slate-500 hover:text-red-500 transition-colors py-2 px-4 rounded-xl border border-slate-200 hover:border-red-200 ops-nav-button"><SimpleIcon type="logout" className="w-4 h-4"/>Logout</button></div>
         </div>
       </footer>}

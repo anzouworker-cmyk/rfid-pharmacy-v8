@@ -1378,7 +1378,7 @@ table button{padding:8px 10px;font-size:13px}
 }
 
 
-/* V33.1 official Smart Inventory logo */
+/* V33.1 official Inventory Connect logo */
 .whiteBrand{
   min-height:74px!important;
   margin:8px 8px 34px!important;
@@ -5763,7 +5763,7 @@ body{background:var(--si-bg)!important;color:var(--si-ink)!important;font-family
 }
 
 
-/* V109 - Full frontend SaaS redesign layer */
+/* V109 - Full frontend redesign layer */
 :root{
   --si-bg:#f5f7fb;
   --si-surface:#ffffff;
@@ -6324,7 +6324,7 @@ table{
 }
 
 
-/* V110 - Shuffle design.md integration: indigo/slate SaaS UI */
+/* V110 - Shuffle design.md integration: indigo/slate application UI */
 :root{
   --si-bg:#fafbfe;
   --si-surface:#ffffff;
@@ -6693,7 +6693,7 @@ input:focus,select:focus,textarea:focus{
   border-color:#fde68a!important;
 }
 
-/* AI assistant: dark SaaS console accent */
+/* AI assistant: dark console accent */
 .aiChatTop{
   background:linear-gradient(135deg,#0f172a,#1e1b4b)!important;
   border:1px solid #334155!important;
@@ -7722,7 +7722,7 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   .shuffleExactLoginOptions{align-items:flex-start!important;flex-direction:column!important;gap:10px!important;}
 }
 
-/* V127 - Exact Shuffle dashboard rebuilt with isolated CSS to avoid SmartInventory style conflicts */
+/* V127 - Exact Shuffle dashboard rebuilt with isolated CSS to avoid InventoryConnect style conflicts */
 .shuffleDashExactPage{min-height:100vh!important;background:#f1f5f9!important;color:#0f172a!important;font-family:"IBM Plex Sans","Plus Jakarta Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;letter-spacing:0!important;}
 .shuffleDashExactPage *{box-sizing:border-box!important;}
 .shuffleDashExactPage button{font-family:inherit!important;}
@@ -8065,7 +8065,7 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
   .shuffleInvAvatar{display:none}
 }
 
-/* V134 - Coherence layer for remaining pages (Caisse, Assistant IA, Dashboard Caisse, Clients SaaS, Publicités) */
+/* V134 - Coherence layer for remaining pages (Caisse, Assistant IA, Dashboard Caisse, Clients, Publicités) */
 .shuffleUnifiedShell{
   min-height:100vh;
   background:#f8fafc;
@@ -8465,7 +8465,7 @@ h1,h2,h3,.topPageTitle,.smartSidebarLogoText,.figmaPanelTitle h2,.operationsPage
 .shuffleUnifiedShell .cashAdminDatePicker,
 .shuffleUnifiedShell .cashAdminInlineDate{font-family:inherit!important}
 
-/* Clients SaaS / utilisateurs */
+/* Clients / utilisateurs */
 .shuffleUnifiedShell .platformPage{
   display:block!important;
 }
@@ -13614,7 +13614,7 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   }
 }
 
-/* V182 - My Users page aligned with Clients SaaS + Dashboard Caisse content redesign */
+/* V182 - My Users page aligned with Clients + Dashboard Caisse content redesign */
 .myUsersPage .platformUsersTitle{
   display:flex!important;
   align-items:center!important;
@@ -15843,5 +15843,31 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
     font-size:clamp(28px,9vw,36px)!important;
     line-height:1!important;
     white-space:nowrap!important;
+  }
+}
+
+/* V204 - Align Associations and Inventory content width with cash dashboard */
+.shuffleAssocMain,
+.shuffleInvMain{
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+.shuffleAssocMain > *,
+.shuffleInvMain > *,
+.withInternalTopNav .shuffleInvMain > *,
+.dashRefContent .shuffleAssocMain > *,
+.dashRefContent .shuffleInvMain > *{
+  width:100%!important;
+  max-width:1280px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+@media (max-width:1024px){
+  .shuffleAssocMain > *,
+  .shuffleInvMain > *,
+  .withInternalTopNav .shuffleInvMain > *,
+  .dashRefContent .shuffleAssocMain > *,
+  .dashRefContent .shuffleInvMain > *{
+    max-width:none!important;
   }
 }
