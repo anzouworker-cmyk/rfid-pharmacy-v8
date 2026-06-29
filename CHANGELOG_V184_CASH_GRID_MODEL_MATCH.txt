@@ -1,0 +1,9 @@
+V184 - CASH GRID MODEL MATCH
+
+Applied exact desktop layout for Dashboard Caisse content to match the approved reference image:
+- first block = 6 large cards arranged as 2 rows x 3 columns
+- KPI row = 5 equal cards
+- results row = 4 equal cards
+- removed inherited grid-column spans that were stretching cards across multiple columns
+- title and date bar left unchanged
+- frontend production build completed successfully

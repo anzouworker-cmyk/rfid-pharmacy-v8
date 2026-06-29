@@ -14002,39 +14002,50 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   .cashShuffleInsightRing{margin:0 auto!important;}
 }
 
-/* V183 - hard fix Dashboard Caisse content grid: remove old grid-column spans */
-.cashShuffleContentV142 .cashShuffleSectionTop > .cashShuffleCardTall,
-.cashShuffleContentV142 .cashShuffleSectionBottom > .cashShuffleMini,
-.cashShuffleContentV142 .cashShuffleSectionResults > .cashShuffleWide{
+/* V183/V184 - enforce exact cash dashboard model grid from reference image */
+.cashShuffleContentV142 .cashShuffleSectionTop .cashShuffleCardTall,
+.cashShuffleContentV142 .cashShuffleSectionBottom .cashShuffleMini,
+.cashShuffleContentV142 .cashShuffleSectionResults .cashShuffleWide{
   grid-column:auto!important;
 }
-.cashShuffleContentV142 .cashShuffleSectionTop,
-.cashShuffleContentV142 .cashShuffleSectionBottom,
+
+/* six large cards in 2 rows x 3 columns */
+.cashShuffleContentV142 .cashShuffleSectionTop{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.cashShuffleContentV142 .cashShuffleSectionTop .cashShuffleCardTall{
+  min-height:280px!important;
+}
+
+/* five KPI cards in one row */
+.cashShuffleContentV142 .cashShuffleSectionBottom{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+}
+.cashShuffleContentV142 .cashShuffleSectionBottom .cashShuffleMini{
+  min-height:140px!important;
+}
+
+/* four result cards in one row */
 .cashShuffleContentV142 .cashShuffleSectionResults{
-  width:100%!important;
-  min-width:0!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
 }
-@media (min-width:1101px){
+.cashShuffleContentV142 .cashShuffleSectionResults .cashShuffleWide{
+  min-height:154px!important;
+}
+
+/* responsive fallback only; desktop must match the reference exactly */
+@media (max-width: 1280px){
   .cashShuffleContentV142 .cashShuffleSectionTop{
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  }
-  .cashShuffleContentV142 .cashShuffleSectionBottom{
-    grid-template-columns:repeat(5,minmax(0,1fr))!important;
-  }
-  .cashShuffleContentV142 .cashShuffleSectionResults{
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  }
-}
-@media (max-width:1100px) and (min-width:721px){
-  .cashShuffleContentV142 .cashShuffleSectionTop,
-  .cashShuffleContentV142 .cashShuffleSectionResults{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
   .cashShuffleContentV142 .cashShuffleSectionBottom{
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
   }
+  .cashShuffleContentV142 .cashShuffleSectionResults{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
 }
-@media (max-width:720px){
+@media (max-width: 820px){
   .cashShuffleContentV142 .cashShuffleSectionTop,
   .cashShuffleContentV142 .cashShuffleSectionBottom,
   .cashShuffleContentV142 .cashShuffleSectionResults{
