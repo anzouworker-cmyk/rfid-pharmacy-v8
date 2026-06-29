@@ -14002,53 +14002,528 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   .cashShuffleInsightRing{margin:0 auto!important;}
 }
 
-/* V183/V184 - enforce exact cash dashboard model grid from reference image */
-.cashShuffleContentV142 .cashShuffleSectionTop .cashShuffleCardTall,
-.cashShuffleContentV142 .cashShuffleSectionBottom .cashShuffleMini,
-.cashShuffleContentV142 .cashShuffleSectionResults .cashShuffleWide{
+/* V183 - hard fix Dashboard Caisse content grid: remove old grid-column spans */
+.cashShuffleContentV142 .cashShuffleSectionTop > .cashShuffleCardTall,
+.cashShuffleContentV142 .cashShuffleSectionBottom > .cashShuffleMini,
+.cashShuffleContentV142 .cashShuffleSectionResults > .cashShuffleWide{
   grid-column:auto!important;
 }
-
-/* six large cards in 2 rows x 3 columns */
-.cashShuffleContentV142 .cashShuffleSectionTop{
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-}
-.cashShuffleContentV142 .cashShuffleSectionTop .cashShuffleCardTall{
-  min-height:280px!important;
-}
-
-/* five KPI cards in one row */
-.cashShuffleContentV142 .cashShuffleSectionBottom{
-  grid-template-columns:repeat(5,minmax(0,1fr))!important;
-}
-.cashShuffleContentV142 .cashShuffleSectionBottom .cashShuffleMini{
-  min-height:140px!important;
-}
-
-/* four result cards in one row */
+.cashShuffleContentV142 .cashShuffleSectionTop,
+.cashShuffleContentV142 .cashShuffleSectionBottom,
 .cashShuffleContentV142 .cashShuffleSectionResults{
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  width:100%!important;
+  min-width:0!important;
 }
-.cashShuffleContentV142 .cashShuffleSectionResults .cashShuffleWide{
-  min-height:154px!important;
-}
-
-/* responsive fallback only; desktop must match the reference exactly */
-@media (max-width: 1280px){
+@media (min-width:1101px){
   .cashShuffleContentV142 .cashShuffleSectionTop{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .cashShuffleContentV142 .cashShuffleSectionBottom{
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  }
+  .cashShuffleContentV142 .cashShuffleSectionResults{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+}
+@media (max-width:1100px) and (min-width:721px){
+  .cashShuffleContentV142 .cashShuffleSectionTop,
+  .cashShuffleContentV142 .cashShuffleSectionResults{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
   .cashShuffleContentV142 .cashShuffleSectionBottom{
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
   }
-  .cashShuffleContentV142 .cashShuffleSectionResults{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  }
 }
-@media (max-width: 820px){
+@media (max-width:720px){
   .cashShuffleContentV142 .cashShuffleSectionTop,
   .cashShuffleContentV142 .cashShuffleSectionBottom,
   .cashShuffleContentV142 .cashShuffleSectionResults{
     grid-template-columns:1fr!important;
+  }
+}
+
+/* V185 - exact cash dashboard model layout and sizing */
+.cashShuffleDashboard{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:28px!important;
+}
+.cashShuffleContentV142{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:22px!important;
+  width:100%!important;
+}
+.cashShuffleContentV142 .cashShuffleSection{
+  display:grid!important;
+  gap:22px!important;
+  width:100%!important;
+  min-width:0!important;
+}
+.cashShuffleContentV142 .cashShuffleSectionTop{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.cashShuffleContentV142 .cashShuffleSectionBottom{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+}
+.cashShuffleContentV142 .cashShuffleSectionResults{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+.cashShuffleContentV142 .cashShuffleSection > *{
+  grid-column:auto!important;
+}
+.cashShuffleCard{
+  position:relative!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+  border:1px solid #e8edf5!important;
+  border-radius:22px!important;
+  background:#ffffff!important;
+  box-shadow:0 8px 24px rgba(15, 23, 42, 0.05)!important;
+  overflow:hidden!important;
+}
+.cashShuffleCardTall{
+  min-height:278px!important;
+  padding:26px 28px!important;
+}
+.cashShuffleMini{
+  min-height:142px!important;
+  padding:24px 26px!important;
+}
+.cashShuffleWide{
+  min-height:160px!important;
+  padding:24px 26px!important;
+}
+.cashShuffleCardTop{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  margin-bottom:16px!important;
+}
+.cashShuffleCardTop > div:first-child{
+  min-width:0!important;
+}
+.cashShuffleCardTop h3{
+  margin:0!important;
+  color:#0f172a!important;
+  font-size:18px!important;
+  line-height:1.2!important;
+  letter-spacing:-0.02em!important;
+  font-weight:800!important;
+}
+.cashShuffleCardMeta{
+  margin-top:10px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  flex-wrap:wrap!important;
+}
+.cashShuffleCardMeta span{
+  color:#94a3b8!important;
+  font-size:14px!important;
+  line-height:1.3!important;
+  font-weight:600!important;
+}
+.cashShuffleCardMeta .cashShuffleLimitPill,
+.cashShuffleCardMeta .cashShuffleMetaPill,
+.cashShuffleCardMeta .cashShuffleChip{
+  height:32px!important;
+  padding:0 16px!important;
+  border-radius:999px!important;
+  border:1px solid #dbe4f0!important;
+  background:#fff!important;
+  color:#64748b!important;
+  font-size:14px!important;
+  font-weight:700!important;
+}
+.cashShuffleMetricBody{
+  display:flex!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+.cashShuffleDot{
+  flex:0 0 auto!important;
+  width:10px!important;
+  height:10px!important;
+  border-radius:999px!important;
+  margin-top:4px!important;
+}
+.cashShuffleBadgePill{
+  min-width:36px!important;
+  height:28px!important;
+  padding:0 10px!important;
+  border-radius:10px!important;
+  border:1px solid #edf1f7!important;
+  background:#f8fafc!important;
+  color:#64748b!important;
+  font-size:13px!important;
+  font-weight:800!important;
+}
+.cashShuffleBadgeIcon{
+  width:42px!important;
+  height:42px!important;
+  border-radius:12px!important;
+  border:1px solid transparent!important;
+}
+.cashShuffleMini .cashShuffleCardTop,
+.cashShuffleWide .cashShuffleCardTop{
+  position:relative!important;
+  align-items:flex-start!important;
+  min-height:42px!important;
+  padding-left:56px!important;
+}
+.cashShuffleMini .cashShuffleCardTop h3,
+.cashShuffleWide .cashShuffleCardTop h3{
+  font-size:14px!important;
+  letter-spacing:0!important;
+  font-weight:800!important;
+}
+.cashShuffleMini .cashShuffleCardMeta,
+.cashShuffleWide .cashShuffleCardMeta{
+  margin-top:6px!important;
+}
+.cashShuffleMini .cashShuffleCardMeta span,
+.cashShuffleWide .cashShuffleCardMeta span{
+  font-size:13px!important;
+  font-weight:600!important;
+}
+.cashShuffleMini .cashShuffleBadge,
+.cashShuffleWide .cashShuffleBadge{
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  margin:0!important;
+}
+.cashShuffleMini .cashShuffleMetricBody,
+.cashShuffleWide .cashShuffleMetricBody{
+  flex-direction:column!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+}
+.cashShuffleAmount{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:8px!important;
+  min-width:0!important;
+}
+.cashShuffleAmount em{
+  font-style:normal!important;
+  font-size:15px!important;
+  font-weight:700!important;
+  color:#94a3b8!important;
+}
+.cashShuffleAmount strong{
+  color:#0f172a!important;
+  font-weight:800!important;
+  line-height:1!important;
+}
+.cashShuffleAmountXL strong,
+.cashShuffleAmountLarge strong{
+  font-size:56px!important;
+}
+.cashShuffleAmountXL em,
+.cashShuffleAmountLarge em{
+  font-size:16px!important;
+}
+.cashShuffleAmount.negative strong{color:#e11d48!important;}
+.cashShuffleAmount.positive strong{color:#10b981!important;}
+.cashShuffleActionNote{
+  color:#94a3b8!important;
+  font-size:14px!important;
+  line-height:1.45!important;
+  font-weight:600!important;
+}
+.cashShuffleBalanceDueActionCard .cashShuffleActionNote{
+  max-width:none!important;
+}
+.cashShuffleBalanceDueActionCard .cashShuffleAmount strong,
+.cashShuffleMini .cashShuffleAmount strong,
+.cashShuffleWide .cashShuffleAmount strong{
+  font-size:20px!important;
+}
+.cashShuffleBalanceDueActionCard .cashShuffleAmount em,
+.cashShuffleMini .cashShuffleAmount em,
+.cashShuffleWide .cashShuffleAmount em{
+  font-size:15px!important;
+}
+.cashShuffleInsightMetric{
+  display:grid!important;
+  grid-template-columns:156px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:22px!important;
+  width:100%!important;
+}
+.cashShuffleInsightRing{
+  width:156px!important;
+  height:156px!important;
+  border-radius:50%!important;
+  background:conic-gradient(var(--ring-color, #6366f1) var(--progress,0%), #eef2f7 0)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.cashShuffleInsightRing > div{
+  width:128px!important;
+  height:128px!important;
+  border-radius:50%!important;
+  background:#fff!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-shadow:inset 0 0 0 1px #eef2f7!important;
+}
+.cashShuffleInsightRing span{
+  color:#0f172a!important;
+  font-size:20px!important;
+  font-weight:800!important;
+}
+.cashShuffleInsightRing.indigo{--ring-color:#6366f1!important;}
+.cashShuffleInsightRing.amber{--ring-color:#f59e0b!important;}
+.cashShuffleInsightText{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:6px!important;
+  min-width:0!important;
+}
+.cashShuffleInsightText small{
+  color:#64748b!important;
+  font-size:15px!important;
+  line-height:1.3!important;
+  font-weight:700!important;
+}
+.cashShuffleInsightText strong{
+  color:#0f172a!important;
+  font-size:22px!important;
+  line-height:1.18!important;
+  font-weight:800!important;
+}
+.cashShuffleInsightText p{
+  margin:0!important;
+  color:#64748b!important;
+  font-size:15px!important;
+  line-height:1.5!important;
+  font-weight:500!important;
+  max-width:340px!important;
+}
+.cashShuffleMonthlyAmountCard .cashShuffleMetricBody{
+  justify-content:flex-end!important;
+  align-items:flex-start!important;
+}
+.cashShuffleMonthlySummary{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  margin-top:auto!important;
+}
+.cashShuffleMonthlySummaryText{
+  color:#94a3b8!important;
+  font-size:15px!important;
+  line-height:1.4!important;
+  font-weight:700!important;
+}
+.cashShuffleMonthlySummary .cashShuffleAmount strong{
+  font-size:54px!important;
+}
+.cashShuffleMonthlySummary .cashShuffleAmount em{
+  font-size:16px!important;
+}
+.cashShuffleBalanceCard{
+  position:relative!important;
+}
+.cashShuffleBalanceCard::after,
+.cashShuffleMonthlySurplusCard::after{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  height:82px!important;
+  pointer-events:none!important;
+  background-repeat:no-repeat!important;
+  background-position:center bottom!important;
+  background-size:100% 82px!important;
+}
+.cashShuffleBalanceCard::after{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 82' preserveAspectRatio='none'%3E%3Cpath d='M0 64 C50 64 60 44 110 44 S170 72 220 72 S280 44 330 44 S390 70 440 70 S500 30 550 30 S610 52 660 52 S730 40 800 40' fill='none' stroke='%23c7d2fe' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.cashShuffleMonthlySurplusCard::after{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 82' preserveAspectRatio='none'%3E%3Cpath d='M0 68 C60 68 70 76 130 76 S190 54 250 54 S310 74 370 74 S430 46 490 46 S550 60 610 60 S680 56 800 56' fill='none' stroke='%23bbf7d0' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.cashShuffleBalanceCard .cashShuffleMetricBody,
+.cashShuffleMonthlySurplusCard .cashShuffleMetricBody{
+  align-items:flex-end!important;
+}
+.cashShuffleBalanceCard .cashShuffleAmount,
+.cashShuffleMonthlySurplusCard .cashShuffleMonthlySummary{
+  margin-bottom:10px!important;
+}
+.cashShuffleMonthlyShortageCard .cashShuffleMetricBody,
+.cashShuffleMonthlySurplusCard .cashShuffleMetricBody{
+  align-items:flex-start!important;
+}
+.cashShuffleMonthlyShortageCard .cashShuffleAmount strong,
+.cashShuffleMonthlySurplusCard .cashShuffleAmount strong{
+  font-size:54px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleMetricBody,
+.cashShuffleProgressCard .cashShuffleMetricBody{
+  align-items:center!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleInsightMetric{
+  grid-template-columns:132px minmax(0,1fr)!important;
+  gap:18px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleInsightRing{
+  width:132px!important;
+  height:132px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleInsightRing > div{
+  width:108px!important;
+  height:108px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleInsightText strong{
+  font-size:18px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleInsightText p{
+  font-size:14px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleInsightText small{
+  font-size:14px!important;
+}
+.cashShuffleExpensesLimitCard .cashShuffleCardMeta span:first-child,
+.cashShuffleProgressCard .cashShuffleCardMeta span:first-child{
+  color:#94a3b8!important;
+}
+.cashShuffleAnomalyCard .cashShuffleMetricBody{
+  align-items:stretch!important;
+}
+.cashShuffleAnomalyCarousel{
+  width:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:14px!important;
+}
+.cashShuffleAnomalyToolbar{
+  display:flex!important;
+  justify-content:center!important;
+}
+.cashShuffleAnomalyFilters{
+  display:flex!important;
+  gap:12px!important;
+}
+.cashShuffleAnomalyFilters button{
+  height:38px!important;
+  min-width:116px!important;
+  padding:0 18px!important;
+  border-radius:12px!important;
+  border:1px solid #dbe4f0!important;
+  background:#fff!important;
+  color:#64748b!important;
+  font-size:14px!important;
+  font-weight:700!important;
+}
+.cashShuffleAnomalyFilters button.active{
+  border-color:#c7d2fe!important;
+  background:#eef2ff!important;
+  color:#4f46e5!important;
+}
+.cashShuffleAnomalyDivider{
+  width:100%!important;
+  height:1px!important;
+  background:#edf2f7!important;
+}
+.cashShuffleAnomalyViewport{
+  display:grid!important;
+  grid-template-columns:36px minmax(0,1fr) 36px!important;
+  gap:14px!important;
+  align-items:center!important;
+}
+.cashShuffleAnomalyItem,
+.cashShuffleAnomalyEmpty{
+  min-height:104px!important;
+  border-radius:16px!important;
+  border:1px solid #e5eaf3!important;
+  background:#f8fafc!important;
+  padding:18px 18px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:16px!important;
+}
+.cashShuffleAnomalyItem strong,
+.cashShuffleAnomalyEmpty strong{
+  color:#0f172a!important;
+  font-size:16px!important;
+  font-weight:800!important;
+}
+.cashShuffleAnomalyItem small,
+.cashShuffleAnomalyEmpty small{
+  color:#64748b!important;
+  font-size:14px!important;
+  line-height:1.45!important;
+  font-weight:500!important;
+}
+.cashShuffleAnomalyItem b{
+  margin-left:auto!important;
+  color:#0f172a!important;
+  font-size:18px!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+.cashShuffleAnomalyIcon{
+  width:44px!important;
+  height:44px!important;
+  border-radius:14px!important;
+  font-size:24px!important;
+  font-weight:900!important;
+}
+.cashShuffleAnomalyEmpty .cashShuffleAnomalyIcon.ok{
+  border-radius:999px!important;
+}
+.cashShuffleAnomalyNav{
+  width:36px!important;
+  height:36px!important;
+  border-radius:12px!important;
+  border:1px solid #dbe4f0!important;
+  background:#fff!important;
+  color:#64748b!important;
+  font-size:22px!important;
+  line-height:1!important;
+  font-weight:700!important;
+}
+.cashShuffleAnomalyPager{
+  color:#94a3b8!important;
+  font-size:14px!important;
+  line-height:1!important;
+  font-weight:700!important;
+  text-align:center!important;
+}
+@media (max-width: 1400px){
+  .cashShuffleContentV142 .cashShuffleSectionTop,
+  .cashShuffleContentV142 .cashShuffleSectionResults{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .cashShuffleContentV142 .cashShuffleSectionBottom{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+@media (max-width: 980px){
+  .cashShuffleContentV142 .cashShuffleSectionTop,
+  .cashShuffleContentV142 .cashShuffleSectionBottom,
+  .cashShuffleContentV142 .cashShuffleSectionResults{
+    grid-template-columns:1fr!important;
+  }
+  .cashShuffleInsightMetric,
+  .cashShuffleExpensesLimitCard .cashShuffleInsightMetric{
+    grid-template-columns:1fr!important;
+    justify-items:flex-start!important;
+  }
+  .cashShuffleInsightRing,
+  .cashShuffleExpensesLimitCard .cashShuffleInsightRing{
+    margin:0 auto!important;
   }
 }
