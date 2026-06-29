@@ -1,0 +1,19 @@
+V187 - Dashboard Caisse pixel-match pass
+
+Objectif:
+- rapprocher le Dashboard Caisse du modèle validé par l'utilisateur, sans interprétation.
+- conserver le titre et la barre de date existants.
+
+Ajustements principaux:
+- grille du dashboard forcée pour correspondre au modèle:
+  - rangée 1: 3 cartes larges
+  - rangée 2: 3 cartes larges
+  - rangée 3: 5 cartes KPI
+  - rangée 4: 4 cartes KPI
+- homogénéisation des hauteurs, paddings, arrondis, ombres et bordures.
+- affinage des tailles de texte, badges, anneaux de progression et espacements.
+- réalignement des cartes "Real time CR balance", "Tot. montant manquant", "Tot. montant surplus" et "Alertes anomalies".
+- ajustement responsive pour préserver le modèle sur desktop et une dégradation propre sur tablettes/mobile.
+
+Fichiers touchés:
+- frontend/src/style.css

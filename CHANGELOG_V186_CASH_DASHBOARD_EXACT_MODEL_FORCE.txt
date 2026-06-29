@@ -1,0 +1,8 @@
+V186 - Dashboard Caisse exact model force
+
+- Forced the Dashboard Caisse content grid to match the provided model.
+- Removed inherited spans for Balance Due and other KPI cards.
+- Enforced 3 large cards per row, 5 KPI cards per row, and 4 result cards per row.
+- Rebalanced sizing, padding, card radius, icons, rings, and typography to be closer to the reference.
+- Kept title and date bar unchanged.
+- Frontend build completed successfully.
