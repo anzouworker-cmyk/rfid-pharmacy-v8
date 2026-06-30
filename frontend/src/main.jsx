@@ -2168,7 +2168,7 @@ function CashDashboardAdmin(){
       </div>
     </div>
 
-    <div className="cashShuffleGrid cashShuffleContentV142 cashShuffleContentV210 cashShuffleContentV211">
+    <div className="cashShuffleGrid cashShuffleContentV142 cashShuffleContentV210 cashShuffleContentV211 cashShuffleContentV216">
       <div className="cashShuffleSection cashShuffleSectionV210">
         <CashShuffleCard title="Progression écart de caisse" meta={limitMeta("Tolérance écart", "toleranceLimitCents", toleranceLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleInsightCard cashShuffleV210Standard" dotTone="indigo">
           <CashShuffleProgress

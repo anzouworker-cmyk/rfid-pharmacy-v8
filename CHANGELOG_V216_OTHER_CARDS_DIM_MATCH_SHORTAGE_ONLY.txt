@@ -1,0 +1,9 @@
+V216 - Ajuster seulement la dimension des autres cartes comme Tot. montant manquant
+
+Base: V215.
+Changes:
+- Kept Dashboard Caisse content and organization unchanged from V215/V212 reference.
+- Adjusted only the dimensions of the other standard Dashboard Caisse cards so they match the Tot. montant manquant card shell more closely.
+- Did not modify the content/components inside the cards.
+- Did not change the Tot. montant manquant card itself.
+- Kept Progression écart de caisse, Tot. dépenses, and Alertes anomalies content unchanged.

@@ -16543,3 +16543,24 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   white-space:nowrap!important;
   text-align:center!important;
 }
+
+
+/* V216 - Match only the other Dashboard Caisse cards dimensions to Tot. montant manquant, without changing content */
+.cashShuffleContentV216 .cashShuffleMini.cashShuffleV211KpiLikeShortage,
+.cashShuffleContentV216 .cashShuffleWide.cashShuffleV211KpiLikeShortage,
+.cashShuffleContentV216 .cashShuffleMonthlySurplusCard.cashShuffleV211KpiLikeShortage{
+  min-height:220px!important;
+  height:220px!important;
+  max-height:none!important;
+  border-radius:22px!important;
+}
+
+/* Keep the desktop grid rows consistent for those resized cards only through the existing row flow */
+@media(max-width:760px){
+  .cashShuffleContentV216 .cashShuffleMini.cashShuffleV211KpiLikeShortage,
+  .cashShuffleContentV216 .cashShuffleWide.cashShuffleV211KpiLikeShortage,
+  .cashShuffleContentV216 .cashShuffleMonthlySurplusCard.cashShuffleV211KpiLikeShortage{
+    min-height:170px!important;
+    height:auto!important;
+  }
+}
