@@ -1,0 +1,9 @@
+V211 - Cash dashboard polish
+
+Base: V210.
+Changes:
+- Kept V210 3-column dashboard organization unchanged.
+- Fixed only the inner white circle of the "Tot. dépenses" progress ring so it remains perfectly round and no longer appears compressed.
+- Redesigned the standard KPI cards to visually match the "Tot. montant manquant" card style, while leaving these exceptions unchanged: "Progression écart de caisse", "Tot. dépenses", and "Alertes anomalies".
+- Updated the tall "Alertes anomalies" card so it can display up to two alerts at the same time when multiple alerts exist.
+- Existing logic and calculations were preserved.
