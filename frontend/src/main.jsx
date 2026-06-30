@@ -1393,7 +1393,7 @@ function CashRegister({me}={}){
                     const qty=Number(current.quantities[d.cents] || 0);
                     return <tr key={d.cents}>
                       <td>{d.label}</td>
-                      <td><input className="qtyInput" type="number" min="0" step="1" value={qty} onChange={e=>updateQuantity(d.cents,e.target.value)}/></td>
+                      <td><span className="qtyDisplay" aria-label={`Quantité affichée ${d.label}`}>{qty}</span></td>
                       <td>{formatDH(qty * d.cents)}</td>
                     </tr>
                   })}
@@ -1416,7 +1416,7 @@ function CashRegister({me}={}){
                     const qty=Number(current.quantities[d.cents] || 0);
                     return <tr key={d.cents}>
                       <td>{d.label}</td>
-                      <td><input className="qtyInput" type="number" min="0" step="1" value={qty} onChange={e=>updateQuantity(d.cents,e.target.value)}/></td>
+                      <td><span className="qtyDisplay" aria-label={`Quantité affichée ${d.label}`}>{qty}</span></td>
                       <td>{formatDH(qty * d.cents)}</td>
                     </tr>
                   })}
@@ -2161,81 +2161,71 @@ function CashDashboardAdmin(){
       </div>
     </div>
 
-    <div className="cashShuffleGrid cashShuffleContentV142">
-      <div className="cashShuffleSection cashShuffleSectionTop">
-      <CashShuffleCard title="Progression écart de caisse" meta={limitMeta("Tolérance écart", "toleranceLimitCents", toleranceLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleInsightCard" dotTone="indigo">
-        <CashShuffleProgress
-          value={balanceDueProgressValue}
-          label={formatDH(monthlyAccumulatedGapCents)}
-          subLabel={`${Math.round(balanceDueProgressValue)}% de la limite`}
-          description={monthlyAccumulatedGapCents > 0
-            ? `La tolérance d’écart configurée est de ${formatDH(toleranceLimitCents || 0)} pour le mois sélectionné.`
-            : `Aucun écart enregistré pour le mois sélectionné. La tolérance active est de ${formatDH(toleranceLimitCents || 0)}.`}
-        />
-      </CashShuffleCard>
+    <div className="cashShuffleGrid cashShuffleContentV142 cashShuffleContentV210">
+      <div className="cashShuffleSection cashShuffleSectionV210">
+        <CashShuffleCard title="Progression écart de caisse" meta={limitMeta("Tolérance écart", "toleranceLimitCents", toleranceLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleInsightCard cashShuffleV210Standard" dotTone="indigo">
+          <CashShuffleProgress
+            value={balanceDueProgressValue}
+            label={formatDH(monthlyAccumulatedGapCents)}
+            subLabel={`${Math.round(balanceDueProgressValue)}% de la limite`}
+            description={monthlyAccumulatedGapCents > 0
+              ? `La tolérance d’écart configurée est de ${formatDH(toleranceLimitCents || 0)} pour le mois sélectionné.`
+              : `Aucun écart enregistré pour le mois sélectionné. La tolérance active est de ${formatDH(toleranceLimitCents || 0)}.`}
+          />
+        </CashShuffleCard>
 
-      <CashShuffleCard title="Real time CR balance" meta={cardMeta("Jour sélectionné")} badge="SD" badgeClassName="cashShuffleBadgePill" className="cashShuffleCardTall cashShuffleBalanceCard">
-        <CashShuffleAmount cents={selectedMetrics.countedCents} large />
-      </CashShuffleCard>
+        <CashShuffleCard title="Tot. dépenses" meta={limitMeta("Total mensuel", "monthlyExpenseLimitCents", monthlyExpenseLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleExpensesLimitCard cashShuffleInsightCard cashShuffleV210Standard" dotTone="amber">
+          <CashShuffleExpenseProgress value={expensesProgress} cents={monthlyExpensesCents} limitCents={monthlyExpenseLimitCents} />
+        </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeDanger" className="cashShuffleCardTall cashShuffleMonthlyAmountCard cashShuffleMonthlyShortageCard">
-        <CashShuffleMonthlySummary cents={monthlyShortageCents} tone="negative" emptyText="Aucun montant manquant enregistré" />
-      </CashShuffleCard>
+        <CashShuffleCard title="Tot. montant manquant" meta={cardMeta("Total mensuel")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeDanger" className="cashShuffleCardTall cashShuffleMonthlyAmountCard cashShuffleMonthlyShortageCard cashShuffleV210Standard">
+          <CashShuffleMonthlySummary cents={monthlyShortageCents} tone="negative" emptyText="Aucun montant manquant enregistré" />
+        </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge={<InvIcon name="sync" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeSuccess" className="cashShuffleCardTall cashShuffleMonthlyAmountCard cashShuffleMonthlySurplusCard">
-        <CashShuffleMonthlySummary cents={monthlySurplusCents} tone="positive" emptyText="Aucun surplus enregistré" />
-      </CashShuffleCard>
+        <CashShuffleCard title="Tot. montant surplus" meta={cardMeta("Total mensuel")} badge={<InvIcon name="sync" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeSuccess" className="cashShuffleCardTall cashShuffleMonthlyAmountCard cashShuffleMonthlySurplusCard cashShuffleV210Standard">
+          <CashShuffleMonthlySummary cents={monthlySurplusCents} tone="positive" emptyText="Aucun surplus enregistré" />
+        </CashShuffleCard>
 
-      <CashShuffleCard title="Tot. dépenses" meta={limitMeta("Total mensuel", "monthlyExpenseLimitCents", monthlyExpenseLimitCents)} className="cashShuffleCardTall cashShuffleProgressCard cashShuffleExpensesLimitCard cashShuffleInsightCard" dotTone="amber">
-        <CashShuffleExpenseProgress value={expensesProgress} cents={monthlyExpensesCents} limitCents={monthlyExpenseLimitCents} />
-      </CashShuffleCard>
+        <CashShuffleCard title="Balance due" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleMini cashShuffleBalanceDueActionCard cashShuffleV210Standard">
+          <CashShuffleSignedAmount cents={selectedBalanceDueSignedCents} tone={balanceDueTone} />
+          <CashShuffleActionNote text={balanceDueActionTitle} />
+        </CashShuffleCard>
 
-      <CashShuffleCard title="Alertes anomalies" meta={cardMeta(anomalyMetaText)} className="cashShuffleCardTall cashShuffleAnomalyCard" dotTone={anomalyAlerts.length ? "amber" : "emerald"}>
-        <CashAnomalyList />
-      </CashShuffleCard>
+        <CashShuffleCard title="Montant manquant" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeDanger" className="cashShuffleMini cashShuffleV210Standard">
+          <CashShuffleAmount cents={selectedMetrics.shortageCents} tone="negative" />
+        </CashShuffleCard>
 
-      </div>
+        <CashShuffleCard title="Montant surplus" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="sync" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeSuccess" className="cashShuffleMini cashShuffleV210Standard">
+          <CashShuffleAmount cents={selectedMetrics.surplusCents} tone="positive" />
+        </CashShuffleCard>
 
-      <div className="cashShuffleSection cashShuffleSectionBottom">
-      <CashShuffleCard title="Balance due" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleMini cashShuffleBalanceDueActionCard">
-        <CashShuffleSignedAmount cents={selectedBalanceDueSignedCents} tone={balanceDueTone} />
-        <CashShuffleActionNote text={balanceDueActionTitle} />
-      </CashShuffleCard>
+        <CashShuffleCard title="Retiré" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="upload" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeBlue" className="cashShuffleMini cashShuffleV210Standard">
+          <CashShuffleAmount cents={selectedMetrics.withdrawnCents} />
+        </CashShuffleCard>
 
-      <CashShuffleCard title="Montant manquant" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeDanger" className="cashShuffleMini">
-        <CashShuffleAmount cents={selectedMetrics.shortageCents} tone="negative" />
-      </CashShuffleCard>
+        <CashShuffleCard title="Nouvelle C. fermeture" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide cashShuffleV210Standard">
+          <CashShuffleAmount cents={selectedMetrics.closingRealCents} xl />
+        </CashShuffleCard>
 
-      <CashShuffleCard title="Montant surplus" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="sync" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeSuccess" className="cashShuffleMini">
-        <CashShuffleAmount cents={selectedMetrics.surplusCents} tone="positive" />
-      </CashShuffleCard>
+        <CashShuffleCard title="Vente en espèce + règlement de crédit" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide cashShuffleV210Standard">
+          <CashShuffleAmount cents={Number(selectedMetrics.salesCashCents || 0) + Number(selectedMetrics.creditSettlementCents || 0)} xl />
+        </CashShuffleCard>
 
-      <CashShuffleCard title="Retiré" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="upload" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeBlue" className="cashShuffleMini">
-        <CashShuffleAmount cents={selectedMetrics.withdrawnCents} />
-      </CashShuffleCard>
+        <CashShuffleCard title="Dépenses" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="list" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeAmber" className="cashShuffleMini cashShuffleV210Standard">
+          <CashShuffleAmount cents={selectedMetrics.expensesCents} />
+        </CashShuffleCard>
 
-      <CashShuffleCard title="Dépenses" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="list" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeAmber" className="cashShuffleMini">
-        <CashShuffleAmount cents={selectedMetrics.expensesCents} />
-      </CashShuffleCard>
+        <CashShuffleCard title="Alertes anomalies" meta={cardMeta(anomalyMetaText)} className="cashShuffleCardTall cashShuffleAnomalyCard cashShuffleV210Tall" dotTone={anomalyAlerts.length ? "amber" : "emerald"}>
+          <CashAnomalyList />
+        </CashShuffleCard>
 
-      </div>
+        <CashShuffleCard title="C. fermeture (théorique)" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="grid" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide cashShuffleV210Standard">
+          <CashShuffleAmount cents={selectedMetrics.closingCalculatedCents} xl />
+        </CashShuffleCard>
 
-      <div className="cashShuffleSection cashShuffleSectionResults">
-      <CashShuffleCard title="Vente en espèce + règlement de crédit" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
-        <CashShuffleAmount cents={Number(selectedMetrics.salesCashCents || 0) + Number(selectedMetrics.creditSettlementCents || 0)} xl />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="C. fermeture (théorique)" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="grid" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
-        <CashShuffleAmount cents={selectedMetrics.closingCalculatedCents} xl />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="Nouvelle C. fermeture" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="cash" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide">
-        <CashShuffleAmount cents={selectedMetrics.closingRealCents} xl />
-      </CashShuffleCard>
-
-      <CashShuffleCard title="C. fermeture (comptée)" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide cashShuffleWideDelta">
-        <CashShuffleAmount cents={selectedMetrics.countedCents} xl />
-      </CashShuffleCard>
+        <CashShuffleCard title="C. fermeture (comptée)" meta={cardMeta("Jour sélectionné")} badge={<InvIcon name="lab" />} badgeClassName="cashShuffleBadgeIcon cashShuffleBadgeIndigo" className="cashShuffleWide cashShuffleWideDelta cashShuffleV210Standard">
+          <CashShuffleAmount cents={selectedMetrics.countedCents} xl />
+        </CashShuffleCard>
       </div>
     </div>
   </section>;

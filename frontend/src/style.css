@@ -16170,3 +16170,190 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
   .pagePermissionsModal .pagePermissionModalActions .platformModalCancel,
   .pagePermissionsModal .pagePermissionModalActions .platformModalCreate{width:100%!important;}
 }
+
+
+/* V209 - Cash register quantity table is display-only outside the counting popup */
+.cashCountTable .qtyDisplay{
+  width:120px!important;
+  min-height:44px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:12px!important;
+  border:1px solid #d6e0ed!important;
+  background:#fbfdff!important;
+  text-align:center!important;
+  font-size:18px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  color:#0f2340!important;
+  box-shadow:none!important;
+  user-select:text!important;
+}
+.cashCountTable .qtyDisplay:hover,
+.cashCountTable .qtyDisplay:focus{
+  border-color:#d6e0ed!important;
+  background:#fbfdff!important;
+  box-shadow:none!important;
+  outline:none!important;
+}
+
+/* V210 - Dashboard Caisse: 3 cards per row, no Real time CR card, tall anomalies card */
+.cashShuffleContentV210{
+  display:block!important;
+  width:100%!important;
+  gap:0!important;
+}
+.cashShuffleContentV210 .cashShuffleSectionV210{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;
+  grid-auto-rows:minmax(178px,auto)!important;
+  gap:22px!important;
+  width:100%!important;
+  min-width:0!important;
+}
+.cashShuffleContentV210 .cashShuffleSectionV210 > *{
+  grid-column:auto!important;
+  min-width:0!important;
+}
+.cashShuffleContentV210 .cashShuffleV210Standard,
+.cashShuffleContentV210 .cashShuffleCardTall.cashShuffleV210Standard,
+.cashShuffleContentV210 .cashShuffleMini.cashShuffleV210Standard,
+.cashShuffleContentV210 .cashShuffleWide.cashShuffleV210Standard{
+  min-height:178px!important;
+  height:100%!important;
+  border-radius:22px!important;
+}
+.cashShuffleContentV210 .cashShuffleV210Tall{
+  grid-row:span 2!important;
+  min-height:378px!important;
+  height:100%!important;
+  border-radius:22px!important;
+}
+.cashShuffleContentV210 .cashShuffleCardTop{
+  margin-bottom:12px!important;
+}
+.cashShuffleContentV210 .cashShuffleCardTop h3{
+  font-size:clamp(14px,1.05vw,17px)!important;
+  line-height:1.25!important;
+}
+.cashShuffleContentV210 .cashShuffleCardMeta{
+  min-height:24px!important;
+  margin-top:6px!important;
+  gap:8px!important;
+}
+.cashShuffleContentV210 .cashShuffleMetricBody{
+  margin-top:auto!important;
+}
+.cashShuffleContentV210 .cashShuffleAmount strong,
+.cashShuffleContentV210 .cashShuffleMini .cashShuffleAmount strong,
+.cashShuffleContentV210 .cashShuffleWide .cashShuffleAmount strong{
+  font-size:clamp(28px,2.7vw,42px)!important;
+  line-height:.95!important;
+  letter-spacing:-.055em!important;
+}
+.cashShuffleContentV210 .cashShuffleAmountXL strong,
+.cashShuffleContentV210 .cashShuffleWide .cashShuffleAmountXL strong{
+  font-size:clamp(28px,2.55vw,40px)!important;
+}
+.cashShuffleContentV210 .cashShuffleMonthlySummary{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+  min-height:86px!important;
+}
+.cashShuffleContentV210 .cashShuffleMonthlySummary .cashShuffleAmount strong{
+  font-size:clamp(40px,4.1vw,62px)!important;
+}
+.cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleMetricBody{
+  padding:0!important;
+}
+.cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleInsightMetric,
+.cashShuffleContentV210 .cashShuffleExpensesLimitCard .cashShuffleExpenseProgress,
+.cashShuffleContentV210 .cashShuffleExpensesLimitCard .cashShuffleInsightMetric{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:18px!important;
+  min-height:112px!important;
+  width:100%!important;
+}
+.cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleSvgRing,
+.cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleSvgRing svg,
+.cashShuffleContentV210 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing,
+.cashShuffleContentV210 .cashShuffleExpensesLimitCard .cashShuffleExpenseRing svg{
+  width:116px!important;
+  min-width:116px!important;
+  height:116px!important;
+  flex:0 0 116px!important;
+}
+.cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleSvgRingValue{
+  inset:24px!important;
+}
+.cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleSvgRingValue span{
+  font-size:17px!important;
+}
+.cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleInsightText{
+  min-width:0!important;
+  align-items:flex-start!important;
+  text-align:left!important;
+}
+.cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleInsightText strong{
+  font-size:clamp(17px,1.65vw,24px)!important;
+  line-height:1.08!important;
+}
+.cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleInsightText p,
+.cashShuffleContentV210 .cashShuffleExpenseText small{
+  font-size:13px!important;
+  line-height:1.35!important;
+  max-width:260px!important;
+}
+.cashShuffleContentV210 .cashShuffleAnomalyCard .cashShuffleMetricBody{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+}
+.cashShuffleContentV210 .cashShuffleAnomalyList{
+  flex:1!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+}
+.cashShuffleContentV210 .cashShuffleAnomalyEmpty,
+.cashShuffleContentV210 .cashShuffleAnomalySlideEmpty,
+.cashShuffleContentV210 .cashShuffleAnomalyItem{
+  min-height:140px!important;
+}
+@media(max-width:1250px){
+  .cashShuffleContentV210 .cashShuffleSectionV210{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .cashShuffleContentV210 .cashShuffleV210Tall{
+    grid-row:span 1!important;
+    min-height:220px!important;
+  }
+}
+@media(max-width:760px){
+  .cashShuffleContentV210 .cashShuffleSectionV210{
+    grid-template-columns:1fr!important;
+    grid-auto-rows:auto!important;
+    gap:16px!important;
+  }
+  .cashShuffleContentV210 .cashShuffleV210Standard,
+  .cashShuffleContentV210 .cashShuffleV210Tall{
+    min-height:170px!important;
+  }
+  .cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleInsightMetric,
+  .cashShuffleContentV210 .cashShuffleExpensesLimitCard .cashShuffleInsightMetric{
+    flex-direction:column!important;
+    align-items:center!important;
+    text-align:center!important;
+  }
+  .cashShuffleContentV210 .cashShuffleInsightCard .cashShuffleInsightText{
+    align-items:center!important;
+    text-align:center!important;
+  }
+}

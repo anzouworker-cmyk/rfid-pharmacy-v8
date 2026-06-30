@@ -1,0 +1,24 @@
+V210 - Dashboard Caisse 3-column card grid redesign
+
+Base: V209.
+Changes:
+- Kept all V209 logic and previous fixes unchanged.
+- Removed the "Real time CR balance" card from Dashboard Caisse.
+- Reorganized Dashboard Caisse cards into a strict 3-column grid.
+- Reordered cards according to the requested organization:
+  Row 1: Progression écart de caisse, Tot. dépenses, Tot. montant manquant.
+  Row 2: Tot. montant surplus, Balance due, Montant manquant.
+  Row 3: Montant surplus, Retiré, Nouvelle C. fermeture.
+  Row 4: Vente en espèce + règlement de crédit, Dépenses, Alertes anomalies starts.
+  Row 5: C. fermeture (théorique), C. fermeture (comptée), Alertes anomalies continues.
+- Standard dashboard cards now share the same grid sizing behavior.
+- Alertes anomalies is the only card configured as a double-height card on desktop.
+- Added responsive fallback: 2 columns on medium screens and 1 column on mobile.
+
+Files modified:
+- frontend/src/main.jsx
+- frontend/src/style.css
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.

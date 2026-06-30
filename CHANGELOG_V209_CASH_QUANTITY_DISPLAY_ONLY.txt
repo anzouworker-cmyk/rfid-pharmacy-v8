@@ -1,0 +1,13 @@
+V209 - Cash register quantity display only
+
+Base: V208.
+Changes:
+- Kept V208 logic/design and page-permissions modal redesign unchanged.
+- Changed the cash register Billets/Pièces quantity cells to display-only values.
+- Removed direct editing from the Caisses cash-counting table by replacing quantity inputs with read-only display pills.
+- The counting/editing workflow remains available from the intended cash counting popup/card.
+- Added CSS styling for the display-only quantity pills to keep the same visual look without allowing user input.
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.
