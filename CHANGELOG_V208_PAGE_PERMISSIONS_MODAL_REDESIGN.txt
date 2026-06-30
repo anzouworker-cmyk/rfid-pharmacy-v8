@@ -1,0 +1,16 @@
+V208 - Pages visibles modal redesign
+
+Base: V207.
+Changes:
+- Kept V207 logic and all cash/history behavior unchanged.
+- Redesigned only the "Pages visibles" popup according to the approved model.
+- Removed confusing title format such as "Pages visibles - ..." and normalized the popup title to "Pages visibles de l’utilisateur".
+- Replaced mixed French/English wording like "user" with "utilisateur".
+- Improved subtitle contrast and readability.
+- Reworked the page permission choices into compact rounded option cards with checkbox + label aligned together.
+- Added a clean 3-column grid on desktop, 2 columns on smaller screens, and 1 column on mobile.
+- Kept the modal close button, Annuler and Enregistrer buttons with polished alignment.
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.

@@ -98,19 +98,30 @@ function PagePermissionsModalButton({
     setOpen(false);
   }
 
+  const modalTitle = String(title || "").toLowerCase().startsWith("pages visibles")
+    ? "Pages visibles de l’utilisateur"
+    : title;
+  const modalDescription = String(description || "")
+    .replace(/du user/gi, "de l’utilisateur")
+    .replace(/ce user/gi, "cet utilisateur")
+    .replace(/pour ce utilisateur/gi, "pour cet utilisateur");
+
   return <>
     <button type="button" className={buttonClassName} onClick={()=>setOpen(true)}>{buttonLabel}</button>
     {open && <div className="modalOverlay" onClick={()=>setOpen(false)}>
       <div className="scanModal pagePermissionsModal" onClick={e=>e.stopPropagation()}>
-        <button type="button" className="modalClose" onClick={()=>setOpen(false)}>×</button>
-        <h2>{title}</h2>
-        <p>{description}</p>
+        <button type="button" className="modalClose" onClick={()=>setOpen(false)} aria-label="Fermer">×</button>
+        <h2>{modalTitle}</h2>
+        <p>{modalDescription}</p>
         <div className="pagePermissionBox pagePermissionModalBox">
           <div className="pagePermissionGrid pagePermissionModalGrid">
-            {options.map(page=><label key={page.id}>
-              <input type="checkbox" checked={draft.includes(page.id)} onChange={()=>togglePage(page.id)}/>
-              <span>{page.label}</span>
-            </label>)}
+            {options.map(page=>{
+              const checked = draft.includes(page.id);
+              return <label key={page.id} className={checked ? "checked" : ""}>
+                <input type="checkbox" checked={checked} onChange={()=>togglePage(page.id)}/>
+                <span>{page.label}</span>
+              </label>;
+            })}
           </div>
         </div>
         <div className="platformModalActions pagePermissionModalActions">
@@ -3491,7 +3502,7 @@ function MyUsers({auth,me}){
                   <PagePermissionsModalButton
                     buttonLabel="Editer"
                     title={`Pages visibles - ${u.username}`}
-                    description="Cochez les pages visibles pour cet utilisateur."
+                    description="Choisissez les pages visibles pour cet utilisateur."
                     options={visiblePageOptions}
                     value={currentPages}
                     onSave={next=>updatePages(u,next)}
@@ -3793,8 +3804,8 @@ return <section className="platformPage platformUsersPage">
                 </div>
                 <PagePermissionsModalButton
                   buttonLabel="Editer"
-                  title="Pages visibles du user"
-                  description="Choisissez les pages visibles pour ce user."
+                  title="Pages visibles de l’utilisateur"
+                  description="Choisissez les pages visibles pour cet utilisateur."
                   options={ASSIGNABLE_PAGE_OPTIONS}
                   value={pagePermissions}
                   onSave={next=>setPagePermissions(next)}
@@ -3846,7 +3857,7 @@ return <section className="platformPage platformUsersPage">
               <td>{isAdmin ? <PagePermissionsModalButton buttonLabel="Editer" title={`Pages visibles - ${c.username}`} description="Compte admin : toutes les pages restent disponibles." options={ASSIGNABLE_PAGE_OPTIONS} value={ASSIGNABLE_PAGE_IDS} onSave={()=>{}} /> : <PagePermissionsModalButton
                     buttonLabel="Editer"
                     title={`Pages visibles - ${c.username}`}
-                    description="Choisissez les pages visibles pour ce user."
+                    description="Choisissez les pages visibles pour cet utilisateur."
                     options={ASSIGNABLE_PAGE_OPTIONS}
                     value={currentPages}
                     onSave={next=>updateClientAccess(c,next,c.can_manage_users)}
