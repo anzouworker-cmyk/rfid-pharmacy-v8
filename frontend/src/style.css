@@ -16702,3 +16702,142 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
     font-size:clamp(34px,10vw,48px)!important;
   }
 }
+
+
+/* V214 - Force the other KPI cards to the Tot. montant manquant template, without changing Tot. montant manquant */
+.cashShuffleContentV214 .cashShuffleV214MatchShortage{
+  height:220px!important;
+  min-height:220px!important;
+  max-height:220px!important;
+  padding:26px 28px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  align-items:stretch!important;
+  overflow:hidden!important;
+}
+
+/* Header structure: title/meta left, icon fixed at top-right like Tot. montant manquant */
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleCardTop{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 42px!important;
+  align-items:start!important;
+  justify-content:stretch!important;
+  column-gap:18px!important;
+  margin:0!important;
+  min-height:56px!important;
+  width:100%!important;
+}
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleCardTop > div{
+  grid-column:1!important;
+  grid-row:1!important;
+  min-width:0!important;
+  align-self:start!important;
+}
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleCardTop h3{
+  margin:0!important;
+  color:#0f172a!important;
+  font-size:clamp(14px,1.05vw,17px)!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+  letter-spacing:-.02em!important;
+  text-transform:none!important;
+}
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleCardMeta{
+  margin-top:9px!important;
+  min-height:20px!important;
+  color:#94a3b8!important;
+  font-size:13px!important;
+  line-height:1.25!important;
+  font-weight:800!important;
+}
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleBadge,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleBadgeIcon{
+  grid-column:2!important;
+  grid-row:1!important;
+  justify-self:end!important;
+  align-self:start!important;
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  min-height:42px!important;
+  padding:0!important;
+  border-radius:14px!important;
+  margin:0!important;
+}
+
+/* Body structure: large breathing space, amount bottom-left like Tot. montant manquant */
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleMetricBody{
+  flex:1 1 auto!important;
+  width:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+}
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleMonthlySummary{
+  width:100%!important;
+  min-height:0!important;
+  flex:1 1 auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+}
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmount,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmountXL,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmountLarge,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleMonthlySummary .cashShuffleAmount{
+  display:flex!important;
+  align-items:baseline!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  margin:0!important;
+  width:100%!important;
+}
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmount em,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmountXL em,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmountLarge em{
+  color:#94a3b8!important;
+  font-size:15px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  letter-spacing:-.015em!important;
+}
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmount strong,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmountXL strong,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmountLarge strong,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleMonthlySummary .cashShuffleAmount strong{
+  font-size:clamp(42px,4.1vw,62px)!important;
+  line-height:.92!important;
+  font-weight:900!important;
+  letter-spacing:-.06em!important;
+  white-space:nowrap!important;
+}
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleMonthlySummaryText,
+.cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleActionNote{
+  margin:0!important;
+  color:#94a3b8!important;
+  font-size:13px!important;
+  line-height:1.35!important;
+  font-weight:800!important;
+}
+
+/* Responsive safety */
+@media(max-width:760px){
+  .cashShuffleContentV214 .cashShuffleV214MatchShortage{
+    height:auto!important;
+    max-height:none!important;
+    min-height:180px!important;
+    padding:22px!important;
+  }
+  .cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmount strong,
+  .cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmountXL strong,
+  .cashShuffleContentV214 .cashShuffleV214MatchShortage .cashShuffleAmountLarge strong{
+    font-size:clamp(34px,10vw,48px)!important;
+  }
+}

@@ -1,0 +1,22 @@
+V214 - Force other KPI cards to match Tot. montant manquant
+
+Base: V213.
+Changes:
+- Kept the existing "Tot. montant manquant" card unchanged.
+- Added a V214-specific class only to the other standard KPI cards.
+- Forced those other cards to follow the "Tot. montant manquant" visual template:
+  - same fixed height,
+  - same internal padding,
+  - same title/meta placement,
+  - icon placed at top-right,
+  - amount aligned bottom-left,
+  - same amount typography and spacing.
+- Kept the special cards outside this force-template:
+  - Progression écart de caisse,
+  - Tot. dépenses,
+  - Alertes anomalies.
+- Dashboard 3-column organization and anomaly two-row card behavior are preserved.
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.
