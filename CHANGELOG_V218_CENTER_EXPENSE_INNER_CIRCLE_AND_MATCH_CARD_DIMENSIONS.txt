@@ -1,0 +1,9 @@
+V218 - Center Tot. dépenses inner gray circle and match other card dimensions to Tot. montant manquant
+
+Base: V217.
+Changes:
+- Centered only the inner gray circle inside the orange Tot. dépenses ring.
+- Did not change the orange outer ring, card content, or card layout.
+- Used Tot. montant manquant as the outer-dimension model for the other standard Dashboard Caisse cards.
+- Added a dedicated class only to the other standard cards so their dimensions match the Tot. montant manquant card more closely.
+- Did not modify the Tot. montant manquant card itself.
