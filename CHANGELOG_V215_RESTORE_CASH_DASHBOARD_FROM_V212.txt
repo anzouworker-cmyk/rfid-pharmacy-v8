@@ -1,0 +1,16 @@
+V215 - Restore Dashboard Caisse from V212 reference
+
+Base: V212.
+Reason:
+- V213/V214 forced-card dashboard changes created an incorrect visual result.
+- User requested to refer back to V212 for Dashboard Caisse.
+
+Changes:
+- Restored Dashboard Caisse behavior/design from V212.
+- Kept the V212 fix for the orange Tot. dépenses progress ring inner circle.
+- Removed the V213/V214 forced standard-card template changes.
+- Dashboard Caisse returns to the V212 reference state.
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.
