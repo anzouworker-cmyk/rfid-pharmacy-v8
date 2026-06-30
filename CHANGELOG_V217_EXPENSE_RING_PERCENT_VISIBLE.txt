@@ -1,0 +1,12 @@
+V217 - Tot. dépenses inner circle percent visibility fix
+
+Base: V216.
+Changes:
+- Updated only the inner white circle / percentage label of the orange Tot. dépenses progress ring.
+- Increased and centered the inner circle so the "100.0%" text is fully visible.
+- Kept the outer orange ring unchanged.
+- Kept the card content, card dimensions, grid organization, and all other cards unchanged.
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.

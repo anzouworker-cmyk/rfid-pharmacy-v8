@@ -16564,3 +16564,37 @@ button.cashAdminDatePickerDisplay.cashAdminDatePickerDisplay{
     height:auto!important;
   }
 }
+
+
+/* V217 - Tot. dépenses: inner progress circle text visibility fix only */
+.cashShuffleContentV217 .cashShuffleExpensesLimitCard .cashShuffleSvgRingValue{
+  position:absolute!important;
+  inset:auto!important;
+  left:17px!important;
+  top:17px!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:82px!important;
+  height:82px!important;
+  min-width:82px!important;
+  min-height:82px!important;
+  max-width:82px!important;
+  max-height:82px!important;
+  aspect-ratio:1 / 1!important;
+  transform:none!important;
+  border-radius:999px!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+.cashShuffleContentV217 .cashShuffleExpensesLimitCard .cashShuffleSvgRingValue span{
+  display:block!important;
+  width:max-content!important;
+  max-width:none!important;
+  font-size:17px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-align:center!important;
+}
