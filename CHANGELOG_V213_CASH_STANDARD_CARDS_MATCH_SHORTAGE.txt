@@ -1,0 +1,22 @@
+V213 - Dashboard Caisse standard cards match Tot. montant manquant
+
+Base: V212.
+Changes:
+- Kept V212 inner-ring fix and V210/V211 dashboard organization unchanged.
+- Added a V213 dashboard CSS scope.
+- Forced all standard Dashboard Caisse KPI cards to use the same dimensions and internal structure as the "Tot. montant manquant" model card.
+- Standard cards now share:
+  - same height,
+  - same padding,
+  - same title/meta spacing,
+  - same top-right icon sizing,
+  - same bottom-left amount alignment and typography.
+- Kept the requested exceptions unchanged:
+  - Progression écart de caisse,
+  - Tot. dépenses,
+  - Alertes anomalies.
+- Alertes anomalies remains the only double-height card on desktop.
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.

@@ -1,0 +1,12 @@
+V212 - Fix Tot. dépenses inner progress circle placement
+
+Base: V211.
+Changes:
+- Kept V211 3-column dashboard organization, KPI card polish, and anomaly display behavior unchanged.
+- Fixed the broken inner white circle/percentage label inside the orange Tot. dépenses progress ring.
+- Scoped the CSS override only to the Tot. dépenses progress ring inner circle in Dashboard Caisse.
+- The ring container remains square and the inner white circle is centered and round.
+
+Validation:
+- Frontend production build succeeded.
+- Backend main.py compiled successfully.
