@@ -1,0 +1,9 @@
+V225 - Progression ring uses same dimensions as Tot. dépenses V224
+
+Base: V224 / staging.
+Changes:
+- Added a dedicated CSS file loaded after V224.
+- Adjusted only the circle/ring of Progression écart de caisse.
+- Progression ring now uses the current Tot. dépenses V224 dimensions: 160px ring, 27px inner inset, 20px percentage text, stroke 12px.
+- Kept Progression color purple/indigo.
+- Did not change cash logic, values, cards, or dashboard layout.
