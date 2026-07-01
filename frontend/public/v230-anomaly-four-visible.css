@@ -1,0 +1,34 @@
+/* V230 - Compact Alertes anomalies list so 4 alerts are visible inside the two-row card */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleAnomalyCard .cashShuffleAnomalyListV211{
+  gap:10px!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleAnomalyCard .cashShuffleAnomalyStackV211{
+  gap:10px!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleAnomalyCard .cashShuffleAnomalyItem{
+  min-height:86px!important;
+  padding:14px 16px!important;
+  border-radius:16px!important;
+  gap:12px!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleAnomalyCard .cashShuffleAnomalyItem strong{
+  font-size:14px!important;
+  line-height:1.2!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleAnomalyCard .cashShuffleAnomalyItem small{
+  font-size:12px!important;
+  line-height:1.25!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleAnomalyCard .cashShuffleAnomalyItem b{
+  font-size:14px!important;
+  white-space:nowrap!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleAnomalyCard .cashShuffleAnomalyIcon{
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  border-radius:12px!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleAnomalyCard .cashShuffleAnomalyPagerV211{
+  margin-top:auto!important;
+}
