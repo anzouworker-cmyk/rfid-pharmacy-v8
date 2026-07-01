@@ -1,0 +1,11 @@
+V231 - Platform users metadata columns and categories
+
+Base: V230 / staging.
+Changes:
+- Added new visible columns in the platform users table: Catégorie, Créé par, Date création.
+- Categories are derived as Admin, User, or Under user.
+- Rows are visually grouped/sorted by category: Admin first, User second, Under user third.
+- Created-by is shown from created_by_username when available, otherwise parent_username for under users, Système for admin, or admin for platform-created users.
+- Creation date uses the existing created_at value returned by /platform/clients.
+- Added styling for category chips.
+- Did not change authentication or user permissions logic.
