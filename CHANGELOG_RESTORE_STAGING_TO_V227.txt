@@ -1,0 +1,11 @@
+Restore staging to V227
+
+The staging branch was restored to the previous version before V228.
+
+Restored reference commit:
+138b12c2cae8feae3cb73a1197c844365e6119f6
+
+Result:
+- V228 CSS is no longer loaded.
+- Staging is back to the V227 Dashboard Caisse state.
+- This changelog commit exists only to make the rollback visible in GitHub.
