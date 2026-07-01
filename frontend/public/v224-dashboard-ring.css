@@ -1,0 +1,85 @@
+/* V224 - Tot. dépenses uses the exact same ring geometry as Progression écart de caisse */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleInsightMetric{
+  display:grid!important;
+  grid-template-columns:160px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:26px!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleSvgRing{
+  position:relative!important;
+  width:160px!important;
+  height:160px!important;
+  min-width:160px!important;
+  min-height:160px!important;
+  max-width:160px!important;
+  max-height:160px!important;
+  flex:0 0 160px!important;
+  display:grid!important;
+  place-items:center!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleSvgRing svg{
+  width:160px!important;
+  height:160px!important;
+  min-width:160px!important;
+  min-height:160px!important;
+  max-width:160px!important;
+  max-height:160px!important;
+  transform:rotate(-90deg)!important;
+  overflow:visible!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleSvgRingTrack,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleSvgRingProgress{
+  fill:none!important;
+  stroke-linecap:round!important;
+  stroke-width:12!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleSvgRingTrack{
+  stroke:#e9edf5!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleSvgRingProgress{
+  stroke:#f59e0b!important;
+  transition:stroke-dashoffset .25s ease!important;
+  opacity:1!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleSvgRingValue{
+  position:absolute!important;
+  inset:27px!important;
+  left:27px!important;
+  top:27px!important;
+  right:27px!important;
+  bottom:27px!important;
+  width:auto!important;
+  height:auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  transform:none!important;
+  translate:none!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  border:2px solid #edf2f7!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleSvgRingValue span{
+  color:#0f172a!important;
+  font-size:20px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+  margin:0!important;
+  padding:0!important;
+}
+@media (max-width:900px){
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleInsightMetric{
+    grid-template-columns:1fr!important;
+    justify-items:center!important;
+    text-align:center!important;
+  }
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleExpensesLimitCard .cashShuffleInsightText{
+    align-items:center!important;
+  }
+}
