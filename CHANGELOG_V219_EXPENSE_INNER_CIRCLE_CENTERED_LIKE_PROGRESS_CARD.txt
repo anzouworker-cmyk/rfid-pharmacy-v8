@@ -1,0 +1,11 @@
+V219 - Center Tot. dépenses inner gray circle like Progression écart de caisse
+
+Base: V218.
+Changes:
+- Adjusted only the inner gray circle of the Tot. dépenses progress ring.
+- Used the same inset/centering behavior as the Progression écart de caisse card.
+- Did not change the orange outer ring, card content, or other dashboard cards.
+- Kept the V218 card-dimension adjustments intact.
+
+Staging note:
+- Applied on staging with a scoped runtime CSS override in frontend/index.html to avoid rewriting large bundled source files through the GitHub connector.
