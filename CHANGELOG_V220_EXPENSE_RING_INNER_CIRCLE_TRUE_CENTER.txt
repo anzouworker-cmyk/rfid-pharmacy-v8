@@ -1,0 +1,9 @@
+V220 - Tot. dépenses inner circle true center fix
+
+Base: V219 / staging.
+Changes:
+- Added a stronger scoped runtime CSS correction for the Tot. dépenses ring.
+- The ring container is forced to a square 116px box.
+- The inner gray circle is centered with left/top 50% and a fixed 74px circle.
+- Did not change the orange outer ring, text content, card size, or dashboard layout.
+- Kept V218 card dimension adjustments unchanged.
