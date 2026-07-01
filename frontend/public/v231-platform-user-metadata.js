@@ -1,30 +1,25 @@
-/* V231 - Platform users table: category, creator and creation date columns. */
+/* V232 hotfix inside V231 asset - Platform users table metadata columns. */
 (function(){
-  if(window.__v231PlatformUserMetadata) return;
-  window.__v231PlatformUserMetadata = true;
+  if(window.__v232PlatformUserMetadataHotfix) return;
+  window.__v232PlatformUserMetadataHotfix = true;
 
-  var API = '';
-  try{
-    var scripts = document.querySelectorAll('script[src]');
-    for(var i=0;i<scripts.length;i++){
-      var src = scripts[i].getAttribute('src') || '';
-      if(src.indexOf('/src/main.jsx') >= 0){ API = location.origin; }
-    }
-  }catch(e){}
+  var cachedUsers = [];
+  try{ cachedUsers = JSON.parse(sessionStorage.getItem('v232_platform_users') || '[]') || []; }catch(e){ cachedUsers = []; }
 
+  function clean(v){ return String(v || '').trim().toLowerCase().replace(/\s+/g,' '); }
   function token(){ return localStorage.getItem('token') || localStorage.token || ''; }
-  function normalize(v){ return String(v || '').trim().toLowerCase(); }
-  function cleanCell(v){ return normalize(v).replace(/\s+/g,' '); }
   function formatDate(value){
     if(!value) return '—';
     var d = new Date(value);
     if(isNaN(d.getTime())) return String(value).slice(0,10) || '—';
     return d.toLocaleDateString('fr-FR',{year:'numeric',month:'2-digit',day:'2-digit'});
   }
-  function categoryOf(user){
-    if(!user) return {key:'unknown', label:'User'};
-    if(user.role === 'platform_admin') return {key:'admin', label:'Admin'};
-    if(user.role === 'client_user' || user.parent_username) return {key:'under', label:'Under user'};
+  function categoryOf(user,row){
+    var role = clean(user && user.role);
+    var parent = clean(user && user.parent_username);
+    var text = clean(row && row.innerText);
+    if(role === 'platform_admin' || text.indexOf(' admin ') >= 0 || text.indexOf('admin') === 0) return {key:'admin', label:'Admin'};
+    if(role === 'client_user' || parent) return {key:'under', label:'Under user'};
     return {key:'user', label:'User'};
   }
   function creatorOf(user){
@@ -34,97 +29,117 @@
     if(user.role === 'platform_admin') return 'Système';
     return 'admin';
   }
-  function scoreUser(rowText, usernameText, user){
+  function rankOf(cat){ return cat.key === 'admin' ? 0 : cat.key === 'user' ? 1 : cat.key === 'under' ? 2 : 3; }
+  function scoreRow(row,user){
+    var rowText = clean(row && row.innerText);
+    var username = clean(user && user.username);
+    var name = clean(user && (user.pharmacy_name || user.full_name));
     var score = 0;
-    var username = cleanCell(user.username);
-    var full = cleanCell(user.pharmacy_name || user.full_name || '');
-    if(username && usernameText === username) score += 100;
-    if(username && rowText.indexOf(username) >= 0) score += 50;
-    if(full && usernameText === full) score += 40;
-    if(full && rowText.indexOf(full) >= 0) score += 25;
+    if(username && rowText.indexOf(username) >= 0) score += 80;
+    if(name && rowText.indexOf(name) >= 0) score += 50;
     return score;
   }
-  function findUserForRow(row, users){
-    var cells = Array.prototype.slice.call(row.children);
-    var rowText = cleanCell(row.innerText || '');
-    var usernameText = cleanCell(cells[0] ? cells[0].innerText : '');
+  function userForRow(row){
     var best = null, bestScore = 0;
-    users.forEach(function(user){
-      var s = scoreUser(rowText, usernameText, user);
+    cachedUsers.forEach(function(user){
+      var s = scoreRow(row,user);
       if(s > bestScore){ best = user; bestScore = s; }
     });
-    return best;
+    return bestScore > 0 ? best : null;
   }
-  function findPlatformUsersTable(){
+  function findTable(){
     var tables = Array.prototype.slice.call(document.querySelectorAll('table'));
     return tables.find(function(table){
-      var headers = Array.prototype.slice.call(table.querySelectorAll('thead th')).map(function(th){return cleanCell(th.innerText);});
-      return headers.indexOf('user') >= 0 && headers.indexOf('user name') >= 0 && headers.indexOf('abonnement') >= 0 && headers.indexOf('pages visibles') >= 0;
+      var heads = Array.prototype.slice.call(table.querySelectorAll('thead th')).map(function(th){return clean(th.innerText);});
+      return heads.indexOf('user') >= 0 && heads.indexOf('user name') >= 0 && heads.indexOf('abonnement') >= 0 && heads.indexOf('pages visibles') >= 0;
     });
   }
-  function ensureHeader(table){
-    var headRow = table.querySelector('thead tr');
-    if(!headRow) return;
-    var existing = Array.prototype.slice.call(headRow.children).map(function(th){return cleanCell(th.innerText);});
-    if(existing.indexOf('categorie') < 0 && existing.indexOf('catégorie') < 0){
-      var thCat = document.createElement('th'); thCat.textContent = 'Catégorie'; thCat.className = 'v231UserCategoryHead';
-      var thBy = document.createElement('th'); thBy.textContent = 'Créé par'; thBy.className = 'v231UserCreatedByHead';
-      var thDate = document.createElement('th'); thDate.textContent = 'Date création'; thDate.className = 'v231UserCreatedAtHead';
-      var insertAfter = 2;
-      headRow.insertBefore(thDate, headRow.children[insertAfter+1] || null);
-      headRow.insertBefore(thBy, thDate);
-      headRow.insertBefore(thCat, thBy);
-    }
+  function makeHeader(text,cls){ var th=document.createElement('th'); th.textContent=text; th.className=cls; return th; }
+  function ensureHeaders(table){
+    var tr = table.querySelector('thead tr');
+    if(!tr) return;
+    var heads = Array.prototype.slice.call(tr.children).map(function(th){return clean(th.innerText);});
+    if(heads.indexOf('catégorie') >= 0 || heads.indexOf('categorie') >= 0) return;
+    var before = tr.children[2] || null;
+    tr.insertBefore(makeHeader('Catégorie','v231UserCategoryHead'), before);
+    tr.insertBefore(makeHeader('Créé par','v231UserCreatedByHead'), before);
+    tr.insertBefore(makeHeader('Date création','v231UserCreatedAtHead'), before);
   }
-  function ensureCell(row, className, contentNode, index){
-    var existing = row.querySelector('td.' + className);
-    if(existing){ existing.innerHTML = ''; existing.appendChild(contentNode); return existing; }
-    var td = document.createElement('td'); td.className = className; td.appendChild(contentNode);
-    row.insertBefore(td, row.children[index] || null);
-    return td;
+  function makeTextCell(cls,txt){ var td=document.createElement('td'); td.className=cls; td.textContent=txt || '—'; return td; }
+  function makeCategoryCell(cat){ var td=document.createElement('td'); td.className='v231UserCategoryCell'; var span=document.createElement('span'); span.className='v231UserCategoryChip ' + cat.key; span.textContent=cat.label; td.appendChild(span); return td; }
+  function setOrInsert(row,cls,node,index){
+    var old = row.querySelector('td.' + cls);
+    if(old){ old.replaceWith(node); return; }
+    row.insertBefore(node,row.children[index] || null);
   }
-  function textNode(txt){ var span = document.createElement('span'); span.textContent = txt || '—'; return span; }
-  function chip(label, key){ var span = document.createElement('span'); span.className = 'v231UserCategoryChip ' + key; span.textContent = label; return span; }
-  function categoryRank(user){ var c = categoryOf(user).key; return c === 'admin' ? 0 : c === 'user' ? 1 : c === 'under' ? 2 : 3; }
-  function decorate(users){
-    var table = findPlatformUsersTable();
-    if(!table || !Array.isArray(users) || !users.length) return;
-    if(table.dataset.v231Decorating === '1') return;
-    table.dataset.v231Decorating = '1';
-    ensureHeader(table);
-    var tbody = table.querySelector('tbody');
-    if(!tbody){ table.dataset.v231Decorating = '0'; return; }
-    var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
-    var decorated = rows.map(function(row){
-      var user = findUserForRow(row, users);
-      var cat = categoryOf(user);
-      ensureCell(row, 'v231UserCategoryCell', chip(cat.label, cat.key), 3);
-      ensureCell(row, 'v231UserCreatedByCell', textNode(creatorOf(user)), 4);
-      ensureCell(row, 'v231UserCreatedAtCell', textNode(formatDate(user && user.created_at)), 5);
-      row.dataset.v231UserCategory = cat.key;
-      return {row:row, rank:categoryRank(user), created:user && user.created_at ? new Date(user.created_at).getTime() : 0};
-    });
-    decorated.sort(function(a,b){ return a.rank - b.rank || b.created - a.created; }).forEach(function(item){ tbody.appendChild(item.row); });
+  function decorate(){
+    var table = findTable();
+    if(!table) return;
+    if(table.dataset.v232Busy === '1') return;
+    table.dataset.v232Busy = '1';
+    ensureHeaders(table);
     table.classList.add('v231PlatformUsersTable');
-    table.dataset.v231Decorating = '0';
+    var body = table.querySelector('tbody');
+    if(!body){ table.dataset.v232Busy = '0'; return; }
+    var rows = Array.prototype.slice.call(body.querySelectorAll('tr'));
+    var pack = rows.map(function(row){
+      var user = userForRow(row);
+      var cat = categoryOf(user,row);
+      setOrInsert(row,'v231UserCategoryCell',makeCategoryCell(cat),2);
+      setOrInsert(row,'v231UserCreatedByCell',makeTextCell('v231UserCreatedByCell',creatorOf(user)),3);
+      setOrInsert(row,'v231UserCreatedAtCell',makeTextCell('v231UserCreatedAtCell',formatDate(user && user.created_at)),4);
+      row.dataset.v231UserCategory = cat.key;
+      var created = user && user.created_at ? new Date(user.created_at).getTime() : 0;
+      return {row:row, rank:rankOf(cat), created:created};
+    });
+    pack.sort(function(a,b){ return a.rank - b.rank || b.created - a.created; }).forEach(function(item){ body.appendChild(item.row); });
+    table.dataset.v232Busy = '0';
   }
-  var cache = null;
-  var fetching = false;
+  function saveUsers(data){
+    if(!Array.isArray(data)) return;
+    if(!data.some(function(x){ return x && typeof x === 'object' && 'username' in x; })) return;
+    cachedUsers = data;
+    try{ sessionStorage.setItem('v232_platform_users', JSON.stringify(data)); }catch(e){}
+    decorate();
+  }
+  function knownClientUrls(){
+    var urls = [];
+    try{
+      performance.getEntriesByType('resource').forEach(function(entry){
+        var name = String(entry.name || '');
+        if(name.indexOf('/platform/clients') >= 0) urls.push(name);
+      });
+    }catch(e){}
+    urls.push('/platform/clients');
+    return urls.filter(function(v,i,a){ return v && a.indexOf(v) === i; });
+  }
   function fetchUsers(){
     var t = token();
-    if(!t || fetching) return;
-    fetching = true;
-    fetch('/platform/clients',{headers:{Authorization:'Bearer ' + t}})
-      .then(function(r){ return r.ok ? r.json() : []; })
-      .then(function(data){ cache = Array.isArray(data) ? data : []; decorate(cache); })
-      .catch(function(){})
-      .finally(function(){ fetching = false; });
+    if(!t) return;
+    knownClientUrls().forEach(function(url){
+      fetch(url,{headers:{Authorization:'Bearer ' + t}})
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(saveUsers)
+        .catch(function(){});
+    });
   }
-  function tick(){
-    if(cache) decorate(cache);
-    else fetchUsers();
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tick); else tick();
-  setInterval(tick, 1500);
-  try{ new MutationObserver(function(){ tick(); }).observe(document.documentElement,{subtree:true,childList:true}); }catch(e){}
+  try{
+    var XO = XMLHttpRequest.prototype.open;
+    var XS = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = function(method,url){ this.__v232url = String(url || ''); return XO.apply(this,arguments); };
+    XMLHttpRequest.prototype.send = function(){
+      try{
+        this.addEventListener('loadend',function(){
+          if(String(this.__v232url || '').indexOf('/platform/clients') >= 0){
+            try{ saveUsers(JSON.parse(this.responseText || '[]')); }catch(e){}
+          }
+        });
+      }catch(e){}
+      return XS.apply(this,arguments);
+    };
+  }catch(e){}
+  function tick(){ decorate(); fetchUsers(); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded',tick); else tick();
+  setInterval(tick,1500);
+  try{ new MutationObserver(decorate).observe(document.documentElement,{subtree:true,childList:true}); }catch(e){}
 })();
