@@ -1,0 +1,9 @@
+V234 - Safe Clients table metadata columns
+
+Base: V233 / staging.
+Changes:
+- Added a safer non-invasive script for the Clients table.
+- Adds Catégorie, Créé par and Date création columns without MutationObserver and without modifying browser prototypes.
+- Classifies rows as Admin, User or Under user.
+- Keeps the Clients page stable after the V231/V232 crash.
+- Does not change authentication, delete actions or permissions logic.
