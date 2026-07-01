@@ -1,0 +1,8 @@
+V233 - Disable clients metadata script causing crash
+
+Base: V232 / staging.
+Changes:
+- Removed the injected platform user metadata script/style from frontend/index.html.
+- Restores the Clients page stability.
+- Keeps previous Dashboard Caisse fixes and V230 anomaly display loaded.
+- The requested creator/category/date columns will need a proper React/backend implementation instead of DOM injection.
