@@ -1,0 +1,184 @@
+/* V229 - Normal Dashboard Caisse cards use the same visual template as Tot. montant manquant */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-auto-rows:300px!important;
+  gap:22px!important;
+  align-items:stretch!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard{
+  border-radius:22px!important;
+  box-sizing:border-box!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleAnomalyCard){
+  min-height:300px!important;
+  height:300px!important;
+  max-height:300px!important;
+}
+
+/* All normal value/KPI cards must copy Tot. montant manquant layout. */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard){
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  padding:26px 28px!important;
+  overflow:hidden!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleCardTop{
+  position:relative!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:18px!important;
+  min-height:58px!important;
+  margin:0 0 18px 0!important;
+  padding:0!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleCardTop > div{
+  min-width:0!important;
+  padding:0!important;
+  margin:0!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleCardTop h3{
+  margin:0!important;
+  padding:0!important;
+  font-size:18px!important;
+  line-height:1.2!important;
+  font-weight:900!important;
+  letter-spacing:-.03em!important;
+  color:#0f172a!important;
+  text-transform:none!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleCardMeta{
+  margin-top:12px!important;
+  min-height:22px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleCardMeta > span{
+  color:#8fa0bd!important;
+  font-size:15px!important;
+  line-height:1.25!important;
+  font-weight:700!important;
+}
+
+/* Put every icon/badge on the top-right, exactly like Tot. montant manquant. */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleBadge,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleBadgeIcon{
+  position:static!important;
+  left:auto!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  margin:0!important;
+  order:2!important;
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  min-height:42px!important;
+  border-radius:14px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleMetricBody{
+  flex:1 1 auto!important;
+  min-height:118px!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleMonthlySummary{
+  width:100%!important;
+  min-height:118px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleAmount,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleAmountXL,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleAmountLarge{
+  display:flex!important;
+  align-items:baseline!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleAmount em,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleAmountXL em,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleAmountLarge em{
+  color:#8fa0bd!important;
+  font-size:15px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  letter-spacing:-.015em!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleAmount strong,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleAmountXL strong,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleAmountLarge strong{
+  font-size:clamp(44px,4.1vw,62px)!important;
+  line-height:.95!important;
+  font-weight:900!important;
+  letter-spacing:-.06em!important;
+  white-space:nowrap!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleActionNote,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleProgressCard):not(.cashShuffleExpensesLimitCard):not(.cashShuffleAnomalyCard) .cashShuffleMonthlySummaryText{
+  margin:0!important;
+  color:#64748b!important;
+  font-size:15px!important;
+  line-height:1.35!important;
+  font-weight:700!important;
+}
+
+/* Alertes anomalies keeps normal card width but takes exactly two rows. */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleAnomalyCard{
+  grid-column:auto!important;
+  grid-row:span 2!important;
+  min-height:622px!important;
+  height:100%!important;
+  max-height:none!important;
+}
+
+@media(max-width:1250px){
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:760px){
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210{
+    grid-template-columns:1fr!important;
+    grid-auto-rows:auto!important;
+    gap:16px!important;
+  }
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard,
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleAnomalyCard{
+    height:auto!important;
+    max-height:none!important;
+    min-height:240px!important;
+    grid-row:auto!important;
+  }
+}
