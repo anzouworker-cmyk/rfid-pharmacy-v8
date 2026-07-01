@@ -1,0 +1,10 @@
+V236 - Fix Clients delete button for Under user rows
+
+Base: V235 / staging.
+Changes:
+- Updated the existing safe Clients table enhancer.
+- Keeps Catégorie and Créé par columns; Date création remains removed.
+- Adds a reliable delete fallback for Clients table Delete buttons.
+- For non-admin rows, the delete click calls the available backend delete routes and removes the row after success.
+- Supports User and Under user rows.
+- Does not change authentication, permissions, dashboard caisse, or cash logic.
