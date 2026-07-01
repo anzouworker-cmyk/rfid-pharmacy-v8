@@ -1,7 +1,7 @@
-/* V235 - Safe Clients table columns: Catégorie, Créé par. No Date création column. */
+/* V236 - Safe Clients table columns + reliable delete fallback for Under user rows. */
 (function(){
-  if(window.__v235ClientsSafeColumns) return;
-  window.__v235ClientsSafeColumns = true;
+  if(window.__v236ClientsSafeColumns) return;
+  window.__v236ClientsSafeColumns = true;
   var cachedUsers = [];
   var fetching = false;
   function clean(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ')}
@@ -38,7 +38,26 @@
       }).catch(function(){});
     })).finally(function(){fetching=false; decorate()});
   }
+  function identityUsername(row){
+    try{
+      var identity=row.querySelector('.platformUserIdentity');
+      if(identity){
+        var spans=Array.prototype.slice.call(identity.querySelectorAll('span'));
+        var last=spans[spans.length-1];
+        var txt=String(last && last.textContent || '').trim();
+        if(txt && txt.length>1) return txt;
+        var all=String(identity.textContent||'').trim().split(/\s+/).filter(Boolean);
+        if(all.length>1) return all[all.length-1];
+      }
+    }catch(e){}
+    return '';
+  }
   function userForRow(row){
+    var exact=identityUsername(row);
+    if(exact){
+      var found=cachedUsers.find(function(u){return clean(u.username)===clean(exact)});
+      if(found) return found;
+    }
     var text=clean(row.textContent);
     var best=null,score=0;
     cachedUsers.forEach(function(u){
@@ -48,6 +67,11 @@
       if(s>score){best=u;score=s}
     });
     return score>0?best:null;
+  }
+  function usernameForRow(row){
+    var user=userForRow(row);
+    if(user && user.username) return String(user.username).trim();
+    return identityUsername(row);
   }
   function category(user,row){
     var text=clean(row.textContent), role=clean(user&&user.role), parent=clean(user&&user.parent_username);
@@ -93,15 +117,59 @@
     rows.forEach(function(row,i){
       if(row.children.length<4) return;
       clearOld(row);
-      var user=userForRow(row), cat=category(user,row);
+      var user=userForRow(row), cat=category(user,row), rowUsername=(user&&user.username)||identityUsername(row);
       row.insertBefore(catCell(cat),row.children[2]||null);
       row.insertBefore(textCell('v234CellCreatedBy',creator(user,cat)),row.children[3]||null);
       row.dataset.v234Category=cat.key;
+      if(rowUsername) row.dataset.v234Username=rowUsername;
       pack.push({row:row,r:rank(cat),i:i,d:user&&user.created_at?new Date(user.created_at).getTime():0});
     });
     pack.sort(function(a,b){return a.r-b.r || b.d-a.d || a.i-b.i}).forEach(function(x){body.appendChild(x.row)});
     table.dataset.v234Busy='0';
   }
+  async function deleteByApi(username,row,button){
+    var t=token();
+    if(!username || !t) return false;
+    var enc=encodeURIComponent(username);
+    var headers={Authorization:'Bearer '+t};
+    if(!confirm('Supprimer définitivement le user '+username+' ?')) return true;
+    if(button){button.disabled=true;button.textContent='Suppression...'}
+    var attempts=[
+      {url:'/platform/client-delete/'+enc,method:'POST'},
+      {url:'/platform/delete-client/'+enc,method:'DELETE'},
+      {url:'/users/delete/'+enc,method:'DELETE'}
+    ];
+    var ok=false,last='';
+    for(var i=0;i<attempts.length;i++){
+      try{
+        var r=await fetch(attempts[i].url,{method:attempts[i].method,headers:headers});
+        if(r.ok){ok=true;break;}
+        last=await r.text();
+      }catch(e){last=String(e&&e.message||e)}
+    }
+    if(ok){
+      cachedUsers=cachedUsers.filter(function(u){return clean(u.username)!==clean(username)});
+      if(row) row.remove();
+      return true;
+    }
+    if(button){button.disabled=false;button.textContent='Delete'}
+    alert('Erreur suppression utilisateur: '+(last||'réessayez'));
+    return true;
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target&&e.target.closest?e.target.closest('button'):null;
+    if(!btn || clean(btn.textContent)!=='delete') return;
+    var table=findClientsTable();
+    if(!table || !table.contains(btn)) return;
+    var row=btn.closest('tr');
+    if(!row || row.dataset.v234Category==='admin') return;
+    var username=row.dataset.v234Username || usernameForRow(row);
+    if(!username) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+    deleteByApi(username,row,btn);
+  },true);
   function tick(){try{decorate();fetchUsers()}catch(e){}}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tick); else tick();
   var n=0, timer=setInterval(function(){tick(); if(++n>40) clearInterval(timer)},1500);
