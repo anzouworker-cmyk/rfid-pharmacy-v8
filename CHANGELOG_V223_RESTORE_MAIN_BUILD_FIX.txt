@@ -1,0 +1,7 @@
+V223 - Restore build after placeholder commit
+
+Base: V222 / staging.
+Changes:
+- Verified frontend/src/main.jsx has been restored to valid React source.
+- Added this changelog-only commit to trigger a fresh Vercel build from the corrected staging branch.
+- The previous placeholder commit is no longer the staging head.
