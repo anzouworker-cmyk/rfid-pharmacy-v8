@@ -1,0 +1,8 @@
+V222 - Font fallback console cleanup
+
+Base: V221 / staging.
+Changes:
+- Added a lightweight font fallback style in frontend/index.html.
+- Avoids relying on a missing local Inter ExtraBold font file.
+- Keeps the V221 Tot. dépenses ring inline centering fix unchanged.
+- Browser extension console messages are external and cannot be fixed from the app code.
