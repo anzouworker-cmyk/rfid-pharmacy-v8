@@ -1,0 +1,9 @@
+V224 - Tot. dépenses ring matches Progression écart de caisse
+
+Base: restored V218 staging.
+Changes:
+- Removed the earlier runtime-script approach from the fix path.
+- Added a clean external CSS file loaded by frontend/index.html.
+- The Tot. dépenses ring now reuses the same geometry as Progression écart de caisse: 160px ring, 27px inner inset, 20px percentage text, same track/progress stroke behavior.
+- Kept the amber color for Tot. dépenses.
+- Did not change cash logic or dashboard data.
