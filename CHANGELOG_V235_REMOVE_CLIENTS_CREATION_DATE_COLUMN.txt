@@ -1,0 +1,9 @@
+V235 - Remove Date création column from Clients table
+
+Base: V234 / staging.
+Changes:
+- Removed the visible Date création column from the Clients table enhancer.
+- Kept Catégorie and Créé par columns.
+- Removed CSS targeting the Date création column.
+- Kept category grouping: Admin, User, Under user.
+- Did not change authentication, permissions, or user deletion logic.
