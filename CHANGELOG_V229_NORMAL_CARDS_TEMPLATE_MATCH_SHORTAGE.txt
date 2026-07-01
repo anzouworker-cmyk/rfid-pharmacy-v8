@@ -1,0 +1,10 @@
+V229 - Normal Dashboard Caisse cards copy Tot. montant manquant template
+
+Base: V227 / staging.
+Changes:
+- Added a dedicated CSS file loaded after V224/V225/V226/V227.
+- Fixed the remaining dashboard card anomalies by forcing all normal KPI/value cards to use the same visual template as Tot. montant manquant.
+- Normal cards now share the same height, padding, top title/meta structure, top-right icon placement, bottom-left amount alignment, and bottom text placement.
+- Kept Progression écart de caisse and Tot. dépenses ring-card design unchanged.
+- Alertes anomalies keeps normal card width and spans exactly two rows.
+- Did not change cash logic or data.
