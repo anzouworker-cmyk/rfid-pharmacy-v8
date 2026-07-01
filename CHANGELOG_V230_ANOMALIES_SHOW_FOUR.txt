@@ -1,0 +1,8 @@
+V230 - Alertes anomalies displays 4 alerts at once
+
+Base: V229 / staging.
+Changes:
+- Added a small frontend asset loaded before React to display 4 cash anomaly cards at once instead of 2.
+- Added compact CSS for the Alertes anomalies list so 4 alert rows fit inside the existing two-row card.
+- Kept the Alertes anomalies card width and two-row height behavior unchanged.
+- Did not change cash calculations or source data.
