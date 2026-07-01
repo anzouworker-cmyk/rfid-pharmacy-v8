@@ -1,0 +1,11 @@
+V227 - Dashboard Caisse all cards equal to Tot. montant manquant dimensions
+
+Base: V226 / staging.
+Changes:
+- Added a dedicated CSS file loaded after V224/V225/V226.
+- All Dashboard Caisse cards now use the same desktop card height as Tot. montant manquant: 300px.
+- Standard KPI/value cards keep the Tot. montant manquant internal template/alignment.
+- Progression écart de caisse and Tot. dépenses keep their current ring design while using the same card height.
+- Alertes anomalies keeps the same single-card width as other cards but spans exactly two rows in height.
+- Mobile uses safe auto height.
+- Did not change cash calculations or data logic.
