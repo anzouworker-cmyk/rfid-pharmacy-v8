@@ -1,0 +1,9 @@
+V226 - Dashboard Caisse standard cards match Tot. montant manquant dimensions
+
+Base: V225 / staging.
+Changes:
+- Added a dedicated CSS file loaded after V224 and V225.
+- Adjusted Tot. montant surplus and all standard KPI/value cards to use the same card dimensions/template as Tot. montant manquant.
+- Standard card height is fixed at 220px on desktop, with the same padding, border radius, body alignment, and amount typography.
+- Mobile keeps safe auto height with 170px minimum.
+- Did not change Progression/Tot. dépenses ring dimensions, Alertes anomalies behavior, or cash logic.
