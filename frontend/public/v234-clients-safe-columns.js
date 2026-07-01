@@ -1,16 +1,10 @@
-/* V234 - Safe Clients table columns: Catégorie, Créé par, Date création. No mutation observer, no prototype patch. */
+/* V235 - Safe Clients table columns: Catégorie, Créé par. No Date création column. */
 (function(){
-  if(window.__v234ClientsSafeColumns) return;
-  window.__v234ClientsSafeColumns = true;
+  if(window.__v235ClientsSafeColumns) return;
+  window.__v235ClientsSafeColumns = true;
   var cachedUsers = [];
   var fetching = false;
   function clean(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ')}
-  function formatDate(v){
-    if(!v) return '—';
-    var d = new Date(v);
-    if(isNaN(d.getTime())) return String(v).slice(0,10) || '—';
-    return d.toLocaleDateString('fr-FR',{year:'numeric',month:'2-digit',day:'2-digit'});
-  }
   function findClientsTable(){
     var tables = Array.prototype.slice.call(document.querySelectorAll('table'));
     return tables.find(function(table){
@@ -72,15 +66,15 @@
   function mkHeader(txt,cls){var th=document.createElement('th');th.textContent=txt;th.className=cls;return th}
   function ensureHeaders(table){
     var tr=table.querySelector('thead tr'); if(!tr) return;
+    Array.prototype.slice.call(tr.querySelectorAll('.v234HeadCreatedAt,.v235HeadCreatedAt')).forEach(function(th){th.remove()});
     var h=Array.prototype.slice.call(tr.children).map(function(th){return clean(th.textContent)});
     if(h.indexOf('catégorie')>=0 || h.indexOf('categorie')>=0) return;
     var before=tr.children[2]||null;
     tr.insertBefore(mkHeader('Catégorie','v234HeadCategory'),before);
     tr.insertBefore(mkHeader('Créé par','v234HeadCreatedBy'),before);
-    tr.insertBefore(mkHeader('Date création','v234HeadCreatedAt'),before);
   }
   function clearOld(row){
-    Array.prototype.slice.call(row.querySelectorAll('.v234CellCategory,.v234CellCreatedBy,.v234CellCreatedAt')).forEach(function(td){td.remove()});
+    Array.prototype.slice.call(row.querySelectorAll('.v234CellCategory,.v234CellCreatedBy,.v234CellCreatedAt,.v235CellCreatedAt')).forEach(function(td){td.remove()});
   }
   function catCell(cat){
     var td=document.createElement('td');td.className='v234CellCategory';
@@ -102,7 +96,6 @@
       var user=userForRow(row), cat=category(user,row);
       row.insertBefore(catCell(cat),row.children[2]||null);
       row.insertBefore(textCell('v234CellCreatedBy',creator(user,cat)),row.children[3]||null);
-      row.insertBefore(textCell('v234CellCreatedAt',formatDate(user&&user.created_at)),row.children[4]||null);
       row.dataset.v234Category=cat.key;
       pack.push({row:row,r:rank(cat),i:i,d:user&&user.created_at?new Date(user.created_at).getTime():0});
     });
