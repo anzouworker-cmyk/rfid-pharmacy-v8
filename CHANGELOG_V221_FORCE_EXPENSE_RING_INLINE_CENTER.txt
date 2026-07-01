@@ -1,0 +1,8 @@
+V221 - Force Tot. dépenses inner ring with inline centering
+
+Base: V220 / staging.
+Changes:
+- Added a runtime inline-style correction for the Tot. dépenses progress ring.
+- Reapplies the correction after React renders and on DOM mutations.
+- Forces the ring container to 116px square and the inner white/gray circle to 76px centered at 50% / 50%.
+- Does not change the orange outer ring, text content, card size, or dashboard layout.
