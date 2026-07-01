@@ -1,0 +1,9 @@
+V232 - Platform users table metadata hotfix
+
+Base: V231 / staging.
+Changes:
+- Replaced the platform user table enhancer with a stronger version inside the already loaded V231 asset.
+- The table now adds Catégorie, Créé par and Date création columns directly in the visible platform clients table.
+- The script uses the existing /platform/clients API data when available and still shows the columns with safe fallback values if API data is not captured immediately.
+- Users are grouped as Admin, User, Under user.
+- Did not change authentication, permissions or user deletion logic.
