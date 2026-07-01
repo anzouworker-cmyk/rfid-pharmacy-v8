@@ -1,0 +1,96 @@
+/* V227 - All Dashboard Caisse cards use Tot. montant manquant card height; Alertes anomalies spans two rows */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210{
+  grid-auto-rows:300px!important;
+  align-items:stretch!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard{
+  min-height:300px!important;
+  height:300px!important;
+  max-height:300px!important;
+  border-radius:22px!important;
+  box-sizing:border-box!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleAnomalyCard){
+  display:flex!important;
+  flex-direction:column!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard:not(.cashShuffleAnomalyCard) .cashShuffleMetricBody{
+  flex:1 1 auto!important;
+  min-height:0!important;
+}
+
+/* Standard KPI/value cards: same inside template as Tot. montant manquant */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage{
+  padding:26px 28px!important;
+  justify-content:space-between!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleCardTop{
+  align-items:flex-start!important;
+  margin-bottom:18px!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleMetricBody{
+  margin-top:auto!important;
+  min-height:72px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  width:100%!important;
+}
+
+/* Ring cards keep their current V224/V225 ring design but fit inside the same 300px card height */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleProgressCard,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleExpensesLimitCard{
+  padding:26px 28px!important;
+  justify-content:space-between!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleProgressCard .cashShuffleMetricBody,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleExpensesLimitCard .cashShuffleMetricBody{
+  align-items:center!important;
+}
+
+/* Alertes anomalies: same single-column width as other cards, but exactly two rows tall */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleAnomalyCard{
+  grid-column:auto!important;
+  grid-row:span 2!important;
+  min-height:622px!important;
+  height:100%!important;
+  max-height:none!important;
+  border-radius:22px!important;
+  box-sizing:border-box!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleAnomalyCard .cashShuffleMetricBody{
+  min-height:0!important;
+  flex:1 1 auto!important;
+}
+
+@media(max-width:1250px){
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210{
+    grid-auto-rows:300px!important;
+  }
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleAnomalyCard{
+    grid-row:span 2!important;
+    min-height:622px!important;
+  }
+}
+
+@media(max-width:760px){
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210{
+    grid-auto-rows:auto!important;
+  }
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard,
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleAnomalyCard{
+    height:auto!important;
+    max-height:none!important;
+    min-height:300px!important;
+    grid-row:auto!important;
+  }
+}
