@@ -20,7 +20,7 @@ from sqlalchemy import text, inspect
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "sqlite:///./license_saas.db"
+    DATABASE_URL: str = "sqlite:///./license_saas.db" 
     SECRET_KEY: str = "change_this_secret_key"
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
