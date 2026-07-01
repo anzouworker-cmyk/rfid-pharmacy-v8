@@ -1,0 +1,52 @@
+/* V231 - Platform users metadata columns */
+.v231PlatformUsersTable{
+  min-width:1500px!important;
+}
+.v231PlatformUsersTable th.v231UserCategoryHead,
+.v231PlatformUsersTable th.v231UserCreatedByHead,
+.v231PlatformUsersTable th.v231UserCreatedAtHead{
+  color:#334155!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+.v231PlatformUsersTable td.v231UserCategoryCell,
+.v231PlatformUsersTable td.v231UserCreatedByCell,
+.v231PlatformUsersTable td.v231UserCreatedAtCell{
+  color:#334155!important;
+  font-weight:700!important;
+  white-space:nowrap!important;
+}
+.v231UserCategoryChip{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:34px!important;
+  padding:0 14px!important;
+  border-radius:999px!important;
+  font-size:13px!important;
+  font-weight:900!important;
+  border:1px solid #dbe4f0!important;
+  background:#f8fafc!important;
+  color:#475569!important;
+}
+.v231UserCategoryChip.admin{
+  background:#eef2ff!important;
+  border-color:#c7d2fe!important;
+  color:#4338ca!important;
+}
+.v231UserCategoryChip.user{
+  background:#ecfdf5!important;
+  border-color:#bbf7d0!important;
+  color:#047857!important;
+}
+.v231UserCategoryChip.under{
+  background:#fff7ed!important;
+  border-color:#fed7aa!important;
+  color:#c2410c!important;
+}
+.v231PlatformUsersTable tr[data-v231-user-category='admin']{
+  background:linear-gradient(90deg,rgba(238,242,255,.42),transparent 38%)!important;
+}
+.v231PlatformUsersTable tr[data-v231-user-category='under']{
+  background:linear-gradient(90deg,rgba(255,247,237,.38),transparent 38%)!important;
+}
