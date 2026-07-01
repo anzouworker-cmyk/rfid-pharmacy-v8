@@ -1,0 +1,80 @@
+/* V226 - Match all standard Dashboard Caisse cards to Tot. montant manquant card dimensions */
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage{
+  min-height:220px!important;
+  height:220px!important;
+  max-height:none!important;
+  border-radius:22px!important;
+  padding:26px 28px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  box-sizing:border-box!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleCardTop{
+  align-items:flex-start!important;
+  margin-bottom:18px!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleMetricBody{
+  margin-top:auto!important;
+  min-height:72px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  width:100%!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleAmount,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleAmountXL,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleAmountLarge{
+  display:flex!important;
+  align-items:baseline!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  margin:0!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleAmount strong,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleAmountXL strong,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleAmountLarge strong{
+  font-size:clamp(36px,3.4vw,54px)!important;
+  line-height:.95!important;
+  font-weight:900!important;
+  letter-spacing:-.06em!important;
+  white-space:nowrap!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleAmount em,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleAmountXL em,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleAmountLarge em{
+  color:#94a3b8!important;
+  font-size:15px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  letter-spacing:-.015em!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleMonthlySummary{
+  min-height:72px!important;
+  gap:8px!important;
+  justify-content:flex-end!important;
+}
+
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleActionNote,
+.cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage .cashShuffleMonthlySummaryText{
+  margin:0!important;
+  color:#64748b!important;
+  font-size:13px!important;
+  line-height:1.35!important;
+  font-weight:700!important;
+}
+
+@media(max-width:760px){
+  .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleSectionV210 > .cashShuffleCard.cashShuffleV211KpiLikeShortage{
+    height:auto!important;
+    min-height:170px!important;
+  }
+}
