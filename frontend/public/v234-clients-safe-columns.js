@@ -1,4 +1,4 @@
-/* V238 - Clients table columns, reliable delete fallback, and Créé par filter. */
+/* V240 - Clients table helpers + cash cloud sync. */
 (function(){
   if(window.__v238ClientsSafeColumns) return;
   window.__v238ClientsSafeColumns = true;
@@ -222,4 +222,95 @@
   function tick(){try{decorate();fetchUsers()}catch(e){}}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tick); else tick();
   var n=0, timer=setInterval(function(){tick(); if(++n>40) clearInterval(timer)},1500);
+})();
+
+/* V240 - Sync caisse localStorage to PostgreSQL via backend /cash/data. */
+(function(){
+  if(window.__v240CashCloudSync) return;
+  window.__v240CashCloudSync = true;
+  var REGISTER_KEY='smart_inventory_cash_register_v1';
+  var SETTINGS_KEY='smart_inventory_cash_settings_v1';
+  var lastPayload='';
+  var loading=false;
+  var saving=false;
+  var apiBase='';
+  function token(){return localStorage.getItem('token') || localStorage.token || ''}
+  function raw(key){return localStorage.getItem(key) || ''}
+  function hasUsefulValue(v){
+    var s=String(v||'').trim();
+    return !!s && s!=='{}' && s!=='[]' && s!=='null' && s!=='undefined';
+  }
+  function discoverApiBase(){
+    if(apiBase) return apiBase;
+    var paths=['/cash/data','/me','/dashboard/content','/platform/clients','/users/my-users','/platform/'];
+    try{
+      var entries=performance.getEntriesByType('resource')||[];
+      for(var i=0;i<entries.length;i++){
+        var name=String(entries[i].name||'');
+        for(var p=0;p<paths.length;p++){
+          var idx=name.indexOf(paths[p]);
+          if(idx>0 && /^https?:\/\//i.test(name)){
+            apiBase=name.slice(0,idx).replace(/\/$/,'');
+            return apiBase;
+          }
+        }
+      }
+    }catch(e){}
+    return '';
+  }
+  function cashPayload(){
+    return JSON.stringify({register:raw(REGISTER_KEY),settings:raw(SETTINGS_KEY)});
+  }
+  async function loadFromCloud(){
+    var base=discoverApiBase(), t=token();
+    if(!base || !t || loading) return false;
+    loading=true;
+    try{
+      var r=await fetch(base+'/cash/data',{headers:{Authorization:'Bearer '+t}});
+      if(!r.ok) return false;
+      var data=await r.json();
+      var cloudRegister=String(data.register||'');
+      var cloudSettings=String(data.settings||'');
+      if(!hasUsefulValue(raw(REGISTER_KEY)) && hasUsefulValue(cloudRegister)) localStorage.setItem(REGISTER_KEY,cloudRegister);
+      if(!hasUsefulValue(raw(SETTINGS_KEY)) && hasUsefulValue(cloudSettings)) localStorage.setItem(SETTINGS_KEY,cloudSettings);
+      lastPayload=cashPayload();
+      return true;
+    }catch(e){return false;}
+    finally{loading=false;}
+  }
+  async function saveToCloud(force){
+    var base=discoverApiBase(), t=token();
+    if(!base || !t || saving) return false;
+    var payload=cashPayload();
+    if(!force && payload===lastPayload) return true;
+    saving=true;
+    try{
+      var body=JSON.parse(payload);
+      var r=await fetch(base+'/cash/data',{
+        method:'POST',
+        headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},
+        body:JSON.stringify(body)
+      });
+      if(r.ok){lastPayload=payload;return true;}
+      return false;
+    }catch(e){return false;}
+    finally{saving=false;}
+  }
+  var originalSetItem=localStorage.setItem;
+  try{
+    localStorage.setItem=function(k,v){
+      var result=originalSetItem.apply(this,arguments);
+      if(k===REGISTER_KEY || k===SETTINGS_KEY) setTimeout(function(){saveToCloud(false)},250);
+      return result;
+    };
+  }catch(e){}
+  var attempts=0;
+  var timer=setInterval(function(){
+    attempts++;
+    discoverApiBase();
+    if(attempts===1 || attempts%4===0) loadFromCloud().then(function(){saveToCloud(false)});
+    else saveToCloud(false);
+    if(attempts>240) clearInterval(timer);
+  },3000);
+  setTimeout(function(){loadFromCloud().then(function(){saveToCloud(true)})},1500);
 })();
