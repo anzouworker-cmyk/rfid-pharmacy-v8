@@ -32,3 +32,36 @@
 .cashShuffleDashboard .cashShuffleContentV218 .cashShuffleAnomalyCard .cashShuffleAnomalyPagerV211{
   margin-top:auto!important;
 }
+
+/* V239 - Dashboard partner/ad card: full-bleed image only, no title or labels */
+.dashRefAdCard{
+  position:relative!important;
+  overflow:hidden!important;
+  padding:0!important;
+  display:block!important;
+  min-height:320px!important;
+  border-radius:28px!important;
+  background:#0f172a!important;
+}
+.dashRefAdCard > span,
+.dashRefAdCard > h3,
+.dashRefAdCard > p,
+.dashRefAdCard > button,
+.dashRefAdCard .dashRefPartnerLine{
+  display:none!important;
+}
+.dashRefAdCard > img{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border:0!important;
+  border-radius:inherit!important;
+  margin:0!important;
+  padding:0!important;
+  display:block!important;
+}
