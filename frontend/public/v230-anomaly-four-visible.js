@@ -26,13 +26,12 @@
   };
 })();
 
-/* V247 - Login screen privacy/security polish. */
+/* V248 - Strict login privacy: no exposed credentials and no default values. */
 (function(){
-  if(window.__v247LoginPrivacy) return;
-  window.__v247LoginPrivacy = true;
-  var startedAt = Date.now();
+  if(window.__v248LoginPrivacyStrict) return;
+  window.__v248LoginPrivacyStrict = true;
 
-  function secureMessage(text){
+  function safeText(text){
     var value = String(text || "");
     var lower = value.toLowerCase();
     if(lower.indexOf("connexion échouée") >= 0 || lower.indexOf("bad credentials") >= 0){
@@ -41,10 +40,13 @@
     if(lower.indexOf("api backend inaccessible") >= 0 || lower.indexOf("vite_api_url") >= 0 || lower.indexOf("frontend_origins") >= 0 || lower.indexOf("cors") >= 0){
       return "Service momentanément indisponible. Réessayez plus tard.";
     }
+    value = value.replace(/demo\s*\/\s*demo123/gi, "vos identifiants");
+    value = value.replace(/admin\s*\/\s*admin123/gi, "vos identifiants");
+    value = value.replace(/après\s+redéploiement\s+du\s+backend/gi, "");
     return value;
   }
 
-  function sanitizeMessages(root){
+  function sanitizeText(root){
     root = root || document.body;
     if(!root) return;
     try{
@@ -55,68 +57,68 @@
           return NodeFilter.FILTER_ACCEPT;
         }
       });
-      var nodes = [];
+      var nodes=[];
       while(walker.nextNode()) nodes.push(walker.currentNode);
       nodes.forEach(function(node){
-        var next = secureMessage(node.nodeValue);
+        var next = safeText(node.nodeValue);
         if(next !== node.nodeValue) node.nodeValue = next;
       });
     }catch(e){}
   }
 
-  function looksLikeLoginInput(input){
+  function isLoginField(input){
     if(!input || !input.matches) return false;
     var type = String(input.getAttribute("type") || "text").toLowerCase();
     var name = String(input.getAttribute("name") || "").toLowerCase();
-    var labelText = "";
-    try{ labelText = String(input.closest("div")?.textContent || "").toLowerCase(); }catch(e){}
-    return type === "password" || name === "username" || labelText.indexOf("nom d'utilisateur") >= 0 || labelText.indexOf("mot de passe") >= 0;
+    var ac = String(input.getAttribute("autocomplete") || "").toLowerCase();
+    var label = "";
+    try{ label = String(input.closest("div") && input.closest("div").textContent || "").toLowerCase(); }catch(e){}
+    return type === "password" || name === "username" || ac.indexOf("username") >= 0 || ac.indexOf("password") >= 0 || label.indexOf("nom d'utilisateur") >= 0 || label.indexOf("mot de passe") >= 0;
   }
 
-  function hardenInputs(){
+  function setNativeValue(input, value){
     try{
-      document.querySelectorAll("form").forEach(function(form){
-        form.setAttribute("autocomplete", "off");
-      });
-      document.querySelectorAll("input").forEach(function(input){
-        if(!looksLikeLoginInput(input)) return;
-        input.setAttribute("autocomplete", "off");
-        input.setAttribute("autocorrect", "off");
-        input.setAttribute("autocapitalize", "none");
-        input.setAttribute("spellcheck", "false");
-        if(!input.dataset.v247PrivacyBound){
-          input.dataset.v247PrivacyBound = "1";
-          ["input","keydown","paste","focus"].forEach(function(name){
-            input.addEventListener(name, function(){ input.dataset.v247UserTouched = "1"; }, {passive:true});
-          });
-        }
-        var early = Date.now() - startedAt < 6000;
-        if(input.value && early && !input.dataset.v247UserTouched){
-          input.value = "";
-          try{ input.dispatchEvent(new Event("input", {bubbles:true})); }catch(e){}
-          try{ input.dispatchEvent(new Event("change", {bubbles:true})); }catch(e){}
-        }
-      });
+      var proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      var setter = Object.getOwnPropertyDescriptor(proto, "value").set;
+      setter.call(input, value);
+    }catch(e){ input.value = value; }
+  }
+
+  function clearField(input){
+    if(!input || !isLoginField(input)) return;
+    input.setAttribute("autocomplete", "off");
+    input.setAttribute("autocorrect", "off");
+    input.setAttribute("autocapitalize", "none");
+    input.setAttribute("spellcheck", "false");
+    input.setAttribute("data-lpignore", "true");
+
+    var value = String(input.value || "");
+    var shouldClear = /^(demo|admin|demo123|admin123)$/i.test(value);
+    if(shouldClear){
+      setNativeValue(input, "");
+      try{ input.dispatchEvent(new Event("input", {bubbles:true})); }catch(e){}
+      try{ input.dispatchEvent(new Event("change", {bubbles:true})); }catch(e){}
+    }
+  }
+
+  function harden(){
+    try{
+      document.querySelectorAll("form").forEach(function(form){ form.setAttribute("autocomplete", "off"); });
+      document.querySelectorAll("input").forEach(clearField);
     }catch(e){}
   }
 
   function run(){
-    sanitizeMessages(document.body);
-    hardenInputs();
+    sanitizeText(document.body);
+    harden();
   }
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
   else run();
 
   try{
-    var observer = new MutationObserver(function(){ setTimeout(run, 0); });
-    observer.observe(document.documentElement, {childList:true, subtree:true, characterData:true});
+    new MutationObserver(function(){ setTimeout(run, 0); }).observe(document.documentElement, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:["value","autocomplete"]});
   }catch(e){}
 
-  var count = 0;
-  var timer = setInterval(function(){
-    run();
-    count += 1;
-    if(count > 24) clearInterval(timer);
-  }, 500);
+  setInterval(run, 300);
 })();
