@@ -1,10 +1,12 @@
-/* V236 - Safe Clients table columns + reliable delete fallback for Under user rows. */
+/* V238 - Clients table columns, reliable delete fallback, and Créé par filter. */
 (function(){
-  if(window.__v236ClientsSafeColumns) return;
-  window.__v236ClientsSafeColumns = true;
+  if(window.__v238ClientsSafeColumns) return;
+  window.__v238ClientsSafeColumns = true;
   var cachedUsers = [];
   var fetching = false;
+  var creatorFilterValue = 'all';
   function clean(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ')}
+  function labelKey(v){return clean(v || '—')}
   function findClientsTable(){
     var tables = Array.prototype.slice.call(document.querySelectorAll('table'));
     return tables.find(function(table){
@@ -80,8 +82,8 @@
     return {key:'user',label:'User'};
   }
   function creator(user,cat){
-    if(user && user.created_by_username) return user.created_by_username;
-    if(user && user.parent_username) return user.parent_username;
+    if(user && user.created_by_username) return String(user.created_by_username).trim();
+    if(user && user.parent_username) return String(user.parent_username).trim();
     if(cat.key==='admin') return 'Système';
     if(cat.key==='under') return 'User principal';
     return 'admin';
@@ -105,6 +107,46 @@
     var s=document.createElement('span');s.className='v234Chip '+cat.key;s.textContent=cat.label;td.appendChild(s);return td;
   }
   function textCell(cls,txt){var td=document.createElement('td');td.className=cls;td.textContent=txt||'—';return td}
+  function filterSelect(){return document.querySelector('.v238CreatedByFilter')}
+  function ensureCreatorFilter(table){
+    var filters=document.querySelector('.platformUsersFilters');
+    if(!filters || !table) return;
+    var select=filterSelect();
+    if(!select){
+      select=document.createElement('select');
+      select.className='v238CreatedByFilter';
+      select.setAttribute('aria-label','Filtrer par Créé par');
+      select.style.cssText='min-width:180px;height:44px;border:1px solid #d8e2f0;border-radius:10px;background:#fff;color:#334155;font-weight:800;padding:0 14px;';
+      select.addEventListener('change',function(){creatorFilterValue=select.value||'all';applyCreatorFilter(table)});
+      var reset=filters.querySelector('.platformResetFilter');
+      filters.insertBefore(select,reset||null);
+    }
+    var current=select.value || creatorFilterValue || 'all';
+    var map={};
+    Array.prototype.slice.call(table.querySelectorAll('tbody tr')).forEach(function(row){
+      var v=row.dataset.v234Creator || '';
+      if(v) map[labelKey(v)]=v;
+    });
+    var values=Object.keys(map).sort(function(a,b){return map[a].localeCompare(map[b],'fr')});
+    select.innerHTML='<option value="all">Créé par — Tous</option>' + values.map(function(k){
+      var safe=map[k].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      return '<option value="'+k+'">'+safe+'</option>';
+    }).join('');
+    select.value=values.indexOf(current)>=0?current:'all';
+    creatorFilterValue=select.value;
+  }
+  function applyCreatorFilter(table){
+    var select=filterSelect();
+    var selected=select ? select.value : (creatorFilterValue || 'all');
+    creatorFilterValue=selected || 'all';
+    if(!table) table=findClientsTable();
+    if(!table) return;
+    Array.prototype.slice.call(table.querySelectorAll('tbody tr')).forEach(function(row){
+      if(!row.dataset.v234Category) return;
+      var creatorKey=labelKey(row.dataset.v234Creator || '');
+      row.style.display=(creatorFilterValue==='all' || creatorKey===creatorFilterValue) ? '' : 'none';
+    });
+  }
   function decorate(){
     var table=findClientsTable(); if(!table) return;
     if(table.dataset.v234Busy==='1') return;
@@ -117,14 +159,17 @@
     rows.forEach(function(row,i){
       if(row.children.length<4) return;
       clearOld(row);
-      var user=userForRow(row), cat=category(user,row), rowUsername=(user&&user.username)||identityUsername(row);
+      var user=userForRow(row), cat=category(user,row), rowUsername=(user&&user.username)||identityUsername(row), creatorLabel=creator(user,cat);
       row.insertBefore(catCell(cat),row.children[2]||null);
-      row.insertBefore(textCell('v234CellCreatedBy',creator(user,cat)),row.children[3]||null);
+      row.insertBefore(textCell('v234CellCreatedBy',creatorLabel),row.children[3]||null);
       row.dataset.v234Category=cat.key;
+      row.dataset.v234Creator=creatorLabel;
       if(rowUsername) row.dataset.v234Username=rowUsername;
       pack.push({row:row,r:rank(cat),i:i,d:user&&user.created_at?new Date(user.created_at).getTime():0});
     });
     pack.sort(function(a,b){return a.r-b.r || b.d-a.d || a.i-b.i}).forEach(function(x){body.appendChild(x.row)});
+    ensureCreatorFilter(table);
+    applyCreatorFilter(table);
     table.dataset.v234Busy='0';
   }
   async function deleteByApi(username,row,button){
@@ -150,6 +195,8 @@
     if(ok){
       cachedUsers=cachedUsers.filter(function(u){return clean(u.username)!==clean(username)});
       if(row) row.remove();
+      var table=findClientsTable();
+      if(table){ensureCreatorFilter(table);applyCreatorFilter(table)}
       return true;
     }
     if(button){button.disabled=false;button.textContent='Delete'}
@@ -157,6 +204,8 @@
     return true;
   }
   document.addEventListener('click',function(e){
+    var reset=e.target&&e.target.closest?e.target.closest('.platformResetFilter'):null;
+    if(reset){setTimeout(function(){var s=filterSelect(); if(s){s.value='all'; creatorFilterValue='all'; applyCreatorFilter(findClientsTable())}},0);}
     var btn=e.target&&e.target.closest?e.target.closest('button'):null;
     if(!btn || clean(btn.textContent)!=='delete') return;
     var table=findClientsTable();
