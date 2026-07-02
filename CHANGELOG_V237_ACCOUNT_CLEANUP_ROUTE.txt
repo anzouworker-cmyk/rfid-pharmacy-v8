@@ -1,0 +1,9 @@
+V237 - Account cleanup route
+
+Base: V236 / staging.
+Changes:
+- Added backend/sitecustomize.py.
+- Adds an admin-only maintenance endpoint for accounts with an empty username.
+- Keeps Clients page columns: Catégorie and Créé par.
+- Date création remains removed.
+- No cash/dashboard logic changed.
