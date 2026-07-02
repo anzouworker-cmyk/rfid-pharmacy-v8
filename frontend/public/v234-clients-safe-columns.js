@@ -1,12 +1,16 @@
-/* V244 - Clients table helpers + cash cloud sync. Never call API routes on the frontend domain. */
+/* V245 - Clients helpers + safe cash sync. Avoid API spam when user/backend is not ready. */
 (function(){
-  if(window.__v244ClientsSafeColumns) return;
-  window.__v244ClientsSafeColumns = true;
-  var cachedUsers=[];
-  var fetching=false;
-  var creatorFilterValue='all';
-  var apiBase='';
+  if(window.__v245ClientsSafeColumns) return;
+  window.__v245ClientsSafeColumns=true;
+
   var DEFAULT_BACKEND='https://rfid-pharmacy-v8-staging.onrender.com';
+  var apiBase='';
+  var meCache=null;
+  var meLoading=false;
+  var cachedUsers=[];
+  var fetchingUsers=false;
+  var creatorFilterValue='all';
+
   function clean(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ')}
   function labelKey(v){return clean(v||'—')}
   function token(){return localStorage.getItem('token') || localStorage.token || ''}
@@ -15,37 +19,39 @@
     if(apiBase) return apiBase;
     var saved=String(localStorage.getItem('inventory_connect_api_base')||window.__inventoryConnectApiBase||'').trim().replace(/\/$/,'');
     if(saved && /^https?:\/\//i.test(saved) && !sameOrigin(saved)){apiBase=saved;window.__inventoryConnectApiBase=apiBase;return apiBase;}
-    var paths=['/auth/login','/me','/platform/clients','/users/my-users','/cash/data','/dashboard/content'];
     try{
+      var paths=['/auth/login','/me','/platform/clients','/users/my-users','/cash/data','/dashboard/content'];
       (performance.getEntriesByType('resource')||[]).forEach(function(e){
         if(apiBase) return;
         var n=String(e.name||'');
         if(!/^https?:\/\//i.test(n) || sameOrigin(n)) return;
-        for(var i=0;i<paths.length;i++){
-          var idx=n.indexOf(paths[i]);
-          if(idx>0){apiBase=n.slice(0,idx).replace(/\/$/,'');break;}
-        }
+        paths.forEach(function(p){var idx=n.indexOf(p); if(!apiBase && idx>0) apiBase=n.slice(0,idx).replace(/\/$/,'')});
       });
     }catch(e){}
     if(!apiBase && /(^|\.)inventoryconnect\.app$|\.vercel\.app$/i.test(location.hostname)) apiBase=DEFAULT_BACKEND;
     if(apiBase) window.__inventoryConnectApiBase=apiBase;
     return apiBase;
   }
-  function api(path){var b=discoverApiBase();return b?b+path:''}
+  function api(path){var base=discoverApiBase(); return base?base+path:''}
+
+  function getMe(){
+    var t=token(), url=api('/me');
+    if(meCache || meLoading || !t || !url) return Promise.resolve(meCache);
+    meLoading=true;
+    return fetch(url,{headers:{Authorization:'Bearer '+t}})
+      .then(function(r){return r.ok?r.json():null})
+      .then(function(data){meCache=data||null; return meCache})
+      .catch(function(){return null})
+      .finally(function(){meLoading=false});
+  }
+
   function findClientsTable(){
     return Array.prototype.slice.call(document.querySelectorAll('table')).find(function(table){
       var h=Array.prototype.slice.call(table.querySelectorAll('thead th')).map(function(th){return clean(th.textContent)});
       return h.indexOf('user')>=0 && h.indexOf('user name')>=0 && h.indexOf('abonnement')>=0 && h.indexOf('pages visibles')>=0 && h.indexOf('delete')>=0;
     });
   }
-  function fetchUsers(){
-    var t=token(), url=api('/platform/clients');
-    if(!t || !url || fetching) return;
-    fetching=true;
-    fetch(url,{headers:{Authorization:'Bearer '+t}}).then(function(r){return r.ok?r.json():[]}).then(function(data){
-      if(Array.isArray(data)) cachedUsers=data;
-    }).catch(function(){}).finally(function(){fetching=false;decorate()});
-  }
+
   function identityUsername(row){
     try{
       var identity=row.querySelector('.platformUserIdentity');
@@ -74,7 +80,7 @@
     });
     return score>0?best:null;
   }
-  function usernameForRow(row){var u=userForRow(row);return u&&u.username?String(u.username).trim():identityUsername(row)}
+  function usernameForRow(row){var u=userForRow(row); return u&&u.username?String(u.username).trim():identityUsername(row)}
   function category(user,row){
     var text=clean(row.textContent), role=clean(user&&user.role), parent=clean(user&&user.parent_username);
     if(role==='platform_admin' || text.indexOf(' admin ')>=0 || text.indexOf('admin')===0) return {key:'admin',label:'Admin'};
@@ -89,7 +95,7 @@
     return 'admin';
   }
   function rank(cat){return cat.key==='admin'?0:cat.key==='user'?1:cat.key==='under'?2:3}
-  function mkHeader(txt,cls){var th=document.createElement('th');th.textContent=txt;th.className=cls;return th}
+  function mkHeader(txt,cls){var th=document.createElement('th'); th.textContent=txt; th.className=cls; return th}
   function ensureHeaders(table){
     var tr=table.querySelector('thead tr'); if(!tr) return;
     Array.prototype.slice.call(tr.querySelectorAll('.v234HeadCreatedAt,.v235HeadCreatedAt')).forEach(function(th){th.remove()});
@@ -146,6 +152,15 @@
     pack.sort(function(a,b){return a.r-b.r || b.d-a.d || a.i-b.i}).forEach(function(x){body.appendChild(x.row)});
     ensureCreatorFilter(table); applyCreatorFilter(table); table.dataset.v234Busy='0';
   }
+  function fetchUsers(){
+    var table=findClientsTable(), t=token(), url=api('/platform/clients');
+    if(!table || !t || !url || fetchingUsers) return;
+    getMe().then(function(me){
+      if(!me || me.role!=='platform_admin') return;
+      fetchingUsers=true;
+      fetch(url,{headers:{Authorization:'Bearer '+t}}).then(function(r){return r.ok?r.json():[]}).then(function(data){if(Array.isArray(data)) cachedUsers=data}).catch(function(){}).finally(function(){fetchingUsers=false;decorate()});
+    });
+  }
   async function deleteByApi(username,row,button){
     var t=token(), base=discoverApiBase(); if(!username||!t||!base) return false;
     if(!confirm('Supprimer définitivement le user '+username+' ?')) return true;
@@ -176,13 +191,13 @@
   var n=0,timer=setInterval(function(){tick(); if(++n>40) clearInterval(timer)},1500);
 })();
 
-/* V244 - Sync caisse localStorage to PostgreSQL via backend /cash/data. */
+/* V245 - Sync caisse only when backend exposes /cash/data. */
 (function(){
-  if(window.__v244CashCloudSync) return;
-  window.__v244CashCloudSync=true;
+  if(window.__v245CashCloudSync) return;
+  window.__v245CashCloudSync=true;
   var REGISTER_KEY='smart_inventory_cash_register_v1', SETTINGS_KEY='smart_inventory_cash_settings_v1';
-  var lastPayload='', loading=false, saving=false, apiBase='';
   var DEFAULT_BACKEND='https://rfid-pharmacy-v8-staging.onrender.com';
+  var apiBase='', lastPayload='', loading=false, saving=false, checked=false, enabled=false;
   function token(){return localStorage.getItem('token') || localStorage.token || ''}
   function raw(key){return localStorage.getItem(key)||''}
   function hasUsefulValue(v){var s=String(v||'').trim();return !!s&&s!=='{}'&&s!=='[]'&&s!=='null'&&s!=='undefined'}
@@ -199,8 +214,22 @@
     if(apiBase) window.__inventoryConnectApiBase=apiBase;
     return apiBase;
   }
+  async function cashEndpointReady(){
+    if(checked) return enabled;
+    var base=discoverApiBase(); if(!base) return false;
+    checked=true;
+    try{
+      var r=await fetch(base+'/health');
+      if(!r.ok) return false;
+      var h=await r.json();
+      var tables=(h&&h.db&&h.db.tables)||[];
+      enabled=String(h.version||'').indexOf('V244')>=0 || String(h.version||'').indexOf('V245')>=0 || tables.indexOf('cash_data')>=0;
+      return enabled;
+    }catch(e){return false}
+  }
   function cashPayload(){return JSON.stringify({register:raw(REGISTER_KEY),settings:raw(SETTINGS_KEY)})}
   async function loadFromCloud(){
+    if(!await cashEndpointReady()) return false;
     var base=discoverApiBase(), t=token(); if(!base||!t||loading) return false; loading=true;
     try{var r=await fetch(base+'/cash/data',{headers:{Authorization:'Bearer '+t}}); if(!r.ok) return false; var data=await r.json();
       var cr=String(data.register||''), cs=String(data.settings||'');
@@ -210,6 +239,7 @@
     }catch(e){return false} finally{loading=false}
   }
   async function saveToCloud(force){
+    if(!await cashEndpointReady()) return false;
     var base=discoverApiBase(), t=token(); if(!base||!t||saving) return false;
     var payload=cashPayload(); if(!force&&payload===lastPayload) return true; saving=true;
     try{var r=await fetch(base+'/cash/data',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:payload}); if(r.ok){lastPayload=payload;return true} return false;}
@@ -217,6 +247,6 @@
   }
   var originalSetItem=localStorage.setItem;
   try{localStorage.setItem=function(k,v){var result=originalSetItem.apply(this,arguments); if(k===REGISTER_KEY||k===SETTINGS_KEY) setTimeout(function(){saveToCloud(false)},250); return result;}}catch(e){}
-  var attempts=0,timer=setInterval(function(){attempts++; discoverApiBase(); if(attempts===1||attempts%4===0) loadFromCloud().then(function(){saveToCloud(false)}); else saveToCloud(false); if(attempts>240) clearInterval(timer)},3000);
+  var attempts=0,timer=setInterval(function(){attempts++; if(attempts%8===0){checked=false;} if(attempts===1||attempts%4===0) loadFromCloud().then(function(){saveToCloud(false)}); else saveToCloud(false); if(attempts>240) clearInterval(timer)},3000);
   setTimeout(function(){loadFromCloud().then(function(){saveToCloud(true)})},1500);
 })();
