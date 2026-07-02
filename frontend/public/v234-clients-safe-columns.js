@@ -1,10 +1,11 @@
-/* V240 - Clients table helpers + cash cloud sync. */
+/* V241 - Clients helpers + cash cloud sync. Delete fallback now uses backend API base, not frontend domain. */
 (function(){
   if(window.__v238ClientsSafeColumns) return;
   window.__v238ClientsSafeColumns = true;
   var cachedUsers = [];
   var fetching = false;
   var creatorFilterValue = 'all';
+  var apiBase='';
   function clean(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ')}
   function labelKey(v){return clean(v || '—')}
   function findClientsTable(){
@@ -15,8 +16,30 @@
     });
   }
   function token(){return localStorage.getItem('token') || localStorage.token || ''}
+  function discoverApiBase(){
+    if(apiBase) return apiBase;
+    var paths=['/platform/clients','/platform/client-delete/','/me','/dashboard/content','/users/my-users','/cash/data','/platform/'];
+    try{
+      var entries=performance.getEntriesByType('resource')||[];
+      for(var i=0;i<entries.length;i++){
+        var name=String(entries[i].name||'');
+        for(var p=0;p<paths.length;p++){
+          var idx=name.indexOf(paths[p]);
+          if(idx>0 && /^https?:\/\//i.test(name)){
+            apiBase=name.slice(0,idx).replace(/\/$/,'');
+            window.__inventoryConnectApiBase=apiBase;
+            return apiBase;
+          }
+        }
+      }
+    }catch(e){}
+    if(window.__inventoryConnectApiBase) return window.__inventoryConnectApiBase;
+    return '';
+  }
   function apiUrls(){
     var urls=[];
+    var base=discoverApiBase();
+    if(base) urls.push(base+'/platform/clients');
     try{
       performance.getEntriesByType('resource').forEach(function(e){
         var n=String(e.name||'');
@@ -174,15 +197,16 @@
   }
   async function deleteByApi(username,row,button){
     var t=token();
-    if(!username || !t) return false;
+    var base=discoverApiBase();
+    if(!username || !t || !base) return false;
     var enc=encodeURIComponent(username);
     var headers={Authorization:'Bearer '+t};
     if(!confirm('Supprimer définitivement le user '+username+' ?')) return true;
     if(button){button.disabled=true;button.textContent='Suppression...'}
     var attempts=[
-      {url:'/platform/client-delete/'+enc,method:'POST'},
-      {url:'/platform/delete-client/'+enc,method:'DELETE'},
-      {url:'/users/delete/'+enc,method:'DELETE'}
+      {url:base+'/platform/client-delete/'+enc,method:'POST'},
+      {url:base+'/platform/delete-client/'+enc,method:'DELETE'},
+      {url:base+'/users/delete/'+enc,method:'DELETE'}
     ];
     var ok=false,last='';
     for(var i=0;i<attempts.length;i++){
@@ -213,13 +237,13 @@
     var row=btn.closest('tr');
     if(!row || row.dataset.v234Category==='admin') return;
     var username=row.dataset.v234Username || usernameForRow(row);
-    if(!username) return;
+    if(!username || !discoverApiBase()) return;
     e.preventDefault();
     e.stopPropagation();
     if(e.stopImmediatePropagation) e.stopImmediatePropagation();
     deleteByApi(username,row,btn);
   },true);
-  function tick(){try{decorate();fetchUsers()}catch(e){}}
+  function tick(){try{decorate();fetchUsers();discoverApiBase()}catch(e){}}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tick); else tick();
   var n=0, timer=setInterval(function(){tick(); if(++n>40) clearInterval(timer)},1500);
 })();
@@ -242,6 +266,7 @@
   }
   function discoverApiBase(){
     if(apiBase) return apiBase;
+    if(window.__inventoryConnectApiBase){apiBase=window.__inventoryConnectApiBase;return apiBase;}
     var paths=['/cash/data','/me','/dashboard/content','/platform/clients','/users/my-users','/platform/'];
     try{
       var entries=performance.getEntriesByType('resource')||[];
@@ -251,6 +276,7 @@
           var idx=name.indexOf(paths[p]);
           if(idx>0 && /^https?:\/\//i.test(name)){
             apiBase=name.slice(0,idx).replace(/\/$/,'');
+            window.__inventoryConnectApiBase=apiBase;
             return apiBase;
           }
         }
